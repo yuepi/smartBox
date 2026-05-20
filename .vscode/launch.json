@@ -22,7 +22,7 @@
     },
     {
       "type": "chrome",
-      "name": "vben admin ele dev",
+      "name": "智能回收管理平台 dev",
       "request": "launch",
       "url": "http://localhost:5777",
       "env": { "NODE_ENV": "development" },

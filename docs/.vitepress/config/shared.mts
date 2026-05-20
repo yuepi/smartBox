@@ -35,7 +35,7 @@ export const shared = defineConfig({
   srcDir: 'src',
   themeConfig: {
     i18nRouting: true,
-    logo: 'https://unpkg.com/@vbenjs/static-source@0.1.7/source/logo-v1.webp',
+    logo: 'https://tempapi.huiyifamily.com/profile/avatar/2024/08/12/logo.jpg',
     search: {
       options: {
         locales: {

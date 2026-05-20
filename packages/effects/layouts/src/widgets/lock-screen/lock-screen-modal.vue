@@ -86,7 +86,7 @@ async function handleSubmit() {
     :title="$t('ui.widgets.lockScreen.title')"
   >
     <div
-      class="mb-10 flex w-full flex-col items-center px-10"
+      class="lock-screen-content mb-10 flex w-full flex-col items-center px-10"
       @keydown.enter.prevent="handleSubmit"
     >
       <div class="w-full">
@@ -108,3 +108,13 @@ async function handleSubmit() {
     </div>
   </Modal>
 </template>
+<style scoped>
+.lock-screen-content {
+  padding: 20px !important;
+  background-image: url('https://plus.unsplash.com/premium_vector-1697729510037-b7f652020cb1?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8ZGVza3RvcCUyMHdhbGxwYXBlcnxlbnwwfHwwfHx8MA%3D%3D');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  border-radius: 12px;
+}
+</style>

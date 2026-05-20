@@ -11,5 +11,55 @@
     "title": "Dashboard",
     "analytics": "Analytics",
     "workspace": "Workspace"
+  },
+  "device": {
+    "config": "Device Configuration",
+    "title": "Device Management",
+    "list": "Device List",
+    "hatch": "Hatch List",
+    "bag": "Bag List",
+    "package": "Billing Package",
+    "fault": "Device Fault",
+    "qrcode": "QR Code"
+  },
+  "operate": {
+    "title": "Operation Management",
+    "recycleOrder": "Recycling Order",
+    "cleanTask": "Clean Task",
+    "sortTask": "Sort Task"
+  },
+  "member": {
+    "title": "Member Finance",
+    "list": "Member List",
+    "withdraw": "Withdrawal",
+    "walletFlow": "Wallet Flow",
+    "wallet": "Member Wallet"
+  },
+  "system": {
+    "title": "System Management",
+    "user": "User Management",
+    "role": "Role Management",
+    "menu": "Menu Management",
+    "dept": "Department Management",
+    "dict": "Data Dictionary",
+    "log": "Operation Log"
+  },
+  "merchant": {
+    "title": "Merchant Management",
+    "merchant": "Merchant Management",
+    "info": "Merchant Info",
+    "center": "Merchant Center"
+  },
+  "user": {
+    "title": "User Management",
+    "user": "User Management",
+    "role": "Role Management",
+    "menu": "Menu Management",
+    "dept": "Department Management"
+  },
+  "monitor": {
+    "title": "Log Management",
+    "loginLog": "Login Log",
+    "operationLog": "Operation Log"
   }
 }

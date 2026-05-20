@@ -88,7 +88,7 @@ useScrollLock();
 </script>
 
 <template>
-  <div class="fixed z-2000 size-full bg-background">
+  <div class="fixed z-2000 size-full bg-background lock-screen-content">
     <transition name="slide-left">
       <div v-show="!showUnlockForm" class="size-full">
         <div
@@ -165,3 +165,28 @@ useScrollLock();
     </div>
   </div>
 </template>
+<style scoped>
+.lock-screen-content {
+  padding: 20px !important;
+  background-image: url('https://images.pexels.com/photos/975771/pexels-photo-975771.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+/* 静寂的湖面 */
+
+/* background-image: url('https://images.pexels.com/photos/975771/pexels-photo-975771.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop'); */
+
+/* 森林光影 */
+
+/* background-image: url('https://images.pexels.com/photos/2387793/pexels-photo-2387793.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop'); */
+
+/* 星空银河 */
+
+/* background-image: url('https://images.pexels.com/photos/998641/pexels-photo-998641.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop'); */
+
+/* 海洋日落 */
+
+/* background-image: url('https://images.pexels.com/photos/1271619/pexels-photo-1271619.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop'); */
+</style>

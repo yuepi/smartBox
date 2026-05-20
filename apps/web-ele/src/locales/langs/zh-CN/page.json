@@ -11,5 +11,55 @@
     "title": "概览",
     "analytics": "分析页",
     "workspace": "工作台"
+  },
+  "system": {
+    "title": "系统管理",
+    "user": "用户管理",
+    "role": "角色管理",
+    "menu": "菜单管理",
+    "dept": "部门管理",
+    "dict": "数据字典",
+    "log": "操作日志"
+  },
+  "user": {
+    "title": "用户管理",
+    "user": "用户管理",
+    "role": "角色管理",
+    "menu": "菜单管理",
+    "dept": "部门管理"
+  },
+  "merchant": {
+    "title": "商户管理",
+    "merchant": "商户管理",
+    "info": "商户信息",
+    "center": "商户中心"
+  },
+  "device": {
+    "title": "设备管理",
+    "config": "设备配置",
+    "list": "设备列表",
+    "hatch": "仓口列表",
+    "bag": "包袋列表",
+    "package": "计费套餐",
+    "fault": "设备故障",
+    "qrCode":"二维码"
+  },
+  "operate": {
+    "title": "运营管理",
+    "recycleOrder": "回收订单",
+    "cleanTask": "清运任务",
+    "sortTask": "分拣任务"
+  },
+  "member": {
+    "title": "会员财务",
+    "list": "会员列表",
+    "withdraw": "提现审核",
+    "walletFlow": "会员流水",
+    "wallet": "会员钱包"
+  },
+  "monitor": {
+    "title": "日志管理",
+    "loginLog": "登录日志",
+    "operationLog": "操作日志"
   }
 }

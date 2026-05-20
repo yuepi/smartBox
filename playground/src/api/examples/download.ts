@@ -8,7 +8,7 @@ import { requestClient } from '../request';
  */
 async function downloadFile1() {
   return requestClient.download<Blob>(
-    'https://unpkg.com/@vbenjs/static-source@0.1.7/source/logo-v1.webp',
+    'https://tempapi.huiyifamily.com/profile/avatar/2024/08/12/logo.jpg',
   );
 }
 
@@ -18,7 +18,7 @@ async function downloadFile1() {
  */
 async function downloadFile2() {
   return requestClient.download<RequestResponse<Blob>>(
-    'https://unpkg.com/@vbenjs/static-source@0.1.7/source/logo-v1.webp',
+    'https://tempapi.huiyifamily.com/profile/avatar/2024/08/12/logo.jpg',
     {
       responseReturn: 'raw',
     },

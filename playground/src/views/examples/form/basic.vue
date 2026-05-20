@@ -477,7 +477,7 @@ function handleSetFormValue() {
         name: 'example.png',
         status: 'done',
         uid: '-1',
-        url: 'https://unpkg.com/@vbenjs/static-source@0.1.7/source/logo-v1.webp',
+        url: 'https://tempapi.huiyifamily.com/profile/avatar/2024/08/12/logo.jpg',
       },
     ],
     mentions: '@afc163',
