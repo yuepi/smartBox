@@ -202,7 +202,7 @@ async function handleView(row: RecycleOrder) {
     detailData.value = res;
     detailVisible.value = true;
   } catch {
-    ElMessage.error("获取详情失败");
+    ElMessage.error("获取详情失败1");
   }
 }
 
