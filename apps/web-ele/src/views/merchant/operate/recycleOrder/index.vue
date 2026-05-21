@@ -364,47 +364,7 @@ onMounted(() => {
 <template>
   <Page auto-content-height>
     <div class="p-4">
-      <!-- 统计卡片 -->
-      <!-- <el-row :gutter="16" class="mb-4">
-        <el-col :span="6">
-          <el-card shadow="hover" class="text-center">
-            <div class="text-gray-500 text-sm">订单总数</div>
-            <div class="text-2xl font-bold text-primary">{{ total }}</div>
-          </el-card>
-        </el-col>
-        <el-col :span="6">
-          <el-card shadow="hover" class="text-center">
-            <div class="text-gray-500 text-sm">已完成</div>
-            <div class="text-2xl font-bold text-success">
-              {{ tableData.filter((item) => item.orderStatus === 4).length }}
-            </div>
-          </el-card>
-        </el-col>
-        <el-col :span="6">
-          <el-card shadow="hover" class="text-center">
-            <div class="text-gray-500 text-sm">进行中</div>
-            <div class="text-2xl font-bold text-warning">
-              {{
-                tableData.filter((item) => [1, 2, 3].includes(item.orderStatus))
-                  .length
-              }}
-            </div>
-          </el-card>
-        </el-col>
-        <el-col :span="6">
-          <el-card shadow="hover" class="text-center">
-            <div class="text-gray-500 text-sm">异常/取消</div>
-            <div class="text-2xl font-bold text-danger">
-              {{
-                tableData.filter((item) => [5, 6].includes(item.orderStatus))
-                  .length
-              }}
-            </div>
-          </el-card>
-        </el-col>
-      </el-row> -->
-
-      <!-- 查询表单 -->
+<!-- 查询表单 -->
       <el-card shadow="never" class="mb-4">
         <el-form :inline="true" :model="queryParams">
           <el-form-item label="订单编号">
