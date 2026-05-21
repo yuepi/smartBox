@@ -5,7 +5,6 @@ import { Page } from "@vben/common-ui";
 
 import {
   ArrowDown,
-  Delete,
   Refresh,
   Search,
   View,
@@ -174,8 +173,8 @@ async function loadOptions() {
       getDeviceListApi({ status: 0 }),
       getMerchantDeptListApi({ status: 0 }),
     ]);
-    deviceOptions.value = deviceRes.data || [];
-    deptOptions.value = deptRes.data || [];
+    deviceOptions.value = deviceRes || [];
+    deptOptions.value = deptRes || [];
   } catch (error) {
     console.error(error);
   }
@@ -427,20 +426,19 @@ onMounted(() => {
             />
           </el-form-item>
           <el-form-item label="所属小区">
-            <el-select
+           <el-tree-select
               v-model="queryParams.deptId"
-              placeholder="请选择小区"
+              :data="deptOptions"
+              :props="{
+                value: 'deptId',
+                label: 'deptName',
+                children: 'children',
+              }"
+              placeholder="全部"
               clearable
-              filterable
-              style="width: 160px"
-            >
-              <el-option
-                v-for="item in deptOptions"
-                :key="item.deptId"
-                :label="item.deptName"
-                :value="item.deptId"
-              />
-            </el-select>
+              check-strictly
+              style="width: 180px"
+            />
           </el-form-item>
           <el-form-item label="订单状态">
             <el-select
@@ -479,7 +477,7 @@ onMounted(() => {
 <el-button :loading="exporting" @click="openExportSelector">导出</el-button>
             <el-button :icon="Refresh" @click="resetQuery">重置</el-button>
             
-            <el-button
+            <!-- <el-button
               type="danger"
               plain
               :icon="Delete"
@@ -487,7 +485,7 @@ onMounted(() => {
               @click="handleDelete()"
             >
               批量删除
-            </el-button>
+            </el-button> -->
           </el-form-item>
         </el-form>
       </el-card>
@@ -528,12 +526,6 @@ onMounted(() => {
       <template v-if="col.key === 'orderStatus'">
         <DictTag :options="order_status" :value="row.orderStatus" />
       </template>
-      <!-- 支付状态 -->
-      <template v-else-if="col.key === 'payStatus'">
-        <el-tag :type="getPayStatusType(row.payStatus)" size="small">
-          {{ getPayStatusText(row.payStatus) }}
-        </el-tag>
-      </template>
       <!-- 投递重量 -->
       <template v-else-if="col.key === 'weight'">
         {{ row.weight?.toFixed(2) || 0 }} kg
@@ -544,6 +536,13 @@ onMounted(() => {
           {{ formatAmount(row.realAmount) }}
         </span>
       </template>
+      <!-- 投递前后重量合并显示 -->
+    <template v-else-if="col.key === 'beforeAfterWeight'">
+      <span>
+        {{ (row.beforeWeight || 0).toFixed(2) }} → 
+        {{ (row.afterWeight || 0).toFixed(2) }} kg
+      </span>
+    </template>
       <!-- 普通字段 -->
       <template v-else>
         {{ (row as any)[col.key] ?? '-' }}

@@ -142,7 +142,7 @@ function getPackageTypeColor(type: number): string {
 async function loadOptions() {
   try {
     const deviceRes = await getDeviceListApi({ status: 0 });
-    deviceOptions.value = deviceRes.data || [];
+    deviceOptions.value = deviceRes || [];
   } catch (error) {
     console.error(error);
   }

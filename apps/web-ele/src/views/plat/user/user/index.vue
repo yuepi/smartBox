@@ -46,13 +46,13 @@ const sexOptions = [
 ];
 
 // 身份标识选项
-const identifyOptions = [
-  { label: "普通用户", value: "0" },
-  { label: "清运人员", value: "1" },
-  { label: "分拣人员", value: "2" },
-  { label: "回收员", value: "3" },
-  { label: "设备管理员", value: "4" },
-];
+// const identifyOptions = [
+//   { label: "普通用户", value: "0" },
+//   { label: "清运人员", value: "1" },
+//   { label: "分拣人员", value: "2" },
+//   { label: "回收员", value: "3" },
+//   { label: "设备管理员", value: "4" },
+// ];
 
 // 状态选项
 const statusOptions = [
@@ -433,7 +433,7 @@ onMounted(() => {
               {{ getSexText(row.sex) }}
             </template>
           </el-table-column>
-          <el-table-column
+          <!-- <el-table-column
             prop="identify"
             label="身份标识"
             min-width="150"
@@ -444,7 +444,7 @@ onMounted(() => {
                 {{ getIdentifyText(row.identify) }}
               </el-tag>
             </template>
-          </el-table-column>
+          </el-table-column> -->
           <el-table-column label="角色" min-width="150" align="center">
             <template #default="{ row }">
               <div class="flex flex-wrap justify-center gap-1">
@@ -583,7 +583,7 @@ onMounted(() => {
                 </el-radio>
               </el-radio-group>
             </el-form-item>
-            <el-form-item label="身份标识">
+            <!-- <el-form-item label="身份标识">
               <el-checkbox-group v-model="identifyArray">
                 <el-checkbox
                   v-for="item in identifyOptions"
@@ -593,7 +593,7 @@ onMounted(() => {
                   {{ item.label }}
                 </el-checkbox>
               </el-checkbox-group>
-            </el-form-item>
+            </el-form-item> -->
           </el-form>
         </el-col>
 

@@ -34,3 +34,10 @@ export function h5PayApi(data: H5PayParams) {
 export function nativePayApi(data: NativePayParams) {
   return requestClient.post<NativePayResponse>('/common/pay/pay/native', data);
 }
+
+/**
+ * 退款-商户退款
+ */
+export function refundByMerchantApi(data: any) {
+  return requestClient.post<any>('/common/pay/refundByMerchant', data);
+}

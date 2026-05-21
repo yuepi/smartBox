@@ -6,7 +6,6 @@ import { Page } from "@vben/common-ui";
 import {
   Delete,
   Edit,
-  Plus,
   Refresh,
   Search,
   View,
@@ -507,16 +506,16 @@ onMounted(() => {
           </el-form-item>
           <el-form-item>
             <el-button type="primary" :icon="Search" @click="handleQuery">
-查询
-</el-button>
+              查询
+            </el-button>
             <el-button :icon="Refresh" @click="resetQuery">重置</el-button>
-            <el-button type="primary" plain :icon="Plus" @click="handleAdd">
-新增
-</el-button>
+            <!-- <el-button type="primary" plain :icon="Plus" @click="handleAdd">
+              新增
+            </el-button> -->
             <el-button :loading="exporting" @click="openExportSelector">
-导出
-</el-button>
-            <el-button
+              导出
+            </el-button>
+            <!-- <el-button
               type="danger"
               plain
               :icon="Delete"
@@ -524,7 +523,7 @@ onMounted(() => {
               @click="handleDelete()"
             >
               批量删除
-            </el-button>
+            </el-button> -->
           </el-form-item>
         </el-form>
       </el-card>
@@ -605,33 +604,33 @@ onMounted(() => {
                 type="primary"
                 :icon="View"
                 @click="handleView(row)"
-                >
-详情
-</el-button>
+              >
+                详情
+              </el-button>
               <el-button
                 link
                 type="primary"
                 :icon="Wallet"
                 @click="handleViewWallet(row)"
-                >
-钱包
-</el-button>
+              >
+                钱包
+              </el-button>
               <el-button
                 link
                 type="primary"
                 :icon="Edit"
                 @click="handleEdit(row)"
-                >
-编辑
-</el-button>
+              >
+                编辑
+              </el-button>
               <el-button
                 link
                 type="danger"
                 :icon="Delete"
                 @click="handleDelete(row)"
-                >
-删除
-</el-button>
+              >
+                删除
+              </el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -696,9 +695,9 @@ onMounted(() => {
           type="primary"
           :loading="formSubmitting"
           @click="handleSubmit"
-          >
-确定
-</el-button>
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
 
@@ -713,25 +712,17 @@ onMounted(() => {
         <el-tab-pane label="基本信息" name="basic">
           <el-descriptions :column="1" border v-if="detailData">
             <el-descriptions-item label="会员ID">
-{{
-              detailData.memberId
-            }}
-</el-descriptions-item>
+              {{ detailData.memberId }}
+            </el-descriptions-item>
             <el-descriptions-item label="手机号">
-{{
-              detailData.mobile
-            }}
-</el-descriptions-item>
+              {{ detailData.mobile }}
+            </el-descriptions-item>
             <el-descriptions-item label="昵称">
-{{
-              detailData.nickname || "-"
-            }}
-</el-descriptions-item>
+              {{ detailData.nickname || "-" }}
+            </el-descriptions-item>
             <el-descriptions-item label="性别">
-{{
-              getSexText(detailData.sex)
-            }}
-</el-descriptions-item>
+              {{ getSexText(detailData.sex) }}
+            </el-descriptions-item>
             <el-descriptions-item label="状态">
               <el-tag :type="getStatusType(detailData.status)" size="small">
                 {{ getStatusText(detailData.status) }}
@@ -764,15 +755,11 @@ onMounted(() => {
           <div v-loading="walletLoading">
             <el-descriptions :column="2" border v-if="walletInfo">
               <el-descriptions-item label="钱包ID">
-{{
-                walletInfo.memberWalletId
-              }}
-</el-descriptions-item>
+                {{ walletInfo.memberWalletId }}
+              </el-descriptions-item>
               <el-descriptions-item label="会员ID">
-{{
-                walletInfo.memberId
-              }}
-</el-descriptions-item>
+                {{ walletInfo.memberId }}
+              </el-descriptions-item>
               <el-descriptions-item label="可用余额">
                 <span class="text-success font-bold text-lg">{{
                   formatBalance(walletInfo.balance)
@@ -846,8 +833,8 @@ onMounted(() => {
               </el-form-item>
               <el-form-item>
                 <el-button type="primary" @click="handleFlowQuery">
-查询
-</el-button>
+                  查询
+                </el-button>
                 <el-button @click="resetFlowQuery">重置</el-button>
               </el-form-item>
             </el-form>

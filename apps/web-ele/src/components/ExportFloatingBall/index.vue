@@ -150,7 +150,7 @@ function startPolling() {
         tasks.value = res.records || [];
       });
     }
-  }, 5000);
+  }, 10_000);
 }
 
 function stopPolling() {

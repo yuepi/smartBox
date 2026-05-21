@@ -8,7 +8,7 @@ import { useUserStore } from "@vben/stores";
 import { ElMessage } from "element-plus";
 import QRCode from "qrcode";
 
-import { h5PayApi, nativePayApi } from "#/api/common/pay";
+import { h5PayApi, nativePayApi, refundByMerchantApi } from "#/api/common/pay";
 import {
   editMerchantConfigApi,
   getMerchantAccountApi,
@@ -212,6 +212,61 @@ async function handleRecharge() {
     ElMessage.error("充值失败");
   } finally {
     rechargeSubmitting.value = false;
+  }
+}
+
+// 退款弹窗
+const refundDialogVisible = ref(false);
+const refundSubmitting = ref(false);
+const currentRechargeOrder = ref<MerchantRecharge | null>(null);
+const refundAmount = ref(0);
+
+// 打开退款弹窗
+function openRefundDialog(row: MerchantRecharge) {
+  // 只有已支付的订单才能退款
+  if (row.status !== 2) {
+    ElMessage.warning("只有已支付的订单才能退款");
+    return;
+  }
+  // 检查是否已退款
+  if (row.refundStatus === 2) {
+    ElMessage.warning("该订单已完成退款");
+    return;
+  }
+  currentRechargeOrder.value = row;
+  refundAmount.value = 0;
+  refundDialogVisible.value = true;
+}
+
+// 执行退款
+async function handleRefund() {
+  if (refundAmount.value <= 0) {
+    ElMessage.warning("请输入退款金额");
+    return;
+  }
+
+  const order = currentRechargeOrder.value;
+  if (!order) return;
+
+  if (refundAmount.value > order.amount) {
+    ElMessage.warning(`退款金额不能超过订单金额 ${formatAmount(order.amount)}`);
+    return;
+  }
+
+  refundSubmitting.value = true;
+  try {
+    await refundByMerchantApi({
+      outTradeNo: order.rechargeNo, // 商户订单号
+      refundAmount: refundAmount.value,
+    });
+    ElMessage.success("退款申请已提交");
+    refundDialogVisible.value = false;
+    // 刷新充值订单列表
+    loadRechargeData();
+  } catch {
+    ElMessage.error("退款失败");
+  } finally {
+    refundSubmitting.value = false;
   }
 }
 
@@ -716,7 +771,7 @@ onMounted(async () => {
                     }}
                   </template>
                 </el-table-column>
-                <el-table-column label="操作" width="80" align="center">
+                <el-table-column label="操作" width="200" align="center">
                   <template #default="{ row }">
                     <el-button
                       link
@@ -724,6 +779,14 @@ onMounted(async () => {
                       @click="handleViewRecharge(row)"
                     >
                       详情
+                    </el-button>
+                    <el-button
+                      v-if="row.status === 2 && row.refundStatus !== 2"
+                      link
+                      type="danger"
+                      @click="openRefundDialog(row)"
+                    >
+                      退款
                     </el-button>
                   </template>
                 </el-table-column>
@@ -991,6 +1054,7 @@ onMounted(async () => {
         </el-button>
       </template>
     </el-dialog>
+
     <!-- 充值订单详情弹窗 -->
     <el-dialog
       v-model="rechargeDetailVisible"
@@ -1048,6 +1112,46 @@ onMounted(async () => {
       </el-descriptions>
       <template #footer>
         <el-button @click="rechargeDetailVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 退款弹窗 -->
+    <el-dialog
+      v-model="refundDialogVisible"
+      title="订单退款"
+      width="450px"
+      append-to-body
+    >
+      <el-form label-width="100px">
+        <el-form-item label="订单金额">
+          <span class="font-bold text-primary">
+            {{ formatAmount(currentRechargeOrder?.amount || 0) }}
+          </span>
+        </el-form-item>
+        <el-form-item label="退款金额" required>
+          <el-input-number
+            v-model="refundAmount"
+            :min="0.01"
+            :precision="2"
+            :step="10"
+            :max="currentRechargeOrder?.amount"
+            placeholder="请输入退款金额"
+            style="width: 100%"
+          />
+          <div class="text-gray-400 text-xs mt-1">
+            最高可退 {{ formatAmount(currentRechargeOrder?.amount || 0) }}
+          </div>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="refundDialogVisible = false">取消</el-button>
+        <el-button
+          type="primary"
+          :loading="refundSubmitting"
+          @click="handleRefund"
+        >
+          确认退款
+        </el-button>
       </template>
     </el-dialog>
   </Page>
