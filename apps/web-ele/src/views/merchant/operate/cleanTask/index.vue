@@ -283,54 +283,29 @@ onMounted(() => {
 
 <template>
   <Page auto-content-height>
-    <div class="p-4">
-      <!-- 统计卡片 -->
-      <!-- <el-row :gutter="16" class="mb-4">
-        <el-col :span="6">
-          <el-card shadow="hover" class="text-center">
-            <div class="text-gray-500 text-sm">任务总数</div>
-            <div class="text-2xl font-bold text-primary">{{ total }}</div>
-          </el-card>
-        </el-col>
-        <el-col :span="6">
-          <el-card shadow="hover" class="text-center">
-            <div class="text-gray-500 text-sm">待清运</div>
-            <div class="text-2xl font-bold text-warning">
-              {{tableData.filter((item) => item.taskStatus === 0).length}}
-            </div>
-          </el-card>
-        </el-col>
-        <el-col :span="6">
-          <el-card shadow="hover" class="text-center">
-            <div class="text-gray-500 text-sm">清运中</div>
-            <div class="text-2xl font-bold text-primary">
-              {{tableData.filter((item) => item.taskStatus === 1).length}}
-            </div>
-          </el-card>
-        </el-col>
-        <el-col :span="6">
-          <el-card shadow="hover" class="text-center">
-            <div class="text-gray-500 text-sm">已完成</div>
-            <div class="text-2xl font-bold text-success">
-              {{tableData.filter((item) => item.taskStatus === 2).length}}
-            </div>
-          </el-card>
-        </el-col>
-      </el-row> -->
-
+    <div class="p-0">
       <!-- 查询表单 -->
-      <el-card shadow="never" class="mb-4">
-        <el-form :inline="true" :model="queryParams">
-          <el-form-item label="任务单号">
+      <el-card shadow="never" class="border-none mb-4 !p-2">
+        <el-form
+          :inline="true"
+          :model="queryParams"
+          class="flex flex-wrap gap-x-2 gap-y-2 items-center"
+        >
+          <el-form-item class="!mb-0 !mr-2">
             <el-input
               v-model="queryParams.taskNo"
-              placeholder="请输入任务单号"
+              placeholder="请输入"
               clearable
-              style="width: 180px"
+              style="width: 200px"
               @keyup.enter="handleQuery"
-            />
+            >
+              <template #prefix>
+                <span class="text-xs text-gray-400 mr-0.5">任务单号:</span>
+              </template>
+            </el-input>
           </el-form-item>
-          <el-form-item label="所属小区">
+
+          <el-form-item class="!mb-0 !mr-2">
             <el-tree-select
               v-model="queryParams.deptId"
               :data="deptOptions"
@@ -339,19 +314,23 @@ onMounted(() => {
                 label: 'deptName',
                 children: 'children',
               }"
-              placeholder="全部"
+              placeholder="请选择"
               clearable
               check-strictly
-              style="width: 180px"
+              style="width: 200px"
+              class="tree-prefix-dept"
             />
           </el-form-item>
-          <el-form-item label="任务状态">
+
+          <el-form-item class="!mb-0 !mr-2">
             <el-select
               v-model="queryParams.taskStatus"
-              placeholder="全部"
               clearable
-              style="width: 120px"
+              style="width: 200px"
             >
+              <template #prefix>
+                <span class="text-xs text-gray-400 mr-0.5">任务状态:</span>
+              </template>
               <el-option
                 v-for="item in taskStatusOptions"
                 :key="item.value"
@@ -360,17 +339,33 @@ onMounted(() => {
               />
             </el-select>
           </el-form-item>
-          <el-form-item>
-            <el-button type="primary" :icon="Search" @click="handleQuery">
-查询
-</el-button>
-            <el-button :icon="Refresh" @click="resetQuery">重置</el-button>
+
+          <el-form-item class="!mb-0 !mr-0 md:ml-auto flex items-center gap-1">
+            <el-tooltip content="查询" placement="top">
+              <el-button
+                type="primary"
+                :icon="Search"
+                circle
+                @click="handleQuery"
+              />
+            </el-tooltip>
+            <el-tooltip content="重置" placement="top">
+              <el-button :icon="Refresh" circle @click="resetQuery" />
+            </el-tooltip>
+          </el-form-item>
+        </el-form>
+      </el-card>
+
+      <!-- 数据表格 -->
+      <el-card shadow="never" class="border-none !p-2">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
             <el-button type="primary" plain :icon="Plus" @click="handleAdd">
-新增
-</el-button>
+              新增任务
+            </el-button>
             <el-button :loading="exporting" @click="openExportSelector">
-导出
-</el-button>
+              导出
+            </el-button>
             <el-button
               type="danger"
               plain
@@ -380,19 +375,27 @@ onMounted(() => {
             >
               批量删除
             </el-button>
-          </el-form-item>
-        </el-form>
-      </el-card>
+            <span
+              v-if="selectedIds.length > 0"
+              class="text-xs text-gray-400 ml-2"
+            >
+              已选
+              <span class="text-red-500 font-medium">{{
+                selectedIds.length
+              }}</span>
+              项
+            </span>
+          </div>
 
-      <!-- 数据表格 -->
-      <el-card shadow="never">
-        <div class="flex justify-end mb-2">
-          <ColumnSelector
-            :storage-key="CLEAN_TASK_STORAGE_KEY"
-            :default-columns="defaultCleanTaskColumns"
-            @update:columns="handleColumnsUpdate"
-          />
+          <div class="flex items-center">
+            <ColumnSelector
+              :storage-key="CLEAN_TASK_STORAGE_KEY"
+              :default-columns="defaultCleanTaskColumns"
+              @update:columns="handleColumnsUpdate"
+            />
+          </div>
         </div>
+
         <el-table
           v-loading="loading"
           :data="tableData"
@@ -402,7 +405,7 @@ onMounted(() => {
           @selection-change="handleSelectionChange"
         >
           <!-- 选择列固定写死 -->
-          <el-table-column type="selection" width="55" align="center" />
+          <el-table-column type="selection" width="50" align="center" />
 
           <!-- 动态数据列 -->
           <el-table-column
@@ -426,11 +429,11 @@ onMounted(() => {
               </template>
               <!-- 所属小区 -->
               <template v-else-if="col.key === 'deptName'">
-                {{ row.deptName || "-" }}
+                {{ row.deptName || row.deptId || "-" }}
               </template>
               <!-- 仓口号 -->
               <template v-else-if="col.key === 'hatchNo'">
-                {{ row.hatchNo ? `${row.hatchNo}号仓` : "-" }}
+                {{ row.hatchNo ? `${row.hatchNo}` : "-" }}
               </template>
               <!-- 清运人员 -->
               <template v-else-if="col.key === 'cleanUserName'">
@@ -468,28 +471,29 @@ onMounted(() => {
                 type="primary"
                 :icon="View"
                 @click="handleView(row)"
-                >
-详情
-</el-button>
+              >
+                详情
+              </el-button>
               <el-button
                 link
                 type="primary"
                 :icon="Edit"
                 @click="handleEdit(row)"
-                >
-编辑
-</el-button>
+              >
+                编辑
+              </el-button>
               <el-button
                 link
                 type="danger"
                 :icon="Delete"
                 @click="handleDelete(row)"
-                >
-删除
-</el-button>
+              >
+                删除
+              </el-button>
             </template>
           </el-table-column>
         </el-table>
+
         <!-- 分页 -->
         <div class="flex justify-end mt-4">
           <el-pagination
@@ -498,6 +502,7 @@ onMounted(() => {
             :total="total"
             :page-sizes="[10, 20, 50, 100]"
             layout="total, sizes, prev, pager, next, jumper"
+            background
             @size-change="loadData"
             @current-change="loadData"
           />
@@ -521,20 +526,30 @@ onMounted(() => {
     >
       <el-form :model="formData" label-width="100px">
         <el-form-item label="所属小区">
-          <el-select
+          <el-tree-select
             v-model="formData.deptId"
-            placeholder="请选择小区"
+            :data="deptOptions"
+            :props="{
+              value: 'deptId',
+              label: (data) => {
+                // 父节点显示加标识
+                if (data.children && data.children.length > 0) {
+                  return `${data.deptName} (不可选)`;
+                }
+                return data.deptName;
+              },
+              children: 'children',
+              disabled: (data) => {
+                // 有子节点的就是父节点，禁用父节点
+                return data.children && data.children.length > 0;
+              },
+            }"
+            default-expand-all
+            placeholder="请选择"
             clearable
-            filterable
+            check-strictly
             style="width: 100%"
-          >
-            <el-option
-              v-for="item in deptOptions"
-              :key="item.deptId"
-              :label="item.deptName"
-              :value="item.deptId"
-            />
-          </el-select>
+          />
         </el-form-item>
         <el-form-item label="选择设备" required>
           <el-select
@@ -598,9 +613,9 @@ onMounted(() => {
           type="primary"
           :loading="formSubmitting"
           @click="handleSubmit"
-          >
-确定
-</el-button>
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
 
@@ -613,51 +628,37 @@ onMounted(() => {
     >
       <el-descriptions :column="2" border v-if="detailData">
         <el-descriptions-item label="任务单号" :span="2">
-{{
-          detailData.taskNo
-        }}
-</el-descriptions-item>
+          {{ detailData.taskNo }}
+        </el-descriptions-item>
         <el-descriptions-item label="所属小区">
-{{
-          detailData.deptId || "-"
-        }}
-</el-descriptions-item>
+          {{ detailData.deptId || "-" }}
+        </el-descriptions-item>
         <el-descriptions-item label="设备ID">
-{{
-          detailData.deviceId || "-"
-        }}
-</el-descriptions-item>
+          {{ detailData.deviceId || "-" }}
+        </el-descriptions-item>
         <el-descriptions-item label="仓口号">
-          {{ detailData.hatchNo ? `${detailData.hatchNo}号仓` : "-" }}
+          {{ detailData.hatchNo ? `${detailData.hatchNo}` : "-" }}
         </el-descriptions-item>
         <el-descriptions-item label="满仓重量">
-{{ detailData.fullWeight?.toFixed(2) || 0 }} kg
-</el-descriptions-item>
+          {{ detailData.fullWeight?.toFixed(2) || 0 }} kg
+        </el-descriptions-item>
         <el-descriptions-item label="清运人员">
-{{
-          detailData.cleanUserName || "-"
-        }}
-</el-descriptions-item>
+          {{ detailData.cleanUserName || "-" }}
+        </el-descriptions-item>
         <el-descriptions-item label="计划时间">
-{{
-          detailData.planTime || "-"
-        }}
-</el-descriptions-item>
+          {{ detailData.planTime || "-" }}
+        </el-descriptions-item>
         <el-descriptions-item label="完成时间">
-{{
-          detailData.finishTime || "-"
-        }}
-</el-descriptions-item>
+          {{ detailData.finishTime || "-" }}
+        </el-descriptions-item>
         <el-descriptions-item label="任务状态">
           <el-tag :type="getTaskStatusType(detailData.taskStatus)" size="small">
             {{ getTaskStatusText(detailData.taskStatus) }}
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="备注" :span="2">
-{{
-          detailData.remark || "-"
-        }}
-</el-descriptions-item>
+          {{ detailData.remark || "-" }}
+        </el-descriptions-item>
       </el-descriptions>
       <template #footer>
         <el-button @click="detailVisible = false">关闭</el-button>
@@ -681,5 +682,23 @@ onMounted(() => {
 
 .font-bold {
   font-weight: 600;
+}
+
+/* 部门树选择器前缀 */
+.tree-prefix-dept :deep(.el-select__wrapper) {
+  position: relative;
+  padding-left: 45px !important;
+}
+
+.tree-prefix-dept :deep(.el-select__wrapper)::before {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #909399;
+  pointer-events: none;
+  content: "部门:";
+  transform: translateY(-50%);
 }
 </style>

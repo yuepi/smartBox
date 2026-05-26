@@ -6,7 +6,7 @@ export const RECYCLE_ORDER_STORAGE_KEY = 'recycle_order_table_columns';
 
 export const defaultRecycleOrderColumns: TableColumnConfig[] = [
   // { key: 'recycleOrderId', label: '订单ID', visible: true, width: 80, align: 'center' },
-  { key: 'orderNo', label: '订单编号', visible: true, minWidth: 150, align: 'center', fixed: true, showOverflowTooltip: true },
+  { key: 'orderNo', label: '订单编号', visible: true, minWidth: 200, align: 'center', fixed: true, showOverflowTooltip: true },
   // { key: 'merchantId', label: '商户ID', visible: false, width: 80, align: 'center' },
   // { key: 'deptId', label: '小区ID', visible: false, width: 80, align: 'center' },
   { key: 'deptName', label: '小区名称', visible: true, minWidth: 150, align: 'center', showOverflowTooltip: true },
@@ -25,8 +25,8 @@ export const defaultRecycleOrderColumns: TableColumnConfig[] = [
   // { key: 'afterWeight', label: '投递后重量(kg)', visible: true, width: 120, align: 'center' },
   { key: 'beforeAfterWeight', label: '投递重量变化(kg)', visible: true, width: 160, align: 'center' },  
   { key: 'weight', label: '投递重量(kg)', visible: true, width: 110, align: 'center' },
-  { key: 'realWeight', label: '实际有效重量(kg)', visible: true, width: 120, align: 'center' },
-  { key: 'unitPrice', label: '回收单价(元/kg)', visible: true, width: 120, align: 'center' },
+  { key: 'realWeight', label: '实际有效重量(kg)', visible: true, width: 180, align: 'center' },
+  { key: 'unitPrice', label: '回收单价(元/kg)', visible: true, width: 180, align: 'center' },
   { key: 'estimateAmount', label: '预估金额(元)', visible: false, width: 110, align: 'center' },
   { key: 'realAmount', label: '实际金额(元)', visible: true, width: 110, align: 'center' },
   { key: 'orderStatus', label: '订单状态', visible: true, width: 120, align: 'center' },
@@ -48,7 +48,7 @@ export const defaultCleanTaskColumns: TableColumnConfig[] = [
   { key: 'deviceName', label: '设备名称', visible: true, minWidth: 150, align: 'center', showOverflowTooltip: true },
   { key: 'deviceNo', label: '设备编号', visible: false, width: 120, align: 'center' },
   { key: 'hatchId', label: '仓口ID', visible: false, width: 80, align: 'center' },
-  { key: 'hatchNo', label: '仓口号', visible: true, width: 80, align: 'center' },
+  { key: 'hatchNo', label: '仓口号', visible: true, width: 180, align: 'center' },
   { key: 'deviceBagId', label: '包袋ID', visible: false, width: 80, align: 'center' },
   { key: 'fullWeight', label: '满仓重量(kg)', visible: true, width: 110, align: 'center' },
   { key: 'cleanUserId', label: '清运人员ID', visible: false, width: 100, align: 'center' },

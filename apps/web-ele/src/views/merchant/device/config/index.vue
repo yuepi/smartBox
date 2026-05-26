@@ -17,7 +17,7 @@ import {
 } from "#/api/device/deviceConfig";
 import UploadImage from "#/components/UploadImage/index.vue";
 import { ModuleCodeMap, useExport } from "#/hooks/useExport";
-const { exporting, exportData } = useExport(ModuleCodeMap.DEVICE);
+const { exporting, exportData } = useExport(ModuleCodeMap.CONFIG);
 import ColumnSelector from "#/components/ColumnSelector/index.vue";
 import ExportFieldSelector from "#/components/ExportFieldSelector/index.vue";
 import {
@@ -411,26 +411,37 @@ onMounted(() => {
 
 <template>
   <Page auto-content-height>
-    <div class="p-4">
+    <div class="p-0">
       <!-- 查询表单 -->
-      <el-card shadow="never" class="mb-4">
-        <el-form :inline="true" :model="queryParams">
-          <el-form-item label="配置名称">
+      <el-card shadow="never" class="border-none mb-4 !p-2">
+        <el-form
+          :inline="true"
+          :model="queryParams"
+          class="flex flex-wrap gap-x-2 gap-y-2 items-center"
+        >
+          <el-form-item class="!mb-0 !mr-2">
             <el-input
               v-model="queryParams.configName"
-              placeholder="请输入配置名称"
+              placeholder="请输入"
               clearable
-              style="width: 180px"
+              style="width: 200px"
               @keyup.enter="handleQuery"
-            />
+            >
+              <template #prefix>
+                <span class="text-xs text-gray-400 mr-0.5">配置名称:</span>
+              </template>
+            </el-input>
           </el-form-item>
-          <el-form-item label="设备品牌">
+
+          <el-form-item class="!mb-0 !mr-2">
             <el-select
               v-model="queryParams.deviceBrand"
-              placeholder="全部"
               clearable
-              style="width: 140px"
+              style="width: 200px"
             >
+              <template #prefix>
+                <span class="text-xs text-gray-400 mr-0.5">设备品牌:</span>
+              </template>
               <el-option
                 v-for="item in device_brand"
                 :key="item.value"
@@ -439,13 +450,16 @@ onMounted(() => {
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="状态">
+
+          <el-form-item class="!mb-0 !mr-2">
             <el-select
               v-model="queryParams.status"
-              placeholder="全部"
               clearable
-              style="width: 100px"
+              style="width: 200px"
             >
+              <template #prefix>
+                <span class="text-xs text-gray-400 mr-0.5">状态:</span>
+              </template>
               <el-option
                 v-for="item in statusOptions"
                 :key="item.value"
@@ -454,13 +468,24 @@ onMounted(() => {
               />
             </el-select>
           </el-form-item>
-          <el-form-item>
-            <el-button type="primary" :icon="Search" @click="handleQuery">
-              查询
-            </el-button>
-            <el-button :icon="Refresh" @click="resetQuery">重置</el-button>
-            <el-button type="primary" plain :icon="Plus" @click="handleAdd">
-              新增
+
+          <el-form-item class="!mb-0 !mr-0 md:ml-auto flex items-center gap-1">
+            <el-tooltip content="查询" placement="top">
+              <el-button type="primary" :icon="Search" circle @click="handleQuery" />
+            </el-tooltip>
+            <el-tooltip content="重置" placement="top">
+              <el-button :icon="Refresh" circle @click="resetQuery" />
+            </el-tooltip>
+          </el-form-item>
+        </el-form>
+      </el-card>
+
+      <!-- 数据表格 -->
+      <el-card shadow="never" class="border-none !p-2">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <el-button type="primary" :icon="Plus" @click="handleAdd">
+              新增配置
             </el-button>
             <el-button :loading="exporting" @click="openExportSelector">
               导出
@@ -474,19 +499,20 @@ onMounted(() => {
             >
               批量删除
             </el-button>
-          </el-form-item>
-        </el-form>
-      </el-card>
+            <span v-if="selectedIds.length > 0" class="text-xs text-gray-400 ml-2">
+              已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
+            </span>
+          </div>
 
-      <!-- 数据表格 -->
-      <el-card shadow="never">
-        <div class="float-right">
-          <ColumnSelector
-            :storage-key="CONFIG_STORAGE_KEY"
-            :default-columns="defaultConfigColumns"
-            @update:columns="handleColumnsUpdate"
-          />
+          <div class="flex items-center">
+            <ColumnSelector
+              :storage-key="CONFIG_STORAGE_KEY"
+              :default-columns="defaultConfigColumns"
+              @update:columns="handleColumnsUpdate"
+            />
+          </div>
         </div>
+
         <el-table
           v-loading="loading"
           :data="tableData"
@@ -495,7 +521,8 @@ onMounted(() => {
           style="width: 100%"
           @selection-change="handleSelectionChange"
         >
-          <el-table-column type="selection" width="55" align="center" />
+          <el-table-column type="selection" width="50" align="center" />
+
           <el-table-column
             v-for="col in visibleColumns"
             :key="col.key"
@@ -522,6 +549,8 @@ onMounted(() => {
                 <el-tag
                   :type="row.status === 0 ? 'success' : 'danger'"
                   size="small"
+                  round
+                  effect="light"
                 >
                   {{ getStatusText(row.status) }}
                 </el-tag>
@@ -531,32 +560,20 @@ onMounted(() => {
               </template>
             </template>
           </el-table-column>
-          <el-table-column
-            label="操作"
-            width="150"
-            fixed="right"
-            align="center"
-          >
+
+          <el-table-column label="操作" width="150" fixed="right" align="center">
             <template #default="{ row }">
-              <el-button
-                link
-                type="primary"
-                :icon="Edit"
-                @click="handleEdit(row)"
-              >
+              <el-button link type="primary" :icon="Edit" @click="handleEdit(row)">
                 编辑
               </el-button>
-              <el-button
-                link
-                type="danger"
-                :icon="Delete"
-                @click="handleDelete(row)"
-              >
+              <el-button link type="danger" :icon="Delete" @click="handleDelete(row)">
                 删除
               </el-button>
             </template>
           </el-table-column>
         </el-table>
+
+        <!-- 分页 -->
         <div class="flex justify-end mt-4">
           <el-pagination
             v-model:current-page="queryParams.pageNo"
@@ -564,6 +581,7 @@ onMounted(() => {
             :total="total"
             :page-sizes="[10, 20, 50, 100]"
             layout="total, sizes, prev, pager, next, jumper"
+            background
             @size-change="loadData"
             @current-change="loadData"
           />

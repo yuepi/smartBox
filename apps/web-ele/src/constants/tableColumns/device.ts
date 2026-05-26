@@ -124,3 +124,16 @@ export const defaultBagColumns: TableColumnConfig[] = [
   { key: 'unbindTime', label: '解绑时间', visible: true, width: 180, align: 'center' },
   { key: 'status', label: '状态', visible: true, width: 100, align: 'center' },
 ];
+
+
+// ========== 二维码管理 ==========
+export const QRCODE_STORAGE_KEY = 'qrcode_table_columns';
+
+export const defaultQrcodeColumns: TableColumnConfig[] = [
+  { key: 'qrcodeId', label: 'ID', visible: false, width: 80, align: 'center' },
+  { key: 'qrcodeCode', label: '二维码编号', visible: true, minWidth: 180, align: 'left', showOverflowTooltip: true },
+  { key: 'qrcodeType', label: '类型', visible: true, width: 120, align: 'center' },
+  { key: 'bindFlag', label: '绑定状态', visible: true, width: 100, align: 'center' },
+  { key: 'status', label: '状态', visible: true, width: 100, align: 'center' },
+  { key: 'qrcodeUrl', label: '二维码图片', visible: false, width: 120, align: 'center' },
+];

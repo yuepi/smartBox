@@ -12,6 +12,9 @@ import { ElLoading } from "element-plus";
 import ElementPlus from "element-plus";
 import zhCn from "element-plus/es/locale/lang/zh-cn";
 
+import ColumnSelector from "#/components/ColumnSelector/index.vue";
+import DictTag from '#/components/DictTag/index.vue';
+import ExportButton from '#/components/ExportButton/index.vue';
 import { $t, setupI18n } from "#/locales";
 
 import { initComponentAdapter } from "./adapter/component";
@@ -20,8 +23,6 @@ import App from "./app.vue";
 import { router } from "./router";
 
 import "element-plus/dist/index.css";
-
-import DictTag from '#/components/DictTag/index.vue';
 
 async function bootstrap(namespace: string) {
   // 初始化组件适配器
@@ -50,6 +51,8 @@ async function bootstrap(namespace: string) {
   };
 
   app.component('DictTag', DictTag);
+  app.component('ExportButton', ExportButton);
+  app.component('ColumnSelector', ColumnSelector);
 
   // 注册Element Plus提供的v-loading指令
   app.directive("loading", ElLoading.directive);

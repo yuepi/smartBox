@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive,ref } from "vue";
 
 import { Page } from "@vben/common-ui";
 
@@ -25,6 +25,49 @@ import {
   type Qrcode,
   type QrcodePageParams,
 } from "#/api/device/qrcode";
+import ColumnSelector from "#/components/ColumnSelector/index.vue";
+import ExportFieldSelector from "#/components/ExportFieldSelector/index.vue";
+import {
+  defaultQrcodeColumns,
+  QRCODE_STORAGE_KEY,
+  type TableColumnConfig,
+} from "#/constants/tableColumns";
+import { ModuleCodeMap, useExport } from "#/hooks/useExport";
+
+const { exporting, exportData } = useExport(ModuleCodeMap.QRCODE);
+
+// 表格列配置
+const columnConfig = ref<TableColumnConfig[]>([...defaultQrcodeColumns]);
+
+function handleColumnsUpdate(newColumns: TableColumnConfig[]) {
+  columnConfig.value = newColumns;
+}
+
+// 可见的数据列
+const visibleColumns = computed(() => {
+  return columnConfig.value.filter((col) => col.visible);
+});
+
+// 可导出的字段
+const getExportableFields = computed(() => {
+  return visibleColumns.value.map((col) => ({
+    prop: col.key,
+    label: col.label,
+  }));
+});
+
+// 导出字段选择弹窗
+const exportFieldVisible = ref(false);
+const exportFields = ref<{ label: string; prop: string }[]>([]);
+
+function openExportSelector() {
+  exportFields.value = getExportableFields.value;
+  exportFieldVisible.value = true;
+}
+
+async function handleExportConfirm(selectedFields: string[]) {
+  await exportData(queryParams, selectedFields);
+}
 
 // --- 状态变量 ---
 const loading = ref(false);
@@ -287,26 +330,37 @@ onMounted(() => {
 
 <template>
   <Page auto-content-height>
-    <div class="p-4">
+     <div class="p-0">
       <!-- 查询表单 -->
-      <el-card shadow="never" class="mb-4">
-        <el-form :inline="true" :model="queryParams">
-          <el-form-item label="二维码编号">
+      <el-card shadow="never" class="border-none mb-4 !p-2">
+        <el-form
+          :inline="true"
+          :model="queryParams"
+          class="flex flex-wrap gap-x-2 gap-y-2 items-center"
+        >
+          <el-form-item class="!mb-0 !mr-2">
             <el-input
               v-model="queryParams.qrcodeCode"
-              placeholder="请输入二维码编号"
+              placeholder="请输入"
               clearable
-              style="width: 180px"
+              style="width: 200px"
               @keyup.enter="handleQuery"
-            />
+            >
+              <template #prefix>
+                <span class="text-xs text-gray-400 mr-0.5">二维码编号:</span>
+              </template>
+            </el-input>
           </el-form-item>
-          <el-form-item label="二维码类型">
+
+          <el-form-item class="!mb-0 !mr-2">
             <el-select
               v-model="queryParams.qrcodeType"
-              placeholder="全部"
               clearable
-              style="width: 120px"
+              style="width: 200px"
             >
+              <template #prefix>
+                <span class="text-xs text-gray-400 mr-0.5">二维码类型:</span>
+              </template>
               <el-option
                 v-for="item in qrcodeTypeOptions"
                 :key="item.value"
@@ -315,24 +369,30 @@ onMounted(() => {
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="绑定状态">
+
+          <el-form-item class="!mb-0 !mr-2">
             <el-select
               v-model="queryParams.bindFlag"
-              placeholder="全部"
               clearable
-              style="width: 120px"
+              style="width: 200px"
             >
+              <template #prefix>
+                <span class="text-xs text-gray-400 mr-0.5">绑定状态:</span>
+              </template>
               <el-option label="未绑定" :value="0" />
               <el-option label="已绑定" :value="1" />
             </el-select>
           </el-form-item>
-          <el-form-item label="状态">
+
+          <el-form-item class="!mb-0 !mr-2">
             <el-select
               v-model="queryParams.status"
-              placeholder="全部"
               clearable
-              style="width: 100px"
+              style="width: 200px"
             >
+              <template #prefix>
+                <span class="text-xs text-gray-400 mr-0.5">状态:</span>
+              </template>
               <el-option
                 v-for="item in statusOptions"
                 :key="item.value"
@@ -341,19 +401,28 @@ onMounted(() => {
               />
             </el-select>
           </el-form-item>
-          <el-form-item>
-            <el-button type="primary" :icon="Search" @click="handleQuery">
-              查询
-            </el-button>
-            <el-button :icon="Refresh" @click="resetQuery">重置</el-button>
-            <el-button
-              type="primary"
-              plain
-              :icon="Plus"
-              @click="handleGenerate"
-            >
+
+          <el-form-item class="!mb-0 !mr-0 md:ml-auto flex items-center gap-1">
+            <el-tooltip content="查询" placement="top">
+              <el-button type="primary" :icon="Search" circle @click="handleQuery" />
+            </el-tooltip>
+            <el-tooltip content="重置" placement="top">
+              <el-button :icon="Refresh" circle @click="resetQuery" />
+            </el-tooltip>
+          </el-form-item>
+        </el-form>
+      </el-card>
+
+      <!-- 数据表格 -->
+      <el-card shadow="never" class="border-none !p-2">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <el-button type="primary" plain :icon="Plus" @click="handleGenerate">
               生成二维码
             </el-button>
+            <el-button :loading="exporting" @click="openExportSelector">
+    导出
+  </el-button>
             <el-button
               type="success"
               plain
@@ -372,12 +441,20 @@ onMounted(() => {
             >
               批量下载
             </el-button>
-          </el-form-item>
-        </el-form>
-      </el-card>
+            <span v-if="selectedIds.length > 0" class="text-xs text-gray-400 ml-2">
+              已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
+            </span>
+          </div>
 
-      <!-- 数据表格 -->
-      <el-card shadow="never">
+          <div class="flex items-center">
+            <ColumnSelector
+              :storage-key="QRCODE_STORAGE_KEY"
+              :default-columns="defaultQrcodeColumns"
+              @update:columns="handleColumnsUpdate"
+            />
+          </div>
+        </div>
+
         <el-table
           v-loading="loading"
           :data="tableData"
@@ -386,122 +463,87 @@ onMounted(() => {
           style="width: 100%"
           @selection-change="handleSelectionChange"
         >
-          <el-table-column type="selection" width="55" align="center" />
+          <!-- 选择列固定写死 -->
+          <el-table-column type="selection" width="50" align="center" />
+
+          <!-- 动态数据列 -->
           <el-table-column
-            prop="qrcodeId"
-            label="ID"
-            width="80"
-            align="center"
-          />
-          <el-table-column
-            prop="qrcodeCode"
-            label="二维码编号"
-            min-width="180"
-            align="left"
-          />
-          <el-table-column
-            prop="qrcodeType"
-            label="类型"
-            width="150"
-            align="center"
+            v-for="col in visibleColumns"
+            :key="col.key"
+            :prop="col.key"
+            :label="col.label"
+            :width="typeof col.width === 'number' ? col.width : undefined"
+            :min-width="col.minWidth"
+            :align="col.align"
           >
             <template #default="{ row }">
-              <el-tag
-                :type="row.qrcodeType === 0 ? 'primary' : 'success'"
-                size="small"
-              >
-                {{ getQrcodeTypeText(row.qrcodeType) }}
-              </el-tag>
+              <!-- 二维码类型 -->
+              <template v-if="col.key === 'qrcodeType'">
+                <el-tag
+                  :type="row.qrcodeType === 0 ? 'primary' : 'success'"
+                  size="small"
+                  round
+                  effect="light"
+                >
+                  {{ getQrcodeTypeText(row.qrcodeType) }}
+                </el-tag>
+              </template>
+              <!-- 绑定状态 -->
+              <template v-else-if="col.key === 'bindFlag'">
+                <el-tag
+                  :type="row.bindFlag === 1 ? 'success' : 'info'"
+                  size="small"
+                  round
+                  effect="light"
+                >
+                  {{ row.bindFlag === 1 ? "已绑定" : "未绑定" }}
+                </el-tag>
+              </template>
+              <!-- 状态 -->
+              <template v-else-if="col.key === 'status'">
+                <el-tag
+                  :type="row.status === 0 ? 'success' : 'danger'"
+                  size="small"
+                  round
+                  effect="light"
+                >
+                  {{ getStatusText(row.status) }}
+                </el-tag>
+              </template>
+              <!-- 二维码图片 -->
+              <template v-else-if="col.key === 'qrcodeUrl'">
+                <el-button
+                  v-if="row.qrcodeUrl"
+                  link
+                  type="primary"
+                  size="small"
+                  @click="showQrcodeImage(row)"
+                >
+                  查看图片
+                </el-button>
+                <span v-else class="text-gray-400">-</span>
+              </template>
+              <!-- 绑定业务ID -->
+              <template v-else-if="col.key === 'bizId'">
+                {{ row.bizId || "-" }}
+              </template>
+              <!-- 普通字段 -->
+              <template v-else>
+                {{ (row as any)[col.key] ?? '-' }}
+              </template>
             </template>
           </el-table-column>
-          <el-table-column
-            prop="bindFlag"
-            label="绑定状态"
-            width="100"
-            align="center"
-          >
+
+          <!-- 操作列固定写死 -->
+          <el-table-column label="操作" width="220" fixed="right" align="center">
             <template #default="{ row }">
-              <el-tag
-                :type="row.bindFlag === 1 ? 'success' : 'info'"
-                size="small"
-              >
-                {{ row.bindFlag === 1 ? "已绑定" : "未绑定" }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column
-            prop="bizId"
-            label="绑定业务ID"
-            width="120"
-            align="center"
-          >
-            <template #default="{ row }">
-              {{ row.bizId || "-" }}
-            </template>
-          </el-table-column>
-          <el-table-column
-            prop="status"
-            label="状态"
-            width="100"
-            align="center"
-          >
-            <template #default="{ row }">
-              <el-tag
-                :type="row.status === 0 ? 'success' : 'danger'"
-                size="small"
-              >
-                {{ getStatusText(row.status) }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column
-            prop="qrcodeUrl"
-            label="二维码图片"
-            width="120"
-            align="center"
-          >
-            <template #default="{ row }">
-              <el-button
-                v-if="row.qrcodeUrl"
-                link
-                type="primary"
-                size="small"
-                @click="showQrcodeImage(row)"
-              >
-                查看图片
-              </el-button>
-              <span v-else class="text-gray-400">-</span>
-            </template>
-          </el-table-column>
-          <el-table-column
-            label="操作"
-            width="250"
-            fixed="right"
-            align="center"
-          >
-            <template #default="{ row }">
-              <el-button
-                link
-                type="primary"
-                :icon="View"
-                @click="handleView(row)"
-              >
+              <el-button link type="primary" :icon="View" @click="handleView(row)">
                 详情
               </el-button>
-              <el-button
-                link
-                type="primary"
-                :icon="Picture"
-                @click="handleShowQrcode(row)"
-              >
+              <el-button link type="primary" :icon="Picture" @click="handleShowQrcode(row)">
                 展示
               </el-button>
-              <el-button
-                link
-                type="warning"
-                :icon="Download"
-                @click="handleDownloadQrcode(row)"
-              >
+              <el-button link type="warning" :icon="Download" @click="handleDownloadQrcode(row)">
                 下载
               </el-button>
             </template>
@@ -516,12 +558,20 @@ onMounted(() => {
             :total="total"
             :page-sizes="[10, 20, 50, 100]"
             layout="total, sizes, prev, pager, next, jumper"
+            background
             @size-change="loadData"
             @current-change="loadData"
           />
         </div>
       </el-card>
     </div>
+
+    <ExportFieldSelector
+  v-model:visible="exportFieldVisible"
+  :fields="exportFields"
+  :loading="exporting"
+  @confirm="handleExportConfirm"
+/>
 
     <!-- 生成二维码弹窗 -->
     <el-dialog
@@ -704,9 +754,7 @@ onMounted(() => {
 
       <template #footer>
         <div class="flex justify-between items-center px-2">
-          <span class="text-xs text-gray-400"
-            >提示：点击图片可查看高清大图并轮播</span
-          >
+          <span class="text-xs text-gray-400">提示：点击图片可查看高清大图并轮播</span>
           <el-button @click="qrcodeVisible = false" class="!rounded-md">
             关闭
           </el-button>

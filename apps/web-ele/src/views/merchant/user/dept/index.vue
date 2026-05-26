@@ -1,21 +1,119 @@
 <script lang="tsx" setup>
-import { onMounted, reactive, ref } from 'vue';
-import { ElMessage, ElMessageBox } from 'element-plus';
-import { Search, Refresh, Delete, Plus, Edit, Folder, OfficeBuilding, HomeFilled } from '@element-plus/icons-vue';
+import { computed, onMounted, reactive, ref,watch } from 'vue';
+
+import { useAccess } from '@vben/access';
 import { Page } from '@vben/common-ui';
 
-import {
-  getMerchantDeptDetailApi,
-  addMerchantDeptApi,
-  editMerchantDeptApi,
-  deleteMerchantDeptApi,
-  getMerchantDeptListApi,
-  type Dept,
-} from '#/api/system/dept';
-import { useAccess } from '@vben/access';
+import { Delete, Edit, Folder, HomeFilled, OfficeBuilding, Plus, Refresh, Search } from '@element-plus/icons-vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
+import {
+  addMerchantDeptApi,
+  deleteMerchantDeptApi,
+  type Dept,
+  editMerchantDeptApi,
+  getMerchantDeptDetailApi,
+  getMerchantDeptListApi,
+} from '#/api/system/dept';
+import ColumnSelector from '#/components/ColumnSelector/index.vue';
+import {
+  defaultDeptColumns,
+  DEPT_STORAGE_KEY,
+  type TableColumnConfig,
+} from '#/constants/tableColumns';
+import { ModuleCodeMap } from '#/hooks/useExport';
 
 const { hasAccessByCodes } = useAccess();
+
+// --- 表格列配置 ---
+const columnConfig = ref<TableColumnConfig[]>([...defaultDeptColumns]);
+
+function handleColumnsUpdate(newColumns: TableColumnConfig[]) {
+  columnConfig.value = newColumns;
+}
+
+const visibleColumns = computed(() => {
+  return columnConfig.value.filter((col) => col.visible);
+});
+
+// 转换为 el-table-v2 需要的 columns 格式
+const tableColumns = computed(() => {
+  // 1. 获取当前用户自定义勾选显示的动态列
+  const cols = visibleColumns.value.length > 0 ? visibleColumns.value : defaultDeptColumns;
+
+  // 2. 将动态列映射为相应的渲染格式
+  const mappedColumns = cols.map((col) => ({
+    key: col.key,
+    title: col.label,
+    width: col.width,
+    align: col.align || 'left',
+    cellRenderer: ({ rowData }: { rowData: Dept }) => {
+      switch (col.key) {
+        case 'deptName': {
+          return (
+            <div class="flex items-center gap-1 w-full overflow-hidden">
+              {rowData.deptType === 0 && <HomeFilled class="w-4 h-4 text-primary shrink-0" />}
+              {rowData.deptType === 1 && <OfficeBuilding class="w-4 h-4 text-success shrink-0" />}
+              {rowData.deptType === 2 && <Folder class="w-4 h-4 text-info shrink-0" />}
+              <span class="truncate">{rowData.deptName}</span>
+            </div>
+          );
+        }
+        case 'deptType': {
+          const typeMap: Record<number, { text: string; type: string }> = {
+            0: { text: '顶级部门', type: 'primary' },
+            1: { text: '部门', type: 'success' },
+            2: { text: '小区', type: 'info' },
+          };
+          const config = typeMap[rowData.deptType] || { text: '未知', type: 'danger' };
+          return <el-tag size="small" type={config.type}>{config.text}</el-tag>;
+        }
+        case 'status': {
+          return (
+            <el-tag effect="light" round size="small" type={rowData.status === 0 ? 'success' : 'danger'}>
+              {rowData.status === 0 ? '启用' : '禁用'}
+            </el-tag>
+          );
+        }
+        default: {
+          const text = (rowData as any)[col.key] ?? '-';
+          return <span>{text}</span>;
+        }
+      }
+    },
+  }));
+
+  // 3. 动态列 + 固定操作列
+  return [
+    ...mappedColumns,
+    {
+      key: 'operate',
+      title: '操作',
+      width: 280,
+      align: 'center',
+      fixed: 'right' as const,
+      cellRenderer: ({ rowData }: { rowData: Dept }) => (
+        <div class="flex justify-center gap-1 w-full">
+          {hasAccessByCodes(['plat:dept:add']) && (
+            <el-button icon={Plus} link onClick={() => handleAdd(rowData.deptId)} type="primary">
+              新增
+            </el-button>
+          )}
+          {hasAccessByCodes(['plat:dept:edit']) && (
+            <el-button icon={Edit} link onClick={() => handleEdit(rowData)} type="primary">
+              编辑
+            </el-button>
+          )}
+          {hasAccessByCodes(['plat:dept:del']) && (
+            <el-button icon={Delete} link onClick={() => handleDelete(rowData)} type="danger">
+              删除
+            </el-button>
+          )}
+        </div>
+      ),
+    },
+  ];
+});
 
 // --- 状态变量 ---
 const loading = ref(false);
@@ -53,95 +151,11 @@ const queryParams = reactive({
 const expandedRowKeys = ref([]);
 const rowKey = 'deptId';
 
-// 表格列配置
-const columns = ref([
-  {
-    key: 'deptId',
-    title: '部门ID',
-    width: 150,
-    align: 'center' as const,
-    cellRenderer: ({ rowData }: any) => rowData.deptId,
-  },
-  {
-    key: 'deptName',
-    title: '部门名称',
-    width: 600,
-    cellRenderer: ({ rowData }: any) => (
-      <div class="flex items-center gap-1">
-        {rowData.deptType === 0 && <HomeFilled class="w-4 h-4 text-primary" />}
-        {rowData.deptType === 1 && <OfficeBuilding class="w-4 h-4 text-success" />}
-        {rowData.deptType === 2 && <Folder class="w-4 h-4 text-info" />}
-        <span>{rowData.deptName}</span>
-      </div>
-    ),
-  },
-  {
-    key: 'deptType',
-    title: '部门类型',
-    width: 200,
-    align: 'center' as const,
-    cellRenderer: ({ rowData }: any) => {
-      const typeMap: Record<number, { text: string; type: string }> = {
-        0: { text: '顶级部门', type: 'primary' },
-        1: { text: '部门', type: 'success' },
-        2: { text: '小区', type: 'info' },
-      };
-      const config = typeMap[rowData.deptType] || { text: '未知', type: 'danger' };
-      return <el-tag type={config.type} size="small">{config.text}</el-tag>;
-    },
-  },
-  {
-    key: 'sort',
-    title: '排序',
-    width: 150,
-    align: 'center' as const,
-    cellRenderer: ({ rowData }: any) => rowData.sort,
-  },
-  {
-    key: 'status',
-    title: '状态',
-    width: 150,
-    align: 'center' as const,
-    cellRenderer: ({ rowData }: any) => (
-      <el-tag type={rowData.status === 0 ? 'success' : 'danger'} size="small">
-        {rowData.status === 0 ? '启用' : '禁用'}
-      </el-tag>
-    ),
-  },
-  {
-    key: 'createTime',
-    title: '创建时间',
-    width: 300,
-    align: 'center' as const,
-    cellRenderer: ({ rowData }: any) => rowData.createTime || '-',
-  },
-  {
-    key: 'operate',
-    title: '操作',
-    width: 300,
-    fixed: 'right' as const,
-    align: 'center' as const,
-    cellRenderer: ({ rowData }: any) => (
-      <div class="flex justify-center gap-1">
-        {hasAccessByCodes(['merchant:dept:add']) && (
-          <el-button icon={Plus} link type="primary" onClick={() => handleAdd(rowData.deptId)}>
-            新增
-          </el-button>
-        )}
-        {hasAccessByCodes(['merchant:dept:edit']) && (
-          <el-button icon={Edit} link type="primary" onClick={() => handleEdit(rowData)}>
-            编辑
-          </el-button>
-        )}
-        {hasAccessByCodes(['merchant:dept:del']) && (
-          <el-button icon={Delete} link type="danger" onClick={() => handleDelete(rowData)}>
-            删除
-          </el-button>
-        )}
-      </div>
-    ),
-  },
-]);
+// 强制刷新表格的 key
+const tableKey = ref(0);
+watch(visibleColumns, () => {
+  tableKey.value++;
+});
 
 // 递归构建树形结构
 function buildTree(depts: Dept[]): Dept[] {
@@ -167,11 +181,10 @@ function buildTree(depts: Dept[]): Dept[] {
     }
   });
 
-  // 排序
   const sortTree = (nodes: Dept[]) => {
     nodes.sort((a, b) => (a.sort || 0) - (b.sort || 0));
     nodes.forEach(node => {
-      if (node.children && node.children.length) {
+      if (node.children && node.children.length > 0) {
         sortTree(node.children);
       }
     });
@@ -186,7 +199,6 @@ async function loadParentDeptOptions() {
   try {
     const res = await getMerchantDeptListApi({ status: 0 });
     const depts = res || [];
-    // 递归扁平化树形结构用于下拉选择
     const flatDepts = flattenTree(depts);
     parentDeptOptions.value = [
       { deptId: 0, deptName: '顶级部门', parentId: 0, merchantId: 0, deptType: 0, sort: 0, status: 0 } as Dept,
@@ -202,7 +214,7 @@ function flattenTree(nodes: Dept[]): Dept[] {
   let result: Dept[] = [];
   nodes.forEach(node => {
     result.push(node);
-    if (node.children && node.children.length) {
+    if (node.children && node.children.length > 0) {
       result = result.concat(flattenTree(node.children));
     }
   });
@@ -261,7 +273,6 @@ async function handleSubmit() {
     ElMessage.success(formData.value.deptId ? '修改成功' : '新增成功');
     formVisible.value = false;
     handleQuery();
-
   } catch {
     ElMessage.error('操作失败');
   } finally {
@@ -283,11 +294,7 @@ async function handleDelete(row?: Dept) {
     await ElMessageBox.confirm(
       row ? `确定要删除部门"${deleteName}"吗？删除后可能导致子部门也被删除。` : `确定要删除选中的部门吗？`,
       '提示',
-      {
-        type: 'warning',
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-      }
+      { type: 'warning' }
     );
 
     for (const id of ids) {
@@ -320,40 +327,68 @@ onMounted(() => {
 
 <template>
   <Page auto-content-height>
-    <h1 class="text-2xl font-bold">商户部门管理</h1>
-    <div class="p-4">
+    <div class="p-0">
       <!-- 查询表单 -->
-      <el-card shadow="never" class="mb-4">
-        <el-form :inline="true" :model="queryParams">
-          <el-form-item label="部门名称">
-            <el-input v-model="queryParams.deptName" placeholder="请输入部门名称" clearable style="width: 180px"
-              @keyup.enter="handleQuery" />
+      <el-card shadow="never" class="border-none mb-4 !p-2">
+        <el-form :inline="true" :model="queryParams" class="flex flex-wrap gap-x-2 gap-y-2 items-center">
+          <el-form-item class="!mb-0 !mr-2">
+            <el-input v-model="queryParams.deptName" placeholder="请输入" clearable style="width: 200px" @keyup.enter="handleQuery">
+              <template #prefix><span class="text-xs text-gray-400 mr-0.5">部门名称:</span></template>
+            </el-input>
           </el-form-item>
-          <el-form-item label="部门类型">
-            <el-select v-model="queryParams.deptType" placeholder="全部" clearable style="width: 120px">
+
+          <el-form-item class="!mb-0 !mr-2">
+            <el-select v-model="queryParams.deptType" clearable style="width: 200px">
+              <template #prefix><span class="text-xs text-gray-400 mr-0.5">部门类型:</span></template>
               <el-option v-for="item in deptTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
             </el-select>
           </el-form-item>
-          <el-form-item label="状态">
-            <el-select v-model="queryParams.status" placeholder="全部" clearable style="width: 100px">
+
+          <el-form-item class="!mb-0 !mr-2">
+            <el-select v-model="queryParams.status" clearable style="width: 200px">
+              <template #prefix><span class="text-xs text-gray-400 mr-0.5">状态:</span></template>
               <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
             </el-select>
           </el-form-item>
-          <el-form-item>
-            <el-button type="primary" :icon="Search" @click="handleQuery" v-access:code="['merchant:dept:page']">查询</el-button>
-            <el-button :icon="Refresh" @click="resetQuery" v-access:code="['merchant:dept:page']">重置</el-button>
-            <el-button type="primary" plain :icon="Plus" @click="handleAdd()" v-access:code="['merchant:dept:add']">新增部门</el-button>
+
+          <el-form-item class="!mb-0 !mr-0 md:ml-auto flex items-center gap-1">
+            <el-tooltip content="查询" placement="top">
+              <el-button type="primary" :icon="Search" circle @click="handleQuery" />
+            </el-tooltip>
+            <el-tooltip content="重置" placement="top">
+              <el-button :icon="Refresh" circle @click="resetQuery" />
+            </el-tooltip>
           </el-form-item>
         </el-form>
       </el-card>
 
-      <!-- 数据表格 - 使用 el-table-v2 -->
+      <!-- 数据表格 -->
       <el-card shadow="never">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <el-button type="primary" plain :icon="Plus" @click="handleAdd()" v-access:code="['plat:dept:add']">
+              新增部门
+            </el-button>
+            <ExportButton :module-code="ModuleCodeMap.DEPT" :fields="visibleColumns" :find-cond="queryParams" />
+          </div>
+          <div class="flex items-center">
+            <ColumnSelector :storage-key="DEPT_STORAGE_KEY" :default-columns="defaultDeptColumns" @update:columns="handleColumnsUpdate" />
+          </div>
+        </div>
         <div class="table-container">
           <el-auto-resizer>
             <template #default="{ height, width }">
-              <el-table-v2 :columns="columns" :data="tableData" :width="width" :height="height" :row-key="rowKey"
-                :expanded-row-keys="expandedRowKeys" expand-column-key="deptName" fixed />
+              <el-table-v2
+                :key="tableKey"
+                :columns="tableColumns"
+                :data="tableData"
+                :width="width"
+                :height="height"
+                :row-key="rowKey"
+                :expanded-row-keys="expandedRowKeys"
+                expand-column-key="deptName"
+                fixed
+              />
             </template>
           </el-auto-resizer>
         </div>
@@ -365,8 +400,7 @@ onMounted(() => {
       <el-form :model="formData" label-width="100px">
         <el-form-item label="上级部门">
           <el-select v-model="formData.parentId" placeholder="请选择上级部门" clearable style="width: 100%">
-            <el-option v-for="item in parentDeptOptions" :key="item.deptId" :label="item.deptName"
-              :value="item.deptId" />
+            <el-option v-for="item in parentDeptOptions" :key="item.deptId" :label="item.deptName" :value="item.deptId" />
           </el-select>
         </el-form-item>
         <el-form-item label="部门名称" required>
@@ -399,9 +433,9 @@ onMounted(() => {
 
 <style scoped>
 .table-container {
-  min-height: 500px;
-  height: calc(100vh - 280px);
   width: 100%;
+  height: calc(100vh - 320px);
+  min-height: 500px;
 }
 
 :deep(.el-table-v2__row-cell) {
@@ -410,7 +444,7 @@ onMounted(() => {
 }
 
 :deep(.el-table-v2__header-cell) {
-  background-color: var(--el-fill-color-light);
   font-weight: 600;
+  background-color: var(--el-fill-color-light);
 }
 </style>

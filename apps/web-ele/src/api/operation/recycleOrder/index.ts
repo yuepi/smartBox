@@ -114,3 +114,9 @@ export function weightOperateApi(params: WeightOperateParams) {
 export function remarkOperateApi(params: RemarkOperateParams) {
   return requestClient.post('/merchant/recycleOrder/operate/remark', params);
 }
+
+
+/** 9.查看订单图片  */
+export function getImageUrlsByRecycleOrderId(recycleOrderId: number) {
+  return requestClient.get('/merchant/recycleOrderImage/queryImageUrlsByRecycleOrderId', { params: { recycleOrderId } });
+}

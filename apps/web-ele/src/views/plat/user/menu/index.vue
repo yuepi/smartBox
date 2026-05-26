@@ -1,28 +1,137 @@
 <script lang="tsx" setup>
-import { onMounted, reactive, ref, computed } from 'vue';
-import { ElMessage, ElMessageBox } from 'element-plus';
-import { Search, Refresh, Delete, Plus, Edit, Folder, Document, Operation } from '@element-plus/icons-vue';
-import { Page } from '@vben/common-ui';
-
-import { useUserStore } from '@vben/stores';
-
-import {
-  getPlatMenuDetailApi,
-  addPlatMenuApi,
-  editPlatMenuApi,
-  deletePlatMenuApi,
-  getPlatMenuListApi,
-  refreshMenuCacheApi,
-  clearMenuCacheApi,
-  type Menu,
-} from '#/api/system/menu';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 
 import { useAccess } from '@vben/access';
+import { Page } from '@vben/common-ui';
+import { useUserStore } from '@vben/stores';
+
+import { Delete, Document, Edit, Folder, Operation, Plus, Refresh, Search } from '@element-plus/icons-vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
+
+import {
+  addPlatMenuApi,
+  clearMenuCacheApi,
+  deletePlatMenuApi,
+  editPlatMenuApi,
+  getPlatMenuDetailApi,
+  getPlatMenuListApi,
+  type Menu,
+  refreshMenuCacheApi,
+} from '#/api/system/menu';
+import ColumnSelector from '#/components/ColumnSelector/index.vue';
+import {
+  defaultMenuColumns,
+  MENU_STORAGE_KEY,
+  type TableColumnConfig,
+} from '#/constants/tableColumns';
+import { ModuleCodeMap } from "#/hooks/useExport";
 
 const userStore = useUserStore();
 const isSuperAdmin = computed(() => userStore.userInfo?.superAdminFlag === 1);
 const { hasAccessByCodes } = useAccess();
 
+// 表格列配置
+const columnConfig = ref<TableColumnConfig[]>([...defaultMenuColumns]);
+const visibleColumns = computed(() => columnConfig.value.filter((col) => col.visible));
+
+function handleColumnsUpdate(newColumns: TableColumnConfig[]) {
+  columnConfig.value = newColumns;
+}
+// --- 转换为 el-table-v2 需要的 columns 格式 ---
+const tableColumns = computed(() => {
+  // 1. 获取当前用户自定义勾选显示的动态列
+  const cols = visibleColumns.value.length > 0 ? visibleColumns.value : defaultMenuColumns;
+
+  // 2. 将动态列映射为相应的渲染格式
+  const mappedColumns = cols.map((col) => ({
+    key: col.key,
+    title: col.label,
+    width: col.width,
+    align: col.align || 'left',
+    cellRenderer: ({ rowData, cells }: { cells: any[]; rowData: Menu; }) => {
+      switch (col.key) {
+        case 'code': {
+          return <span class="text-gray-500 text-sm">{rowData.code || '-'}</span>;
+        }
+        case 'component': {
+          return <span class="text-gray-500 text-sm truncate">{rowData.component || '-'}</span>;
+        }
+        case 'menuName': {
+          return (
+            <div class="flex items-center gap-1 w-full overflow-hidden">
+              {cells} 
+              {rowData.menuType === 0 && <Folder class="w-4 h-4 text-gray-400 shrink-0" />}
+              {rowData.menuType === 1 && <Document class="w-4 h-4 text-gray-400 shrink-0" />}
+              {rowData.menuType === 2 && <Operation class="w-4 h-4 text-gray-400 shrink-0" />}
+              <span class="truncate">{rowData.menuName}</span>
+            </div>
+          );
+        }
+        case 'menuType': {
+          return (
+            <el-tag size="small" type={rowData.menuType === 0 ? 'primary' : (rowData.menuType === 1 ? 'success' : 'info')}>
+              {rowData.menuType === 0 ? '目录' : (rowData.menuType === 1 ? '菜单' : '按钮')}
+            </el-tag>
+          );
+        }
+        case 'path': {
+          return <span class="text-gray-500 text-sm truncate">{rowData.path || '-'}</span>;
+        }
+        case 'platformType': {
+          return (
+            <el-tag size="small" type={rowData.platformType === 0 ? 'primary' : 'success'}>
+              {rowData.platformType === 0 ? '平台' : '商户'}
+            </el-tag>
+          );
+        }
+        case 'sort': {
+          return <span>{rowData.sort ?? 0}</span>;
+        }
+        case 'status': {
+          return (
+            <el-tag effect="light" round size="small" type={rowData.status === 0 ? 'success' : 'danger'}>
+              {rowData.status === 0 ? '启用' : '禁用'}
+            </el-tag>
+          );
+        }
+        default: {
+          const text = (rowData as any)[col.key] ?? '-';
+          return <span>{text}</span>;
+        }
+      }
+    },
+  }));
+
+  return [
+    ...mappedColumns,
+    {
+      key: 'operate',
+      title: '操作',
+      width: 300,          // 宽度写死
+      align: 'center',
+      fixed: 'right', 
+      cellRenderer: ({ rowData }: { rowData: Menu }) => (
+        <div class="flex justify-center gap-1 w-full">
+          {hasAccessByCodes(['plat:menu:add']) && (
+            <el-button icon={Plus} link onClick={() => handleAdd(rowData.menuId)} type="primary">
+              新增
+            </el-button>
+          )}
+          {hasAccessByCodes(['plat:menu:edit']) && (
+            <el-button icon={Edit} link onClick={() => handleEdit(rowData)} type="primary">
+              编辑
+            </el-button>
+          )}
+          {hasAccessByCodes(['plat:menu:del']) && (
+            <el-button icon={Delete} link onClick={() => handleDelete(rowData)} type="danger">
+              删除
+            </el-button>
+          )}
+        </div>
+      )
+    }
+  ];
+});
 // --- 状态变量 ---
 const loading = ref(false);
 const tableData = ref<Menu[]>([]);
@@ -32,7 +141,7 @@ const formVisible = ref(false);
 const formTitle = ref('');
 const formData = ref<Partial<Menu>>({});
 const formSubmitting = ref(false);
-const expandedRowKeys = ref([]);
+const expandedRowKeys = ref<string[]>([]);
 const rowKey = 'menuId';
 
 // 类型选项
@@ -42,19 +151,15 @@ const menuTypeOptions = [
   { label: '按钮', value: 2 },
 ];
 
-// 平台类型选项
 const platformTypeOptions = [
   { label: '平台菜单', value: 0 },
   { label: '商户菜单', value: 1 },
 ];
 
-// 状态选项
 const statusOptions = [
   { label: '启用', value: 0 },
   { label: '禁用', value: 1 },
 ];
-
-
 
 // 查询参数
 const queryParams = reactive({
@@ -64,127 +169,12 @@ const queryParams = reactive({
   status: undefined as number | undefined,
 });
 
-// 表格列配置
-const columns = ref([
-  {
-    key: 'menuName',
-    title: '菜单名称',
-    width: 400,
-    cellRenderer: ({ rowData, cells }: any) => (
-      <div class="flex items-center gap-1">
-        {cells}
-
-        {rowData.menuType === 0 && <Folder class="w-4 h-4 text-gray-500" />}
-        {rowData.menuType === 1 && <Document class="w-4 h-4 text-gray-500" />}
-        {rowData.menuType === 2 && <Operation class="w-4 h-4 text-gray-500" />}
-        <span>{rowData.menuName}</span>
-      </div>
-    ),
-  },
-  {
-    key: 'menuType',
-    title: '类型',
-    width: 200,
-    align: 'center' as const,
-    cellRenderer: ({ rowData }: any) => {
-      const typeMap: Record<number, { text: string; type: string }> = {
-        0: { text: '目录', type: 'primary' },
-        1: { text: '菜单', type: 'success' },
-        2: { text: '按钮', type: 'info' },
-      };
-      const config = typeMap[rowData.menuType] || { text: '未知', type: 'danger' };
-      return <el-tag type={config.type} size="small">{config.text}</el-tag>;
-    },
-  },
-  {
-    key: 'platformType',
-    title: '归属',
-    width: 200,
-    align: 'center' as const,
-    cellRenderer: ({ rowData }: any) => (
-      <el-tag type={rowData.platformType === 0 ? 'primary' : 'success'} size="small">
-        {rowData.platformType === 0 ? '平台菜单' : '商户菜单'}
-      </el-tag>
-    ),
-  },
-  {
-    key: 'path',
-    title: '路由地址',
-    width: 280,
-    cellRenderer: ({ rowData }: any) => (
-      <span class="text-gray-500 text-sm">{rowData.path || '-'}</span>
-    ),
-  },
-  {
-    key: 'code',
-    title: '权限标识',
-    width: 280,
-    cellRenderer: ({ rowData }: any) => (
-      <span class="text-gray-500 text-sm">{rowData.code || '-'}</span>
-    ),
-  },
-  {
-    key: 'sort',
-    title: '排序',
-    width: 100,
-    align: 'center' as const,
-    cellRenderer: ({ rowData }: any) => rowData.sort,
-  },
-  {
-    key: 'status',
-    title: '状态',
-    width: 120,
-    align: 'center' as const,
-    cellRenderer: ({ rowData }: any) => (
-      <el-tag type={rowData.status === 0 ? 'success' : 'danger'} size="small">
-        {rowData.status === 0 ? '启用' : '禁用'}
-      </el-tag>
-    ),
-  },
-  {
-    key: 'operate',
-    title: '操作',
-    width: 300,
-    fixed: 'right',
-    align: 'center' as const,
-    cellRenderer: ({ rowData }: any) => (
-      <div class="flex justify-center gap-1">
-        {hasAccessByCodes(['plat:menu:add']) && (
-          <el-button icon={Plus} link type="primary" onClick={() => handleAdd(rowData.menuId)}>
-            新增
-          </el-button>
-        )}
-        {hasAccessByCodes(['plat:menu:edit']) && (
-          <el-button icon={Edit} link type="primary" onClick={() => handleEdit(rowData)}>
-            编辑
-          </el-button>
-        )}
-        {hasAccessByCodes(['plat:menu:del']) && (
-          <el-button icon={Delete} link type="danger" onClick={() => handleDelete(rowData)}>
-            删除
-          </el-button>
-        )}
-      </div>
-    ),
-  },
-]);
-
 // 刷新菜单缓存
 async function handleRefreshCache() {
   try {
-    await ElMessageBox.confirm(
-      '确定要刷新菜单缓存吗？刷新后菜单数据将立即生效。',
-      '提示',
-      {
-        type: 'warning',
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-      }
-    );
-
+    await ElMessageBox.confirm('确定要刷新菜单缓存吗？刷新后菜单数据将立即生效。', '提示', { type: 'warning' });
     await refreshMenuCacheApi();
     ElMessage.success('菜单缓存刷新成功');
-    // 刷新后重新加载数据
     await loadData();
   } catch (error) {
     if (error !== 'cancel') {
@@ -196,19 +186,9 @@ async function handleRefreshCache() {
 // 清除菜单缓存
 async function handleClearCache() {
   try {
-    await ElMessageBox.confirm(
-      '确定要清除菜单缓存吗？清除后需要重新加载菜单数据。',
-      '提示',
-      {
-        type: 'warning',
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-      }
-    );
-
+    await ElMessageBox.confirm('确定要清除菜单缓存吗？清除后需要重新加载菜单数据。', '提示', { type: 'warning' });
     await clearMenuCacheApi();
     ElMessage.success('菜单缓存清除成功');
-    // 清除后重新加载数据
     await loadData();
   } catch (error) {
     if (error !== 'cancel') {
@@ -241,11 +221,10 @@ function buildTree(menus: Menu[]): Menu[] {
     }
   });
 
-  // 排序
   const sortTree = (nodes: Menu[]) => {
     nodes.sort((a, b) => (a.sort || 0) - (b.sort || 0));
     nodes.forEach(node => {
-      if (node.children && node.children.length) {
+      if (node.children && node.children.length > 0) {
         sortTree(node.children);
       }
     });
@@ -258,11 +237,9 @@ function buildTree(menus: Menu[]): Menu[] {
 // 父级菜单选项
 const parentMenuOptions = ref<Menu[]>([]);
 
-// 加载父级菜单选项（用于下拉选择）
 async function loadParentMenuOptions() {
   try {
-    let res = await getPlatMenuListApi(queryParams);
-
+    const res = await getPlatMenuListApi(queryParams);
     const treeMenus = buildTree(res || []);
     parentMenuOptions.value = [
       {
@@ -285,27 +262,11 @@ async function loadParentMenuOptions() {
   }
 }
 
-// 递归扁平化树形结构
-function flattenTree(nodes: Menu[]): Menu[] {
-  let result: Menu[] = [];
-  nodes.forEach(node => {
-    result.push(node);
-    if (node.children && node.children.length) {
-      result = result.concat(flattenTree(node.children));
-    }
-  });
-  return result;
-}
-
 // --- 数据加载 ---
 async function loadData() {
-  console.log(isSuperAdmin.value, "是否超管");
-  console.log(userStore.userInfo, "商户ID");
   try {
     loading.value = true;
-
-    let res = await getPlatMenuListApi(queryParams);
-
+    const res = await getPlatMenuListApi(queryParams);
     tableData.value = buildTree(res || []);
   } catch (error) {
     console.error(error);
@@ -375,11 +336,7 @@ async function handleDelete(row?: Menu) {
     await ElMessageBox.confirm(
       row ? `确定要删除菜单"${deleteName}"吗？删除后可能导致子菜单也被删除。` : `确定要删除选中的 ${ids.length} 条菜单吗？`,
       '提示',
-      {
-        type: 'warning',
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-      }
+      { type: 'warning' }
     );
 
     for (const id of ids) {
@@ -406,6 +363,12 @@ function resetQuery() {
   loadData();
 }
 
+// 监听 visibleColumns 变化，确保表格刷新（强制重新渲染）
+const tableKey = ref(0);
+watch(visibleColumns, () => {
+  tableKey.value++;
+});
+
 onMounted(() => {
   loadData();
 });
@@ -413,48 +376,91 @@ onMounted(() => {
 
 <template>
   <Page auto-content-height>
-    <h1 class="text-2xl font-bold">平台菜单管理</h1>
-    <div class="p-4">
+    <div class="p-0">
       <!-- 查询表单 -->
-      <el-card shadow="never" class="mb-4">
-        <el-form :inline="true" :model="queryParams">
-          <el-form-item label="菜单名称">
-            <el-input v-model="queryParams.menuName" placeholder="请输入菜单名称" clearable style="width: 180px"
-              @keyup.enter="handleQuery" />
+      <el-card shadow="never" class="border-none mb-4 !p-2">
+        <el-form :inline="true" :model="queryParams" class="flex flex-wrap gap-x-2 gap-y-2 items-center">
+          <el-form-item class="!mb-0 !mr-2">
+            <el-input v-model="queryParams.menuName" placeholder="请输入" clearable style="width: 200px" @keyup.enter="handleQuery">
+              <template #prefix><span class="text-xs text-gray-400 mr-0.5">菜单名称:</span></template>
+            </el-input>
           </el-form-item>
-          <el-form-item label="类型">
-            <el-select v-model="queryParams.menuType" placeholder="全部" clearable style="width: 100px">
+
+          <el-form-item class="!mb-0 !mr-2">
+            <el-select v-model="queryParams.menuType" clearable style="width: 200px">
+              <template #prefix><span class="text-xs text-gray-400 mr-0.5">类型:</span></template>
               <el-option v-for="item in menuTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
             </el-select>
           </el-form-item>
-          <el-form-item label="归属">
-            <el-select v-model="queryParams.platformType" placeholder="全部" clearable style="width: 120px">
-              <el-option v-for="item in platformTypeOptions" :key="item.value" :label="item.label"
-                :value="item.value" />
+
+          <el-form-item class="!mb-0 !mr-2">
+            <el-select v-model="queryParams.platformType" clearable style="width: 200px">
+              <template #prefix><span class="text-xs text-gray-400 mr-0.5">归属:</span></template>
+              <el-option v-for="item in platformTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
             </el-select>
           </el-form-item>
-          <el-form-item label="状态">
-            <el-select v-model="queryParams.status" placeholder="全部" clearable style="width: 100px">
+
+          <el-form-item class="!mb-0 !mr-2">
+            <el-select v-model="queryParams.status" clearable style="width: 200px">
+              <template #prefix><span class="text-xs text-gray-400 mr-0.5">状态:</span></template>
               <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
             </el-select>
           </el-form-item>
-          <el-form-item>
-            <el-button type="primary" :icon="Search" @click="handleQuery" v-access:code="['plat:menu:page']">查询</el-button>
-            <el-button :icon="Refresh" @click="resetQuery" v-access:code="['plat:menu:page']">重置</el-button>
-            <el-button type="primary" plain :icon="Plus" @click="handleAdd()" v-access:code="['plat:menu:add']">新增菜单</el-button>
-            <el-button type="warning" plain :icon="Refresh" @click="handleRefreshCache">刷新缓存</el-button>
-            <el-button type="danger" plain :icon="Delete" @click="handleClearCache">清除缓存</el-button>
+
+          <el-form-item class="!mb-0 !mr-0 md:ml-auto flex items-center gap-1">
+            <el-tooltip content="查询" placement="top">
+              <el-button type="primary" :icon="Search" circle @click="handleQuery" />
+            </el-tooltip>
+            <el-tooltip content="重置" placement="top">
+              <el-button :icon="Refresh" circle @click="resetQuery" />
+            </el-tooltip>
           </el-form-item>
         </el-form>
       </el-card>
 
-      <!-- 数据表格 - 使用 el-table-v2 -->
+      <!-- 数据表格 -->
       <el-card shadow="never">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <el-button type="primary" plain :icon="Plus" @click="handleAdd()" v-access:code="['plat:menu:add']">
+              新增菜单
+            </el-button>
+            <el-button type="warning" plain :icon="Refresh" @click="handleRefreshCache">
+              刷新缓存
+            </el-button>
+            <el-button type="danger" plain :icon="Delete" @click="handleClearCache">
+              清除缓存
+            </el-button>
+            <ExportButton
+               v-access:code="['plat:menu:export']"
+              :module-code="ModuleCodeMap.MENU"
+              :fields="visibleColumns"
+              :find-cond="queryParams"
+            />
+          </div>
+          <div class="flex items-center">
+            <ColumnSelector
+              :storage-key="MENU_STORAGE_KEY"
+              :default-columns="defaultMenuColumns"
+              @update:columns="handleColumnsUpdate"
+            />
+          </div>
+        </div>
+
         <div class="table-container">
           <el-auto-resizer>
             <template #default="{ height, width }">
-              <el-table-v2 :columns="columns" :data="tableData" :width="width" :height="height" fixed :row-key="rowKey"
-                :expanded-row-keys="expandedRowKeys" expand-column-key="menuName" />
+              <el-table-v2
+                :key="tableKey"
+                :columns="tableColumns"
+                :data="tableData"
+                :width="width"
+                :height="height"
+                fixed
+                :row-key="rowKey"
+                :expanded-row-keys="expandedRowKeys"
+                expand-column-key="menuName"
+              />
             </template>
           </el-auto-resizer>
         </div>
@@ -465,11 +471,13 @@ onMounted(() => {
     <el-dialog v-model="formVisible" :title="formTitle" width="600px" append-to-body>
       <el-form :model="formData" label-width="100px">
         <el-form-item label="上级菜单">
-          <el-tree-select v-model="formData.parentId" :data="parentMenuOptions" :props="{
+          <el-tree-select
+v-model="formData.parentId" :data="parentMenuOptions" :props="{
             value: 'menuId',
             label: 'menuName',
             children: 'children',
-          }" :check-strictly="true" placeholder="请选择上级菜单" clearable filterable style="width: 100%" />
+          }" :check-strictly="true" placeholder="请选择上级菜单" clearable filterable style="width: 100%"
+/>
         </el-form-item>
         <el-form-item label="菜单名称" required>
           <el-input v-model="formData.menuName" placeholder="请输入菜单名称" />
@@ -517,9 +525,9 @@ onMounted(() => {
 
 <style scoped>
 .table-container {
-  min-height: 500px;
-  height: calc(100vh - 280px);
   width: 100%;
+  height: calc(100vh - 320px);
+  min-height: 500px;
 }
 
 :deep(.el-table-v2__row-cell) {
@@ -528,7 +536,7 @@ onMounted(() => {
 }
 
 :deep(.el-table-v2__header-cell) {
-  background-color: var(--el-fill-color-light);
   font-weight: 600;
+  background-color: var(--el-fill-color-light);
 }
 </style>

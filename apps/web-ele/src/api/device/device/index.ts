@@ -51,6 +51,7 @@ export interface DevicePageParams {
   onlineStatus?: number;
   status?: number;
   devicePackageId?: number;
+  qrCode?: string;
 }
 
 /** 1. 分页查询设备 */

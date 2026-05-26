@@ -17,6 +17,46 @@ import {
   type User,
   type UserPageParams,
 } from "#/api/system/user";
+import ColumnSelector from "#/components/ColumnSelector/index.vue";
+import ExportFieldSelector from "#/components/ExportFieldSelector/index.vue";
+import {
+  defaultUserColumns,
+  type TableColumnConfig,
+  USER_STORAGE_KEY,
+} from "#/constants/tableColumns";
+import { ModuleCodeMap, useExport } from "#/hooks/useExport";
+
+const { exporting, exportData } = useExport(ModuleCodeMap.USER);
+
+// 表格列配置
+const columnConfig = ref<TableColumnConfig[]>([...defaultUserColumns]);
+
+function handleColumnsUpdate(newColumns: TableColumnConfig[]) {
+  columnConfig.value = newColumns;
+}
+
+const visibleColumns = computed(() => {
+  return columnConfig.value.filter((col) => col.visible);
+});
+
+const getExportableFields = computed(() => {
+  return visibleColumns.value.map((col) => ({
+    prop: col.key,
+    label: col.label,
+  }));
+});
+
+const exportFieldVisible = ref(false);
+const exportFields = ref<{ label: string; prop: string }[]>([]);
+
+function openExportSelector() {
+  exportFields.value = getExportableFields.value;
+  exportFieldVisible.value = true;
+}
+
+async function handleExportConfirm(selectedFields: string[]) {
+  await exportData(queryParams, selectedFields);
+}
 
 // --- 状态变量 ---
 const loading = ref(false);
@@ -194,7 +234,7 @@ async function handleEdit(row: User) {
     formTitle.value = "编辑用户";
     const res = await getMerchantUserDetailApi(row.userId);
     formData.value = res || {};
-    formData.value.roles = res.roles || [];
+    formData.value.userroles = res.userroles || [];
     formData.value.deptIds = res.deptIds || []; // 直接赋值，自动回显
     await loadRoleList();
     formVisible.value = true;
@@ -205,7 +245,7 @@ async function handleEdit(row: User) {
 
 async function handleSubmit() {
   if (!formData.value.userName?.trim()) {
-    ElMessage.warning("请输入账号");
+    ElMessage.warning("请输入用户名");
     return;
   }
   if (!formData.value.nickName?.trim()) {
@@ -220,9 +260,7 @@ async function handleSubmit() {
 
   formSubmitting.value = true;
   try {
-    const api = formData.value.userId
-      ? editMerchantUserApi
-      : addMerchantUserApi;
+    const api = formData.value.userId ? editMerchantUserApi : addMerchantUserApi;
     await api(formData.value);
     ElMessage.success(formData.value.userId ? "修改成功" : "新增成功");
     formVisible.value = false;
@@ -296,36 +334,51 @@ onMounted(() => {
 
 <template>
   <Page auto-content-height>
-    <h1 class="text-2xl font-bold">商户用户管理</h1>
-    <div class="p-4">
+      <div class="p-0">
       <!-- 查询表单 -->
-      <el-card shadow="never" class="mb-4">
-        <el-form :inline="true" :model="queryParams">
-          <el-form-item label="昵称">
+      <el-card shadow="never" class="border-none mb-4 !p-2">
+        <el-form
+          :inline="true"
+          :model="queryParams"
+          class="flex flex-wrap gap-x-2 gap-y-2 items-center"
+        >
+          <el-form-item class="!mb-0 !mr-2">
             <el-input
               v-model="queryParams.nickName"
-              placeholder="请输入昵称"
+              placeholder="请输入"
               clearable
-              style="width: 180px"
+              style="width: 200px"
               @keyup.enter="handleQuery"
-            />
+            >
+              <template #prefix>
+                <span class="text-xs text-gray-400 mr-0.5">昵称:</span>
+              </template>
+            </el-input>
           </el-form-item>
-          <el-form-item label="邮箱">
+
+          <el-form-item class="!mb-0 !mr-2">
             <el-input
               v-model="queryParams.email"
-              placeholder="请输入邮箱"
+              placeholder="请输入"
               clearable
-              style="width: 180px"
+              style="width: 200px"
               @keyup.enter="handleQuery"
-            />
+            >
+              <template #prefix>
+                <span class="text-xs text-gray-400 mr-0.5">邮箱:</span>
+              </template>
+            </el-input>
           </el-form-item>
-          <el-form-item label="性别">
+
+          <el-form-item class="!mb-0 !mr-2">
             <el-select
               v-model="queryParams.sex"
-              placeholder="全部"
               clearable
-              style="width: 100px"
+              style="width: 200px"
             >
+              <template #prefix>
+                <span class="text-xs text-gray-400 mr-0.5">性别:</span>
+              </template>
               <el-option
                 v-for="item in sexOptions"
                 :key="item.value"
@@ -334,13 +387,16 @@ onMounted(() => {
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="状态">
+
+          <el-form-item class="!mb-0 !mr-2">
             <el-select
               v-model="queryParams.status"
-              placeholder="全部"
               clearable
-              style="width: 100px"
+              style="width: 200px"
             >
+              <template #prefix>
+                <span class="text-xs text-gray-400 mr-0.5">状态:</span>
+              </template>
               <el-option
                 v-for="item in statusOptions"
                 :key="item.value"
@@ -349,30 +405,27 @@ onMounted(() => {
               />
             </el-select>
           </el-form-item>
-          <el-form-item>
-            <el-button
-              type="primary"
-              :icon="Search"
-              @click="handleQuery"
-              v-access:code="['merchant:user:page']"
-            >
-              查询
+
+          <el-form-item class="!mb-0 !mr-0 md:ml-auto flex items-center gap-1">
+            <el-tooltip content="查询" placement="top">
+              <el-button type="primary" :icon="Search" circle @click="handleQuery" />
+            </el-tooltip>
+            <el-tooltip content="重置" placement="top">
+              <el-button :icon="Refresh" circle @click="resetQuery" />
+            </el-tooltip>
+          </el-form-item>
+        </el-form>
+      </el-card>
+
+      <!-- 数据表格 -->
+      <el-card shadow="never" class="border-none !p-2">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <el-button type="primary" plain :icon="Plus" @click="handleAdd" v-access:code="['plat:user:add']">
+              新增用户
             </el-button>
-            <el-button
-              :icon="Refresh"
-              @click="resetQuery"
-              v-access:code="['merchant:user:page']"
-            >
-              重置
-            </el-button>
-            <el-button
-              type="primary"
-              plain
-              :icon="Plus"
-              @click="handleAdd()"
-              v-access:code="['merchant:user:add']"
-            >
-              新增
+            <el-button :loading="exporting" @click="openExportSelector">
+              导出
             </el-button>
             <el-button
               type="danger"
@@ -380,148 +433,83 @@ onMounted(() => {
               :icon="Delete"
               :disabled="selectedIds.length === 0"
               @click="handleDelete()"
-              v-access:code="['merchant:user:del']"
+              v-access:code="['plat:user:del']"
             >
               批量删除
             </el-button>
-          </el-form-item>
-        </el-form>
-      </el-card>
+            <span v-if="selectedIds.length > 0" class="text-xs text-gray-400 ml-2">
+              已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
+            </span>
+          </div>
 
-      <!-- 数据表格 -->
-      <el-card shadow="never">
+          <div class="flex items-center">
+            <ColumnSelector
+              :storage-key="USER_STORAGE_KEY"
+              :default-columns="defaultUserColumns"
+              @update:columns="handleColumnsUpdate"
+            />
+          </div>
+        </div>
+
         <el-table
           v-loading="loading"
           :data="tableData"
           border
+          stripe
           style="width: 100%"
           @selection-change="handleSelectionChange"
         >
-          <el-table-column type="selection" width="55" align="center" />
+          <!-- 选择列固定写死 -->
+          <el-table-column type="selection" width="50" align="center" />
+
+          <!-- 动态数据列 -->
           <el-table-column
-            prop="userId"
-            label="用户ID"
-            width="80"
-            align="center"
-          />
-           <el-table-column
-            prop="userName"
-            label="账号"
-            min-width="120"
-            align="center"
-          />
-          <el-table-column
-            prop="nickName"
-            label="昵称"
-            min-width="120"
-            align="center"
+            v-for="col in visibleColumns"
+            :key="col.key"
+            :prop="col.key"
+            :label="col.label"
+            :width="typeof col.width === 'number' ? col.width : undefined"
+            :min-width="col.minWidth"
+            :align="col.align"
+            :show-overflow-tooltip="col.showOverflowTooltip || false"
           >
             <template #default="{ row }">
-              <div class="flex items-center justify-center gap-2">
-                <el-avatar :size="24" :src="row.avatar" />
-                <span>{{ row.nickName }}</span>
-              </div>
-            </template>
-          </el-table-column>
-          <el-table-column
-            prop="email"
-            label="邮箱"
-            width="180"
-            align="center"
-            show-overflow-tooltip
-          />
-          <el-table-column prop="sex" label="性别" width="80" align="center">
-            <template #default="{ row }">
-              {{ getSexText(row.sex) }}
-            </template>
-          </el-table-column>
-          <!-- <el-table-column
-            prop="identify"
-            label="身份标识"
-            min-width="150"
-            align="center"
-          >
-            <template #default="{ row }">
-              <el-tag size="small" type="info">
-                {{ getIdentifyText(row.identify) }}
-              </el-tag>
-            </template>
-          </el-table-column> -->
-          <el-table-column label="角色" min-width="150" align="center">
-            <template #default="{ row }">
-              <div class="flex flex-wrap justify-center gap-1">
-                <el-tag
-                  v-for="role in row.roles || []"
-                  :key="role.roleId"
-                  size="small"
-                  type="info"
-                >
-                  {{ role.roleName || role }}
+              <!-- 头像 -->
+              <template v-if="col.key === 'avatar'">
+                <div class="flex items-center justify-center gap-2">
+                  <el-avatar :size="32" :src="row.avatar" />
+                </div>
+              </template>
+              <!-- 性别 -->
+              <template v-else-if="col.key === 'sex'">
+                {{ getSexText(row.sex) }}
+              </template>
+              <!-- 状态 -->
+              <template v-else-if="col.key === 'status'">
+                <el-tag :type="row.status === 0 ? 'success' : 'danger'" size="small" round effect="light">
+                  {{ getStatusText(row.status) }}
                 </el-tag>
-                <span v-if="!row.roles?.length" class="text-gray-400">-</span>
-              </div>
-            </template>
-          </el-table-column>
-          <el-table-column label="所属部门" min-width="150" align="center">
-            <template #default="{ row }">
-              <div class="flex flex-wrap justify-center gap-1">
-                <el-tag
-                  v-for="dept in row.depts || []"
-                  :key="dept.deptId"
-                  size="small"
-                  type="success"
-                >
-                  {{ dept.deptName }}
+              </template>
+              <!-- 超管标识 -->
+              <template v-else-if="col.key === 'superAdminFlag'">
+                <el-tag :type="row.superAdminFlag === 1 ? 'danger' : 'info'" size="small" round effect="light">
+                  {{ row.superAdminFlag === 1 ? "是" : "否" }}
                 </el-tag>
-                <span v-if="!row.depts?.length" class="text-gray-400">-</span>
-              </div>
+              </template>
+              <!-- 普通字段 -->
+              <template v-else>
+                {{ (row as any)[col.key] ?? '-' }}
+              </template>
             </template>
           </el-table-column>
-          <el-table-column
-            prop="superAdminFlag"
-            label="超管标识"
-            width="100"
-            align="center"
-          >
+
+          <!-- 操作列固定写死 -->
+          <el-table-column label="操作" width="150" fixed="right" align="center">
             <template #default="{ row }">
-              <el-tag
-                :type="row.superAdminFlag === 1 ? 'danger' : 'info'"
-                size="small"
-              >
-                {{ row.superAdminFlag === 1 ? "是" : "否" }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column prop="status" label="状态" width="80" align="center">
-            <template #default="{ row }">
-              <el-tag :type="row.status === 0 ? 'success' : 'danger'">
-                {{ getStatusText(row.status) }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column
-            label="操作"
-            width="150"
-            fixed="right"
-            align="center"
-          >
-            <template #default="{ row }">
-              <el-button
-                link
-                type="primary"
-                :icon="Edit"
-                @click="handleEdit(row)"
-                v-access:code="['merchant:user:edit']"
-              >
+              <el-button link type="primary" :icon="Edit" @click="handleEdit(row)" v-access:code="['plat:user:edit']">
                 编辑
               </el-button>
-              <el-button
-                link
-                type="danger"
-                :icon="Delete"
-                @click="handleDelete(row)"
-                v-access:code="['merchant:user:del']"
-              >
+              <el-button link type="danger" :icon="Delete" @click="handleDelete(row)" v-access:code="['plat:user:del']">
                 删除
               </el-button>
             </template>
@@ -536,12 +524,22 @@ onMounted(() => {
             :total="total"
             :page-sizes="[10, 20, 50, 100]"
             layout="total, sizes, prev, pager, next, jumper"
+            background
             @size-change="loadData"
             @current-change="loadData"
           />
         </div>
       </el-card>
     </div>
+
+    <!-- 导出字段选择组件 -->
+    <ExportFieldSelector
+      v-model:visible="exportFieldVisible"
+      :fields="exportFields"
+      :loading="exporting"
+      @confirm="handleExportConfirm"
+    />
+
     <!-- 新增/编辑弹窗（两列布局） -->
     <el-dialog
       v-model="formVisible"
@@ -553,8 +551,8 @@ onMounted(() => {
         <!-- 左侧列 -->
         <el-col :span="12">
           <el-form :model="formData" label-width="100px">
-            <el-form-item label="账号" required>
-              <el-input v-model="formData.userName" placeholder="请输入账号" />
+            <el-form-item label="用户名" required>
+              <el-input v-model="formData.userName" placeholder="请输入用户名" />
             </el-form-item>
             <el-form-item label="昵称" required>
               <el-input v-model="formData.nickName" placeholder="请输入昵称" />
@@ -603,7 +601,7 @@ onMounted(() => {
           <el-form :model="formData" label-width="100px">
             <el-form-item label="角色">
               <el-select
-                v-model="formData.roles"
+                v-model="formData.userroles"
                 multiple
                 filterable
                 placeholder="请选择角色"

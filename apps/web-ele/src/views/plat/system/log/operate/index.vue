@@ -214,14 +214,18 @@ onMounted(() => {
       <el-card shadow="never" class="mb-4">
         <el-form :inline="true" :model="queryParams">
           <el-form-item label="模块标题">
-            <el-input v-model="queryParams.title" placeholder="请输入模块标题" clearable style="width: 180px"
-              @keyup.enter="handleQuery" />
+            <el-input
+v-model="queryParams.title" placeholder="请输入模块标题" clearable style="width: 180px"
+              @keyup.enter="handleQuery"
+/>
           </el-form-item>
 
           <el-form-item label="业务类型">
             <el-select v-model="queryParams.businessType" placeholder="全部" clearable style="width: 120px">
-              <el-option v-for="item in businessTypeOptions" :key="item.value" :label="item.label"
-                :value="item.value" />
+              <el-option
+v-for="item in businessTypeOptions" :key="item.value" :label="item.label"
+                :value="item.value"
+/>
             </el-select>
           </el-form-item>
 
@@ -232,8 +236,10 @@ onMounted(() => {
           </el-form-item>
 
           <el-form-item label="操作人">
-            <el-input v-model="queryParams.operAccountName" placeholder="请输入操作人" clearable style="width: 150px"
-              @keyup.enter="handleQuery" />
+            <el-input
+v-model="queryParams.operAccountName" placeholder="请输入操作人" clearable style="width: 150px"
+              @keyup.enter="handleQuery"
+/>
           </el-form-item>
 
           <el-form-item label="状态">
@@ -258,8 +264,10 @@ onMounted(() => {
 
       <!-- 数据表格 -->
       <el-card shadow="never">
-        <el-table v-loading="loading" :data="tableData" border style="width: 100%"
-          @selection-change="handleSelectionChange">
+        <el-table
+v-loading="loading" :data="tableData" border style="width: 100%"
+          @selection-change="handleSelectionChange"
+>
           <el-table-column type="selection" width="55" align="center" />
           <el-table-column prop="operLogId" label="操作ID" width="80" align="center" />
           <el-table-column prop="title" label="模块标题" min-width="150" align="center" show-overflow-tooltip />
@@ -310,16 +318,18 @@ onMounted(() => {
 
         <!-- 分页 -->
         <div class="flex justify-end mt-4">
-          <el-pagination v-model:current-page="queryParams.pageNo" v-model:page-size="queryParams.pageSize"
+          <el-pagination
+v-model:current-page="queryParams.pageNo" v-model:page-size="queryParams.pageSize"
             :total="total" :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper"
-            @size-change="loadData" @current-change="loadData" />
+            @size-change="loadData" @current-change="loadData"
+/>
         </div>
       </el-card>
     </div>
 
     <!-- 详情弹窗 -->
-    <el-dialog v-model="detailVisible" title="操作日志详情" width="700px" append-to-body>
-      <el-descriptions :column="2" border v-if="detailData">
+    <el-dialog v-model="detailVisible" title="操作日志详情" width="800px" append-to-body>
+      <el-descriptions :column="2" border v-if="detailData" label-width="100px">
         <el-descriptions-item label="操作ID" :span="2">
           {{ detailData.operLogId }}
         </el-descriptions-item>

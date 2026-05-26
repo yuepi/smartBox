@@ -42,7 +42,7 @@ import {
   type TableColumnConfig,
 } from "#/constants/tableColumns";
 import { ModuleCodeMap, useExport } from "#/hooks/useExport";
-const { exporting, exportData } = useExport(ModuleCodeMap.DEVICE);
+const { exporting, exportData } = useExport(ModuleCodeMap.BAG);
 
 // 表格列配置
 const columnConfig = ref<TableColumnConfig[]>([...defaultBagColumns]);
@@ -511,26 +511,37 @@ onMounted(() => {
 
 <template>
   <Page auto-content-height>
-    <div class="p-4">
+    <div class="p-0">
       <!-- 查询表单 -->
-      <el-card shadow="never" class="mb-4">
-        <el-form :inline="true" :model="queryParams">
-          <el-form-item label="包袋编号">
+      <el-card shadow="never" class="border-none mb-4 !p-2">
+        <el-form
+          :inline="true"
+          :model="queryParams"
+          class="flex flex-wrap gap-x-2 gap-y-2 items-center"
+        >
+          <el-form-item class="!mb-0 !mr-2">
             <el-input
               v-model="queryParams.bagNo"
-              placeholder="请输入包袋编号"
+              placeholder="请输入"
               clearable
-              style="width: 180px"
+              style="width: 200px"
               @keyup.enter="handleQuery"
-            />
+            >
+              <template #prefix>
+                <span class="text-xs text-gray-400 mr-0.5">包袋编号:</span>
+              </template>
+            </el-input>
           </el-form-item>
-          <el-form-item label="包袋状态">
+
+          <el-form-item class="!mb-0 !mr-2">
             <el-select
               v-model="queryParams.bagStatus"
-              placeholder="全部"
               clearable
-              style="width: 120px"
+              style="width: 200px"
             >
+              <template #prefix>
+                <span class="text-xs text-gray-400 mr-0.5">包袋状态:</span>
+              </template>
               <el-option
                 v-for="item in bagStatusOptions"
                 :key="item.value"
@@ -539,13 +550,16 @@ onMounted(() => {
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="状态">
+
+          <el-form-item class="!mb-0 !mr-2">
             <el-select
               v-model="queryParams.status"
-              placeholder="全部"
               clearable
-              style="width: 100px"
+              style="width: 200px"
             >
+              <template #prefix>
+                <span class="text-xs text-gray-400 mr-0.5">状态:</span>
+              </template>
               <el-option
                 v-for="item in statusOptions"
                 :key="item.value"
@@ -554,24 +568,30 @@ onMounted(() => {
               />
             </el-select>
           </el-form-item>
-          <el-form-item>
-            <el-button type="primary" :icon="Search" @click="handleQuery">
-              查询
+
+          <el-form-item class="!mb-0 !mr-0 md:ml-auto flex items-center gap-1">
+            <el-tooltip content="查询" placement="top">
+              <el-button type="primary" :icon="Search" circle @click="handleQuery" />
+            </el-tooltip>
+            <el-tooltip content="重置" placement="top">
+              <el-button :icon="Refresh" circle @click="resetQuery" />
+            </el-tooltip>
+          </el-form-item>
+        </el-form>
+      </el-card>
+
+      <!-- 数据表格 -->
+      <el-card shadow="never" class="border-none !p-2">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <el-button type="primary" :icon="Plus" @click="handleAdd">
+              新增包袋
             </el-button>
-            <el-button :icon="Refresh" @click="resetQuery">重置</el-button>
-            <el-button type="primary" plain :icon="Plus" @click="handleAdd">
-              新增
+            <el-button type="success" plain :icon="Picture" @click="handleGenerate">
+              生成包袋
             </el-button>
             <el-button :loading="exporting" @click="openExportSelector">
               导出
-            </el-button>
-            <el-button
-              type="success"
-              plain
-              :icon="Picture"
-              @click="handleGenerate"
-            >
-              生成包袋
             </el-button>
             <el-button
               type="warning"
@@ -582,28 +602,20 @@ onMounted(() => {
             >
               批量下载
             </el-button>
-            <!-- <el-button
-              type="danger"
-              plain
-              :icon="Delete"
-              :disabled="selectedIds.length === 0"
-              @click="handleDelete()"
-            >
-              批量删除
-            </el-button> -->
-          </el-form-item>
-        </el-form>
-      </el-card>
+            <span v-if="selectedIds.length > 0" class="text-xs text-gray-400 ml-2">
+              已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
+            </span>
+          </div>
 
-      <!-- 数据表格 -->
-      <el-card shadow="never">
-        <div class="flex justify-end mb-2">
-          <ColumnSelector
-            :storage-key="BAG_STORAGE_KEY"
-            :default-columns="defaultBagColumns"
-            @update:columns="handleColumnsUpdate"
-          />
+          <div class="flex items-center">
+            <ColumnSelector
+              :storage-key="BAG_STORAGE_KEY"
+              :default-columns="defaultBagColumns"
+              @update:columns="handleColumnsUpdate"
+            />
+          </div>
         </div>
+
         <el-table
           v-loading="loading"
           :data="tableData"
@@ -613,7 +625,7 @@ onMounted(() => {
           @selection-change="handleSelectionChange"
         >
           <!-- 选择列固定写死 -->
-          <el-table-column type="selection" width="55" align="center" />
+          <el-table-column type="selection" width="50" align="center" />
 
           <!-- 动态数据列 -->
           <el-table-column
@@ -624,6 +636,7 @@ onMounted(() => {
             :width="typeof col.width === 'number' ? col.width : undefined"
             :min-width="col.minWidth"
             :align="col.align"
+            :show-overflow-tooltip="col.showOverflowTooltip || false"
           >
             <template #default="{ row }">
               <!-- 绑定设备ID -->
@@ -636,7 +649,12 @@ onMounted(() => {
               </template>
               <!-- 包袋状态 -->
               <template v-else-if="col.key === 'bagStatus'">
-                <el-tag :type="getBagStatusType(row.bagStatus)" size="small">
+                <el-tag
+                  :type="getBagStatusType(row.bagStatus)"
+                  size="small"
+                  round
+                  effect="light"
+                >
                   {{ getBagStatusText(row.bagStatus) }}
                 </el-tag>
               </template>
@@ -649,6 +667,8 @@ onMounted(() => {
                 <el-tag
                   :type="row.status === 0 ? 'success' : 'danger'"
                   size="small"
+                  round
+                  effect="light"
                 >
                   {{ getStatusText(row.status) }}
                 </el-tag>
@@ -661,28 +681,12 @@ onMounted(() => {
           </el-table-column>
 
           <!-- 操作列固定写死 -->
-          <el-table-column
-            label="操作"
-            width="400"
-            fixed="right"
-            align="center"
-          >
-            <!-- 原有操作列内容保持不变 -->
+          <el-table-column label="操作" width="360" fixed="right" align="center">
             <template #default="{ row }">
-              <el-button
-                link
-                type="primary"
-                :icon="Picture"
-                @click="handleViewQrcode(row)"
-              >
+              <el-button link type="primary" :icon="Picture" @click="handleViewQrcode(row)">
                 二维码
               </el-button>
-              <el-button
-                link
-                type="primary"
-                :icon="Download"
-                @click="handleDownloadQrcode(row)"
-              >
+              <el-button link type="primary" :icon="Download" @click="handleDownloadQrcode(row)">
                 下载
               </el-button>
               <el-button
@@ -703,22 +707,9 @@ onMounted(() => {
               >
                 解绑
               </el-button>
-              <el-button
-                link
-                type="primary"
-                :icon="Edit"
-                @click="handleEdit(row)"
-              >
+              <el-button link type="primary" :icon="Edit" @click="handleEdit(row)">
                 编辑
               </el-button>
-              <!-- <el-button
-                link
-                type="danger"
-                :icon="Delete"
-                @click="handleDelete(row)"
-              >
-                删除
-              </el-button> -->
             </template>
           </el-table-column>
         </el-table>
@@ -731,6 +722,7 @@ onMounted(() => {
             :total="total"
             :page-sizes="[10, 20, 50, 100]"
             layout="total, sizes, prev, pager, next, jumper"
+            background
             @size-change="loadData"
             @current-change="loadData"
           />

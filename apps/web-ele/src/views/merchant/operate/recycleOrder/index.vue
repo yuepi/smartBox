@@ -1,10 +1,11 @@
 <script lang="ts" setup>
-import { computed,onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 
 import { Page } from "@vben/common-ui";
 
 import {
   ArrowDown,
+  Picture,
   Refresh,
   Search,
   View,
@@ -19,6 +20,7 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { type Device, getDeviceListApi } from "#/api/device/device";
 import {
   deleteRecycleOrderApi,
+  getImageUrlsByRecycleOrderId,
   getRecycleOrderDetailApi,
   getRecycleOrderPageApi,
   OrderStatusMap,
@@ -81,13 +83,30 @@ async function handleExportConfirm(selectedFields: string[]) {
 }
 
 // 添加导入
-import ImageGallery from "./components/ImageGallery.vue";
 
 // --- 状态变量 ---
 const loading = ref(false);
 const tableData = ref<RecycleOrder[]>([]);
 const total = ref(0);
 const selectedIds = ref<number[]>([]);
+
+// 图片相关
+const imageUrls = ref<string[]>([]);
+const imageLoading = ref(false);
+
+// 获取图片列表
+async function loadImages(orderId: number) {
+  imageLoading.value = true;
+  try {
+    const res = await getImageUrlsByRecycleOrderId(orderId);
+    imageUrls.value = res || [];
+  } catch {
+    console.error("获取图片失败");
+    imageUrls.value = [];
+  } finally {
+    imageLoading.value = false;
+  }
+}
 
 // 详情弹窗
 const detailVisible = ref(false);
@@ -363,30 +382,44 @@ onMounted(() => {
 
 <template>
   <Page auto-content-height>
-    <div class="p-4">
-<!-- 查询表单 -->
-      <el-card shadow="never" class="mb-4">
-        <el-form :inline="true" :model="queryParams">
-          <el-form-item label="订单编号">
+    <div class="p-0">
+      <!-- 查询表单 -->
+      <el-card shadow="never" class="border-none mb-4 !p-2">
+        <el-form
+          :inline="true"
+          :model="queryParams"
+          class="flex flex-wrap gap-x-2 gap-y-2 items-center"
+        >
+          <el-form-item class="!mb-0 !mr-2">
             <el-input
               v-model="queryParams.orderNo"
-              placeholder="请输入订单编号"
+              placeholder="请输入"
               clearable
-              style="width: 180px"
+              style="width: 200px"
               @keyup.enter="handleQuery"
-            />
+            >
+              <template #prefix>
+                <span class="text-xs text-gray-400 mr-0.5">订单编号:</span>
+              </template>
+            </el-input>
           </el-form-item>
-          <el-form-item label="会员Id">
+
+          <el-form-item class="!mb-0 !mr-2">
             <el-input
               v-model="queryParams.memberId"
-              placeholder="请输入会员ID"
+              placeholder="请输入"
               clearable
-              style="width: 150px"
+              style="width: 200px"
               @keyup.enter="handleQuery"
-            />
+            >
+              <template #prefix>
+                <span class="text-xs text-gray-400 mr-0.5">会员ID:</span>
+              </template>
+            </el-input>
           </el-form-item>
-          <el-form-item label="所属小区">
-           <el-tree-select
+
+          <el-form-item class="!mb-0 !mr-2">
+            <el-tree-select
               v-model="queryParams.deptId"
               :data="deptOptions"
               :props="{
@@ -394,19 +427,23 @@ onMounted(() => {
                 label: 'deptName',
                 children: 'children',
               }"
-              placeholder="全部"
+              placeholder="请选择"
               clearable
               check-strictly
-              style="width: 180px"
+              style="width: 200px"
+              class="tree-prefix-dept"
             />
           </el-form-item>
-          <el-form-item label="订单状态">
+
+          <el-form-item class="!mb-0 !mr-2">
             <el-select
               v-model="queryParams.orderStatus"
-              placeholder="全部"
               clearable
-              style="width: 120px"
+              style="width: 200px"
             >
+              <template #prefix>
+                <span class="text-xs text-gray-400 mr-0.5">订单状态:</span>
+              </template>
               <el-option
                 v-for="item in order_status"
                 :key="item.value"
@@ -415,13 +452,16 @@ onMounted(() => {
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="支付状态">
+
+          <el-form-item class="!mb-0 !mr-2">
             <el-select
               v-model="queryParams.payStatus"
-              placeholder="全部"
               clearable
-              style="width: 120px"
+              style="width: 200px"
             >
+              <template #prefix>
+                <span class="text-xs text-gray-400 mr-0.5">支付状态:</span>
+              </template>
               <el-option
                 v-for="item in payStatusOptions"
                 :key="item.value"
@@ -430,115 +470,146 @@ onMounted(() => {
               />
             </el-select>
           </el-form-item>
-          <el-form-item>
-            <el-button type="primary" :icon="Search" @click="handleQuery">
-查询
-</el-button>
-<el-button :loading="exporting" @click="openExportSelector">导出</el-button>
-            <el-button :icon="Refresh" @click="resetQuery">重置</el-button>
-            
-            <!-- <el-button
-              type="danger"
-              plain
-              :icon="Delete"
-              :disabled="selectedIds.length === 0"
-              @click="handleDelete()"
-            >
-              批量删除
-            </el-button> -->
+
+          <el-form-item class="!mb-0 !mr-0 md:ml-auto flex items-center gap-1">
+            <el-tooltip content="查询" placement="top">
+              <el-button
+                type="primary"
+                :icon="Search"
+                circle
+                @click="handleQuery"
+              />
+            </el-tooltip>
+            <el-tooltip content="重置" placement="top">
+              <el-button :icon="Refresh" circle @click="resetQuery" />
+            </el-tooltip>
           </el-form-item>
         </el-form>
       </el-card>
 
       <!-- 数据表格 -->
-      <el-card shadow="never">
-        <div class="flex justify-end mb-2">
-    <ColumnSelector
-      :storage-key="RECYCLE_ORDER_STORAGE_KEY"
-      :default-columns="defaultRecycleOrderColumns"
-      @update:columns="handleColumnsUpdate"
-    />
-  </div>
-       <el-table
-  v-loading="loading"
-  :data="tableData"
-  border
-  stripe
-  style="width: 100%"
-  @selection-change="handleSelectionChange"
->
-  <!-- 选择列固定写死 -->
-  <el-table-column type="selection" width="55" align="center" />
+      <el-card shadow="never" class="border-none !p-2">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <el-button :loading="exporting" @click="openExportSelector">
+              导出
+            </el-button>
+            <span
+              v-if="selectedIds.length > 0"
+              class="text-xs text-gray-400 ml-2"
+            >
+              已选
+              <span class="text-red-500 font-medium">{{
+                selectedIds.length
+              }}</span>
+              项
+            </span>
+          </div>
 
-  <!-- 动态数据列 -->
-  <el-table-column
-    v-for="col in visibleColumns"
-    :key="col.key"
-    :prop="col.key"
-    :label="col.label"
-    :width="typeof col.width === 'number' ? col.width : undefined"
-    :min-width="col.minWidth"
-    :align="col.align"
-    :show-overflow-tooltip="col.showOverflowTooltip || false"
-  >
-    <template #default="{ row }">
-      <!-- 订单状态 -->
-      <template v-if="col.key === 'orderStatus'">
-        <DictTag :options="order_status" :value="row.orderStatus" />
-      </template>
-      <!-- 投递重量 -->
-      <template v-else-if="col.key === 'weight'">
-        {{ row.weight?.toFixed(2) || 0 }} kg
-      </template>
-      <!-- 实际金额 -->
-      <template v-else-if="col.key === 'realAmount'">
-        <span class="font-medium text-primary">
-          {{ formatAmount(row.realAmount) }}
-        </span>
-      </template>
-      <!-- 投递前后重量合并显示 -->
-    <template v-else-if="col.key === 'beforeAfterWeight'">
-      <span>
-        {{ (row.beforeWeight || 0).toFixed(2) }} → 
-        {{ (row.afterWeight || 0).toFixed(2) }} kg
-      </span>
-    </template>
-      <!-- 普通字段 -->
-      <template v-else>
-        {{ (row as any)[col.key] ?? '-' }}
-      </template>
-    </template>
-  </el-table-column>
+          <div class="flex items-center">
+            <ColumnSelector
+              :storage-key="RECYCLE_ORDER_STORAGE_KEY"
+              :default-columns="defaultRecycleOrderColumns"
+              @update:columns="handleColumnsUpdate"
+            />
+          </div>
+        </div>
 
-  <!-- 操作列固定写死 -->
-  <el-table-column label="操作" width="200" fixed="right" align="center">
-    <template #default="{ row }">
-       <div class="action-buttons">
-<el-button link type="primary" :icon="View" @click="handleView(row)">
-        详情
-      </el-button>
-      <el-dropdown @command="(cmd: string) => handleCommand(cmd, row)">
-        <el-button link type="primary" class="dropdown-trigger-btn">
-          操作<el-icon class="el-icon--right"><ArrowDown /></el-icon>
-        </el-button>
-        <template #dropdown>
-          <el-dropdown-menu>
-            <el-dropdown-item command="abnormal" :icon="Warning">
-              异常订单
-            </el-dropdown-item>
-            <el-dropdown-item command="weight" :icon="ScaleToOriginal">
-              补重/扣重
-            </el-dropdown-item>
-            <el-dropdown-item command="remark" :icon="ChatDotRound">
-              添加备注
-            </el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
-       </div>
-</template>
-  </el-table-column>
-</el-table>
+        <el-table
+          v-loading="loading"
+          :data="tableData"
+          border
+          stripe
+          style="width: 100%"
+          @selection-change="handleSelectionChange"
+        >
+          <!-- 选择列固定写死 -->
+          <el-table-column type="selection" width="50" align="center" />
+
+          <!-- 动态数据列 -->
+          <el-table-column
+            v-for="col in visibleColumns"
+            :key="col.key"
+            :prop="col.key"
+            :label="col.label"
+            :width="typeof col.width === 'number' ? col.width : undefined"
+            :min-width="col.minWidth"
+            :align="col.align"
+            :show-overflow-tooltip="col.showOverflowTooltip || false"
+          >
+            <template #default="{ row }">
+              <!-- 订单状态 -->
+              <template v-if="col.key === 'orderStatus'">
+                <DictTag :options="order_status" :value="row.orderStatus" />
+              </template>
+              <!-- 投递重量 -->
+              <template v-else-if="col.key === 'weight'">
+                {{ row.weight?.toFixed(2) || 0 }} kg
+              </template>
+              <!-- 实际金额 -->
+              <template v-else-if="col.key === 'realAmount'">
+                <span class="font-medium text-primary">
+                  {{ formatAmount(row.realAmount) }}
+                </span>
+              </template>
+              <!-- 投递前后重量合并显示 -->
+              <template v-else-if="col.key === 'beforeAfterWeight'">
+                <span>
+                  {{ (row.beforeWeight || 0).toFixed(2) }} →
+                  {{ (row.afterWeight || 0).toFixed(2) }} kg
+                </span>
+              </template>
+              <!-- 普通字段 -->
+              <template v-else>
+                {{ (row as any)[col.key] ?? '-' }}
+              </template>
+            </template>
+          </el-table-column>
+
+          <!-- 操作列固定写死 -->
+          <el-table-column
+            label="操作"
+            width="180"
+            fixed="right"
+            align="center"
+          >
+            <template #default="{ row }">
+              <div class="action-buttons">
+                <el-button
+                  link
+                  type="primary"
+                  :icon="View"
+                  @click="handleView(row)"
+                >
+                  详情
+                </el-button>
+                <el-dropdown
+                  @command="(cmd: string) => handleCommand(cmd, row)"
+                >
+                  <el-button link type="primary" class="dropdown-trigger-btn">
+                    操作<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+                  </el-button>
+                  <template #dropdown>
+                    <el-dropdown-menu>
+                      <el-dropdown-item command="abnormal" :icon="Warning">
+                        异常订单
+                      </el-dropdown-item>
+                      <el-dropdown-item
+                        command="weight"
+                        :icon="ScaleToOriginal"
+                      >
+                        补重/扣重
+                      </el-dropdown-item>
+                      <el-dropdown-item command="remark" :icon="ChatDotRound">
+                        添加备注
+                      </el-dropdown-item>
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+              </div>
+            </template>
+          </el-table-column>
+        </el-table>
 
         <!-- 分页 -->
         <div class="flex justify-end mt-4">
@@ -548,6 +619,7 @@ onMounted(() => {
             :total="total"
             :page-sizes="[10, 20, 50, 100]"
             layout="total, sizes, prev, pager, next, jumper"
+            background
             @size-change="loadData"
             @current-change="loadData"
           />
@@ -556,108 +628,115 @@ onMounted(() => {
     </div>
 
     <ExportFieldSelector
-  v-model:visible="exportFieldVisible"
-  :fields="exportFields"
-  :loading="exporting"
-  @confirm="handleExportConfirm"
-/>
+      v-model:visible="exportFieldVisible"
+      :fields="exportFields"
+      :loading="exporting"
+      @confirm="handleExportConfirm"
+    />
 
     <!-- 详情弹窗 -->
     <el-dialog
       v-model="detailVisible"
       title="订单详情"
-      width="700px"
+      width="800px"
       append-to-body
+      @open="detailData && loadImages(detailData.recycleOrderId)"
     >
-      <el-descriptions :column="2" border v-if="detailData">
-        <el-descriptions-item label="订单编号" :span="2">
-{{
-          detailData.orderNo
-        }}
-</el-descriptions-item>
-        <el-descriptions-item label="会员名称">
-{{
-          detailData.memberName || "-"
-        }}
-</el-descriptions-item>
-        <el-descriptions-item label="所属小区">
-{{
-          detailData.deptName || "-"
-        }}
-</el-descriptions-item>
-        <el-descriptions-item label="设备名称">
-{{
-          detailData.deviceName || "-"
-        }}
-</el-descriptions-item>
-        <el-descriptions-item label="设备编号">
-{{
-          detailData.deviceNo || "-"
-        }}
-</el-descriptions-item>
-        <el-descriptions-item label="仓口号">
-{{
-          detailData.hatchNo ? `${detailData.hatchNo}号仓` : "-"
-        }}
-</el-descriptions-item>
-        <el-descriptions-item label="包袋编号">
-{{
-          detailData.deviceBagNo || "-"
-        }}
-</el-descriptions-item>
-        <el-descriptions-item label="投递重量">
-{{ detailData.weight?.toFixed(2) || 0 }} kg
-</el-descriptions-item>
-        <el-descriptions-item label="实际有效重量">
-{{ detailData.realWeight?.toFixed(2) || 0 }} kg
-</el-descriptions-item>
-        <el-descriptions-item label="回收单价">
-¥
-          {{ detailData.unitPrice?.toFixed(2) || 0 }}/kg
-</el-descriptions-item>
-        <el-descriptions-item label="预估金额">
-{{
-          formatAmount(detailData.estimateAmount)
-        }}
-</el-descriptions-item>
-        <el-descriptions-item label="实际金额">
-          <span class="font-bold text-primary">{{
-            formatAmount(detailData.realAmount)
-          }}</span>
-        </el-descriptions-item>
-        <el-descriptions-item label="订单状态">
-          <el-tag
-            :type="getOrderStatusType(detailData.orderStatus)"
-            size="small"
-          >
-            {{ getOrderStatusText(detailData.orderStatus) }}
-          </el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item label="支付状态">
-          <el-tag :type="getPayStatusType(detailData.payStatus)" size="small">
-            {{ getPayStatusText(detailData.payStatus) }}
-          </el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item label="支付时间">
-{{
-          detailData.payTime || "-"
-        }}
-</el-descriptions-item>
-        <el-descriptions-item label="备注" :span="2">
-{{
-          detailData.remark || "-"
-        }}
-</el-descriptions-item>
-      </el-descriptions>
+      <el-scrollbar max-height="70vh">
+        <el-descriptions :column="2" border v-if="detailData">
+          <el-descriptions-item label="订单编号" :span="2">
+            {{ detailData.orderNo }}
+          </el-descriptions-item>
+          <el-descriptions-item label="会员名称">
+            {{ detailData.memberName || "-" }}
+          </el-descriptions-item>
+          <el-descriptions-item label="所属小区">
+            {{ detailData.deptName || "-" }}
+          </el-descriptions-item>
+          <el-descriptions-item label="设备名称">
+            {{ detailData.deviceName || "-" }}
+          </el-descriptions-item>
+          <el-descriptions-item label="设备编号">
+            {{ detailData.deviceNo || "-" }}
+          </el-descriptions-item>
+          <el-descriptions-item label="仓口号">
+            {{ detailData.hatchNo ? `${detailData.hatchNo}号仓` : "-" }}
+          </el-descriptions-item>
+          <el-descriptions-item label="包袋编号">
+            {{ detailData.deviceBagNo || "-" }}
+          </el-descriptions-item>
+          <el-descriptions-item label="投递重量">
+            {{ detailData.weight?.toFixed(2) || 0 }} kg
+          </el-descriptions-item>
+          <el-descriptions-item label="实际有效重量">
+            {{ detailData.realWeight?.toFixed(2) || 0 }} kg
+          </el-descriptions-item>
+          <el-descriptions-item label="回收单价">
+            ¥ {{ detailData.unitPrice?.toFixed(2) || 0 }}/kg
+          </el-descriptions-item>
+          <el-descriptions-item label="预估金额">
+            {{ formatAmount(detailData.estimateAmount) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="实际金额">
+            <span class="font-bold text-primary">{{
+              formatAmount(detailData.realAmount)
+            }}</span>
+          </el-descriptions-item>
+          <el-descriptions-item label="订单状态">
+            <el-tag
+              :type="getOrderStatusType(detailData.orderStatus)"
+              size="small"
+            >
+              {{ getOrderStatusText(detailData.orderStatus) }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="支付状态">
+            <el-tag :type="getPayStatusType(detailData.payStatus)" size="small">
+              {{ getPayStatusText(detailData.payStatus) }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="支付时间">
+            {{ detailData.payTime || "-" }}
+          </el-descriptions-item>
+          <el-descriptions-item label="备注" :span="2">
+            {{ detailData.remark || "-" }}
+          </el-descriptions-item>
+        </el-descriptions>
 
-      <!-- 订单附件 -->
-      <el-divider content-position="left">订单附件</el-divider>
-      <ImageGallery
-        v-if="detailData"
-        :order-id="detailData.recycleOrderId"
-        :order-no="detailData.orderNo"
-        @update="(count) => console.log(`附件数量: ${count}`)"
-      />
+        <!-- 订单图片 -->
+        <el-divider content-position="left">订单图片</el-divider>
+        <div v-loading="imageLoading" class="image-gallery">
+          <div
+            v-if="imageUrls.length === 0 && !imageLoading"
+            class="image-empty"
+          >
+            <el-empty description="暂无图片" :image-size="60" />
+          </div>
+          <div v-else class="image-list">
+            <div
+              v-for="(url, index) in imageUrls"
+              :key="index"
+              class="image-item"
+            >
+              <el-image
+                :src="url"
+                fit="cover"
+                :preview-src-list="imageUrls"
+                :initial-index="index"
+                preview-teleported
+              >
+                <template #error>
+                  <div class="image-error">
+                    <el-icon><Picture /></el-icon>
+                    <span>加载失败</span>
+                  </div>
+                </template>
+              </el-image>
+            </div>
+          </div>
+        </div>
+      </el-scrollbar>
+
       <template #footer>
         <el-button @click="detailVisible = false">关闭</el-button>
       </template>
@@ -767,5 +846,23 @@ onMounted(() => {
     padding: 8px 12px;
     margin: 0;
   }
+}
+
+/* 部门树选择器前缀 */
+.tree-prefix-dept :deep(.el-select__wrapper) {
+  position: relative;
+  padding-left: 45px !important;
+}
+
+.tree-prefix-dept :deep(.el-select__wrapper)::before {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #909399;
+  pointer-events: none;
+  content: "部门:";
+  transform: translateY(-50%);
 }
 </style>

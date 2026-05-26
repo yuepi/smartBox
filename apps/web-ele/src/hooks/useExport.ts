@@ -1,4 +1,4 @@
-
+// hooks/useExport.ts
 import { ref } from 'vue';
 
 import { useUserStore } from '@vben/stores';
@@ -22,7 +22,16 @@ export const ModuleCodeMap = {
   CLEAN_TASK: 5,    // 清运任务
   SORT_TASK: 6,     // 分拣任务
   FAULT: 7,         // 故障管理
-  PACKAGE:8         //计费标准     
+  PACKAGE:8,       //计费套餐   
+  HATCH:9,         // 仓口管理
+  BAG:10,         // 包袋管理
+  CONFIG:11,       // 设备配置
+  WITHDRAW:12,     // 提现审核
+  ROLE:13,         // 角色管理
+  MENU:14,         // 菜单管理
+  DEPT:15,         // 部门管理
+  MERCHANT_RECHARGE:16, // 充值记录
+  MERCHANT_FLOW:17, // 流水记录
 };
 
 // 导出状态枚举

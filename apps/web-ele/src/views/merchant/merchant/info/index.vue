@@ -25,6 +25,21 @@ import {
   type MerchantRechargePageParams,
 } from "#/api/system/merchant";
 
+import MerchantFlowTable from '../components/MerchantFlowTable.vue';
+import MerchantRechargeTable from '../components/MerchantRechargeTable.vue';
+// 添加 ref
+const rechargeTableRef = ref();
+const flowTableRef = ref();
+
+// 刷新数据的方法
+function refreshRechargeData() {
+  rechargeTableRef.value?.loadData();
+}
+
+function refreshFlowData() {
+  flowTableRef.value?.loadData();
+}
+
 // --- 状态变量 ---
 const activeTab = ref("basic");
 const merchantId = ref(0);
@@ -258,6 +273,7 @@ async function handleRefund() {
     await refundByMerchantApi({
       outTradeNo: order.rechargeNo, // 商户订单号
       refundAmount: refundAmount.value,
+      totalAmount: order.amount,
     });
     ElMessage.success("退款申请已提交");
     refundDialogVisible.value = false;
@@ -632,325 +648,12 @@ onMounted(async () => {
 
           <!-- 充值订单 Tab -->
           <el-tab-pane label="充值订单" name="recharge">
-            <div class="recharge-list">
-              <!-- 查询表单 -->
-              <el-form :inline="true" :model="rechargeParams" class="mb-4">
-                <el-form-item label="充值单号">
-                  <el-input
-                    v-model="rechargeParams.rechargeNo"
-                    placeholder="请输入充值单号"
-                    clearable
-                    style="width: 180px"
-                    @keyup.enter="loadRechargeData"
-                  />
-                </el-form-item>
-                <el-form-item label="支付状态">
-                  <el-select
-                    v-model="rechargeParams.status"
-                    placeholder="全部"
-                    clearable
-                    style="width: 120px"
-                  >
-                    <el-option
-                      v-for="item in payStatusOptions"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    />
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="退款状态">
-                  <el-select
-                    v-model="rechargeParams.refundStatus"
-                    placeholder="全部"
-                    clearable
-                    style="width: 120px"
-                  >
-                    <el-option
-                      v-for="item in refundStatusOptions"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    />
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="时间范围">
-                  <el-date-picker
-                    v-model="rechargeDateRange"
-                    type="datetimerange"
-                    range-separator="至"
-                    start-placeholder="开始时间"
-                    end-placeholder="结束时间"
-                    value-format="YYYY-MM-DD HH:mm:ss"
-                    style="width: 360px"
-                  />
-                </el-form-item>
-                <el-form-item>
-                  <el-button type="primary" @click="loadRechargeData">
-                    查询
-                  </el-button>
-                  <el-button @click="resetRechargeQuery">重置</el-button>
-                </el-form-item>
-              </el-form>
-
-              <el-table
-                v-loading="rechargeLoading"
-                :data="rechargeData"
-                border
-                stripe
-                style="width: 100%"
-              >
-                <el-table-column
-                  prop="rechargeNo"
-                  label="充值单号"
-                  min-width="200"
-                  align="center"
-                />
-                <el-table-column
-                  prop="amount"
-                  label="充值金额"
-                  width="120"
-                  align="center"
-                >
-                  <template #default="{ row }">
-                    <span class="text-success">{{
-                      formatAmount(row.amount)
-                    }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column
-                  prop="status"
-                  label="支付状态"
-                  width="100"
-                  align="center"
-                >
-                  <template #default="{ row }">
-                    <el-tag :type="getPayStatusType(row.status)" size="small">
-                      {{ getPayStatusText(row.status) }}
-                    </el-tag>
-                  </template>
-                </el-table-column>
-                <el-table-column
-                  prop="rechargeUserName"
-                  label="充值人"
-                  width="120"
-                  align="center"
-                />
-                <el-table-column
-                  prop="payTime"
-                  label="支付时间"
-                  width="160"
-                  align="center"
-                />
-                <el-table-column
-                  prop="refundStatus"
-                  label="退款状态"
-                  width="100"
-                  align="center"
-                >
-                  <template #default="{ row }">
-                    <el-tag
-                      :type="getRefundStatusType(row.refundStatus)"
-                      size="small"
-                    >
-                      {{ getRefundStatusText(row.refundStatus) }}
-                    </el-tag>
-                  </template>
-                </el-table-column>
-                <el-table-column
-                  prop="totalRefundAmount"
-                  label="退款金额"
-                  width="120"
-                  align="center"
-                >
-                  <template #default="{ row }">
-                    {{
-                      row.totalRefundAmount > 0
-                        ? formatAmount(row.totalRefundAmount)
-                        : "-"
-                    }}
-                  </template>
-                </el-table-column>
-                <el-table-column label="操作" width="200" align="center">
-                  <template #default="{ row }">
-                    <el-button
-                      link
-                      type="primary"
-                      @click="handleViewRecharge(row)"
-                    >
-                      详情
-                    </el-button>
-                    <el-button
-                      v-if="row.status === 2 && row.refundStatus !== 2"
-                      link
-                      type="danger"
-                      @click="openRefundDialog(row)"
-                    >
-                      退款
-                    </el-button>
-                  </template>
-                </el-table-column>
-              </el-table>
-
-              <!-- 分页 -->
-              <div class="flex justify-end mt-4">
-                <el-pagination
-                  v-model:current-page="rechargeParams.pageNo"
-                  v-model:page-size="rechargeParams.pageSize"
-                  :total="rechargeTotal"
-                  :page-sizes="[10, 20, 50, 100]"
-                  layout="total, sizes, prev, pager, next, jumper"
-                  @size-change="loadRechargeData"
-                  @current-change="loadRechargeData"
-                />
-              </div>
-            </div>
+             <MerchantRechargeTable :merchant-id="merchantId" ref="rechargeTableRef" />
           </el-tab-pane>
 
           <!-- 资金流水 Tab -->
           <el-tab-pane label="资金流水" name="flow">
-            <div class="flow-list">
-              <!-- 查询表单 -->
-              <el-form :inline="true" :model="flowParams" class="mb-4">
-                <el-form-item label="变动类型">
-                  <el-select
-                    v-model="flowParams.changeType"
-                    placeholder="全部"
-                    clearable
-                    style="width: 140px"
-                  >
-                    <el-option
-                      v-for="item in changeTypeOptions"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    />
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="时间范围">
-                  <el-date-picker
-                    v-model="flowDateRange"
-                    type="datetimerange"
-                    range-separator="至"
-                    start-placeholder="开始时间"
-                    end-placeholder="结束时间"
-                    value-format="YYYY-MM-DD HH:mm:ss"
-                    style="width: 360px"
-                  />
-                </el-form-item>
-                <el-form-item>
-                  <el-button type="primary" @click="loadFlowData">
-                    查询
-                  </el-button>
-                  <el-button @click="resetFlowQuery">重置</el-button>
-                </el-form-item>
-              </el-form>
-
-              <el-table
-                v-loading="flowLoading"
-                :data="flowData"
-                border
-                stripe
-                style="width: 100%"
-              >
-                <el-table-column
-                  prop="merchantAccountFlowId"
-                  label="流水ID"
-                  width="100"
-                  align="center"
-                />
-                <el-table-column
-                  prop="changeType"
-                  label="变动类型"
-                  width="140"
-                  align="center"
-                >
-                  <template #default="{ row }">
-                    <el-tag
-                      :type="getChangeTypeType(row.changeType)"
-                      size="small"
-                    >
-                      {{ getChangeTypeText(row.changeType) }}
-                    </el-tag>
-                  </template>
-                </el-table-column>
-                <el-table-column
-                  prop="changeAmount"
-                  label="变动金额"
-                  width="120"
-                  align="right"
-                >
-                  <template #default="{ row }">
-                    <span
-                      :class="
-                        row.changeAmount > 0 ? 'text-success' : 'text-danger'
-                      "
-                    >
-                      {{ row.changeAmount > 0 ? "+" : ""
-                      }}{{ formatAmount(row.changeAmount) }}
-                    </span>
-                  </template>
-                </el-table-column>
-                <el-table-column
-                  prop="beforeBalance"
-                  label="变动前余额"
-                  width="120"
-                  align="right"
-                >
-                  <template #default="{ row }">
-                    {{ formatAmount(row.beforeBalance) }}
-                  </template>
-                </el-table-column>
-                <el-table-column
-                  prop="afterBalance"
-                  label="变动后余额"
-                  width="120"
-                  align="right"
-                >
-                  <template #default="{ row }">
-                    <span class="font-medium">{{
-                      formatAmount(row.afterBalance)
-                    }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column
-                  prop="relatedId"
-                  label="关联业务ID"
-                  width="100"
-                  align="center"
-                >
-                  <template #default="{ row }">
-                    {{ row.relatedId || "-" }}
-                  </template>
-                </el-table-column>
-                <el-table-column
-                  prop="remark"
-                  label="备注"
-                  min-width="180"
-                  align="left"
-                  show-overflow-tooltip
-                />
-                <el-table-column
-                  prop="createTime"
-                  label="发生时间"
-                  width="160"
-                  align="center"
-                />
-              </el-table>
-
-              <!-- 分页 -->
-              <div class="flex justify-end mt-4">
-                <el-pagination
-                  v-model:current-page="flowParams.pageNo"
-                  v-model:page-size="flowParams.pageSize"
-                  :total="flowTotal"
-                  :page-sizes="[10, 20, 50, 100]"
-                  layout="total, sizes, prev, pager, next, jumper"
-                  @size-change="loadFlowData"
-                  @current-change="loadFlowData"
-                />
-              </div>
-            </div>
+           <MerchantFlowTable :merchant-id="merchantId" ref="flowTableRef" />
           </el-tab-pane>
           <!-- 商户配置 Tab -->
           <el-tab-pane label="商户配置" name="config">

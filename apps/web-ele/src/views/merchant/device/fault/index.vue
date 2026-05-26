@@ -259,77 +259,64 @@ onMounted(() => {
 <template>
   <Page auto-content-height>
     <div class="p-4">
-      <!-- 统计卡片 -->
-      <!-- <el-row :gutter="16" class="mb-4">
-        <el-col :span="6">
-          <el-card shadow="hover" class="text-center">
-            <div class="text-gray-500 text-sm">故障总数</div>
-            <div class="text-2xl font-bold text-primary">{{ total }}</div>
-          </el-card>
-        </el-col>
-        <el-col :span="6">
-          <el-card shadow="hover" class="text-center">
-            <div class="text-gray-500 text-sm">故障中</div>
-            <div class="text-2xl font-bold text-danger">
-              {{ faultStatusCount[0] || 0 }}
-            </div>
-          </el-card>
-        </el-col>
-        <el-col :span="6">
-          <el-card shadow="hover" class="text-center">
-            <div class="text-gray-500 text-sm">已恢复</div>
-            <div class="text-2xl font-bold text-warning">
-              {{ faultStatusCount[1] || 0 }}
-            </div>
-          </el-card>
-        </el-col>
-        <el-col :span="6">
-          <el-card shadow="hover" class="text-center">
-            <div class="text-gray-500 text-sm">已处理</div>
-            <div class="text-2xl font-bold text-success">
-              {{ faultStatusCount[2] || 0 }}
-            </div>
-          </el-card>
-        </el-col>
-      </el-row> -->
-
       <!-- 查询表单 -->
-      <el-card shadow="never" class="mb-4">
-        <el-form :inline="true" :model="queryParams">
-          <el-form-item label="设备编号">
+      <el-card shadow="never" class="border-none mb-4 !p-2">
+        <el-form
+          :inline="true"
+          :model="queryParams"
+          class="flex flex-wrap gap-x-2 gap-y-2 items-center"
+        >
+          <el-form-item class="!mb-0 !mr-2">
             <el-input
               v-model="queryParams.deviceNo"
-              placeholder="请输入设备编号"
+              placeholder="请输入"
               clearable
-              style="width: 160px"
+              style="width: 200px"
               @keyup.enter="handleQuery"
-            />
+            >
+              <template #prefix>
+                <span class="text-xs text-gray-400 mr-0.5">设备编号:</span>
+              </template>
+            </el-input>
           </el-form-item>
-          <el-form-item label="故障编码">
+
+          <el-form-item class="!mb-0 !mr-2">
             <el-input
               v-model="queryParams.faultCode"
-              placeholder="请输入故障编码"
+              placeholder="请输入"
               clearable
-              style="width: 160px"
+              style="width: 200px"
               @keyup.enter="handleQuery"
-            />
+            >
+              <template #prefix>
+                <span class="text-xs text-gray-400 mr-0.5">故障编码:</span>
+              </template>
+            </el-input>
           </el-form-item>
-          <el-form-item label="故障名称">
+
+          <el-form-item class="!mb-0 !mr-2">
             <el-input
               v-model="queryParams.faultName"
-              placeholder="请输入故障名称"
+              placeholder="请输入"
               clearable
-              style="width: 160px"
+              style="width: 200px"
               @keyup.enter="handleQuery"
-            />
+            >
+              <template #prefix>
+                <span class="text-xs text-gray-400 mr-0.5">故障名称:</span>
+              </template>
+            </el-input>
           </el-form-item>
-          <el-form-item label="故障状态">
+
+          <el-form-item class="!mb-0 !mr-2">
             <el-select
               v-model="queryParams.faultStatus"
-              placeholder="全部"
               clearable
-              style="width: 120px"
+              style="width: 200px"
             >
+              <template #prefix>
+                <span class="text-xs text-gray-400 mr-0.5">故障状态:</span>
+              </template>
               <el-option
                 v-for="item in faultStatusOptions"
                 :key="item.value"
@@ -338,7 +325,8 @@ onMounted(() => {
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="发生时间">
+
+          <el-form-item class="!mb-0 !mr-2">
             <el-date-picker
               v-model="dateRange"
               type="datetimerange"
@@ -346,39 +334,42 @@ onMounted(() => {
               start-placeholder="开始时间"
               end-placeholder="结束时间"
               value-format="YYYY-MM-DD HH:mm:ss"
-              style="width: 360px"
+              style="width: 350px"
             />
           </el-form-item>
-          <el-form-item>
-            <el-button type="primary" :icon="Search" @click="handleQuery">
-查询
-</el-button>
-            <el-button :icon="Refresh" @click="resetQuery">重置</el-button>
-            <el-button :loading="exporting" @click="openExportSelector">
-导出
-</el-button>
-            <!-- <el-button
-              type="danger"
-              plain
-              :icon="Delete"
-              :disabled="selectedIds.length === 0"
-              @click="handleDelete"
-            >
-              批量删除
-            </el-button> -->
+
+          <el-form-item class="!mb-0 !mr-0 md:ml-auto flex items-center gap-1">
+            <el-tooltip content="查询" placement="top">
+              <el-button type="primary" :icon="Search" circle @click="handleQuery" />
+            </el-tooltip>
+            <el-tooltip content="重置" placement="top">
+              <el-button :icon="Refresh" circle @click="resetQuery" />
+            </el-tooltip>
           </el-form-item>
         </el-form>
       </el-card>
 
       <!-- 数据表格 -->
-      <el-card shadow="never">
-        <div class="flex justify-end mb-2">
-          <ColumnSelector
-            :storage-key="FAULT_STORAGE_KEY"
-            :default-columns="defaultFaultColumns"
-            @update:columns="handleColumnsUpdate"
-          />
+      <el-card shadow="never" class="border-none !p-2">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <el-button :loading="exporting" @click="openExportSelector">
+              导出
+            </el-button>
+            <span v-if="selectedIds.length > 0" class="text-xs text-gray-400 ml-2">
+              已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
+            </span>
+          </div>
+
+          <div class="flex items-center">
+            <ColumnSelector
+              :storage-key="FAULT_STORAGE_KEY"
+              :default-columns="defaultFaultColumns"
+              @update:columns="handleColumnsUpdate"
+            />
+          </div>
         </div>
+
         <el-table
           v-loading="loading"
           :data="tableData"
@@ -388,7 +379,7 @@ onMounted(() => {
           @selection-change="handleSelectionChange"
         >
           <!-- 选择列固定写死 -->
-          <el-table-column type="selection" width="55" align="center" />
+          <el-table-column type="selection" width="50" align="center" />
 
           <!-- 动态数据列 -->
           <el-table-column
@@ -410,6 +401,8 @@ onMounted(() => {
                 <el-tag
                   :type="getFaultStatusType(row.faultStatus)"
                   size="small"
+                  round
+                  effect="light"
                 >
                   {{ getFaultStatusText(row.faultStatus) }}
                 </el-tag>
@@ -434,21 +427,11 @@ onMounted(() => {
           </el-table-column>
 
           <!-- 操作列固定写死 -->
-          <el-table-column
-            label="操作"
-            width="200"
-            fixed="right"
-            align="center"
-          >
+          <el-table-column label="操作" width="180" fixed="right" align="center">
             <template #default="{ row }">
-              <el-button
-                link
-                type="primary"
-                :icon="View"
-                @click="handleView(row)"
-                >
-详情
-</el-button>
+              <el-button link type="primary" :icon="View" @click="handleView(row)">
+                详情
+              </el-button>
               <el-button
                 v-if="row.faultStatus !== 2"
                 link
@@ -458,14 +441,6 @@ onMounted(() => {
               >
                 处理
               </el-button>
-              <!-- <el-button
-                link
-                type="danger"
-                :icon="Delete"
-                @click="handleDelete(row)"
-                >
-删除
-</el-button> -->
             </template>
           </el-table-column>
         </el-table>
@@ -478,6 +453,7 @@ onMounted(() => {
             :total="total"
             :page-sizes="[10, 20, 50, 100]"
             layout="total, sizes, prev, pager, next, jumper"
+            background
             @size-change="loadData"
             @current-change="loadData"
           />

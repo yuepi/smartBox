@@ -36,7 +36,10 @@ import {
   type DeviceConfig,
   getDeviceConfigListApi,
 } from "#/api/device/deviceConfig";
-import { type DeviceHatch, getDeviceHatchListApi } from "#/api/device/deviceHatch";
+import {
+  type DeviceHatch,
+  getDeviceHatchListApi,
+} from "#/api/device/deviceHatch";
 import {
   type DevicePackage,
   getDevicePackageListApi,
@@ -50,9 +53,6 @@ import { ModuleCodeMap, useExport } from "#/hooks/useExport";
 const { device_brand } = useDicts(["device_brand"]);
 
 const { exporting, exportData } = useExport(ModuleCodeMap.DEVICE);
-
-import ColumnSelector from "#/components/ColumnSelector/index.vue";
-import ExportFieldSelector from "#/components/ExportFieldSelector/index.vue";
 import UploadFile from "#/components/UploadFile/index.vue";
 import {
   defaultDeviceColumns,
@@ -170,6 +170,7 @@ const queryParams = reactive<DevicePageParams>({
   deviceNo: undefined,
   onlineStatus: undefined,
   status: undefined,
+  qrCode: undefined,
 });
 
 // --- 辅助函数 ---
@@ -212,6 +213,7 @@ const upgradeVisible = ref(false);
 const upgradeDeviceId = ref<number>(0);
 const upgradeFile = ref<File | null>(null);
 const upgradeUploading = ref(false);
+const upgradeFileUrl = ref("");
 
 // 操作类型选项
 const operationTypeOptions = [
@@ -222,45 +224,38 @@ const operationTypeOptions = [
   { label: "重启大屏", value: 4, needHatch: false },
   { label: "调节音量", value: 5, needHatch: false, needVolume: true },
   { label: "关清运门", value: 6, needHatch: true },
+  { label: "屏幕截图", value: 7, needHatch: false },
 ];
+
+// 屏幕截图轮询相关
+const screenshotPollingTimer = ref<null | ReturnType<typeof setInterval>>(null);
+const screenshotImageUrl = ref("");
+const screenshotDialogVisible = ref(false);
+const screenshotLoading = ref(false);
 
 // 获取设备的仓口列表
 const hatchOptions = ref<{ id: number; name: string }[]>([]);
 
-// --- 设备操作 ---
-async function handleOperation(row: Device) {
-  operationDeviceId.value = row.deviceId;
-  operationType.value = 0;
-  volumeValue.value = 50;
-  // deviceHatchId.value = 0;
-  
-  // 加载仓口列表
-  await getHatchOptions(row.deviceId);
-  
-  operationVisible.value = true;
+
+
+async function submitUpgrade() {
+  if (!upgradeFileUrl.value.trim()) {
+    ElMessage.warning("请填写升级文件地址");
+    return;
+  }
+
+  upgradeUploading.value = true;
+  try {
+    await deviceUpgradeApi(upgradeDeviceId.value, upgradeFile.value, upgradeFileUrl.value);
+    ElMessage.success("升级指令已发送");
+    upgradeVisible.value = false;
+    upgradeFileUrl.value = "";
+  } catch {
+    ElMessage.error("升级失败");
+  } finally {
+    upgradeUploading.value = false;
+  }
 }
-
-const upgradeFileUrl = ref("");
-const upgradeFiles = ref("");
-
-// async function submitUpgrade() {
-//   if (!upgradeFileUrl.value.trim()) {
-//     ElMessage.warning("请填写升级文件地址");
-//     return;
-//   }
-
-//   upgradeUploading.value = true;
-//   try {
-//     await deviceUpgradeApi(upgradeDeviceId.value, upgradeFile.value!, upgradeFileUrl.value);
-//     ElMessage.success("升级指令已发送");
-//     upgradeVisible.value = false;
-//     upgradeFileUrl.value = "";
-//   } catch {
-//     ElMessage.error("升级失败");
-//   } finally {
-//     upgradeUploading.value = false;
-//   }
-// }
 
 // 获取设备的仓口列表
 async function getHatchOptions(deviceId: number) {
@@ -268,7 +263,7 @@ async function getHatchOptions(deviceId: number) {
     hatchOptions.value = [];
     return;
   }
-  
+
   try {
     const res = await getDeviceHatchListApi({ deviceId, status: 0 });
     hatchOptions.value = (res || []).map((item: DeviceHatch) => ({
@@ -279,6 +274,22 @@ async function getHatchOptions(deviceId: number) {
     console.error("获取仓口列表失败:", error);
     hatchOptions.value = [];
   }
+}
+
+// --- 设备操作 ---
+async function handleOperation(row: Device) {
+  operationDeviceId.value = row.deviceId;
+  operationType.value = 0;
+  volumeValue.value = 50;
+
+  // 重置截图相关
+  screenshotImageUrl.value = "";
+  screenshotDialogVisible.value = false;
+
+  // 加载仓口列表
+  await getHatchOptions(row.deviceId);
+
+  operationVisible.value = true;
 }
 
 async function submitOperation() {
@@ -314,11 +325,82 @@ async function submitOperation() {
     await operateDeviceApi(params);
     ElMessage.success("操作指令已发送");
     operationVisible.value = false;
+
+    // 如果是屏幕截图操作，开启轮询
+    if (opType === 7) {
+      startScreenshotPolling();
+    }
   } catch {
     ElMessage.error("操作失败");
   } finally {
     operationSubmitting.value = false;
   }
+}
+
+// 开始轮询屏幕截图结果
+function startScreenshotPolling() {
+  // 清除之前的轮询
+  stopScreenshotPolling();
+
+  screenshotLoading.value = true;
+  screenshotDialogVisible.value = true;
+  screenshotImageUrl.value = "";
+
+  // 立即查询一次
+  queryScreenshotResult();
+
+  // 设置5秒轮询
+  screenshotPollingTimer.value = setInterval(() => {
+    queryScreenshotResult();
+  }, 5000);
+}
+
+// 查询截图结果
+async function queryScreenshotResult() {
+  // 如果弹窗已关闭，停止轮询
+  if (!screenshotDialogVisible.value) {
+    stopScreenshotPolling();
+    return;
+  }
+
+  try {
+    const res = await operateDeviceApi({
+      deviceId: operationDeviceId.value,
+      operateType: 7,
+    });
+    if (res?.screenshotReady === true && res?.imageUrl) {
+      // 截图已完成
+      screenshotImageUrl.value = res.imageUrl;
+      screenshotLoading.value = false;
+      stopScreenshotPolling();
+      ElMessage.success("截图已完成");
+    } else if (res?.screenshotReady === false) {
+      // 还在处理中，继续等待
+      screenshotLoading.value = true;
+    } else {
+      // 请求失败或返回异常
+      console.error("获取截图结果失败:", res);
+      screenshotLoading.value = false;
+      ElMessage.error("获取截图失败");
+      stopScreenshotPolling();
+      screenshotDialogVisible.value = false;
+    }
+  } catch (error) {
+    console.error("查询截图结果出错:", error);
+    screenshotLoading.value = false;
+    ElMessage.error("查询截图结果失败");
+    stopScreenshotPolling();
+    screenshotDialogVisible.value = false;
+  }
+}
+
+// 停止轮询
+function stopScreenshotPolling() {
+  if (screenshotPollingTimer.value) {
+    clearInterval(screenshotPollingTimer.value);
+    screenshotPollingTimer.value = null;
+  }
+  screenshotLoading.value = false;
 }
 
 // --- 切换IP端口 ---
@@ -366,25 +448,25 @@ function handleUploadSuccess(res: any) {
   console.log("文件上传成功:", res);
 }
 
-async function submitUpgrade() {
-  if (upgradeFiles.value.length === 0) {
-    ElMessage.warning("请选择升级文件");
-    return;
-  }
+// async function submitUpgrade() {
+//   if (upgradeFile.value.length === 0) {
+//     ElMessage.warning("请选择升级文件");
+//     return;
+//   }
 
-  upgradeUploading.value = true;
-  try {
-    // 根据你的接口，可能传文件地址或文件ID
-    await deviceUpgradeApi(upgradeDeviceId.value, upgradeFiles.value[0]);
-    ElMessage.success("升级指令已发送");
-    upgradeVisible.value = false;
-    upgradeFiles.value = [];
-  } catch {
-    ElMessage.error("升级失败");
-  } finally {
-    upgradeUploading.value = false;
-  }
-}
+//   upgradeUploading.value = true;
+//   try {
+//     // 根据你的接口，可能传文件地址或文件ID
+//     await deviceUpgradeApi(upgradeDeviceId.value, upgradeFile.value[0]);
+//     ElMessage.success("升级指令已发送");
+//     upgradeVisible.value = false;
+//     upgradeFile.value = [];
+//   } catch {
+//     ElMessage.error("升级失败");
+//   } finally {
+//     upgradeUploading.value = false;
+//   }
+// }
 
 // --- 展示单个二维码 ---
 async function handleQrcodeShow(row: Device) {
@@ -509,12 +591,12 @@ function handleCommand(cmd: string, row: Device) {
       handleOperation(row);
       break;
     }
-    case "qrcodeDownload": {
-      handleQrcodeDownload(row);
-      break;
-    }
-    case "qrcodeShow": {
-      handleQrcodeShow(row);
+    case "restart": {
+      operateDeviceApi({
+        deviceId: row.deviceId,
+        operateType: 3,
+      });
+      ElMessage.success("重启指令已发送");
       break;
     }
     case "upgrade": {
@@ -810,7 +892,9 @@ function resetQuery() {
   queryParams.deviceNo = undefined;
   queryParams.onlineStatus = undefined;
   queryParams.status = undefined;
+  queryParams.qrCode = undefined;
   queryParams.pageNo = 1;
+  queryParams.pageSize = 10;
   loadData();
 }
 
@@ -844,278 +928,309 @@ onMounted(() => {
 
 <template>
   <Page auto-content-height>
-    <div class="p-4">
-      <!-- 查询表单 -->
-      <el-card shadow="never" class="mb-4">
-        <el-form :inline="true" :model="queryParams">
-          <el-form-item label="所属部门">
-            <el-tree-select
-              v-model="queryParams.deptId"
-              :data="deptOptions"
-              :props="{
-                value: 'deptId',
-                label: 'deptName',
-                children: 'children',
-              }"
-              placeholder="全部"
-              clearable
-              check-strictly
-              style="width: 180px"
-            />
-          </el-form-item>
-          <el-form-item label="设备名称">
-            <el-input
-              v-model="queryParams.deviceName"
-              placeholder="请输入设备名称"
-              clearable
-              style="width: 160px"
-              @keyup.enter="handleQuery"
-            />
-          </el-form-item>
-          <el-form-item label="设备编号">
-            <el-input
-              v-model="queryParams.deviceNo"
-              placeholder="请输入设备编号"
-              clearable
-              style="width: 160px"
-              @keyup.enter="handleQuery"
-            />
-          </el-form-item>
-          <el-form-item label="在线状态">
-            <el-select
-              v-model="queryParams.onlineStatus"
-              placeholder="全部"
-              clearable
-              style="width: 100px"
-            >
-              <el-option
-                v-for="item in onlineStatusOptions"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="状态">
-            <el-select
-              v-model="queryParams.status"
-              placeholder="全部"
-              clearable
-              style="width: 100px"
-            >
-              <el-option
-                v-for="item in statusOptions"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" :icon="Search" @click="handleQuery">
-              查询
-            </el-button>
-            <el-button :icon="Refresh" @click="resetQuery">重置</el-button>
-            <el-button type="primary" plain :icon="Plus" @click="handleAdd">
-              新增
-            </el-button>
-            <el-button :loading="exporting" @click="openExportSelector">
-              导出
-            </el-button>
-            <el-button
-              type="danger"
-              plain
-              :icon="Delete"
-              :disabled="selectedIds.length === 0"
-              @click="handleDelete()"
-            >
-              批量删除
-            </el-button>
+    <!-- 查询表单 -->
+    <el-card shadow="never" class="border-none mb-4 !p-2">
+      <el-form
+        :inline="true"
+        :model="queryParams"
+        class="flex flex-wrap gap-x-2 gap-y-2 items-center"
+      >
+        <el-form-item class="!mb-0 !mr-2">
+          <el-tree-select
+            v-model="queryParams.deptId"
+            :data="deptOptions"
+            :props="{
+              value: 'deptId',
+              label: 'deptName',
+              children: 'children',
+            }"
+            placeholder="请选择"
+            clearable
+            check-strictly
+            style="width: 200px"
+            class="tree-prefix-dept"
+          />
+        </el-form-item>
 
+        <el-form-item class="!mb-0 !mr-2">
+          <el-input
+            v-model="queryParams.deviceName"
+            placeholder="请输入"
+            clearable
+            style="width: 200px"
+            @keyup.enter="handleQuery"
+          >
+            <template #prefix>
+              <span class="text-xs text-gray-400 mr-0.5">设备名称:</span>
+            </template>
+          </el-input>
+        </el-form-item>
+
+        <el-form-item class="!mb-0 !mr-2">
+          <el-input
+            v-model="queryParams.deviceNo"
+            placeholder="请输入"
+            clearable
+            style="width: 200px"
+            @keyup.enter="handleQuery"
+          >
+            <template #prefix>
+              <span class="text-xs text-gray-400 mr-0.5">设备编号:</span>
+            </template>
+          </el-input>
+        </el-form-item>
+
+        <el-form-item class="!mb-0 !mr-2">
+          <el-input
+            v-model="queryParams.qrCode"
+            placeholder="请输入"
+            clearable
+            style="width: 200px"
+            @keyup.enter="handleQuery"
+          >
+            <template #prefix>
+              <span class="text-xs text-gray-400 mr-0.5">面贴编号:</span>
+            </template>
+          </el-input>
+        </el-form-item>
+
+        <el-form-item class="!mb-0 !mr-2">
+          <el-select
+            v-model="queryParams.onlineStatus"
+            clearable
+            style="width: 200px"
+          >
+            <template #prefix>
+              <span class="text-xs text-gray-400 mr-0.5">在线状态:</span>
+            </template>
+            <el-option
+              v-for="item in onlineStatusOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+
+        <el-form-item class="!mb-0 !mr-2">
+          <el-select
+            v-model="queryParams.status"
+            clearable
+            style="width: 200px"
+          >
+            <template #prefix>
+              <span class="text-xs text-gray-400 mr-0.5">状态:</span>
+            </template>
+            <el-option
+              v-for="item in statusOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+
+        <el-form-item class="!mb-0 !mr-0 md:ml-auto flex items-center gap-1">
+          <el-tooltip content="查询" placement="top">
             <el-button
               type="primary"
-              plain
-              @click="handleBatchQrcodeShow"
-              :disabled="selectedIds.length === 0"
-            >
-              批量展示二维码
-            </el-button>
-            <el-button
-              type="primary"
-              plain
-              @click="handleBatchQrcodeDownload"
-              :disabled="selectedIds.length === 0"
-            >
-              批量下载二维码
-            </el-button>
-          </el-form-item>
-        </el-form>
-      </el-card>
+              :icon="Search"
+              circle
+              @click="handleQuery"
+            />
+          </el-tooltip>
+          <el-tooltip content="重置" placement="top">
+            <el-button :icon="Refresh" circle @click="resetQuery" />
+          </el-tooltip>
+        </el-form-item>
+      </el-form>
+    </el-card>
 
-      <!-- 数据表格 -->
-      <el-card shadow="never">
-        <div class="flex justify-end mb-2">
+    <!-- 数据表格 -->
+    <el-card shadow="never" class="border-none !p-2">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2">
+          <el-button type="primary" :icon="Plus" @click="handleAdd">
+            新增设备
+          </el-button>
+          <ExportButton
+            :module-code="ModuleCodeMap.DEVICE"
+            :fields="visibleColumns"
+            :find-cond="queryParams"
+          />
+          <el-button
+            type="danger"
+            plain
+            :icon="Delete"
+            :disabled="selectedIds.length === 0"
+            @click="handleDelete()"
+          >
+            批量删除
+          </el-button>
+          <span
+            v-if="selectedIds.length > 0"
+            class="text-xs text-gray-400 ml-2"
+          >
+            已选
+            <span class="text-red-500 font-medium">{{
+              selectedIds.length
+            }}</span>
+            项
+          </span>
+        </div>
+
+        <div class="flex items-center">
           <ColumnSelector
             :storage-key="DEVICE_STORAGE_KEY"
             :default-columns="defaultDeviceColumns"
             @update:columns="handleColumnsUpdate"
           />
         </div>
+      </div>
 
-        <el-table
-          v-loading="loading"
-          :data="tableData"
-          border
-          stripe
-          style="width: 100%"
-          @selection-change="handleSelectionChange"
+      <el-table
+        v-loading="loading"
+        :data="tableData"
+        border
+        stripe
+        style="width: 100%"
+        @selection-change="handleSelectionChange"
+      >
+        <!-- 选择列固定写死 -->
+        <el-table-column type="selection" width="55" align="center" />
+
+        <!-- 动态数据列 -->
+        <el-table-column
+          v-for="col in visibleColumns"
+          :key="col.key"
+          :prop="col.key"
+          :label="col.label"
+          :width="typeof col.width === 'number' ? col.width : undefined"
+          :min-width="col.minWidth"
+          :align="col.align"
+          :show-overflow-tooltip="col.showOverflowTooltip || false"
         >
-          <!-- 选择列固定写死 -->
-          <el-table-column type="selection" width="55" align="center" />
-
-          <!-- 动态数据列 -->
-          <el-table-column
-            v-for="col in visibleColumns"
-            :key="col.key"
-            :prop="col.key"
-            :label="col.label"
-            :width="typeof col.width === 'number' ? col.width : undefined"
-            :min-width="col.minWidth"
-            :align="col.align"
-            :show-overflow-tooltip="col.showOverflowTooltip || false"
-          >
-            <template #default="{ row }">
-              <!-- 设备类型 -->
-              <template v-if="col.key === 'deviceHatchType'">
-                {{ getHatchTypeText(row.deviceHatchType) }}
-              </template>
-              <!-- 在线状态 -->
-              <template v-else-if="col.key === 'onlineStatus'">
-                <el-tag
-                  :type="getOnlineStatusType(row.onlineStatus)"
-                  size="small"
-                >
-                  {{ getOnlineStatusText(row.onlineStatus) }}
-                </el-tag>
-              </template>
-              <!-- 状态 -->
-              <template v-else-if="col.key === 'status'">
-                <el-tag
-                  :type="row.status === 0 ? 'success' : 'danger'"
-                  size="small"
-                >
-                  {{ getStatusText(row.status) }}
-                </el-tag>
-              </template>
-              <!-- 面贴编号 -->
-              <template v-else-if="col.key === 'qrCode'">
-                <div class="flex items-center justify-center gap-1">
-                  <span>{{ row.qrCode || "-" }}</span>
-                  <el-icon
-                    v-if="row.qrCode"
-                    class="cursor-pointer text-primary hover:text-primary-dark"
-                    title="查看二维码"
-                    @click.stop="handleQrcodeShow(row)"
-                  >
-                    <Picture />
-                  </el-icon>
-                </div>
-              </template>
-              <!-- 普通字段 -->
-              <template v-else>
-                {{ (row as any)[col.key] ?? '-' }}
-              </template>
+          <template #default="{ row }">
+            <!-- 设备类型 -->
+            <template v-if="col.key === 'deviceHatchType'">
+              {{ getHatchTypeText(row.deviceHatchType) }}
             </template>
-          </el-table-column>
-
-          <!-- 操作列固定写死 -->
-          <el-table-column
-            label="操作"
-            width="400"
-            fixed="right"
-            align="center"
-          >
-            <template #default="{ row }">
-              <div class="action-buttons">
-                <el-button
-                  link
-                  type="primary"
-                  :icon="Monitor"
-                  @click="handleView(row)"
+            <!-- 在线状态 -->
+            <template v-else-if="col.key === 'onlineStatus'">
+              <el-tag
+                :type="getOnlineStatusType(row.onlineStatus)"
+                size="small"
+              >
+                {{ getOnlineStatusText(row.onlineStatus) }}
+              </el-tag>
+            </template>
+            <!-- 状态 -->
+            <template v-else-if="col.key === 'status'">
+              <el-tag
+                :type="row.status === 0 ? 'success' : 'danger'"
+                size="small"
+              >
+                {{ getStatusText(row.status) }}
+              </el-tag>
+            </template>
+            <!-- 面贴编号 -->
+            <template v-else-if="col.key === 'qrCode'">
+              <div class="flex items-center justify-center gap-1">
+                <span>{{ row.qrCode || "-" }}</span>
+                <el-icon
+                  v-if="row.qrCode"
+                  class="cursor-pointer text-primary hover:text-primary-dark"
+                  title="查看二维码"
+                  @click.stop="handleQrcodeShow(row)"
                 >
-                  详情
-                </el-button>
-                <el-button
-                  link
-                  type="primary"
-                  :icon="Edit"
-                  @click="handleEdit(row)"
-                >
-                  编辑
-                </el-button>
-                <el-button
-                  link
-                  type="danger"
-                  :icon="Delete"
-                  @click="handleDelete(row)"
-                >
-                  删除
-                </el-button>
-                <el-dropdown
-                  @command="(cmd: string) => handleCommand(cmd, row)"
-                >
-                  <el-button link type="primary" class="dropdown-trigger-btn">
-                    更多操作<el-icon class="el-icon--right">
-                      <ArrowDown />
-                    </el-icon>
-                  </el-button>
-                  <template #dropdown>
-                    <el-dropdown-menu>
-                      <el-dropdown-item command="operation">
-                        设备操作
-                      </el-dropdown-item>
-                      <el-dropdown-item command="ipPort">
-                        切换IP端口
-                      </el-dropdown-item>
-                      <el-dropdown-item command="upgrade">
-                        设备升级
-                      </el-dropdown-item>
-                      <el-dropdown-item command="qrcodeShow">
-                        展示二维码
-                      </el-dropdown-item>
-                      <el-dropdown-item command="qrcodeDownload">
-                        下载二维码
-                      </el-dropdown-item>
-                    </el-dropdown-menu>
-                  </template>
-                </el-dropdown>
+                  <Picture />
+                </el-icon>
               </div>
             </template>
-          </el-table-column>
-        </el-table>
+            <!-- 普通字段 -->
+            <template v-else>
+              {{ (row as any)[col.key] ?? '-' }}
+            </template>
+          </template>
+        </el-table-column>
 
-        <!-- 分页 -->
-        <div class="flex justify-end mt-4">
-          <el-pagination
-            v-model:current-page="queryParams.pageNo"
-            v-model:page-size="queryParams.pageSize"
-            :total="total"
-            :page-sizes="[10, 20, 50, 100]"
-            layout="total, sizes, prev, pager, next, jumper"
-            @size-change="loadData"
-            @current-change="loadData"
-          />
-        </div>
-      </el-card>
-    </div>
+        <!-- 操作列固定写死 -->
+        <el-table-column label="操作" width="400" fixed="right" align="center">
+          <template #default="{ row }">
+            <div class="action-buttons">
+              <el-button
+                link
+                type="primary"
+                :icon="Monitor"
+                @click="handleView(row)"
+              >
+                详情
+              </el-button>
+              <el-button
+                link
+                type="primary"
+                :icon="Edit"
+                @click="handleEdit(row)"
+              >
+                编辑
+              </el-button>
+              <el-button
+                link
+                type="danger"
+                :icon="Delete"
+                @click="handleDelete(row)"
+              >
+                删除
+              </el-button>
+              <el-dropdown @command="(cmd: string) => handleCommand(cmd, row)">
+                <el-button link type="primary" class="dropdown-trigger-btn">
+                  更多操作<el-icon class="el-icon--right">
+                    <ArrowDown />
+                  </el-icon>
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="restart">
+                      重启设备
+                    </el-dropdown-item>
+                    <el-dropdown-item command="operation">
+                      设备操作
+                    </el-dropdown-item>
+                    <el-dropdown-item command="ipPort">
+                      切换IP端口
+                    </el-dropdown-item>
+                    <el-dropdown-item command="upgrade">
+                      设备升级
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <!-- 分页 -->
+      <div class="flex justify-end mt-4">
+        <el-pagination
+          v-model:current-page="queryParams.pageNo"
+          v-model:page-size="queryParams.pageSize"
+          :total="total"
+          :page-sizes="[10, 20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="loadData"
+          @current-change="loadData"
+        />
+      </div>
+    </el-card>
 
     <!-- 导出字段选择组件 -->
-    <ExportFieldSelector
+    <!-- <ExportFieldSelector
       v-model:visible="exportFieldVisible"
       :fields="exportFields"
       :loading="exporting"
       @confirm="handleExportConfirm"
-    />
+    /> -->
 
     <!-- 新增/编辑弹窗（带地图） -->
     <el-dialog
@@ -1534,13 +1649,14 @@ onMounted(() => {
     >
       <el-form label-width="100px">
         <el-form-item label="升级文件" required>
-          <!-- <el-input
+          <el-input
             v-model="upgradeFileUrl"
             placeholder="请输入升级文件下载地址"
             clearable
-          /> -->
+          />
+
           <UploadFile
-            v-model="upgradeFiles"
+            v-model="upgradeFile"
             :limit="1"
             :file-size="200"
             :file-type="['bin', 'zip', 'hex']"
@@ -1679,5 +1795,23 @@ onMounted(() => {
     padding: 8px 12px;
     margin: 0;
   }
+}
+
+/* 核心：强行往树选择器内部塞入前缀文字 */
+.tree-prefix-dept :deep(.el-select__wrapper) {
+  position: relative;
+  padding-left: 45px !important; /* 留出空间给“部门:”字样 */
+}
+
+.tree-prefix-dept :deep(.el-select__wrapper)::before {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #909399; /* 浅灰色，保持全系统一致 */
+  pointer-events: none; /* 防止遮挡鼠标点击事件 */
+  content: "部门:";
+  transform: translateY(-50%);
 }
 </style>
