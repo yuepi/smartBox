@@ -1,5 +1,7 @@
 <script lang="ts" setup>
-import { onMounted, reactive, ref } from "vue";
+import type { LoginLogPageParams } from "#/api/monitor/login";
+
+import { computed, onMounted, reactive, ref } from "vue";
 
 import { Page } from '@vben/common-ui';
 
@@ -7,14 +9,34 @@ import { Delete, Refresh, Search, View } from "@element-plus/icons-vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 
 import { deleteMerchantLoginLogApi, getMerchantLoginLogDetailApi, getMerchantLoginLogPageApi } from "#/api/monitor/login";
+import ColumnSelector from "#/components/ColumnSelector/index.vue";
+import DictTag from "#/components/DictTag/index.vue";
+import {
+  defaultLoginLogColumns,
+  LOGIN_LOG_STORAGE_KEY,
+  type TableColumnConfig,
+} from "#/constants/tableColumns";
+import { useDicts } from "#/hooks/useDict";
+import { ModuleCodeMap } from "#/hooks/useExport";
 
-import type { LoginLogPageParams } from "#/api/monitor/login";
+const { login_status } = useDicts(["login_status"]);
+
+// 表格列配置
+const columnConfig = ref<TableColumnConfig[]>([...defaultLoginLogColumns]);
+
+function handleColumnsUpdate(newColumns: TableColumnConfig[]) {
+  columnConfig.value = newColumns;
+}
+
+const visibleColumns = computed(() => {
+  return columnConfig.value.filter((col) => col.visible);
+});
 
 // --- 状态变量 ---
 const loading = ref(false);
 const tableData = ref([]);
 const total = ref(0);
-const selectedIds = ref<string[]>([]); // 存储选中的 ID
+const selectedIds = ref<string[]>([]);
 
 // 详情弹窗控制
 const detailVisible = ref(false);
@@ -28,9 +50,13 @@ const queryParams = reactive<LoginLogPageParams>({
   status: undefined,
 });
 
-// --- 逻辑函数 ---
+// 状态选项
+const statusOptions = [
+  { label: "成功", value: 0 },
+  { label: "失败", value: 1 },
+];
 
-// 加载分页数据
+// --- 数据加载 ---
 async function loadData() {
   try {
     loading.value = true;
@@ -44,10 +70,9 @@ async function loadData() {
   }
 }
 
-// 查看详情逻辑
+// 查看详情
 async function handleView(row: any) {
   try {
-    // 调用接口获取最新详情
     const res = await getMerchantLoginLogDetailApi(row.loginLogId);
     detailData.value = res;
     detailVisible.value = true;
@@ -56,7 +81,7 @@ async function handleView(row: any) {
   }
 }
 
-// 批量删除逻辑
+// 批量删除
 async function handleDelete() {
   if (selectedIds.value.length === 0) {
     ElMessage.warning("请选择要删除的记录");
@@ -70,7 +95,7 @@ async function handleDelete() {
     const ids = selectedIds.value.join(",");
     await deleteMerchantLoginLogApi(ids);
     ElMessage.success("删除成功");
-    handleQuery(); // 刷新列表
+    handleQuery();
   } catch {
     // 用户取消删除
   }
@@ -81,17 +106,17 @@ function handleSelectionChange(selection: any[]) {
   selectedIds.value = selection.map((item) => item.loginLogId);
 }
 
-// 搜索
+// 搜索与重置
 function handleQuery() {
   queryParams.pageNo = 1;
   loadData();
 }
 
-// 重置
 function resetQuery() {
   queryParams.accountName = undefined;
   queryParams.status = undefined;
-  handleQuery();
+  queryParams.pageNo = 1;
+  loadData();
 }
 
 onMounted(() => {
@@ -102,42 +127,86 @@ onMounted(() => {
 <template>
   <Page auto-content-height>
     <div class="p-4">
-      <el-card shadow="never" class="mb-4">
-        <el-form :inline="true" :model="queryParams">
-          <el-form-item label="登录账号">
-            <el-input v-model="queryParams.accountName" placeholder="请输入账号" clearable @keyup.enter="handleQuery" />
+      <!-- 查询表单 -->
+      <el-card shadow="never" class="border-none mb-4 !p-2">
+        <el-form :inline="true" :model="queryParams" class="flex flex-wrap gap-x-2 gap-y-2 items-center">
+          <el-form-item class="!mb-0 !mr-2">
+            <el-input
+v-model="queryParams.accountName" placeholder="请输入" clearable style="width: 200px"
+              @keyup.enter="handleQuery"
+>
+              <template #prefix>
+                <span class="text-xs text-gray-400 mr-0.5">登录账号:</span>
+              </template>
+            </el-input>
           </el-form-item>
-          <el-form-item label="状态">
-            <el-select v-model="queryParams.status" placeholder="全部" clearable style="width: 100px">
-              <el-option label="成功" :value="0" />
-              <el-option label="失败" :value="1" />
+
+          <el-form-item class="!mb-0 !mr-2">
+            <el-select v-model="queryParams.status" clearable style="width: 200px">
+              <template #prefix>
+                <span class="text-xs text-gray-400 mr-0.5">状态:</span>
+              </template>
+              <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
             </el-select>
           </el-form-item>
-          <el-form-item>
-            <el-button type="primary" :icon="Search" @click="handleQuery">查询</el-button>
-            <el-button :icon="Refresh" @click="resetQuery">重置</el-button>
-            <el-button type="danger" plain :icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete">
-              批量删除
-            </el-button>
+
+          <el-form-item class="!mb-0 !mr-0 md:ml-auto flex items-center gap-1">
+            <el-tooltip content="查询" placement="top">
+              <el-button type="primary" :icon="Search" circle @click="handleQuery" />
+            </el-tooltip>
+            <el-tooltip content="重置" placement="top">
+              <el-button :icon="Refresh" circle @click="resetQuery" />
+            </el-tooltip>
           </el-form-item>
         </el-form>
       </el-card>
 
-      <el-card shadow="never">
-        <el-table v-loading="loading" :data="tableData" border style="width: 100%"
-          @selection-change="handleSelectionChange">
-          <el-table-column type="selection" width="55" align="center" />
-          <el-table-column prop="accountName" label="账号" min-width="120" align="center" />
-          <el-table-column prop="ipAddr" label="登录IP" width="140" align="center" />
-          <el-table-column prop="loginLocation" label="地点" width="150" align="center" show-overflow-tooltip />
-          <el-table-column prop="status" label="状态" width="100" align="center">
+      <!-- 数据表格 -->
+      <el-card shadow="never" class="border-none !p-2">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <ExportButton
+              :module-code="ModuleCodeMap.LOGIN_LOG"
+              :fields="visibleColumns"
+              :find-cond="queryParams"
+            />
+            <el-button type="danger" plain :icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete">
+              批量删除
+            </el-button>
+            <span v-if="selectedIds.length > 0" class="text-xs text-gray-400 ml-2">
+              已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
+            </span>
+          </div>
+          <div class="flex items-center">
+            <ColumnSelector
+:storage-key="LOGIN_LOG_STORAGE_KEY" :default-columns="defaultLoginLogColumns"
+              @update:columns="handleColumnsUpdate"
+/>
+          </div>
+        </div>
+
+        <el-table
+v-loading="loading" :data="tableData" border stripe style="width: 100%"
+          @selection-change="handleSelectionChange"
+>
+          <el-table-column type="selection" width="50" align="center" />
+
+          <el-table-column
+v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
+            :width="col.width" :min-width="col.minWidth" :align="col.align" :show-overflow-tooltip="col.showOverflowTooltip"
+>
             <template #default="{ row }">
-              <el-tag :type="row.status === 0 ? 'success' : 'danger'">
-                {{ row.status === 0 ? "成功" : "失败" }}
-              </el-tag>
+              <!-- 状态 -->
+              <template v-if="col.key === 'status'">
+                <DictTag :options="login_status" :value="row.status" />
+              </template>
+              <!-- 普通字段 -->
+              <template v-else>
+                {{ (row as any)[col.key] ?? '-' }}
+              </template>
             </template>
           </el-table-column>
-          <el-table-column prop="loginTime" label="登录时间" width="180" align="center" />
+
           <el-table-column label="操作" width="100" fixed="right" align="center">
             <template #default="{ row }">
               <el-button link type="primary" :icon="View" @click="handleView(row)">详情</el-button>
@@ -145,14 +214,18 @@ onMounted(() => {
           </el-table-column>
         </el-table>
 
+        <!-- 分页 -->
         <div class="flex justify-end mt-4">
-          <el-pagination v-model:current-page="queryParams.pageNo" v-model:page-size="queryParams.pageSize"
+          <el-pagination
+v-model:current-page="queryParams.pageNo" v-model:page-size="queryParams.pageSize"
             :total="total" :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper"
-            @size-change="loadData" @current-change="loadData" />
+            background @size-change="loadData" @current-change="loadData"
+/>
         </div>
       </el-card>
     </div>
 
+    <!-- 详情弹窗 -->
     <el-dialog v-model="detailVisible" title="登录日志详情" width="600px" append-to-body>
       <el-descriptions :column="1" border>
         <el-descriptions-item label="登录账号">{{ detailData.accountName }}</el-descriptions-item>
@@ -161,7 +234,7 @@ onMounted(() => {
         <el-descriptions-item label="浏览器">{{ detailData.browser }}</el-descriptions-item>
         <el-descriptions-item label="操作系统">{{ detailData.os }}</el-descriptions-item>
         <el-descriptions-item label="登录状态">
-          <el-tag :type="detailData.status === 0 ? 'success' : 'danger'">
+          <el-tag :type="detailData.status === 0 ? 'success' : 'danger'" size="small" round effect="light">
             {{ detailData.status === 0 ? "成功" : "失败" }}
           </el-tag>
         </el-descriptions-item>
@@ -174,3 +247,7 @@ onMounted(() => {
     </el-dialog>
   </Page>
 </template>
+
+<style scoped lang="scss">
+// 不需要额外样式
+</style>

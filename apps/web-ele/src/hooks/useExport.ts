@@ -32,6 +32,9 @@ export const ModuleCodeMap = {
   DEPT:15,         // 部门管理
   MERCHANT_RECHARGE:16, // 充值记录
   MERCHANT_FLOW:17, // 流水记录
+  MERCHANT:18, // 商户管理
+  LOGIN_LOG:19, // 登录日志
+  OPERATE_LOG:20, // 操作日志
 };
 
 // 导出状态枚举

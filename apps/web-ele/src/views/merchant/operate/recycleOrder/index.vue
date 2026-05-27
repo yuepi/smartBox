@@ -99,7 +99,16 @@ async function loadImages(orderId: number) {
   imageLoading.value = true;
   try {
     const res = await getImageUrlsByRecycleOrderId(orderId);
-    imageUrls.value = res || [];
+    imageUrls.value = res?.length ? res : [
+  'https://fuss10.elemecdn.com/a/3f/3302e58f9a181d2509f3dc0fa68b0jpeg.jpeg',
+  'https://fuss10.elemecdn.com/1/34/19aa98b1fcb2781c4fba33d850549jpeg.jpeg',
+  'https://fuss10.elemecdn.com/0/6f/e35ff375812e6b0020b6b4e8f9583jpeg.jpeg',
+  'https://fuss10.elemecdn.com/9/bb/e27858e973f5d7d3904835f46abbdjpeg.jpeg',
+  'https://fuss10.elemecdn.com/d/e6/c4d93a3805b3ce3f323f7974e6f78jpeg.jpeg',
+  'https://fuss10.elemecdn.com/3/28/bbf893f792f03a54408b3b7a7ebf0jpeg.jpeg',
+  'https://fuss10.elemecdn.com/2/11/6535bcfb26e4c79b48ddde44f4b6fjpeg.jpeg',
+];
+  
   } catch {
     console.error("获取图片失败");
     imageUrls.value = [];
@@ -132,15 +141,6 @@ const remarkForm = reactive({
   remark: "",
 });
 const remarkSubmitting = ref(false);
-
-// 订单状态选项
-const orderStatusOptions = [
-  { label: "全部", value: undefined },
-  ...Object.entries(OrderStatusMap).map(([key, val]) => ({
-    label: val.label,
-    value: Number(key),
-  })),
-];
 
 // 支付状态选项
 const payStatusOptions = [
@@ -635,103 +635,97 @@ onMounted(() => {
     />
 
     <!-- 详情弹窗 -->
-    <el-dialog
+   <el-dialog
       v-model="detailVisible"
       title="订单详情"
-      width="800px"
+      width="750px"
       append-to-body
       @open="detailData && loadImages(detailData.recycleOrderId)"
     >
-      <el-scrollbar max-height="70vh">
-        <el-descriptions :column="2" border v-if="detailData">
-          <el-descriptions-item label="订单编号" :span="2">
-            {{ detailData.orderNo }}
-          </el-descriptions-item>
-          <el-descriptions-item label="会员名称">
-            {{ detailData.memberName || "-" }}
-          </el-descriptions-item>
-          <el-descriptions-item label="所属小区">
-            {{ detailData.deptName || "-" }}
-          </el-descriptions-item>
-          <el-descriptions-item label="设备名称">
-            {{ detailData.deviceName || "-" }}
-          </el-descriptions-item>
-          <el-descriptions-item label="设备编号">
-            {{ detailData.deviceNo || "-" }}
-          </el-descriptions-item>
-          <el-descriptions-item label="仓口号">
-            {{ detailData.hatchNo ? `${detailData.hatchNo}号仓` : "-" }}
-          </el-descriptions-item>
-          <el-descriptions-item label="包袋编号">
-            {{ detailData.deviceBagNo || "-" }}
-          </el-descriptions-item>
-          <el-descriptions-item label="投递重量">
-            {{ detailData.weight?.toFixed(2) || 0 }} kg
-          </el-descriptions-item>
-          <el-descriptions-item label="实际有效重量">
-            {{ detailData.realWeight?.toFixed(2) || 0 }} kg
-          </el-descriptions-item>
-          <el-descriptions-item label="回收单价">
-            ¥ {{ detailData.unitPrice?.toFixed(2) || 0 }}/kg
-          </el-descriptions-item>
-          <el-descriptions-item label="预估金额">
-            {{ formatAmount(detailData.estimateAmount) }}
-          </el-descriptions-item>
-          <el-descriptions-item label="实际金额">
-            <span class="font-bold text-primary">{{
-              formatAmount(detailData.realAmount)
-            }}</span>
-          </el-descriptions-item>
-          <el-descriptions-item label="订单状态">
-            <el-tag
-              :type="getOrderStatusType(detailData.orderStatus)"
-              size="small"
-            >
-              {{ getOrderStatusText(detailData.orderStatus) }}
-            </el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item label="支付状态">
-            <el-tag :type="getPayStatusType(detailData.payStatus)" size="small">
-              {{ getPayStatusText(detailData.payStatus) }}
-            </el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item label="支付时间">
-            {{ detailData.payTime || "-" }}
-          </el-descriptions-item>
-          <el-descriptions-item label="备注" :span="2">
-            {{ detailData.remark || "-" }}
-          </el-descriptions-item>
-        </el-descriptions>
+      <el-scrollbar max-height="65vh">
+        <div v-if="detailData" class="px-3 flex flex-col gap-5">
+<el-descriptions title="基础信息" :column="2" :border="false">
+            <el-descriptions-item label="订单编号" label-class-name="text-gray-400">
+              <span class="font-mono text-gray-800 select-all font-semibold">{{ detailData.orderNo }}</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="订单状态" label-class-name="text-gray-400">
+              <DictTag :options="order_status" :value="detailData.orderStatus" />
+            </el-descriptions-item>
+            <el-descriptions-item label="会员名称" label-class-name="text-gray-400">
+              <span class="text-gray-700">{{ detailData.memberName || "-" }}</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="所属小区" label-class-name="text-gray-400">
+              <span class="text-gray-700">{{ detailData.deptName || "-" }}</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="创建时间" label-class-name="text-gray-400">
+              <span class="font-mono text-gray-700">{{ detailData.createdTime || "-" }}</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="更新时间" label-class-name="text-gray-400">
+              <span class="font-mono text-gray-700">{{ detailData.updatedTime || "-" }}</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="备注说明" :span="2" label-class-name="text-gray-400">
+              <span class="text-gray-700">{{ detailData.remark || "-" }}</span>
+            </el-descriptions-item>
+          </el-descriptions>
 
-        <!-- 订单图片 -->
-        <el-divider content-position="left">订单图片</el-divider>
-        <div v-loading="imageLoading" class="image-gallery">
-          <div
-            v-if="imageUrls.length === 0 && !imageLoading"
-            class="image-empty"
-          >
-            <el-empty description="暂无图片" :image-size="60" />
-          </div>
-          <div v-else class="image-list">
-            <div
-              v-for="(url, index) in imageUrls"
-              :key="index"
-              class="image-item"
-            >
-              <el-image
-                :src="url"
-                fit="cover"
-                :preview-src-list="imageUrls"
-                :initial-index="index"
-                preview-teleported
-              >
-                <template #error>
-                  <div class="image-error">
-                    <el-icon><Picture /></el-icon>
-                    <span>加载失败</span>
-                  </div>
-                </template>
-              </el-image>
+          <el-descriptions title="硬件配置" :column="2" :border="false">
+            <el-descriptions-item label="设备名称" label-class-name="text-gray-400">
+              <span class="text-gray-700">{{ detailData.deviceName || "-" }}</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="设备编号" label-class-name="text-gray-400">
+              <span class="font-mono text-gray-700">{{ detailData.deviceNo || "-" }}</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="定位仓口" label-class-name="text-gray-400">
+              <el-tag v-if="detailData.hatchNo" size="small" type="warning" effect="light">{{ detailData.hatchNo }}号仓</el-tag>
+              <span v-else class="text-gray-400">-</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="包袋编号" label-class-name="text-gray-400">
+              <span class="font-mono text-gray-700">{{ detailData.deviceBagNo || "-" }}</span>
+            </el-descriptions-item>
+          </el-descriptions>
+
+          <el-descriptions title="计量结算" :column="3" :border="false">
+            <el-descriptions-item label="投递前重量" label-class-name="text-gray-400">
+              <span class="font-mono text-gray-500">{{ detailData.beforeWeight?.toFixed(2) || 0 }} kg</span>
+            </el-descriptions-item>
+              <el-descriptions-item label="投递重量" label-class-name="text-gray-400">
+              <span class="font-mono text-gray-700">{{ detailData.weight?.toFixed(2) || 0 }} kg</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="投递后重量" label-class-name="text-gray-400">
+              <span class="font-mono text-gray-500">{{ detailData.afterWeight?.toFixed(2) || 0 }} kg</span>
+            </el-descriptions-item>
+          
+            <el-descriptions-item label="回收单价" label-class-name="text-gray-400">
+              <span class="font-mono text-gray-700">¥ {{ detailData.unitPrice?.toFixed(2) || 0 }}/kg</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="有效重量" label-class-name="text-gray-400">
+              <span class="font-mono text-teal-600 font-bold">{{ detailData.realWeight?.toFixed(2) || 0 }} kg</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="预估金额" label-class-name="text-gray-400">
+              <span class="font-mono text-gray-700">{{ formatAmount(detailData.estimateAmount) }}</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="实际金额" :span="3" label-class-name="text-gray-800 !font-bold" class-name="border-t border-dashed border-gray-100 pt-2 mt-1">
+              <span class="font-mono font-black text-primary text-base">{{ formatAmount(detailData.realAmount) }}</span>
+            </el-descriptions-item>
+          </el-descriptions>
+
+          <div class="mt-1">
+            <div class="text-lg font-bold mb-3">现场凭证</div>
+            <div v-loading="imageLoading" class="min-h-[80px]">
+              <div v-if="imageUrls.length === 0 && !imageLoading">
+                <el-empty description="暂无现场图片" :image-size="40" class="!py-2" />
+              </div>
+              <div v-else class="grid grid-cols-6 gap-2">
+                <div v-for="(url, index) in imageUrls" :key="index" class="aspect-square rounded border border-gray-100 overflow-hidden bg-gray-50">
+                  <el-image :src="url" fit="cover" :preview-src-list="imageUrls" :initial-index="index" preview-teleported class="w-full h-full">
+                    <template #error>
+                      <div class="flex items-center justify-center h-full text-gray-300 bg-gray-100">
+                        <el-icon><Picture /></el-icon>
+                      </div>
+                    </template>
+                  </el-image>
+                </div>
+              </div>
             </div>
           </div>
         </div>
