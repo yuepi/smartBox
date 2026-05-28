@@ -12,20 +12,6 @@ packages:
   - scripts/*
   - docs
   - playground
-<<<<<<< HEAD
-allowBuilds:
-  '@parcel/watcher': true
-  core-js: true
-  esbuild: true
-  lefthook: true
-  vue-demi: true
-
-catalog:
-  '@amap/amap-jsapi-loader': ^1.0.1
-  '@ast-grep/napi': ^0.42.0
-  '@changesets/changelog-github': ^0.6.0
-  '@changesets/cli': ^2.30.0
-=======
 
 publicHoistPattern:
   - lefthook
@@ -54,7 +40,6 @@ catalog:
   '@ast-grep/napi': ^0.42.3
   '@changesets/changelog-github': ^0.7.0
   '@changesets/cli': ^2.31.0
->>>>>>> acf289381e8a5ac651846fabef13726119e585ee
   '@changesets/git': ^3.0.4
   '@clack/prompts': ^1.4.0
   '@commitlint/cli': ^21.0.1
@@ -187,12 +172,7 @@ catalog:
   sass-embedded: ^1.100.0
   secure-ls: ^2.0.0
   sortablejs: ^1.15.7
-<<<<<<< HEAD
-  splitpanes: ^4.0.4
-  stylelint: ^17.6.0
-=======
   stylelint: ^17.12.0
->>>>>>> acf289381e8a5ac651846fabef13726119e585ee
   stylelint-config-recess-order: ^7.7.0
   stylelint-config-recommended: ^18.0.0
   stylelint-config-recommended-scss: ^17.0.1
@@ -235,18 +215,9 @@ catalog:
   zod: ^3.25.76
   zod-defaults: 0.1.3
 
-<<<<<<< HEAD
-overrides:
-  '@ast-grep/napi': 'catalog:'
-  '@ctrl/tinycolor': 'catalog:'
-  clsx: 'catalog:'
-  pinia: 'catalog:'
-  vue: 'catalog:'
-=======
 allowBuilds:
   '@parcel/watcher': true
   core-js: true
   esbuild: true
   lefthook: true
   vue-demi: true
->>>>>>> acf289381e8a5ac651846fabef13726119e585ee
