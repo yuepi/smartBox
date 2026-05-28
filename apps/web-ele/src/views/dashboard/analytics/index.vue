@@ -1,89 +1,66 @@
-<script lang="ts" setup>
-import type { AnalysisOverviewItem } from '@vben/common-ui';
-import type { TabOption } from '@vben/types';
+<!-- views/dashboard/analytics/index.vue -->
+<script setup lang="ts">
+import { ref } from "vue";
 
-import {
-  AnalysisChartCard,
-  AnalysisChartsTabs,
-  AnalysisOverview,
-} from '@vben/common-ui';
-import {
-  SvgBellIcon,
-  SvgCakeIcon,
-  SvgCardIcon,
-  SvgDownloadIcon,
-} from '@vben/icons';
+import { AnalysisChartCard, AnalysisChartsTabs } from "@vben/common-ui";
 
-import AnalyticsTrends from './analytics-trends.vue';
-import AnalyticsVisitsData from './analytics-visits-data.vue';
-import AnalyticsVisitsSales from './analytics-visits-sales.vue';
-import AnalyticsVisitsSource from './analytics-visits-source.vue';
-import AnalyticsVisits from './analytics-visits.vue';
+import CategoryDistribution from "./CategoryDistribution.vue";
+import DeliveryTrends from "./DeliveryTrends.vue";
+import DeviceStatus from "./DeviceStatus.vue";
+import OrderTrend from "./OrderTrend.vue";
+import OverviewCards from "./OverviewCards.vue";
+import RecycleAnalysis from "./RecycleAnalysis.vue";
 
-const overviewItems: AnalysisOverviewItem[] = [
-  {
-    icon: SvgCardIcon,
-    title: '用户量',
-    totalTitle: '总用户量',
-    totalValue: 120_000,
-    value: 2000,
-  },
-  {
-    icon: SvgCakeIcon,
-    title: '访问量',
-    totalTitle: '总访问量',
-    totalValue: 500_000,
-    value: 20_000,
-  },
-  {
-    icon: SvgDownloadIcon,
-    title: '下载量',
-    totalTitle: '总下载量',
-    totalValue: 120_000,
-    value: 8000,
-  },
-  {
-    icon: SvgBellIcon,
-    title: '使用量',
-    totalTitle: '总使用量',
-    totalValue: 50_000,
-    value: 5000,
-  },
-];
-
-const chartTabs: TabOption[] = [
-  {
-    label: '流量趋势',
-    value: 'trends',
-  },
-  {
-    label: '月访问量',
-    value: 'visits',
-  },
+const activeTab = ref("trends");
+// Tab 配置
+const chartTabs = [
+  { label: "投递趋势", value: "trends" },
+  { label: "回收分析", value: "recycle" },
 ];
 </script>
 
 <template>
   <div class="p-5">
-    <AnalysisOverview :items="overviewItems" />
-    <AnalysisChartsTabs :tabs="chartTabs" class="mt-5">
-      <template #trends>
-        <AnalyticsTrends />
-      </template>
-      <template #visits>
-        <AnalyticsVisits />
-      </template>
-    </AnalysisChartsTabs>
+    <!-- 概览卡片 -->
+    <OverviewCards />
+
+    <!-- Tab 切换 -->
 
     <div class="mt-5 w-full md:flex">
-      <AnalysisChartCard class="mt-5 md:mt-0 md:mr-4 md:w-1/3" title="访问数量">
-        <AnalyticsVisitsData />
+      <AnalysisChartsTabs :tabs="chartTabs" class="mt-5">
+        <template #trends>
+          <DeliveryTrends />
+        </template>
+        <template #recycle>
+          <RecycleAnalysis />
+        </template>
+      </AnalysisChartsTabs>
+      <AnalysisChartsTabs :tabs="chartTabs" class="mt-5">
+        <template #trends>
+          <DeliveryTrends />
+        </template>
+        <template #recycle>
+          <RecycleAnalysis />
+        </template>
+      </AnalysisChartsTabs>
+    </div>
+
+    <!-- 底部三列图表 -->
+    <div class="mt-5 w-full md:flex">
+      <AnalysisChartCard
+        class="mt-5 md:mt-0 md:mr-4 md:w-1/3"
+        title="设备状态分布"
+      >
+        <DeviceStatus />
       </AnalysisChartCard>
-      <AnalysisChartCard class="mt-5 md:mt-0 md:mr-4 md:w-1/3" title="访问来源">
-        <AnalyticsVisitsSource />
+      <AnalysisChartCard
+        class="mt-5 md:mt-0 md:mr-4 md:w-1/3"
+        title="投递品类分布"
+      >
+        <CategoryDistribution />
       </AnalysisChartCard>
-      <AnalysisChartCard class="mt-5 md:mt-0 md:w-1/3" title="访问来源">
-        <AnalyticsVisitsSales />
+      <AnalysisChartCard class="mt-5 md:mt-0 md:w-1/3" title="近7日订单趋势">
+        <OrderTrend />
       </AnalysisChartCard>
     </div>
   </div>

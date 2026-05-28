@@ -24,7 +24,7 @@ import {
   getQrcodePageApi,
   type Qrcode,
   type QrcodePageParams,
-} from "#/api/device/qrcode";
+} from "#/api/device/qrCode";
 import ColumnSelector from "#/components/ColumnSelector/index.vue";
 import ExportFieldSelector from "#/components/ExportFieldSelector/index.vue";
 import {

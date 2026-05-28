@@ -31,12 +31,11 @@ import {
   type DevicePackage,
   getDevicePackageListApi,
 } from "#/api/device/devicePackage";
-import { getQrcodeListApi, type Qrcode } from "#/api/device/qrcode";
+import { getQrcodeListApi, type Qrcode } from "#/api/device/qrCode";
 import { type Dept, getMerchantDeptListApi } from "#/api/system/dept";
 import AreaCascader from "#/components/AreaCascader/index.vue";
 import MapPicker from "#/components/MapPicker/index.vue";
-
-import { useExport, ModuleCodeMap } from "#/hooks/useExport";
+import { ModuleCodeMap, useExport } from "#/hooks/useExport";
 
 // 设备管理页面
 const { exporting, exportData } = useExport(ModuleCodeMap.DEVICE);
