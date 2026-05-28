@@ -1,6 +1,5 @@
 <!-- views/dashboard/analytics/index.vue -->
 <script setup lang="ts">
-import { ref } from "vue";
 
 import { AnalysisChartCard, AnalysisChartsTabs } from "@vben/common-ui";
 
@@ -11,7 +10,6 @@ import OrderTrend from "./OrderTrend.vue";
 import OverviewCards from "./OverviewCards.vue";
 import RecycleAnalysis from "./RecycleAnalysis.vue";
 
-const activeTab = ref("trends");
 // Tab 配置
 const chartTabs = [
   { label: "投递趋势", value: "trends" },
@@ -25,7 +23,6 @@ const chartTabs = [
     <OverviewCards />
 
     <!-- Tab 切换 -->
-
     <div class="mt-5 w-full md:flex">
       <AnalysisChartsTabs :tabs="chartTabs" class="mt-5">
         <template #trends>
