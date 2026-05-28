@@ -56,5 +56,5 @@ post-merge:
 
 commit-msg:
   commands:
-    commitlint:
-      # run: pnpm exec commitlint --edit $1
+    # commitlint:
+    #   run: pnpm exec commitlint --edit $1
