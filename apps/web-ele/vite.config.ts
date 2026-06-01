@@ -18,7 +18,7 @@ export default defineConfig(async () => {
             rewrite: (path) => path.replace(/^\/api/, ''),
             // mock代理目标地
             // target: 'http://localhost:5320/api'
-            target: 'http://120.46.81.99:8342/api',
+            target: 'http://recycletestapi.huishoucloud.com/api',
             ws: true,
           },
         },

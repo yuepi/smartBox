@@ -8,7 +8,8 @@ export const useOssUpload = () => {
     const res = await getOssTokenApi();
     // 💡 调试小技巧：确保 data 指向包含 accessKeyId 的那一层
     const credentials = res.data || res; 
-    console.log(credentials, '解析后的凭证');
+    console.log('完整凭证:', JSON.stringify(credentials, null, 2));
+    // console.log(credentials, '解析后的凭证');
 
     console.log('检查凭证字段:', {
   id: credentials.accessKeyId, 
