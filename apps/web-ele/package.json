@@ -16,6 +16,7 @@
   },
   "type": "module",
   "scripts": {
+    "build:dev": "pnpm vite build --mode development",
     "build": "pnpm vite build --mode production",
     "build:analyze": "pnpm vite build --mode analyze",
     "dev": "pnpm vite --mode development",
@@ -26,8 +27,8 @@
     "#/*": "./src/*"
   },
   "dependencies": {
-    "@amap/amap-jsapi-loader": "^1.0.1",
-    "@element-plus/icons-vue": "^2.3.2",
+    "@amap/amap-jsapi-loader": "catalog:",
+    "@element-plus/icons-vue": "catalog:",
     "@vben/access": "workspace:*",
     "@vben/common-ui": "workspace:*",
     "@vben/constants": "workspace:*",
@@ -43,12 +44,12 @@
     "@vben/types": "workspace:*",
     "@vben/utils": "workspace:*",
     "@vueuse/core": "catalog:",
-    "ali-oss": "^6.23.0",
+    "ali-oss": "catalog:",
     "dayjs": "catalog:",
     "element-plus": "catalog:",
     "pinia": "catalog:",
     "qrcode": "catalog:",
-    "splitpanes": "^4.0.4",
+    "splitpanes": "catalog:",
     "vue": "catalog:",
     "vue-router": "catalog:"
   },
