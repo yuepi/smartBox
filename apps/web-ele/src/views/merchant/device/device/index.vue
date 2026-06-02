@@ -50,7 +50,7 @@ import AreaCascader from "#/components/AreaCascader/index.vue";
 import MapPicker from "#/components/MapPicker/index.vue";
 import { useDicts } from "#/hooks/useDict";
 import { ModuleCodeMap, useExport } from "#/hooks/useExport";
-const { device_brand } = useDicts(["device_brand"]);
+const { device_brand, device_screen } = useDicts(["device_brand", "device_screen"]);
 
 const { exporting, exportData } = useExport(ModuleCodeMap.DEVICE);
 import UploadFile from "#/components/UploadFile/index.vue";
@@ -1153,6 +1153,10 @@ onMounted(() => {
                   <Picture />
                 </el-icon>
               </div>
+            </template>
+            <!-- 有无屏幕 -->
+            <template v-else-if="col.key === 'screenFlag'">
+              <DictTag :options="device_screen" :value="row.screenFlag" />
             </template>
             <!-- 普通字段 -->
             <template v-else>
