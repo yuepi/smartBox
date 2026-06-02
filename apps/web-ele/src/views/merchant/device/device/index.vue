@@ -592,11 +592,18 @@ function handleCommand(cmd: string, row: Device) {
       break;
     }
     case "restart": {
-      operateDeviceApi({
-        deviceId: row.deviceId,
-        operateType: 3,
+      // 确认重启
+      ElMessageBox.confirm("确认重启设备吗？", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      }).then(async () => {
+        await operateDeviceApi({
+          deviceId: row.deviceId,
+          operateType: 3,
+        });
+        ElMessage.success("重启指令已发送");
       });
-      ElMessage.success("重启指令已发送");
       break;
     }
     case "upgrade": {

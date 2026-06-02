@@ -35,6 +35,7 @@ export const defaultDeviceColumns: TableColumnConfig[] = [
   { key: 'volume', label: '设备音量', visible: false, width: 100, align: 'center' },
   { key: 'logo', label: '图标地址', visible: false, width: 150, align: 'center' },
   { key: 'customerPhone', label: '客服电话', visible: false, width: 120, align: 'center' },
+  { key: 'screenFlag', label: '有无屏幕', visible: true, width: 100, align: 'center' },
   { key: 'onlineStatus', label: '在线状态', visible: true, width: 100, align: 'center' },
   { key: 'onlineTime', label: '上线时间', visible: true, width: 160, align: 'center' },
   { key: 'offTime', label: '离线时间', visible: true, width: 160, align: 'center' },
