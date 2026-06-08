@@ -52,7 +52,7 @@ import { useDicts } from "#/hooks/useDict";
 import { ModuleCodeMap, useExport } from "#/hooks/useExport";
 const { device_brand, device_screen } = useDicts(["device_brand", "device_screen"]);
 
-const { exporting, exportData } = useExport(ModuleCodeMap.DEVICE);
+const { exportData } = useExport(ModuleCodeMap.DEVICE);
 import UploadFile from "#/components/UploadFile/index.vue";
 import {
   defaultDeviceColumns,
@@ -225,6 +225,8 @@ const operationTypeOptions = [
   { label: "调节音量", value: 5, needHatch: false, needVolume: true },
   { label: "关清运门", value: 6, needHatch: true },
   { label: "屏幕截图", value: 7, needHatch: false },
+  { label: "开仓门灯", value: 8, needHatch: false },
+  { label: "关仓门灯", value: 9, needHatch: false },
 ];
 
 // 屏幕截图轮询相关
@@ -1234,14 +1236,6 @@ onMounted(() => {
         />
       </div>
     </el-card>
-
-    <!-- 导出字段选择组件 -->
-    <!-- <ExportFieldSelector
-      v-model:visible="exportFieldVisible"
-      :fields="exportFields"
-      :loading="exporting"
-      @confirm="handleExportConfirm"
-    /> -->
 
     <!-- 新增/编辑弹窗（带地图） -->
     <el-dialog
