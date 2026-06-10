@@ -102,10 +102,10 @@ async function getOssClient() {
   //   .trim();
 
   // ------------------ 临时硬编码配置开始 ------------------
-  const ADMIN_ACCESS_KEY_ID = import.meta.env.VITE_OSS_ACCESS_KEY_ID;
-  const ADMIN_ACCESS_KEY_SECRET = import.meta.env.VITE_OSS_ACCESS_KEY_SECRET;
-  const BUCKET_NAME = import.meta.env.VITE_OSS_BUCKET;
-  const REGION = import.meta.env.VITE_OSS_REGION;
+  const ADMIN_ACCESS_KEY_ID = "LTAI5t9agcna5FWTctQBZoP6";
+  const ADMIN_ACCESS_KEY_SECRET = "HeBhWrBWBhAH51vk71tW3vInqxqRWz";
+  const BUCKET_NAME = "smart-box-test-2026-04-02";
+  const REGION = "oss-cn-beijing";
 
   return new OSS({
     region: REGION,
