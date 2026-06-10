@@ -42,7 +42,8 @@
     "menu": "Menu Management",
     "dept": "Department Management",
     "dict": "Data Dictionary",
-    "log": "Operation Log"
+    "log": "Operation Log",
+    "oss": "Object Storage"
   },
   "merchant": {
     "title": "Merchant Management",

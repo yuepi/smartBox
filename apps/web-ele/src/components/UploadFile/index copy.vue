@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue';
 
 import { useAccessStore } from '@vben/stores';
 
-import { Document, Upload } from '@element-plus/icons-vue';
+import { Upload } from '@element-plus/icons-vue';
 import { ElLoading, ElMessage } from 'element-plus';
 
 import { useOssUpload } from '#/utils/file/oss';
@@ -22,12 +22,7 @@ interface Props {
   isShowTip?: boolean;
   action?: string;
   disabled?: boolean;
-  
-  // ✨ 新增动态配置属性
-  drag?: boolean;          // 是否启用拖拽上传
-  webkitdirectory?: boolean; // 是否启用文件夹上传
 }
-
 const props = withDefaults(defineProps<Props>(), {
   modelValue: () => [],
   limit: 5,
@@ -36,19 +31,17 @@ const props = withDefaults(defineProps<Props>(), {
   isShowTip: true,
   action: '/common/upload/uploadFile',
   disabled: false,
-  drag: false,             // 默认关闭拖拽
-  webkitdirectory: false,  // 默认关闭文件夹上传
 });
 
 const emit = defineEmits(['update:modelValue', 'success', 'error']);
 
 const { uploadToOss } = useOssUpload();
 
-// 自定义 OSS 上传核心逻辑
 const customUpload = async (options: any) => {
   const { file, onSuccess, onError } = options;
   try {
     const url = await uploadToOss(file);
+    // 调用你原来的成功处理逻辑 [cite: 20]
     handleUploadSuccess({ code: 200, data: url }, file);
     onSuccess();
   } catch (error) {
@@ -67,30 +60,35 @@ const headers = computed(() => ({
 
 const fileList = ref<UploadFile[]>([]);
 const uploadRef = ref();
+
+// 💡 新增：防止父子双向绑定导致的数据二次解析死循环标记
 const isInnerChange = ref(false);
 
 const fileAccept = computed(() => props.fileType.map(type => `.${type}`).join(','));
 const showTip = computed(() => props.isShowTip && (props.fileType.length || props.fileSize));
 
-// 监听外部值变化 [cite: 11]
+// 监听外部值变化
 watch(
   () => props.modelValue,
   (val) => {
+    // 如果是组件内部 emit 激发的变动，直接拦截，不重置本地的 fileList 名字
     if (isInnerChange.value) {
       isInnerChange.value = false;
       return;
     }
+
     if (!val) {
       fileList.value = [];
       return;
     }
+
     if (Array.isArray(val)) {
       if (val.length === 0) {
         fileList.value = [];
       } else if (typeof val[0] === 'string') {
         fileList.value = (val as string[]).map((url, index) => ({
           name: getFileName(url, `file_${index}`),
-          url,
+          url: url,
         }));
       } else {
         fileList.value = JSON.parse(JSON.stringify(val)) as UploadFile[];
@@ -106,6 +104,7 @@ watch(
   { deep: true, immediate: true },
 );
 
+// 获取文件名（从URL中提取）
 function getFileName(url: string, defaultName?: string) {
   if (!url) return defaultName || '未知文件';
   if (url && url.includes('/')) {
@@ -118,49 +117,49 @@ function getFileName(url: string, defaultName?: string) {
   return defaultName || '文件';
 }
 
-// 上传前校验 [cite: 14]
+// 上传前校验
 const handleBeforeUpload = (file: File) => {
-  // 手动拦截文件数量限制
+  // 💡 核心安全策略：由于绑了空数组，必须在前端手动硬拦截 limit
   if (fileList.value.length >= props.limit) {
     ElMessage.error(`最多只能上传 ${props.limit} 个文件`);
     return false;
   }
 
-  // 校验文件类型 (注：文件夹上传时某些系统文件可能没有type，主要依赖后缀校验)
+  // 校验文件类型
   // const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
   // const isValidType = props.fileType.some(type =>
   //   file.type.includes(type) || fileExtension === type.toLowerCase()
   // );
 
   // if (!isValidType) {
-  //   ElMessage.error(`文件 "${file.name}" 格式不正确，请上传 ${props.fileType.join('/')} 格式的文件`);
+  //   ElMessage.error(`文件格式不正确，请上传 ${props.fileType.join('/')} 格式的文件`);
   //   return false;
   // }
 
   // 校验文件大小
   const isLt = file.size / 1024 / 1024 < props.fileSize;
   if (!isLt) {
-    ElMessage.error(`文件 "${file.name}" 大小不能超过 ${props.fileSize} MB`);
+    ElMessage.error(`上传文件大小不能超过 ${props.fileSize} MB`);
     return false;
   }
 
+  // 校验全部通过后才开启 Loading
   ElLoading.service({ lock: true, text: '正在上传...', background: 'rgba(0,0,0,0.7)' });
   return true;
 };
 
-// 上传成功 
+// 上传成功
 const handleUploadSuccess = (res: any, file: any) => {
   ElLoading.service().close();
 
   if (res.code === 200) {
-    const actualUrl = typeof res.data === 'string' ? res.data : (res.data?.url || res.data?.fileUrl);
-    
-    // ✨ 优化：如果引入了文件夹上传，file.name 会包含相对路径（如 "folder/sub/a.txt"）
-    // 我们只需要提取出纯文件名即可
-    const pureName = file.name.includes('/') ? file.name.slice(file.name.lastIndexOf('/') + 1) : file.name;
+    // 💡 核心修改：兼容后端 data 直接返回字符串 URL 的情况
+    const actualUrl = typeof res.data === 'string' 
+      ? res.data 
+      : (res.data?.url || res.data?.fileUrl);
 
     const newFile: UploadFile = {
-      name: pureName,
+      name: file.name,
       url: actualUrl,
       fileId: res.data?.fileId || res.data?.ossId,
     };
@@ -173,20 +172,23 @@ const handleUploadSuccess = (res: any, file: any) => {
   }
 };
 
+// 上传失败
 const handleUploadError = (err: any) => {
   ElLoading.service().close();
   ElMessage.error('上传失败，请重试');
   emit('error', err);
 };
 
+// 删除文件
 const handleRemove = (index: number) => {
   fileList.value.splice(index, 1);
   emitValue();
 };
 
+// 发送数据给父组件
 const emitValue = () => {
   const urls = fileList.value.map(f => f.url).filter(Boolean);
-  isInnerChange.value = true;
+  isInnerChange.value = true; // 锁定：告诉 watch 这是我自己改的，不要瞎洗我的数据
   emit('update:modelValue', urls);
 };
 </script>
@@ -206,27 +208,14 @@ const emitValue = () => {
       :http-request="customUpload"
       :show-file-list="false"
       :disabled="fileList.length >= limit"
-      
-      :drag="drag"
-      :webkitdirectory="webkitdirectory"
     >
-      <template v-if="drag">
-        <el-icon class="el-icon--upload"><Upload /></el-icon>
-        <div class="el-upload__text">
-          将文件拖到此处，或 <em>点击上传</em>
-          <span v-if="webkitdirectory">（支持选择整个文件夹）</span>
-        </div>
-      </template>
-
-      <template v-else>
-        <el-button 
-          type="primary" 
-          :icon="webkitdirectory ? Document : Upload" 
-          :disabled="fileList.length >= limit"
-        >
-          {{ webkitdirectory ? '上传文件夹' : '上传文件' }}
-        </el-button>
-      </template>
+      <el-button 
+        type="primary" 
+        :icon="Upload" 
+        :disabled="fileList.length >= limit"
+      >
+        上传文件
+      </el-button>
     </el-upload>
 
     <div v-if="showTip && !disabled" class="upload-tip">
@@ -234,7 +223,11 @@ const emitValue = () => {
     </div>
 
     <div v-if="fileList.length > 0" class="file-list">
-      <div v-for="(file, index) in fileList" :key="index" class="file-item">
+      <div
+        v-for="(file, index) in fileList"
+        :key="index"
+        class="file-item"
+      >
         <el-link :href="file.url" target="_blank" :underline="false">
           <span class="file-name">{{ file.name }}</span>
         </el-link>
@@ -251,54 +244,3 @@ const emitValue = () => {
     </div>
   </div>
 </template>
-
-<style scoped lang="scss">
-.upload-file {
-  // 💡 优化拖拽框的自适应宽度样式
-  :deep(.el-upload-dragger) {
-    padding: 20px;
-    background-color: #fafafa;
-
-    &:hover {
-      border-color: #409eff;
-    }
-  }
-
-  .upload-tip {
-    margin-top: 8px;
-    font-size: 12px;
-    color: #909399;
-  }
-
-  .file-list {
-    margin-top: 12px;
-
-    .file-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 12px;
-      margin-bottom: 8px;
-      background-color: #f5f7fa;
-      border: 1px solid #ebeef5;
-      border-radius: 4px;
-
-      &:hover {
-        background-color: #ecf5ff;
-        border-color: #c6e2ff;
-      }
-
-      .file-name {
-        display: inline-block;
-        max-width: 400px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-size: 14px;
-        color: #409eff;
-        white-space: nowrap;
-        cursor: pointer;
-      }
-    }
-  }
-}
-</style>

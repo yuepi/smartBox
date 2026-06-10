@@ -57,6 +57,16 @@ const routes: RouteRecordRaw[] = [
           },
         ],
       },
+       {
+            name: "OssManagement",
+            path: "/oss",
+            component: () => import("#/views/plat/system/oss/index.vue"),
+            meta: {
+              icon: "lucide:cloud-upload",
+              title: $t("page.system.oss") || "对象存储",
+              authority: ["plat:system:oss"],
+            },
+          },
     ],
   },
   {

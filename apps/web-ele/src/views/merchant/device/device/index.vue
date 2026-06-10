@@ -238,8 +238,6 @@ const screenshotLoading = ref(false);
 // 获取设备的仓口列表
 const hatchOptions = ref<{ id: number; name: string }[]>([]);
 
-
-
 async function submitUpgrade() {
   if (!upgradeFileUrl.value.trim()) {
     ElMessage.warning("请填写升级文件地址");
@@ -1649,7 +1647,7 @@ onMounted(() => {
     <el-dialog
       v-model="upgradeVisible"
       title="设备升级"
-      width="500px"
+      width="800px"
       append-to-body
     >
       <el-form label-width="100px">
@@ -1659,15 +1657,17 @@ onMounted(() => {
             placeholder="请输入升级文件下载地址"
             clearable
           />
+        </el-form-item>
 
-          <UploadFile
+         <UploadFile
             v-model="upgradeFile"
             :limit="1"
+            drag
+            webkitdirectory
             :file-size="200"
             :file-type="['bin', 'zip', 'hex']"
             @success="handleUploadSuccess"
           />
-        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="upgradeVisible = false">取消</el-button>
