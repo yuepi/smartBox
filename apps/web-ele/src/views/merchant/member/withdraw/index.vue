@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 
 import { Page } from "@vben/common-ui";
 
@@ -17,6 +17,10 @@ import {
   type MemberWithdrawPageParams,
   WithdrawStatusMap,
 } from "#/api/member/memberWithdraw";
+import {
+  getRecycleOrderPageApi,
+  type RecycleOrder,
+} from "#/api/operation/recycleOrder";
 import ColumnSelector from "#/components/ColumnSelector/index.vue";
 import DictTag from "#/components/DictTag/index.vue";
 import ExportFieldSelector from "#/components/ExportFieldSelector/index.vue";
@@ -26,13 +30,14 @@ import {
   type TableColumnConfig,
 } from "#/constants/tableColumns";
 import { useDicts } from "#/hooks/useDict";
-import { ModuleCodeMap, useExport } from "#/hooks/useExport";
+import { ModuleCodeMap } from "#/hooks/useExport";
+import { getRecentDays } from "#/utils/date";
 
-const { withdraw_status, audit_mode } = useDicts([
+const { withdraw_status, audit_mode, order_status } = useDicts([
   "withdraw_status",
   "audit_mode",
+  "order_status",
 ]);
-const { exporting, exportData } = useExport(ModuleCodeMap.WITHDRAW);
 
 // 表格列配置
 const columnConfig = ref<TableColumnConfig[]>([
@@ -46,25 +51,6 @@ function handleColumnsUpdate(newColumns: TableColumnConfig[]) {
 const visibleColumns = computed(() => {
   return columnConfig.value.filter((col) => col.visible);
 });
-
-const getExportableFields = computed(() => {
-  return visibleColumns.value.map((col) => ({
-    prop: col.key,
-    label: col.label,
-  }));
-});
-
-const exportFieldVisible = ref(false);
-const exportFields = ref<{ label: string; prop: string }[]>([]);
-
-function openExportSelector() {
-  exportFields.value = getExportableFields.value;
-  exportFieldVisible.value = true;
-}
-
-async function handleExportConfirm(selectedFields: string[]) {
-  await exportData(queryParams, selectedFields);
-}
 
 // --- 状态变量 ---
 const loading = ref(false);
@@ -110,7 +96,73 @@ const queryParams = reactive<MemberWithdrawPageParams>({
 });
 
 // 时间范围
-const dateRange = ref<[string, string] | null>(null);
+const dateRange = ref<string[]>([]);
+// 页面加载时设置默认时间（最近7天）
+function initDateRange() {
+  const { startTime, endTime } = getRecentDays(7);
+  console.log(startTime, endTime);
+  dateRange.value = [startTime, endTime];
+  queryParams.startTime = startTime;
+  queryParams.endTime = endTime;
+}
+
+// 监听时间范围变化
+watch(dateRange, (newVal) => {
+  if (newVal && newVal.length === 2) {
+    queryParams.startTime = newVal[0];
+    queryParams.endTime = newVal[1];
+  } else {
+    queryParams.startTime = undefined;
+    queryParams.endTime = undefined;
+  }
+});
+
+// 近期订单弹窗
+const recentOrdersVisible = ref(false);
+const recentOrdersLoading = ref(false);
+const recentOrdersData = ref<RecycleOrder[]>([]);
+const currentMemberId = ref<number>(0);
+const currentMemberName = ref("");
+
+// 近期订单查询参数
+const recentOrdersParams = reactive({
+  pageNo: 1,
+  pageSize: 10,
+  memberId: undefined as number | undefined,
+  startTime: "",
+  endTime: "",
+});
+
+// 查看近期订单
+async function handleViewRecentOrders(row: MemberWithdraw) {
+  currentMemberId.value = row.memberId;
+  currentMemberName.value = `会员ID: ${row.memberId}`;
+  recentOrdersVisible.value = true;
+  recentOrdersLoading.value = true;
+
+  // 获取最近7天的时间范围
+  const { startTime, endTime } = getRecentDays(7);
+  recentOrdersParams.memberId = row.memberId;
+  recentOrdersParams.startTime = startTime;
+  recentOrdersParams.endTime = endTime;
+  recentOrdersParams.pageNo = 1;
+
+  try {
+    const res = await getRecycleOrderPageApi(recentOrdersParams);
+    recentOrdersData.value = res.records || [];
+  } catch (error) {
+    console.error("获取近期订单失败", error);
+    ElMessage.error("获取近期订单失败");
+  } finally {
+    recentOrdersLoading.value = false;
+  }
+}
+
+// 关闭弹窗
+function closeRecentOrders() {
+  recentOrdersVisible.value = false;
+  recentOrdersData.value = [];
+}
 
 // --- 辅助函数 ---
 function getStatusText(status: number): string {
@@ -262,6 +314,7 @@ function resetQuery() {
 }
 
 onMounted(() => {
+  // initDateRange();
   loadData();
 });
 </script>
@@ -335,7 +388,12 @@ onMounted(() => {
 
           <el-form-item class="!mb-0 !mr-0 md:ml-auto flex items-center gap-1">
             <el-tooltip content="查询" placement="top">
-              <el-button type="primary" :icon="Search" circle @click="handleQuery" />
+              <el-button
+                type="primary"
+                :icon="Search"
+                circle
+                @click="handleQuery"
+              />
             </el-tooltip>
             <el-tooltip content="重置" placement="top">
               <el-button :icon="Refresh" circle @click="resetQuery" />
@@ -348,9 +406,11 @@ onMounted(() => {
       <el-card shadow="never" class="border-none !p-2">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-2">
-            <el-button :loading="exporting" @click="openExportSelector">
-              导出
-            </el-button>
+            <ExportButton
+              :module-code="ModuleCodeMap.WITHDRAW"
+              :fields="visibleColumns"
+              :find-cond="queryParams"
+            />
             <!-- <el-button
               type="danger"
               plain
@@ -360,8 +420,15 @@ onMounted(() => {
             >
               批量删除
             </el-button> -->
-            <span v-if="selectedIds.length > 0" class="text-xs text-gray-400 ml-2">
-              已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
+            <span
+              v-if="selectedIds.length > 0"
+              class="text-xs text-gray-400 ml-2"
+            >
+              已选
+              <span class="text-red-500 font-medium">{{
+                selectedIds.length
+              }}</span>
+              项
             </span>
           </div>
 
@@ -397,9 +464,21 @@ onMounted(() => {
             :show-overflow-tooltip="col.showOverflowTooltip || false"
           >
             <template #default="{ row }">
+              <!-- 近期订单 -->
+              <template v-if="col.key === 'recentOrder'">
+                <el-button
+                  type="primary"
+                  size="small"
+                  @click="handleViewRecentOrders(row)"
+                >
+                  查看订单
+                </el-button>
+              </template>
               <!-- 申请金额 -->
-              <template v-if="col.key === 'applyAmount'">
-                <span class="font-medium">{{ formatAmount(row.applyAmount) }}</span>
+              <template v-else-if="col.key === 'applyAmount'">
+                <span class="font-medium">{{
+                  formatAmount(row.applyAmount)
+                }}</span>
               </template>
               <!-- 服务费 -->
               <template v-else-if="col.key === 'platformFee'">
@@ -407,7 +486,9 @@ onMounted(() => {
               </template>
               <!-- 实际到账 -->
               <template v-else-if="col.key === 'realWithdrawAmount'">
-                <span class="text-success">{{ formatAmount(row.realWithdrawAmount) }}</span>
+                <span class="text-success">{{
+                  formatAmount(row.realWithdrawAmount)
+                }}</span>
               </template>
               <!-- 审核模式 -->
               <template v-else-if="col.key === 'auditMode'">
@@ -465,9 +546,19 @@ onMounted(() => {
           </el-table-column>
 
           <!-- 操作列固定写死 -->
-          <el-table-column label="操作" width="180" fixed="right" align="center">
+          <el-table-column
+            label="操作"
+            width="300"
+            fixed="right"
+            align="center"
+          >
             <template #default="{ row }">
-              <el-button link type="primary" :icon="View" @click="handleView(row)">
+              <el-button
+                link
+                type="primary"
+                :icon="View"
+                @click="handleView(row)"
+              >
                 详情
               </el-button>
               <el-button
@@ -479,7 +570,12 @@ onMounted(() => {
               >
                 审核
               </el-button>
-              <el-button link type="danger" :icon="Delete" @click="handleDelete(row)">
+              <el-button
+                link
+                type="danger"
+                :icon="Delete"
+                @click="handleDelete(row)"
+              >
                 删除
               </el-button>
             </template>
@@ -518,30 +614,20 @@ onMounted(() => {
     >
       <el-descriptions :column="2" border v-if="detailData">
         <el-descriptions-item label="提现单号" :span="2">
-{{
-          detailData.withdrawNo
-        }}
-</el-descriptions-item>
+          {{ detailData.withdrawNo }}
+        </el-descriptions-item>
         <el-descriptions-item label="会员ID">
-{{
-          detailData.memberId
-        }}
-</el-descriptions-item>
+          {{ detailData.memberId }}
+        </el-descriptions-item>
         <el-descriptions-item label="商户ID">
-{{
-          detailData.merchantId || "-"
-        }}
-</el-descriptions-item>
+          {{ detailData.merchantId || "-" }}
+        </el-descriptions-item>
         <el-descriptions-item label="申请金额">
-{{
-          formatAmount(detailData.applyAmount)
-        }}
-</el-descriptions-item>
+          {{ formatAmount(detailData.applyAmount) }}
+        </el-descriptions-item>
         <el-descriptions-item label="平台服务费">
-{{
-          formatAmount(detailData.platformFee)
-        }}
-</el-descriptions-item>
+          {{ formatAmount(detailData.platformFee) }}
+        </el-descriptions-item>
         <el-descriptions-item label="实际到账金额">
           <span class="font-bold text-success">{{
             formatAmount(detailData.realWithdrawAmount)
@@ -561,15 +647,11 @@ onMounted(() => {
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="审核人">
-{{
-          detailData.auditUserName || "-"
-        }}
-</el-descriptions-item>
+          {{ detailData.auditUserName || "-" }}
+        </el-descriptions-item>
         <el-descriptions-item label="审核时间">
-{{
-          detailData.auditTime || "-"
-        }}
-</el-descriptions-item>
+          {{ detailData.auditTime || "-" }}
+        </el-descriptions-item>
         <el-descriptions-item
           label="驳回原因"
           :span="2"
@@ -578,15 +660,11 @@ onMounted(() => {
           <span class="text-danger">{{ detailData.auditReason }}</span>
         </el-descriptions-item>
         <el-descriptions-item label="支付请求ID" :span="2">
-{{
-          detailData.payRequestId || "-"
-        }}
-</el-descriptions-item>
+          {{ detailData.payRequestId || "-" }}
+        </el-descriptions-item>
         <el-descriptions-item label="支付请求时间">
-{{
-          detailData.payRequestTime || "-"
-        }}
-</el-descriptions-item>
+          {{ detailData.payRequestTime || "-" }}
+        </el-descriptions-item>
       </el-descriptions>
       <template #footer>
         <el-button @click="detailVisible = false">关闭</el-button>
@@ -630,9 +708,78 @@ onMounted(() => {
           type="primary"
           :loading="auditSubmitting"
           @click="handleAuditSubmit"
+        >
+          确定
+        </el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 近期订单弹窗 -->
+    <el-dialog
+      v-model="recentOrdersVisible"
+      :title="`近期订单 - ${currentMemberName}`"
+      width="900px"
+      append-to-body
+      @close="closeRecentOrders"
+    >
+      <div v-loading="recentOrdersLoading">
+        <el-table :data="recentOrdersData" border stripe style="width: 100%">
+          <el-table-column
+            prop="orderNo"
+            label="订单编号"
+            min-width="200"
+            align="center"
+            show-overflow-tooltip
+          />
+          <el-table-column
+            prop="weight"
+            label="投递重量"
+            width="110"
+            align="center"
           >
-确定
-</el-button>
+            <template #default="{ row }">
+              {{ row.weight?.toFixed(2) || 0 }} kg
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="realAmount"
+            label="实际金额"
+            width="120"
+            align="center"
+          >
+            <template #default="{ row }">
+              <span class="font-medium text-primary">
+                ¥ {{ (row.realAmount || 0).toFixed(2) }}
+              </span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="orderStatus"
+            label="订单状态"
+            width="100"
+            align="center"
+          >
+            <template #default="{ row }">
+              <DictTag :options="order_status" :value="row.orderStatus" />
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="createdTime"
+            label="创建时间"
+            width="160"
+            align="center"
+          />
+        </el-table>
+
+        <div
+          v-if="recentOrdersData.length === 0 && !recentOrdersLoading"
+          class="text-center py-8"
+        >
+          <el-empty description="近7天暂无订单" :image-size="80" />
+        </div>
+      </div>
+      <template #footer>
+        <el-button @click="recentOrdersVisible = false">关闭</el-button>
       </template>
     </el-dialog>
   </Page>

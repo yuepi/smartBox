@@ -49,10 +49,8 @@ import { type Dept, getMerchantDeptListApi } from "#/api/system/dept";
 import AreaCascader from "#/components/AreaCascader/index.vue";
 import MapPicker from "#/components/MapPicker/index.vue";
 import { useDicts } from "#/hooks/useDict";
-import { ModuleCodeMap, useExport } from "#/hooks/useExport";
+import { ModuleCodeMap } from "#/hooks/useExport";
 const { device_brand, device_screen } = useDicts(["device_brand", "device_screen"]);
-
-const { exportData } = useExport(ModuleCodeMap.DEVICE);
 import UploadFile from "#/components/UploadFile/index.vue";
 import {
   defaultDeviceColumns,
@@ -72,27 +70,6 @@ function handleColumnsUpdate(newColumns: TableColumnConfig[]) {
 const visibleColumns = computed(() => {
   return columnConfig.value.filter((col) => col.visible);
 });
-
-// 可导出的字段
-const getExportableFields = computed(() => {
-  return visibleColumns.value.map((col) => ({
-    prop: col.key,
-    label: col.label,
-  }));
-});
-
-// 导出字段选择弹窗
-const exportFieldVisible = ref(false);
-const exportFields = ref<{ label: string; prop: string }[]>([]);
-
-function openExportSelector() {
-  exportFields.value = getExportableFields.value;
-  exportFieldVisible.value = true;
-}
-
-async function handleExportConfirm(selectedFields: string[]) {
-  await exportData(queryParams, selectedFields);
-}
 
 // --- 状态变量 ---
 const loading = ref(false);

@@ -6,6 +6,7 @@ import { Page } from "@vben/common-ui";
 import {
   Delete,
   DeleteFilled,
+  DocumentCopy,
   Edit,
   Plus,
   Refresh,
@@ -34,9 +35,9 @@ import {
   HATCH_STORAGE_KEY,
   type TableColumnConfig,
 } from "#/constants/tableColumns";
-import { ModuleCodeMap, useExport } from "#/hooks/useExport";
+import { ModuleCodeMap } from "#/hooks/useExport";
 
-const { exporting, exportData } = useExport(ModuleCodeMap.HATCH);
+import LogDialog from "./LogDialog.vue";
 
 // 表格列配置
 const columnConfig = ref<TableColumnConfig[]>([...defaultHatchColumns]);
@@ -49,23 +50,15 @@ const visibleColumns = computed(() => {
   return columnConfig.value.filter((col) => col.visible);
 });
 
-const getExportableFields = computed(() => {
-  return visibleColumns.value.map((col) => ({
-    prop: col.key,
-    label: col.label,
-  }));
-});
+// 日志弹窗相关
+const logDialogVisible = ref(false);
+const currentLogHatchId = ref(0);
+const currentLogHatchName = ref("");
 
-const exportFieldVisible = ref(false);
-const exportFields = ref<{ label: string; prop: string }[]>([]);
-
-function openExportSelector() {
-  exportFields.value = getExportableFields.value;
-  exportFieldVisible.value = true;
-}
-
-async function handleExportConfirm(selectedFields: string[]) {
-  await exportData(queryParams, selectedFields);
+function handleLog(row: DeviceHatch) {
+  currentLogHatchId.value = row.deviceHatchId;
+  currentLogHatchName.value = row.hatchName;
+  logDialogVisible.value = true;
 }
 
 // --- 状态变量 ---
@@ -281,7 +274,7 @@ onMounted(() => {
 
 <template>
   <Page auto-content-height>
-     <div class="p-0">
+    <div class="p-0">
       <!-- 查询表单 -->
       <el-card shadow="never" class="border-none mb-4 !p-2">
         <el-form
@@ -347,7 +340,12 @@ onMounted(() => {
 
           <el-form-item class="!mb-0 !mr-0 md:ml-auto flex items-center gap-1">
             <el-tooltip content="查询" placement="top">
-              <el-button type="primary" :icon="Search" circle @click="handleQuery" />
+              <el-button
+                type="primary"
+                :icon="Search"
+                circle
+                @click="handleQuery"
+              />
             </el-tooltip>
             <el-tooltip content="重置" placement="top">
               <el-button :icon="Refresh" circle @click="resetQuery" />
@@ -363,9 +361,11 @@ onMounted(() => {
             <el-button type="primary" :icon="Plus" @click="handleAdd">
               新增仓口
             </el-button>
-            <el-button :loading="exporting" @click="openExportSelector">
-              导出
-            </el-button>
+            <ExportButton
+            :module-code="ModuleCodeMap.DEVICE_HATCH"
+            :fields="visibleColumns"
+            :find-cond="queryParams"
+          />
             <el-button
               type="danger"
               plain
@@ -375,8 +375,15 @@ onMounted(() => {
             >
               批量删除
             </el-button>
-            <span v-if="selectedIds.length > 0" class="text-xs text-gray-400 ml-2">
-              已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
+            <span
+              v-if="selectedIds.length > 0"
+              class="text-xs text-gray-400 ml-2"
+            >
+              已选
+              <span class="text-red-500 font-medium">{{
+                selectedIds.length
+              }}</span>
+              项
             </span>
           </div>
 
@@ -469,15 +476,43 @@ onMounted(() => {
           </el-table-column>
 
           <!-- 操作列固定写死 -->
-          <el-table-column label="操作" width="240" fixed="right" align="center">
+          <el-table-column
+            label="操作"
+            width="300"
+            fixed="right"
+            align="center"
+          >
             <template #default="{ row }">
-              <el-button link type="warning" :icon="DeleteFilled" @click="handleClean(row)">
+              <el-button
+                link
+                type="info"
+                :icon="DocumentCopy"
+                @click="handleLog(row)"
+              >
+                日志
+              </el-button>
+              <el-button
+                link
+                type="warning"
+                :icon="DeleteFilled"
+                @click="handleClean(row)"
+              >
                 清空
               </el-button>
-              <el-button link type="primary" :icon="Edit" @click="handleEdit(row)">
+              <el-button
+                link
+                type="primary"
+                :icon="Edit"
+                @click="handleEdit(row)"
+              >
                 编辑
               </el-button>
-              <el-button link type="danger" :icon="Delete" @click="handleDelete(row)">
+              <el-button
+                link
+                type="danger"
+                :icon="Delete"
+                @click="handleDelete(row)"
+              >
                 删除
               </el-button>
             </template>
@@ -500,6 +535,12 @@ onMounted(() => {
       </el-card>
     </div>
 
+    <!-- 日志弹窗组件 -->
+    <LogDialog
+      v-model:visible="logDialogVisible"
+      :device-hatch-id="currentLogHatchId"
+      :device-hatch-name="currentLogHatchName"
+    />
 
     <ExportFieldSelector
       v-model:visible="exportFieldVisible"
@@ -602,9 +643,9 @@ onMounted(() => {
           type="primary"
           :loading="formSubmitting"
           @click="handleSubmit"
-          >
-确定
-</el-button>
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
   </Page>

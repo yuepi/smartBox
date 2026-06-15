@@ -23,6 +23,7 @@ export const defaultMemberWithdrawColumns: TableColumnConfig[] = [
   { key: 'memberId', label: '会员ID', visible: true, width: 80, align: 'center' },
   // { key: 'merchantId', label: '商户ID', visible: false, width: 80, align: 'center' },
   { key: 'applyAmount', label: '申请金额', visible: true, width: 120, align: 'right' },
+  { key: 'recentOrder', label: '近期订单', visible: true, width: 120, align: 'center' },
   { key: 'platformFee', label: '服务费', visible: true, width: 100, align: 'right' },
   { key: 'realWithdrawAmount', label: '实际到账', visible: true, width: 120, align: 'right' },
   { key: 'auditMode', label: '审核模式', visible: true, width: 120, align: 'center' },
@@ -33,4 +34,5 @@ export const defaultMemberWithdrawColumns: TableColumnConfig[] = [
   { key: 'payRequestTime', label: '支付请求时间', visible: true, width: 160, align: 'center' },
   { key: 'status', label: '提现状态', visible: true, width: 100, align: 'center' },
   { key: 'createTime', label: '申请时间', visible: true, width: 160, align: 'center' },
+  
 ];

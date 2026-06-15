@@ -458,33 +458,6 @@ async function handleSaveConfig() {
   }
 }
 
-// 充值订单详情
-function handleViewRecharge(row: MerchantRecharge) {
-  rechargeDetail.value = row;
-  rechargeDetailVisible.value = true;
-}
-
-// 重置查询
-function resetRechargeQuery() {
-  rechargeParams.rechargeNo = undefined;
-  rechargeParams.status = undefined;
-  rechargeParams.refundStatus = undefined;
-  rechargeDateRange.value = [];
-  rechargeParams.startTime = undefined;
-  rechargeParams.endTime = undefined;
-  rechargeParams.pageNo = 1;
-  loadRechargeData();
-}
-
-function resetFlowQuery() {
-  flowParams.changeType = undefined;
-  flowDateRange.value = [];
-  flowParams.startTime = undefined;
-  flowParams.endTime = undefined;
-  flowParams.pageNo = 1;
-  loadFlowData();
-}
-
 // 监听 Tab 切换，懒加载数据
 watch(activeTab, (newTab) => {
   if (newTab === "account" && !accountInfo.value) {

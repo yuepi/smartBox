@@ -59,6 +59,12 @@ export interface RecycleOrderPageParams {
   deviceId?: number;
   orderStatus?: number;
   payStatus?: number;
+  memberId?: number;
+  phoneMember?: string;
+  startTime?: string;
+  endTime?: string;
+  deviceNo?: string;
+  deviceName?: string;
 }
 
 /** 1. 分页查询 */

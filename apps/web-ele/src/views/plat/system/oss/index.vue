@@ -15,6 +15,8 @@ import {
 import OSS from "ali-oss";
 import { ElLoading, ElMessage, ElMessageBox } from "element-plus";
 
+
+
 // 定义文件/文件夹数据结构
 interface OssItem {
   name: string; // 显示的名字
@@ -111,10 +113,17 @@ async function getOssClient() {
     region: REGION,
     accessKeyId: ADMIN_ACCESS_KEY_ID,
     accessKeySecret: ADMIN_ACCESS_KEY_SECRET,
-    // stsToken: credentials.securityToken, // 上线时解开此行，即可安全使用临时鉴权
     bucket: BUCKET_NAME,
     secure: true,
   });
+  //  return new OSS({
+  //   region: cleanRegion,
+  //   accessKeyId: credentials.accessKeyId,
+  //   accessKeySecret: credentials.accessKeySecret,
+  //   stsToken: credentials.securityToken, // 上线时解开此行，即可安全使用临时鉴权
+  //   bucket: credentials.ossBucketName,
+  //   secure: true,
+  // });
 }
 
 // 2. 加载当前目录下的文件和文件夹列表
