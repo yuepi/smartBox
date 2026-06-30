@@ -19,7 +19,9 @@ export interface User {
   superAdminFlag: number; // 0=否,1=是
   identify: string; // 用户身份标识: 0=普通用户,1=清运人员,2=分拣人员,3=回收员,4=设备管理员
   status: number; // 0=启用,1=禁用
-  roles?: UserRole[];
+  userroles?: UserRole[];
+  deptIds?: number[];
+  
 }
 
 // 分页查询参数

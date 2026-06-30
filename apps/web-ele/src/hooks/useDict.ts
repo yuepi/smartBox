@@ -1,13 +1,14 @@
 // hooks/useDict.ts
 import type { DictDataOption } from '#/api/system/dict/dictData';
 
-import { ref, type Ref } from 'vue';
+import { ref } from 'vue';
+import type { Ref } from 'vue';
 
 import { getDictDataByCodeApi } from '#/api/system/dict/dictData';
 import { useDictStore } from '#/store/modules/dict';
 
 // 正在请求中的字典（用于去重）
-const pendingRequests = new Map<string, Promise<any>>();
+const pendingRequests = new Map<string, Promise<DictDataOption[]>>();
 
 function getTagTypeByValue(value: number): DictDataOption['elTagType'] {
   const typeMap: Record<number, any> = {
@@ -31,59 +32,50 @@ export function useDicts<T extends string>(dictCodes: T[]): Record<T, Ref<DictDa
   const dictStore = useDictStore();
   const result = {} as Record<T, Ref<DictDataOption[]>>;
 
-  // 需要请求的字典编码
-  const needFetchCodes: T[] = [];
-
-  dictCodes.forEach(code => {
-    // 创建响应式数据
+  dictCodes.forEach((code) => {
+    // 1. 每个人来，都得到一个独立的、属于自己组件的响应式 ref
     const options = ref<DictDataOption[]>([]);
     result[code] = options;
 
-    // 先从 store 获取缓存
+    // 2. 检查 Pinia 缓存
     const cached = dictStore.getDict(code);
     if (cached) {
       options.value = cached;
-    } else {
-      needFetchCodes.push(code);
+      return; // 命中了就直接返回，不走下面的异步逻辑
     }
-  });
-
-  // 有需要请求的字典才发请求
-  if (needFetchCodes.length > 0) {
-    // 使用相同的请求标识，避免重复请求
-    const requestKey = needFetchCodes.sort().join(',');
     
-    if (!pendingRequests.has(requestKey)) {
-      const promise = Promise.all(
-        needFetchCodes.map(code => getDictDataByCodeApi(code))
-      ).then((results) => {
-        needFetchCodes.forEach((code, index) => {
-          const res = results[index];
+    let fetchPromise = pendingRequests.get(code);
+
+    if (!fetchPromise) {
+      // 如果全局还没有人请求这个 code，则发起真正的 API 请求
+      fetchPromise = getDictDataByCodeApi(code)
+        .then((res) => {
           if (res && Array.isArray(res)) {
             const dictOptions = res.map((item) => ({
               label: item.itemLabel,
               value: item.itemValue,
               elTagType: getTagTypeByValue(item.itemValue),
-              elTagClass: item.listClass ,
+              elTagClass: item.listClass,
             }));
-            result[code].value = dictOptions;
+            // 同步到 Pinia 供下次使用
             dictStore.setDict(code, dictOptions);
-          } else {
-            result[code].value = [];
+            return dictOptions;
           }
+          return [] as DictDataOption[];
+        })
+        .catch(() => [] as DictDataOption[])
+        .finally(() => {
+          // 请求一旦结束，不论成功失败，从请求锁中移除
+          pendingRequests.delete(code);
         });
-      }).finally(() => {
-        pendingRequests.delete(requestKey);
-      });
-      
-      pendingRequests.set(requestKey, promise);
+
+      pendingRequests.set(code, fetchPromise);
     }
-    
-    // 等待请求完成
-    pendingRequests.get(requestKey)!.then(() => {
-      // 数据已经在 then 中设置，这里不需要额外操作
+
+    fetchPromise.then((data) => {
+      options.value = data;
     });
-  }
+  });
 
   return result;
 }

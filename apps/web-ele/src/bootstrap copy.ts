@@ -7,14 +7,15 @@ import { initStores } from '@vben/stores';
 import '@vben/styles';
 import '@vben/styles/ele';
 
+import * as ElementPlusIconsVue from '@element-plus/icons-vue';
 import { useTitle } from '@vueuse/core';
 import { ElLoading } from 'element-plus';
+import ElementPlus from 'element-plus';
+import zhCn from 'element-plus/es/locale/lang/zh-cn';
 
-import BaseTableLayout from '#/components/BaseTableLayout/index.vue';
 import ColumnSelector from '#/components/ColumnSelector/index.vue';
 import DictTag from '#/components/DictTag/index.vue';
 import ExportButton from '#/components/ExportButton/index.vue';
-import { setupGlobalComponent } from '#/components/global';
 import { $t, setupI18n } from '#/locales';
 
 import { initComponentAdapter } from './adapter/component';
@@ -42,17 +43,22 @@ async function bootstrap(namespace: string) {
   // });
   const app = createApp(App);
 
-  app.component('DictTag', DictTag);
-  app.component('ExportButton', ExportButton);
-  app.component('ColumnSelector', ColumnSelector);
-  app.component('BaseTableLayout', BaseTableLayout);
+  // 注册Element Plus组件
+  app.use(ElementPlus, {
+    locale: zhCn,
+  });
 
-  // 全局组件
-  // setupGlobalComponent(app);
+  for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+    app.component(key, component);
+  }
 
   window._AMapSecurityConfig = {
     securityJsCode: 'a86b98b035ae5281d0217de05d841fe2',
   };
+
+  app.component('DictTag', DictTag);
+  app.component('ExportButton', ExportButton);
+  app.component('ColumnSelector', ColumnSelector);
 
   // 注册Element Plus提供的v-loading指令
   app.directive('loading', ElLoading.directive);

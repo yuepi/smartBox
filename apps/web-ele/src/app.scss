@@ -1,0 +1,171 @@
+.default-theme .splitpanes__splitter {
+  background-color: #f1f3f6 !important;
+}
+
+.dark .default-theme .splitpanes__pane {
+  background-color: #2a2a2a !important;
+}
+
+.dark .default-theme .splitpanes__splitter {
+  margin-left: 0 !important;
+  background-color: #14161a !important;
+  border: 0 !important;
+}
+
+.dark .splitpanes.default-theme .splitpanes__splitter::before,
+.dark .splitpanes.default-theme .splitpanes__splitter::after {
+  background-color: #605858 !important;
+}
+
+.more-button {
+  width: 38px;
+  padding-left: 17px;
+  color: #409eff;
+  border: 1px dashed #409eff;
+}
+
+.more-params {
+  padding-top: 8px;
+  margin-bottom: 8px;
+  border: 1px dashed #409eff;
+}
+
+.more-params .el-form-item {
+  margin-bottom: 8px;
+}
+
+//card去除阴影
+.el-card.is-always-shadow,
+.el-card.is-hover-shadow:focus,
+.el-card.is-hover-shadow:hover {
+  box-shadow: none;
+}
+
+.el-card__header {
+  padding: 8px !important;
+}
+
+.el-card__body {
+  padding: 8px !important;
+}
+
+.nopadding .el-card__body {
+  padding: 0 !important;
+}
+
+//list表格可连接文字
+.link_span {
+  cursor: pointer;
+  color: #3e9ece;
+  //color: hsl(var(--primary))
+}
+
+/* Drawer 抽屉 ------------------------------- */
+.el-drawer {
+  --el-drawer-padding-primary: unset !important;
+  .el-drawer__header {
+    padding: 0 15px !important;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 0 !important;
+    border-bottom: 1px solid var(--el-border-color);
+    color: var(--el-text-color-primary);
+  }
+  .el-drawer__body {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    padding: 16px 16px;
+  }
+}
+
+//表单flex佈局
+.zform {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.zform .el-form-item {
+  box-sizing: border-box;
+  width: 100%;
+  padding-right: 10px; /* 可选的间距 */
+  margin-right: 0;
+}
+
+//表单表格样式
+.zgrid {
+  border-top: 1px solid #d2d2d2;
+  border-right: 1px solid #d2d2d2;
+}
+
+.dark .zgrid {
+  border-top: 1px solid #6a6464;
+  border-right: 1px solid #6a6464;
+}
+
+.zgrid .el-form-item {
+  margin: 0;
+  padding: 0;
+  border-left: 1px solid #d2d2d2;
+  border-bottom: 1px solid #d2d2d2;
+}
+
+.zgrid .zgrid-item {
+  margin: 0;
+  padding: 0;
+  border-left: 1px solid #d2d2d2;
+  border-bottom: 1px solid #d2d2d2;
+}
+
+.dark .zgrid .el-form-item {
+  border-left: 1px solid #6a6464;
+  border-bottom: 1px solid #6a6464;
+}
+
+.zgrid .el-form-item .el-form-item__label {
+  height: auto !important;
+  background-color: #f6f6f6;
+  line-height: 38px;
+  padding: 0 6px 0 6px;
+}
+
+.dark .zgrid .el-form-item .el-form-item__label {
+  background-color: #1c1e23;
+}
+
+.zgrid .el-form-item .el-form-item__content {
+  padding: 4px 6px;
+  background-color: white;
+  border-left: 1px solid #d2d2d2;
+}
+
+.dark .zgrid .el-form-item .el-form-item__content {
+  background-color: #1c1e23;
+  border-left: 1px solid #6a6464;
+}
+
+// 优雅的已选择行提示徽章
+.selected-alert-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  font-size: 12px;
+  color: #64748b;
+  background-color: #f1f5f9;
+  border-radius: 20px;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+
+  .dark & {
+    color: #94a3b8;
+    background-color: #334155;
+  }
+
+  .count-highlight {
+    margin: 0 3px;
+    font-weight: 600;
+    color: #ef4444;
+  }
+}

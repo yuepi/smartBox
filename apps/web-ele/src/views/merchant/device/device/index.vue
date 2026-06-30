@@ -50,13 +50,18 @@ import AreaCascader from "#/components/AreaCascader/index.vue";
 import MapPicker from "#/components/MapPicker/index.vue";
 import { useDicts } from "#/hooks/useDict";
 import { ModuleCodeMap } from "#/hooks/useExport";
-const { device_brand, device_screen } = useDicts(["device_brand", "device_screen"]);
+const { device_brand, device_screen } = useDicts([
+  "device_brand",
+  "device_screen",
+]);
 import UploadFile from "#/components/UploadFile/index.vue";
+import UploadImage from "#/components/UploadImage/index.vue";
 import {
   defaultDeviceColumns,
   DEVICE_STORAGE_KEY,
   type TableColumnConfig,
 } from "#/constants/tableColumns";
+
 
 // 表格列配置
 const columnConfig = ref<TableColumnConfig[]>([...defaultDeviceColumns]);
@@ -192,6 +197,16 @@ const upgradeFile = ref<File | null>(null);
 const upgradeUploading = ref(false);
 const upgradeFileUrl = ref("");
 
+const logoList = computed({
+  get: () => {
+    if (!formData.value.logo) return [];
+    return [formData.value.logo];
+  },
+  set: (val: string[]) => {
+    formData.value.logo = val.length > 0 ? val[0] : '';
+  },
+});
+
 // 操作类型选项
 const operationTypeOptions = [
   { label: "开仓口", value: 0, needHatch: true },
@@ -223,7 +238,11 @@ async function submitUpgrade() {
 
   upgradeUploading.value = true;
   try {
-    await deviceUpgradeApi(upgradeDeviceId.value, upgradeFile.value, upgradeFileUrl.value);
+    await deviceUpgradeApi(
+      upgradeDeviceId.value,
+      upgradeFile.value,
+      upgradeFileUrl.value
+    );
     ElMessage.success("升级指令已发送");
     upgradeVisible.value = false;
     upgradeFileUrl.value = "";
@@ -1382,6 +1401,18 @@ onMounted(() => {
               />
             </el-form-item>
 
+            <el-form-item label="设备Logo">
+              <UploadImage
+                v-model="logoList"
+                :limit="1"
+                :file-size="5"
+                :file-type="['png', 'jpg', 'jpeg']"
+              />
+              <div class="text-gray-400 text-xs mt-1">
+                建议尺寸：200*200px，支持png、jpg、jpeg格式，大小不超过5MB
+              </div>
+            </el-form-item>
+
             <el-form-item label="详细地址">
               <el-input
                 v-model="formData.detailAddress"
@@ -1636,15 +1667,15 @@ onMounted(() => {
           />
         </el-form-item>
 
-         <UploadFile
-            v-model="upgradeFile"
-            :limit="1"
-            drag
-            webkitdirectory
-            :file-size="200"
-            :file-type="['bin', 'zip', 'hex']"
-            @success="handleUploadSuccess"
-          />
+        <UploadFile
+          v-model="upgradeFile"
+          :limit="1"
+          drag
+          webkitdirectory
+          :file-size="200"
+          :file-type="['bin', 'zip', 'hex']"
+          @success="handleUploadSuccess"
+        />
       </el-form>
       <template #footer>
         <el-button @click="upgradeVisible = false">取消</el-button>

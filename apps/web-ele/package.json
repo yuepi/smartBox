@@ -55,6 +55,8 @@
   },
   "devDependencies": {
     "@types/qrcode": "catalog:",
-    "unplugin-element-plus": "catalog:"
+    "unplugin-auto-import": "^21.0.0",
+    "unplugin-element-plus": "catalog:",
+    "unplugin-vue-components": "^32.1.0"
   }
 }
