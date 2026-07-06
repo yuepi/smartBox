@@ -988,7 +988,7 @@ onMounted(() => {
             已选
             <span class="text-red-500 font-medium">{{
               selectedIds.length
-            }}</span>
+              }}</span>
             项
           </span>
         </div>
@@ -1009,9 +1009,14 @@ onMounted(() => {
           :width="typeof col.width === 'number' ? col.width : undefined" :min-width="col.minWidth" :align="col.align"
           :show-overflow-tooltip="col.showOverflowTooltip || false">
           <template #default="{ row }">
+           
             <!-- 设备类型 -->
             <template v-if="col.key === 'deviceHatchType'">
               {{ getHatchTypeText(row.deviceHatchType) }}
+            </template>
+             <!-- 设备品牌 -->
+            <template v-else-if="col.key === 'deviceBrand'">
+              <DictTag :options="device_brand" :value="row.deviceBrand" />
             </template>
             <!-- 在线状态 -->
             <template v-else-if="col.key === 'onlineStatus'">
