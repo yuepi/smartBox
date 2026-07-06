@@ -202,6 +202,7 @@ const operationTypeOptions = [
   { label: "开门行程", value: 12, needHatch: false },
 ];
 
+
 // 屏幕截图轮询相关
 const screenshotPollingTimer = ref<null | ReturnType<typeof setInterval>>(null);
 const screenshotImageUrl = ref("");
