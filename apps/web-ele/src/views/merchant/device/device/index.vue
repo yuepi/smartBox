@@ -15,37 +15,18 @@ import {
 } from "@element-plus/icons-vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 
-import {
-  addDeviceApi,
-  batchDownDeviceQrcodeFileApi,
-  batchDownDeviceQrcodeJsonApi,
-  changeDeviceServerIpPortApi,
-  deleteDeviceApi,
-  type Device,
-  type DevicePageParams,
-  deviceUpgradeApi,
-  downOneDeviceQrcodeFileApi,
-  downOneDeviceQrcodeJsonApi,
-  editDeviceApi,
-  getDeviceDetailApi,
-  getDevicePageApi,
-  operateDeviceApi,
-  type QrcodeData,
-} from "#/api/device/device";
-import {
-  type DeviceConfig,
-  getDeviceConfigListApi,
-} from "#/api/device/deviceConfig";
-import {
-  type DeviceHatch,
-  getDeviceHatchListApi,
-} from "#/api/device/deviceHatch";
-import {
-  type DevicePackage,
-  getDevicePackageListApi,
-} from "#/api/device/devicePackage";
-import { getQrcodeListApi, type Qrcode } from "#/api/device/qrCode";
-import { type Dept, getMerchantDeptListApi } from "#/api/system/dept";
+import { addDeviceApi, batchDownDeviceQrcodeFileApi, batchDownDeviceQrcodeJsonApi, changeDeviceServerIpPortApi, deleteDeviceApi, deviceUpgradeApi, downOneDeviceQrcodeFileApi, downOneDeviceQrcodeJsonApi, editDeviceApi, getDeviceDetailApi, getDevicePageApi, operateDeviceApi } from '#/api/device/device';
+import type { Device, DevicePageParams, QrcodeData } from '#/api/device/device';
+import { getDeviceConfigListApi } from '#/api/device/deviceConfig';
+import type { DeviceConfig } from '#/api/device/deviceConfig';
+import { getDeviceHatchListApi } from '#/api/device/deviceHatch';
+import type { DeviceHatch } from '#/api/device/deviceHatch';
+import { getDevicePackageListApi } from '#/api/device/devicePackage';
+import type { DevicePackage } from '#/api/device/devicePackage';
+import { getQrcodeListApi } from '#/api/device/qrCode';
+import type { Qrcode } from '#/api/device/qrCode';
+import { getMerchantDeptListApi } from '#/api/system/dept';
+import type { Dept } from '#/api/system/dept';
 import AreaCascader from "#/components/AreaCascader/index.vue";
 import MapPicker from "#/components/MapPicker/index.vue";
 import { useDicts } from "#/hooks/useDict";
@@ -56,11 +37,9 @@ const { device_brand, device_screen } = useDicts([
 ]);
 import UploadFile from "#/components/UploadFile/index.vue";
 import UploadImage from "#/components/UploadImage/index.vue";
-import {
-  defaultDeviceColumns,
-  DEVICE_STORAGE_KEY,
-  type TableColumnConfig,
-} from "#/constants/tableColumns";
+import DetailModal from './detail.vue';
+import { defaultDeviceColumns, DEVICE_STORAGE_KEY } from '#/constants/tableColumns';
+import type { TableColumnConfig } from '#/constants/tableColumns';
 
 
 // 表格列配置
@@ -75,6 +54,7 @@ function handleColumnsUpdate(newColumns: TableColumnConfig[]) {
 const visibleColumns = computed(() => {
   return columnConfig.value.filter((col) => col.visible);
 });
+const detailModalRef = ref();
 
 // --- 状态变量 ---
 const loading = ref(false);
@@ -219,6 +199,7 @@ const operationTypeOptions = [
   { label: "屏幕截图", value: 7, needHatch: false },
   { label: "开仓门灯", value: 8, needHatch: false },
   { label: "关仓门灯", value: 9, needHatch: false },
+  { label: "开门行程", value: 12, needHatch: false },
 ];
 
 // 屏幕截图轮询相关
@@ -708,13 +689,7 @@ async function loadData() {
 
 // --- 详情 ---
 async function handleView(row: Device) {
-  try {
-    const res = await getDeviceDetailApi(row.deviceId);
-    detailData.value = res;
-    detailVisible.value = true;
-  } catch {
-    ElMessage.error("获取详情失败");
-  }
+  detailModalRef.value?.open(row);
 }
 
 // --- 地图选点变化 ---
@@ -933,36 +908,18 @@ onMounted(() => {
   <Page auto-content-height>
     <!-- 查询表单 -->
     <el-card shadow="never" class="border-none mb-4 !p-2">
-      <el-form
-        :inline="true"
-        :model="queryParams"
-        class="flex flex-wrap gap-x-2 gap-y-2 items-center"
-      >
+      <el-form :inline="true" :model="queryParams" class="flex flex-wrap gap-x-2 gap-y-2 items-center">
         <el-form-item class="!mb-0 !mr-2">
-          <el-tree-select
-            v-model="queryParams.deptId"
-            :data="deptOptions"
-            :props="{
-              value: 'deptId',
-              label: 'deptName',
-              children: 'children',
-            }"
-            placeholder="请选择"
-            clearable
-            check-strictly
-            style="width: 200px"
-            class="tree-prefix-dept"
-          />
+          <el-tree-select v-model="queryParams.deptId" :data="deptOptions" :props="{
+            value: 'deptId',
+            label: 'deptName',
+            children: 'children',
+          }" placeholder="请选择" clearable check-strictly style="width: 200px" class="tree-prefix-dept" />
         </el-form-item>
 
         <el-form-item class="!mb-0 !mr-2">
-          <el-input
-            v-model="queryParams.deviceName"
-            placeholder="请输入"
-            clearable
-            style="width: 200px"
-            @keyup.enter="handleQuery"
-          >
+          <el-input v-model="queryParams.deviceName" placeholder="请输入" clearable style="width: 200px"
+            @keyup.enter="handleQuery">
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">设备名称:</span>
             </template>
@@ -970,13 +927,8 @@ onMounted(() => {
         </el-form-item>
 
         <el-form-item class="!mb-0 !mr-2">
-          <el-input
-            v-model="queryParams.deviceNo"
-            placeholder="请输入"
-            clearable
-            style="width: 200px"
-            @keyup.enter="handleQuery"
-          >
+          <el-input v-model="queryParams.deviceNo" placeholder="请输入" clearable style="width: 200px"
+            @keyup.enter="handleQuery">
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">设备编号:</span>
             </template>
@@ -984,13 +936,8 @@ onMounted(() => {
         </el-form-item>
 
         <el-form-item class="!mb-0 !mr-2">
-          <el-input
-            v-model="queryParams.qrCode"
-            placeholder="请输入"
-            clearable
-            style="width: 200px"
-            @keyup.enter="handleQuery"
-          >
+          <el-input v-model="queryParams.qrCode" placeholder="请输入" clearable style="width: 200px"
+            @keyup.enter="handleQuery">
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">面贴编号:</span>
             </template>
@@ -998,49 +945,26 @@ onMounted(() => {
         </el-form-item>
 
         <el-form-item class="!mb-0 !mr-2">
-          <el-select
-            v-model="queryParams.onlineStatus"
-            clearable
-            style="width: 200px"
-          >
+          <el-select v-model="queryParams.onlineStatus" clearable style="width: 200px">
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">在线状态:</span>
             </template>
-            <el-option
-              v-for="item in onlineStatusOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
+            <el-option v-for="item in onlineStatusOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
 
         <el-form-item class="!mb-0 !mr-2">
-          <el-select
-            v-model="queryParams.status"
-            clearable
-            style="width: 200px"
-          >
+          <el-select v-model="queryParams.status" clearable style="width: 200px">
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">状态:</span>
             </template>
-            <el-option
-              v-for="item in statusOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
+            <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
 
         <el-form-item class="!mb-0 !mr-0 md:ml-auto flex items-center gap-1">
           <el-tooltip content="查询" placement="top">
-            <el-button
-              type="primary"
-              :icon="Search"
-              circle
-              @click="handleQuery"
-            />
+            <el-button type="primary" :icon="Search" circle @click="handleQuery" />
           </el-tooltip>
           <el-tooltip content="重置" placement="top">
             <el-button :icon="Refresh" circle @click="resetQuery" />
@@ -1056,24 +980,11 @@ onMounted(() => {
           <el-button type="primary" :icon="Plus" @click="handleAdd">
             新增设备
           </el-button>
-          <ExportButton
-            :module-code="ModuleCodeMap.DEVICE"
-            :fields="visibleColumns"
-            :find-cond="queryParams"
-          />
-          <el-button
-            type="danger"
-            plain
-            :icon="Delete"
-            :disabled="selectedIds.length === 0"
-            @click="handleDelete()"
-          >
+          <ExportButton :module-code="ModuleCodeMap.DEVICE" :fields="visibleColumns" :find-cond="queryParams" />
+          <el-button type="danger" plain :icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete()">
             批量删除
           </el-button>
-          <span
-            v-if="selectedIds.length > 0"
-            class="text-xs text-gray-400 ml-2"
-          >
+          <span v-if="selectedIds.length > 0" class="text-xs text-gray-400 ml-2">
             已选
             <span class="text-red-500 font-medium">{{
               selectedIds.length
@@ -1083,36 +994,20 @@ onMounted(() => {
         </div>
 
         <div class="flex items-center">
-          <ColumnSelector
-            :storage-key="DEVICE_STORAGE_KEY"
-            :default-columns="defaultDeviceColumns"
-            @update:columns="handleColumnsUpdate"
-          />
+          <ColumnSelector :storage-key="DEVICE_STORAGE_KEY" :default-columns="defaultDeviceColumns"
+            @update:columns="handleColumnsUpdate" />
         </div>
       </div>
 
-      <el-table
-        v-loading="loading"
-        :data="tableData"
-        border
-        stripe
-        style="width: 100%"
-        @selection-change="handleSelectionChange"
-      >
+      <el-table v-loading="loading" :data="tableData" border stripe style="width: 100%"
+        @selection-change="handleSelectionChange">
         <!-- 选择列固定写死 -->
         <el-table-column type="selection" width="55" align="center" />
 
         <!-- 动态数据列 -->
-        <el-table-column
-          v-for="col in visibleColumns"
-          :key="col.key"
-          :prop="col.key"
-          :label="col.label"
-          :width="typeof col.width === 'number' ? col.width : undefined"
-          :min-width="col.minWidth"
-          :align="col.align"
-          :show-overflow-tooltip="col.showOverflowTooltip || false"
-        >
+        <el-table-column v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
+          :width="typeof col.width === 'number' ? col.width : undefined" :min-width="col.minWidth" :align="col.align"
+          :show-overflow-tooltip="col.showOverflowTooltip || false">
           <template #default="{ row }">
             <!-- 设备类型 -->
             <template v-if="col.key === 'deviceHatchType'">
@@ -1120,19 +1015,13 @@ onMounted(() => {
             </template>
             <!-- 在线状态 -->
             <template v-else-if="col.key === 'onlineStatus'">
-              <el-tag
-                :type="getOnlineStatusType(row.onlineStatus)"
-                size="small"
-              >
+              <el-tag :type="getOnlineStatusType(row.onlineStatus)" size="small">
                 {{ getOnlineStatusText(row.onlineStatus) }}
               </el-tag>
             </template>
             <!-- 状态 -->
             <template v-else-if="col.key === 'status'">
-              <el-tag
-                :type="row.status === 0 ? 'success' : 'danger'"
-                size="small"
-              >
+              <el-tag :type="row.status === 0 ? 'success' : 'danger'" size="small">
                 {{ getStatusText(row.status) }}
               </el-tag>
             </template>
@@ -1140,12 +1029,8 @@ onMounted(() => {
             <template v-else-if="col.key === 'qrCode'">
               <div class="flex items-center justify-center gap-1">
                 <span>{{ row.qrCode || "-" }}</span>
-                <el-icon
-                  v-if="row.qrCode"
-                  class="cursor-pointer text-primary hover:text-primary-dark"
-                  title="查看二维码"
-                  @click.stop="handleQrcodeShow(row)"
-                >
+                <el-icon v-if="row.qrCode" class="cursor-pointer text-primary hover:text-primary-dark" title="查看二维码"
+                  @click.stop="handleQrcodeShow(row)">
                   <Picture />
                 </el-icon>
               </div>
@@ -1165,28 +1050,13 @@ onMounted(() => {
         <el-table-column label="操作" width="400" fixed="right" align="center">
           <template #default="{ row }">
             <div class="action-buttons">
-              <el-button
-                link
-                type="primary"
-                :icon="Monitor"
-                @click="handleView(row)"
-              >
+              <el-button link type="primary" :icon="Monitor" @click="handleView(row)">
                 详情
               </el-button>
-              <el-button
-                link
-                type="primary"
-                :icon="Edit"
-                @click="handleEdit(row)"
-              >
+              <el-button link type="primary" :icon="Edit" @click="handleEdit(row)">
                 编辑
               </el-button>
-              <el-button
-                link
-                type="danger"
-                :icon="Delete"
-                @click="handleDelete(row)"
-              >
+              <el-button link type="danger" :icon="Delete" @click="handleDelete(row)">
                 删除
               </el-button>
               <el-dropdown @command="(cmd: string) => handleCommand(cmd, row)">
@@ -1219,51 +1089,27 @@ onMounted(() => {
 
       <!-- 分页 -->
       <div class="flex justify-end mt-4">
-        <el-pagination
-          v-model:current-page="queryParams.pageNo"
-          v-model:page-size="queryParams.pageSize"
-          :total="total"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="loadData"
-          @current-change="loadData"
-        />
+        <el-pagination v-model:current-page="queryParams.pageNo" v-model:page-size="queryParams.pageSize" :total="total"
+          :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper" @size-change="loadData"
+          @current-change="loadData" />
       </div>
     </el-card>
 
     <!-- 新增/编辑弹窗（带地图） -->
-    <el-dialog
-      v-model="formVisible"
-      :title="formTitle"
-      width="1600px"
-      append-to-body
-      @close="resetForm"
-    >
+    <el-dialog v-model="formVisible" :title="formTitle" width="1600px" append-to-body @close="resetForm">
       <el-row :gutter="20">
         <!-- 左侧：表单区域 -->
         <el-col :span="10">
-          <el-form
-            :model="formData"
-            label-width="110px"
-            label-position="right"
-            ref="formRef"
-            :rules="formRules"
-          >
+          <el-form :model="formData" label-width="110px" label-position="right" ref="formRef" :rules="formRules">
             <el-row :gutter="20">
               <el-col :span="12">
                 <el-form-item label="设备名称" prop="deviceName" required>
-                  <el-input
-                    v-model="formData.deviceName"
-                    placeholder="请输入设备名称"
-                  />
+                  <el-input v-model="formData.deviceName" placeholder="请输入设备名称" />
                 </el-form-item>
               </el-col>
               <el-col :span="12">
                 <el-form-item label="设备编号" prop="deviceNo" required>
-                  <el-input
-                    v-model="formData.deviceNo"
-                    placeholder="请输入设备编号"
-                  />
+                  <el-input v-model="formData.deviceNo" placeholder="请输入设备编号" />
                 </el-form-item>
               </el-col>
             </el-row>
@@ -1271,33 +1117,16 @@ onMounted(() => {
             <el-row :gutter="20">
               <el-col :span="12">
                 <el-form-item label="设备品牌" prop="deviceBrand" required>
-                  <el-select
-                    v-model="formData.deviceBrand"
-                    placeholder="请选择"
-                    style="width: 100%"
-                  >
-                    <el-option
-                      v-for="item in device_brand"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    />
+                  <el-select v-model="formData.deviceBrand" placeholder="请选择" style="width: 100%">
+                    <el-option v-for="item in device_brand" :key="item.value" :label="item.label" :value="item.value" />
                   </el-select>
                 </el-form-item>
               </el-col>
               <el-col :span="12">
                 <el-form-item label="设备类型" prop="deviceHatchType" required>
-                  <el-select
-                    v-model="formData.deviceHatchType"
-                    placeholder="请选择"
-                    style="width: 100%"
-                  >
-                    <el-option
-                      v-for="item in hatchTypeOptions"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    />
+                  <el-select v-model="formData.deviceHatchType" placeholder="请选择" style="width: 100%">
+                    <el-option v-for="item in hatchTypeOptions" :key="item.value" :label="item.label"
+                      :value="item.value" />
                   </el-select>
                 </el-form-item>
               </el-col>
@@ -1306,46 +1135,28 @@ onMounted(() => {
             <el-row :gutter="20">
               <el-col :span="12">
                 <el-form-item label="所属部门" prop="deptId" required>
-                  <el-tree-select
-                    v-model="formData.deptId"
-                    :data="deptOptions"
-                    :props="{
-                      value: 'deptId',
-                      label: (data) => {
-                        // 父节点显示加标识
-                        if (data.children && data.children.length > 0) {
-                          return `${data.deptName} (不可选)`;
-                        }
-                        return data.deptName;
-                      },
-                      children: 'children',
-                      disabled: (data) => {
-                        // 有子节点的就是父节点，禁用父节点
-                        return data.children && data.children.length > 0;
-                      },
-                    }"
-                    default-expand-all
-                    placeholder="请选择所属部门"
-                    clearable
-                    check-strictly
-                    style="width: 100%"
-                  />
+                  <el-tree-select v-model="formData.deptId" :data="deptOptions" :props="{
+                    value: 'deptId',
+                    label: (data) => {
+                      // 父节点显示加标识
+                      if (data.children && data.children.length > 0) {
+                        return `${data.deptName} (不可选)`;
+                      }
+                      return data.deptName;
+                    },
+                    children: 'children',
+                    disabled: (data) => {
+                      // 有子节点的就是父节点，禁用父节点
+                      return data.children && data.children.length > 0;
+                    },
+                  }" default-expand-all placeholder="请选择所属部门" clearable check-strictly style="width: 100%" />
                 </el-form-item>
               </el-col>
               <el-col :span="12">
                 <el-form-item label="设备配置" prop="deviceConfigId" required>
-                  <el-select
-                    v-model="formData.deviceConfigId"
-                    placeholder="请选择"
-                    clearable
-                    style="width: 100%"
-                  >
-                    <el-option
-                      v-for="item in deviceConfigOptions"
-                      :key="item.deviceConfigId"
-                      :label="item.configName"
-                      :value="item.deviceConfigId"
-                    />
+                  <el-select v-model="formData.deviceConfigId" placeholder="请选择" clearable style="width: 100%">
+                    <el-option v-for="item in deviceConfigOptions" :key="item.deviceConfigId" :label="item.configName"
+                      :value="item.deviceConfigId" />
                   </el-select>
                 </el-form-item>
               </el-col>
@@ -1354,37 +1165,18 @@ onMounted(() => {
             <el-row :gutter="20">
               <el-col :span="12">
                 <el-form-item label="设备套餐" prop="devicePackageId" required>
-                  <el-select
-                    v-model="formData.devicePackageId"
-                    placeholder="请选择设备套餐"
-                    clearable
-                    style="width: 100%"
-                  >
-                    <el-option
-                      v-for="item in devicePackageOptions"
-                      :key="item.devicePackageId"
-                      :label="`${item.packageName}${item.unitPrice}元/kg`"
-                      :value="item.devicePackageId"
-                    />
+                  <el-select v-model="formData.devicePackageId" placeholder="请选择设备套餐" clearable style="width: 100%">
+                    <el-option v-for="item in devicePackageOptions" :key="item.devicePackageId"
+                      :label="`${item.packageName}${item.unitPrice}元/kg`" :value="item.devicePackageId" />
                   </el-select>
                 </el-form-item>
               </el-col>
               <el-col :span="12">
                 <el-form-item label="面贴编号" prop="qrCode" required>
-                  <el-select
-                    v-model="formData.qrCode"
-                    placeholder="请选择面贴编号"
-                    clearable
-                    filterable
-                    :loading="qrcodeLoading"
-                    style="width: 100%"
-                  >
-                    <el-option
-                      v-for="item in qrcodeOptions"
-                      :key="item"
-                      :label="item.qrcodeCode"
-                      :value="item.qrcodeCode"
-                    />
+                  <el-select v-model="formData.qrCode" placeholder="请选择面贴编号" clearable filterable
+                    :loading="qrcodeLoading" style="width: 100%">
+                    <el-option v-for="item in qrcodeOptions" :key="item" :label="item.qrcodeCode"
+                      :value="item.qrcodeCode" />
                   </el-select>
                   <div class="text-gray-400 text-xs mt-1">
                     仅显示未绑定的设备二维码
@@ -1394,64 +1186,37 @@ onMounted(() => {
             </el-row>
 
             <el-form-item label="区域">
-              <AreaCascader
-                v-model="areaCodes"
-                placeholder="请选择区域"
-                @change="handleAreaChange"
-              />
+              <AreaCascader v-model="areaCodes" placeholder="请选择区域" @change="handleAreaChange" />
             </el-form-item>
 
             <el-form-item label="设备Logo">
-              <UploadImage
-                v-model="logoList"
-                :limit="1"
-                :file-size="5"
-                :file-type="['png', 'jpg', 'jpeg']"
-              />
+              <UploadImage v-model="logoList" :limit="1" :file-size="5" :file-type="['png', 'jpg', 'jpeg']" />
               <div class="text-gray-400 text-xs mt-1">
                 建议尺寸：200*200px，支持png、jpg、jpeg格式，大小不超过5MB
               </div>
             </el-form-item>
 
             <el-form-item label="详细地址">
-              <el-input
-                v-model="formData.detailAddress"
-                placeholder="详细地址（门牌号/位置）"
-              />
+              <el-input v-model="formData.detailAddress" placeholder="详细地址（门牌号/位置）" />
             </el-form-item>
 
             <el-row :gutter="20">
               <el-col :span="12">
                 <el-form-item label="经度">
-                  <el-input-number
-                    v-model="formData.longitude"
-                    :precision="6"
-                    :step="0.000001"
-                    placeholder="经度"
-                    :controls="false"
-                    style="width: 100%"
-                  />
+                  <el-input-number v-model="formData.longitude" :precision="6" :step="0.000001" placeholder="经度"
+                    :controls="false" style="width: 100%" />
                 </el-form-item>
               </el-col>
               <el-col :span="12">
                 <el-form-item label="纬度">
-                  <el-input-number
-                    v-model="formData.latitude"
-                    :precision="6"
-                    :step="0.000001"
-                    placeholder="纬度"
-                    :controls="false"
-                    style="width: 100%"
-                  />
+                  <el-input-number v-model="formData.latitude" :precision="6" :step="0.000001" placeholder="纬度"
+                    :controls="false" style="width: 100%" />
                 </el-form-item>
               </el-col>
             </el-row>
 
             <el-form-item label="客服电话">
-              <el-input
-                v-model="formData.customerPhone"
-                placeholder="客服电话"
-              />
+              <el-input v-model="formData.customerPhone" placeholder="客服电话" />
             </el-form-item>
 
             <el-form-item label="状态">
@@ -1466,177 +1231,55 @@ onMounted(() => {
         <!-- 右侧：地图区域 -->
         <el-col :span="14">
           <div class="map-wrapper">
-            <MapPicker
-              v-model="location"
-              height="550px"
-              @change="handleMapChange"
-            />
+            <MapPicker v-model="location" height="550px" @change="handleMapChange" />
           </div>
         </el-col>
       </el-row>
 
       <template #footer>
         <el-button @click="formVisible = false">取消</el-button>
-        <el-button
-          type="primary"
-          :loading="formSubmitting"
-          @click="handleSubmit"
-        >
+        <el-button type="primary" :loading="formSubmitting" @click="handleSubmit">
           确定
         </el-button>
       </template>
     </el-dialog>
 
     <!-- 详情弹窗 -->
-    <el-dialog
-      v-model="detailVisible"
-      title="设备详情"
-      width="800px"
-      append-to-body
-    >
-      <el-descriptions :column="2" border v-if="detailData">
-        <el-descriptions-item label="设备ID">
-          {{ detailData.deviceId }}
-        </el-descriptions-item>
-        <el-descriptions-item label="设备名称">
-          {{ detailData.deviceName }}
-        </el-descriptions-item>
-        <el-descriptions-item label="设备编号">
-          {{ detailData.deviceNo }}
-        </el-descriptions-item>
-        <el-descriptions-item label="设备品牌">
-          {{ detailData.deviceBrand }}
-        </el-descriptions-item>
-        <el-descriptions-item label="设备类型">
-          {{ getHatchTypeText(detailData.deviceHatchType) }}
-        </el-descriptions-item>
-        <el-descriptions-item label="设备套餐">
-          {{ detailData.devicePackageId || "-" }}
-        </el-descriptions-item>
-        <el-descriptions-item label="在线状态">
-          <el-tag
-            :type="getOnlineStatusType(detailData.onlineStatus)"
-            size="small"
-          >
-            {{ getOnlineStatusText(detailData.onlineStatus) }}
-          </el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item label="最后心跳">
-          {{ detailData.lastHeartTime || "-" }}
-        </el-descriptions-item>
-        <el-descriptions-item label="过期时间">
-          {{ detailData.expireTime || "-" }}
-        </el-descriptions-item>
-        <el-descriptions-item label="设备地址" :span="2">
-          {{ detailData.deviceAddress || "" }}
-          {{ detailData.detailAddress || "" }}
-        </el-descriptions-item>
-        <el-descriptions-item label="经度">
-          {{ detailData.longitude || "-" }}
-        </el-descriptions-item>
-        <el-descriptions-item label="纬度">
-          {{ detailData.latitude || "-" }}
-        </el-descriptions-item>
-        <el-descriptions-item label="硬件版本">
-          {{ detailData.hardwareVersion || "-" }}
-        </el-descriptions-item>
-        <el-descriptions-item label="软件版本">
-          {{ detailData.softwareVersion || "-" }}
-        </el-descriptions-item>
-        <el-descriptions-item label="信号强度">
-          {{ detailData.signal || "-" }}
-        </el-descriptions-item>
-        <el-descriptions-item label="设备音量">
-          {{ detailData.volume || "-" }}
-        </el-descriptions-item>
-        <el-descriptions-item label="客服电话">
-          {{ detailData.customerPhone || "-" }}
-        </el-descriptions-item>
-        <el-descriptions-item label="状态">
-          <el-tag
-            :type="detailData.status === 0 ? 'success' : 'danger'"
-            size="small"
-          >
-            {{ getStatusText(detailData.status) }}
-          </el-tag>
-        </el-descriptions-item>
-      </el-descriptions>
-      <template #footer>
-        <el-button @click="detailVisible = false">关闭</el-button>
-      </template>
-    </el-dialog>
+    <DetailModal ref="detailModalRef" />
 
     <!-- 设备操作弹窗 -->
-    <el-dialog
-      v-model="operationVisible"
-      title="设备操作"
-      width="500px"
-      append-to-body
-    >
+    <el-dialog v-model="operationVisible" title="设备操作" width="500px" append-to-body>
       <el-form label-width="100px">
         <el-form-item label="操作类型">
-          <el-select
-            v-model="operationType"
-            placeholder="请选择"
-            style="width: 100%"
-          >
-            <el-option
-              v-for="item in operationTypeOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
+          <el-select v-model="operationType" placeholder="请选择" style="width: 100%">
+            <el-option v-for="item in operationTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
-        <el-form-item
-          v-if="
-            operationTypeOptions.find((o) => o.value === operationType)
-              ?.needHatch
-          "
-          label="仓口"
-        >
-          <el-select
-            v-model="deviceHatchId"
-            placeholder="请选择"
-            style="width: 100%"
-          >
-            <el-option
-              v-for="item in hatchOptions"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
-            />
+        <el-form-item v-if="
+          operationTypeOptions.find((o) => o.value === operationType)
+            ?.needHatch
+        " label="仓口">
+          <el-select v-model="deviceHatchId" placeholder="请选择" style="width: 100%">
+            <el-option v-for="item in hatchOptions" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
         </el-form-item>
-        <el-form-item
-          v-if="
-            operationTypeOptions.find((o) => o.value === operationType)
-              ?.needVolume
-          "
-          label="音量"
-        >
+        <el-form-item v-if="
+          operationTypeOptions.find((o) => o.value === operationType)
+            ?.needVolume
+        " label="音量">
           <el-slider v-model="volumeValue" :min="0" :max="100" show-stops />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="operationVisible = false">取消</el-button>
-        <el-button
-          type="primary"
-          :loading="operationSubmitting"
-          @click="submitOperation"
-        >
+        <el-button type="primary" :loading="operationSubmitting" @click="submitOperation">
           确定
         </el-button>
       </template>
     </el-dialog>
 
     <!-- 切换IP端口弹窗 -->
-    <el-dialog
-      v-model="ipPortVisible"
-      title="切换IP端口"
-      width="500px"
-      append-to-body
-    >
+    <el-dialog v-model="ipPortVisible" title="切换IP端口" width="500px" append-to-body>
       <el-form label-width="100px">
         <el-form-item label="IP地址" required>
           <el-input v-model="ipPortData.ip" placeholder="请输入IP地址" />
@@ -1652,50 +1295,26 @@ onMounted(() => {
     </el-dialog>
 
     <!-- 设备升级弹窗 -->
-    <el-dialog
-      v-model="upgradeVisible"
-      title="设备升级"
-      width="800px"
-      append-to-body
-    >
+    <el-dialog v-model="upgradeVisible" title="设备升级" width="800px" append-to-body>
       <el-form label-width="100px">
         <el-form-item label="升级文件" required>
-          <el-input
-            v-model="upgradeFileUrl"
-            placeholder="请输入升级文件下载地址"
-            clearable
-          />
+          <el-input v-model="upgradeFileUrl" placeholder="请输入升级文件下载地址" clearable />
         </el-form-item>
 
-        <UploadFile
-          v-model="upgradeFile"
-          :limit="1"
-          drag
-          webkitdirectory
-          :file-size="200"
-          :file-type="['bin', 'zip', 'hex']"
-          @success="handleUploadSuccess"
-        />
+        <UploadFile v-model="upgradeFile" :limit="1" drag webkitdirectory :file-size="200"
+          :file-type="['bin', 'zip', 'hex']" @success="handleUploadSuccess" />
       </el-form>
       <template #footer>
         <el-button @click="upgradeVisible = false">取消</el-button>
-        <el-button
-          type="primary"
-          :loading="upgradeUploading"
-          @click="submitUpgrade"
-        >
+        <el-button type="primary" :loading="upgradeUploading" @click="submitUpgrade">
           确定
         </el-button>
       </template>
     </el-dialog>
+
     <!-- 二维码弹窗 -->
-    <el-dialog
-      v-model="qrcodeVisible"
-      :title="qrcodeMode === 0 ? '设备二维码下载' : '设备二维码展示'"
-      width="900px"
-      append-to-body
-      class="rounded-xl"
-    >
+    <el-dialog v-model="qrcodeVisible" :title="qrcodeMode === 0 ? '设备二维码下载' : '设备二维码展示'" width="900px" append-to-body
+      class="rounded-xl">
       <div v-loading="qrcodeLoading" class="min-height-[400px]">
         <el-scrollbar max-height="550px" always>
           <div v-if="qrcodeList.length === 0 && !qrcodeLoading" class="py-12">
@@ -1703,71 +1322,48 @@ onMounted(() => {
           </div>
 
           <!-- 优化后的网格列表 -->
-          <div
-            v-else
-            class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-2"
-          >
-            <div
-              v-for="(item, index) in qrcodeList"
-              :key="item"
-              class="group relative bg-gray-50 dark:bg-zinc-800/50 rounded-lg p-3 border border-gray-100 dark:border-zinc-700 transition-all hover:shadow-md hover:border-primary/30"
-            >
+          <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-2">
+            <div v-for="(item, index) in qrcodeList" :key="item"
+              class="group relative bg-gray-50 dark:bg-zinc-800/50 rounded-lg p-3 border border-gray-100 dark:border-zinc-700 transition-all hover:shadow-md hover:border-primary/30">
               <!-- 编号标签 -->
               <div class="mb-2">
-                <div
-                  class="text-[11px] text-gray-400 uppercase tracking-wider mb-1"
-                >
+                <div class="text-[11px] text-gray-400 uppercase tracking-wider mb-1">
                   QR Code No.
                 </div>
-                <div
-                  class="text-xs font-mono font-bold text-gray-700 dark:text-gray-200 truncate"
-                  :title="item.qrcodeCode"
-                >
+                <div class="text-xs font-mono font-bold text-gray-700 dark:text-gray-200 truncate"
+                  :title="item.qrcodeCode">
                   {{ item.qrcodeCode }}
                 </div>
               </div>
 
               <!-- 二维码图片展示区 -->
               <div
-                class="relative aspect-square bg-white rounded-md overflow-hidden border border-gray-200 shadow-inner group-hover:border-primary/20"
-              >
-                <el-image
-                  :src="item.base64QrCode || item.qrcodeUrl"
-                  fit="contain"
-                  class="w-full h-full p-2"
-                  :preview-src-list="
-                    qrcodeList.map((i) => i.base64QrCode || i.qrcodeUrl)
-                  "
-                  :initial-index="index"
-                  preview-teleported
-                >
+                class="relative aspect-square bg-white rounded-md overflow-hidden border border-gray-200 shadow-inner group-hover:border-primary/20">
+                <el-image :src="item.base64QrCode || item.qrcodeUrl" fit="contain" class="w-full h-full p-2"
+                  :preview-src-list="qrcodeList.map((i) => i.base64QrCode || i.qrcodeUrl)
+                    " :initial-index="index" preview-teleported>
                   <template #placeholder>
-                    <div
-                      class="flex items-center justify-center h-full bg-gray-50 text-gray-400"
-                    >
-                      <el-icon class="is-loading"><Loading /></el-icon>
+                    <div class="flex items-center justify-center h-full bg-gray-50 text-gray-400">
+                      <el-icon class="is-loading">
+                        <Loading />
+                      </el-icon>
                     </div>
                   </template>
                 </el-image>
 
                 <!-- 悬停提示遮罩 -->
                 <div
-                  class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none"
-                >
-                  <el-icon color="white" :size="24"><View /></el-icon>
+                  class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                  <el-icon color="white" :size="24">
+                    <View />
+                  </el-icon>
                 </div>
               </div>
 
               <!-- 底部下载按钮 -->
               <div class="mt-3">
-                <el-button
-                  type="primary"
-                  plain
-                  size="small"
-                  class="w-full !rounded-md"
-                  :icon="Download"
-                  @click="handleQrcodeDownload(item)"
-                >
+                <el-button type="primary" plain size="small" class="w-full !rounded-md" :icon="Download"
+                  @click="handleQrcodeDownload(item)">
                   下载单图
                 </el-button>
               </div>
@@ -1813,7 +1409,9 @@ onMounted(() => {
 /* 核心：强行往树选择器内部塞入前缀文字 */
 .tree-prefix-dept :deep(.el-select__wrapper) {
   position: relative;
-  padding-left: 45px !important; /* 留出空间给“部门:”字样 */
+  padding-left: 45px !important;
+
+  /* 留出空间给“部门:”字样 */
 }
 
 .tree-prefix-dept :deep(.el-select__wrapper)::before {
@@ -1822,8 +1420,12 @@ onMounted(() => {
   left: 12px;
   font-size: 12px;
   font-weight: 400;
-  color: #909399; /* 浅灰色，保持全系统一致 */
-  pointer-events: none; /* 防止遮挡鼠标点击事件 */
+  color: #909399;
+
+  /* 浅灰色，保持全系统一致 */
+  pointer-events: none;
+
+  /* 防止遮挡鼠标点击事件 */
   content: "部门:";
   transform: translateY(-50%);
 }

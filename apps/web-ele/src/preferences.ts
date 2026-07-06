@@ -43,8 +43,8 @@ export const overridesPreferences = defineOverridesPreferences({
     companySiteLink: 'https://tadmin.huiyifamily.com',
     date: '2026',
     enable: true,
-    icp: '',
-    icpLink: '',
+    icp: '冀ICP备2026014329号-3',
+    icpLink: 'https://beian.miit.gov.cn/',
     settingShow: true,
   },
 });

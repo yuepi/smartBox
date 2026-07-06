@@ -5,11 +5,20 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { Close, Delete, Download, Refresh, RefreshRight } from '@element-plus/icons-vue';
 import { ElBadge, ElButton, ElMessage, ElScrollbar, ElTag } from 'element-plus';
 
-import { delExportTasksApi, ExportStatusMap, getExportTasksApi, onceAgainExportExcelApi } from '#/api/common/export';
-import type { ExportTask } from '#/api/common/export';
+import {
+  delExportTasksApi,
+  ExportStatusMap,
+  type ExportTask,
+  getExportTasksApi,
+  onceAgainExportExcelApi,
+} from '#/api/common/export';
 
 defineOptions({ name: 'ExportFloatingBall' });
 
+// 悬浮球位置
+const position = ref({ x: window.innerWidth - 80, y: window.innerHeight - 120 });
+const isDragging = ref(false);
+const dragOffset = ref({ x: 0, y: 0 });
 const showPanel = ref(false);
 const loading = ref(false);
 const tasks = ref<ExportTask[]>([]);
@@ -17,9 +26,11 @@ const retryingId = ref<null | number>(null);
 const deletingId = ref<null | number>(null);
 let pollingTimer: null | ReturnType<typeof setInterval> = null;
 
+// 是否有进行中的任务
 const hasPending = computed(() => tasks.value.some(t => [0, 1].includes(t.exportStatus)));
 const hasUnread = computed(() => tasks.value.some(t => [0, 1, 3].includes(t.exportStatus)));
 
+// 获取模块名称
 function getModuleName(moduleCode: number): string {
   const map: Record<number, string> = {
     1: '设备管理',
@@ -33,6 +44,7 @@ function getModuleName(moduleCode: number): string {
   return map[moduleCode] || '未知模块';
 }
 
+// 获取状态类型
 function getStatusType(status: number): 'danger' | 'info' | 'success' | 'warning' {
   const map: Record<number, any> = {
     2: 'success',
@@ -49,6 +61,7 @@ function formatTime(time: string): string {
   return new Date(time).toLocaleString();
 }
 
+// 加载任务列表
 async function loadTasks() {
   loading.value = true;
   try {
@@ -64,6 +77,7 @@ async function loadTasks() {
   }
 }
 
+// 下载文件
 function downloadFile(fileAddr: string, fileName: string) {
   if (!fileAddr) {
     ElMessage.error('文件地址不存在');
@@ -72,6 +86,7 @@ function downloadFile(fileAddr: string, fileName: string) {
   window.open(fileAddr, '_blank');
 }
 
+// 重试导出
 async function handleRetry(task: ExportTask, event: Event) {
   event.stopPropagation();
   retryingId.value = task.exportId;
@@ -86,6 +101,7 @@ async function handleRetry(task: ExportTask, event: Event) {
   }
 }
 
+// 删除任务
 async function handleDelete(task: ExportTask, event: Event) {
   event.stopPropagation();
   deletingId.value = task.exportId;
@@ -100,6 +116,7 @@ async function handleDelete(task: ExportTask, event: Event) {
   }
 }
 
+// 清空已完成/失败的任务
 async function handleClear() {
   const finishedTasks = tasks.value.filter(t => t.exportStatus === 2 || t.exportStatus === 3);
   if (finishedTasks.length === 0) {
@@ -116,16 +133,19 @@ async function handleClear() {
   await loadTasks();
 }
 
+// 刷新
 function handleRefresh() {
   loadTasks();
 }
 
+// 轮询
 function startPolling() {
   if (pollingTimer) return;
   pollingTimer = setInterval(() => {
     if (hasPending.value && showPanel.value) {
       loadTasks();
     } else if (hasPending.value) {
+      // 后台更新，不刷新UI，只更新红点提示
       getExportTasksApi({ pageNo: 1, pageSize: 20 }).then(res => {
         tasks.value = res.records || [];
       });
@@ -148,77 +168,135 @@ watch(hasPending, (newVal) => {
   }
 });
 
+// 悬浮球拖拽逻辑
+function handleMouseDown(e: MouseEvent) {
+  isDragging.value = true;
+  dragOffset.value = {
+    x: e.clientX - position.value.x,
+    y: e.clientY - position.value.y,
+  };
+  document.addEventListener('mousemove', handleMouseMove);
+  document.addEventListener('mouseup', handleMouseUp);
+}
+
+function handleMouseMove(e: MouseEvent) {
+  if (!isDragging.value) return;
+  let newX = e.clientX - dragOffset.value.x;
+  let newY = e.clientY - dragOffset.value.y;
+  
+  // 边界限制
+  newX = Math.max(10, Math.min(window.innerWidth - 70, newX));
+  newY = Math.max(10, Math.min(window.innerHeight - 70, newY));
+  
+  position.value = { x: newX, y: newY };
+}
+
+function handleMouseUp() {
+  isDragging.value = false;
+  document.removeEventListener('mousemove', handleMouseMove);
+  document.removeEventListener('mouseup', handleMouseUp);
+}
+
 function togglePanel() {
-  showPanel.value = !showPanel.value;
-  if (showPanel.value) {
-    loadTasks();
+  if (!isDragging.value) {
+    showPanel.value = !showPanel.value;
+    if (showPanel.value) {
+      loadTasks();
+    }
   }
+}
+
+// 监听窗口大小变化，调整位置
+function handleResize() {
+  position.value = {
+    x: Math.min(position.value.x, window.innerWidth - 70),
+    y: Math.min(position.value.y, window.innerHeight - 70),
+  };
 }
 
 onMounted(() => {
   loadTasks();
+  window.addEventListener('resize', handleResize);
   window.addEventListener('refresh-export-tasks', handleRefresh);
 });
 
 onUnmounted(() => {
   stopPolling();
+  window.removeEventListener('resize', handleResize);
   window.removeEventListener('refresh-export-tasks', handleRefresh);
 });
 </script>
 
 <template>
-  <div class="export-sidebar" :class="{ 'is-open': showPanel }">
-    <!-- 触发表单 -->
-    <div class="export-trigger" @click="togglePanel" v-show="!showPanel">
-      <el-badge :value="hasUnread ? '' : undefined" :is-dot="hasUnread">
-        <div class="trigger-icon">
-          <el-icon :size="20"><Download /></el-icon>
-          <span v-if="hasPending" class="status-dot"></span>
+  <div class="export-floating-ball">
+    <!-- 悬浮球 -->
+    <div
+      class="floating-ball"
+      :style="{ left: `${position.x}px`, top: `${position.y}px` }"
+      @mousedown="handleMouseDown"
+      @click="togglePanel"
+    >
+      <ElBadge :value="hasUnread ? '' : undefined" :is-dot="hasUnread">
+        <div class="ball-content">
+          <el-icon :size="24"><Download /></el-icon>
+          <span v-if="hasPending" class="pending-dot"></span>
         </div>
-      </el-badge>
+      </ElBadge>
     </div>
 
     <!-- 导出任务面板 -->
-    <transition name="slide">
-      <div v-if="showPanel" class="export-panel">
+    <transition name="fade">
+      <div
+        v-if="showPanel"
+        class="export-panel"
+        :style="{ left: `${position.x - 380}px`, top: `${position.y - 200}px` }"
+      >
         <div class="panel-header">
           <span class="panel-title">导出任务</span>
           <div class="panel-actions">
-            <el-button link size="small" :icon="Refresh" :loading="loading" @click="handleRefresh" />
-            <el-button link size="small" :icon="Delete" :disabled="tasks.length === 0" @click="handleClear" />
-            <el-button link size="small" :icon="Close" @click="showPanel = false" />
+            <ElButton link :icon="Refresh" :loading="loading" @click="handleRefresh" />
+            <ElButton link :icon="Delete" :disabled="tasks.length === 0" @click="handleClear" />
+            <ElButton link :icon="Close" @click="showPanel = false" />
           </div>
         </div>
 
-        <el-scrollbar v-if="tasks.length > 0" max-height="400px">
+        <ElScrollbar v-if="tasks.length > 0" max-height="400px">
           <div class="task-list">
-            <div v-for="task in tasks" :key="task.exportId" class="task-item">
+            <div
+              v-for="task in tasks"
+              :key="task.exportId"
+              class="task-item"
+            >
               <div class="task-header">
                 <div class="flex items-center gap-2">
                   <span class="task-title">{{ getModuleName(task.moduleCode) }}</span>
-                  <el-tag :type="getStatusType(task.exportStatus)" size="small">
+                  <ElTag :type="getStatusType(task.exportStatus)" size="small">
                     {{ ExportStatusMap[task.exportStatus]?.label || '未知' }}
-                  </el-tag>
+                  </ElTag>
                 </div>
                 <span class="task-time">{{ formatTime(task.exportTime) }}</span>
               </div>
 
-              <div class="task-name">{{ task.fileName || `${getModuleName(task.moduleCode)}导出` }}</div>
+              <div class="task-name">
+                {{ task.fileName || `${getModuleName(task.moduleCode)}导出` }}
+              </div>
 
               <div class="task-footer">
-                <span v-if="task.exportCount > 0" class="task-count">共 {{ task.exportCount }} 条</span>
-                <div class="task-actions">
-                  <el-button
+                <div class="flex gap-3 text-xs text-gray-400">
+                  <span v-if="task.exportCount > 0">共 {{ task.exportCount }} 条</span>
+                </div>
+                
+                <div class="flex gap-1">
+                  <ElButton
                     v-if="task.exportStatus === 2"
                     link
                     size="small"
-                    type="primary"
                     :icon="Download"
                     @click.stop="downloadFile(task.fileAddr, task.fileName)"
                   >
                     下载
-                  </el-button>
-                  <el-button
+                  </ElButton>
+                  <ElButton
                     v-if="task.exportStatus === 3"
                     link
                     size="small"
@@ -227,8 +305,8 @@ onUnmounted(() => {
                     @click.stop="handleRetry(task, $event)"
                   >
                     重试
-                  </el-button>
-                  <el-button
+                  </ElButton>
+                  <ElButton
                     link
                     size="small"
                     type="danger"
@@ -237,7 +315,7 @@ onUnmounted(() => {
                     @click.stop="handleDelete(task, $event)"
                   >
                     删除
-                  </el-button>
+                  </ElButton>
                 </div>
               </div>
 
@@ -246,10 +324,14 @@ onUnmounted(() => {
               </div>
             </div>
           </div>
-        </el-scrollbar>
+        </ElScrollbar>
 
         <div v-else class="empty-state">
-          <el-empty description="暂无导出任务" :image-size="60" />
+          <el-empty description="暂无导出任务" :image-size="80" />
+        </div>
+
+        <div class="panel-footer">
+          <span class="text-xs text-gray-400">导出任务异步生成，请稍后下载</span>
         </div>
       </div>
     </transition>
@@ -257,47 +339,44 @@ onUnmounted(() => {
 </template>
 
 <style scoped lang="scss">
-.export-sidebar {
-  position: fixed;
-  top: 50%;
-  right: 0;
+.export-floating-ball {
+  position: relative;
   z-index: 9999;
-  display: flex;
-  align-items: center;
-  transform: translateY(-50%);
 }
 
-.export-trigger {
-  .trigger-icon {
+.floating-ball {
+  position: fixed;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #409eff, #53a8ff);
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+  transition: transform 0.2s, box-shadow 0.2s;
+  
+  &:hover {
+    box-shadow: 0 6px 16px rgb(0 0 0 / 20%);
+    transform: scale(1.05);
+  }
+  
+  .ball-content {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    cursor: pointer;
-    background: white;
-    border-radius: 8px 0 0 8px;
-    box-shadow: -2px 0 12px rgb(0 0 0 / 8%);
-    transition: all 0.3s;
-
-    &:hover {
-      background: #f5f7fa;
-      box-shadow: -2px 0 16px rgb(0 0 0 / 12%);
-    }
-
-    .el-icon {
-      color: #409eff;
-    }
-
-    .status-dot {
+    color: white;
+    
+    .pending-dot {
       position: absolute;
-      top: 6px;
-      right: 6px;
-      width: 8px;
-      height: 8px;
+      top: -4px;
+      right: -12px;
+      width: 10px;
+      height: 10px;
       background-color: #f56c6c;
-      border: 2px solid white;
       border-radius: 50%;
       animation: pulse 1.5s infinite;
     }
@@ -322,120 +401,114 @@ onUnmounted(() => {
 }
 
 .export-panel {
+  position: fixed;
+  z-index: 10001;
+  display: flex;
+  flex-direction: column;
   width: 380px;
-  max-height: 500px;
-  margin-right: 8px;
   overflow: hidden;
   background: white;
-  border-radius: 12px 0 0 12px;
-  box-shadow: -4px 0 24px rgb(0 0 0 / 8%);
-
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 15%);
+  
   .panel-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 12px 16px;
-    border-bottom: 1px solid #f0f0f0;
-
+    background: #f5f7fa;
+    border-bottom: 1px solid #ebeef5;
+    
     .panel-title {
       font-size: 14px;
       font-weight: 600;
     }
-
+    
     .panel-actions {
       display: flex;
       gap: 4px;
     }
   }
-
+  
   .task-list {
     padding: 8px 12px;
   }
-
+  
   .task-item {
-    padding: 10px 12px;
+    padding: 12px;
     margin-bottom: 8px;
-    background: #fafafa;
-    border: 1px solid #f0f0f0;
+    background: white;
+    border: 1px solid #ebeef5;
     border-radius: 8px;
-    transition: background 0.2s;
-
+    
     &:hover {
       background: #f5f7fa;
     }
-
+    
     .task-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 4px;
-
+      margin-bottom: 8px;
+      
       .task-title {
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 500;
       }
-
+      
       .task-time {
         font-size: 11px;
         color: #909399;
       }
     }
-
+    
     .task-name {
-      margin-bottom: 6px;
+      margin-bottom: 8px;
       font-size: 13px;
       color: #606266;
     }
-
+    
     .task-footer {
       display: flex;
-      gap: 8px;
       align-items: center;
       justify-content: space-between;
-
-      .task-count {
-        font-size: 12px;
-        color: #909399;
-      }
-
-      .task-actions {
-        display: flex;
-        gap: 4px;
-      }
     }
-
+    
     .task-error {
-      margin-top: 6px;
-      font-size: 12px;
+      margin-top: 8px;
+      font-size: 11px;
       color: #f56c6c;
     }
   }
-
+  
   .empty-state {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 120px;
+    min-height: 200px;
     padding: 20px;
+  }
+  
+  .panel-footer {
+    padding: 10px 16px;
+    text-align: center;
+    background: #f5f7fa;
+    border-top: 1px solid #ebeef5;
   }
 }
 
-.slide-enter-active,
-.slide-leave-active {
-  transition: all 0.3s ease;
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s, transform 0.2s;
 }
 
-.slide-enter-from,
-.slide-leave-to {
-  width: 0;
+.fade-enter-from {
   opacity: 0;
-  transform: translateX(20px);
+  transform: scale(0.9);
 }
 
-.slide-enter-to,
-.slide-leave-from {
-  width: 380px;
-  opacity: 1;
-  transform: translateX(0);
+.fade-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
 }
 </style>
