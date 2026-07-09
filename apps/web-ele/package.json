@@ -29,6 +29,7 @@
   "dependencies": {
     "@amap/amap-jsapi-loader": "catalog:",
     "@element-plus/icons-vue": "catalog:",
+    "@kjgl77/datav-vue3": "^1.7.4",
     "@vben/access": "workspace:*",
     "@vben/common-ui": "workspace:*",
     "@vben/constants": "workspace:*",
@@ -46,6 +47,7 @@
     "@vueuse/core": "catalog:",
     "ali-oss": "catalog:",
     "dayjs": "catalog:",
+    "echarts": "catalog:",
     "element-plus": "catalog:",
     "pinia": "catalog:",
     "qrcode": "catalog:",

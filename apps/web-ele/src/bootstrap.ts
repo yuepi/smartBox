@@ -15,13 +15,19 @@ import ColumnSelector from '#/components/ColumnSelector/index.vue';
 import DictTag from '#/components/DictTag/index.vue';
 import ExportButton from '#/components/ExportButton/index.vue';
 import { setupGlobalComponent } from '#/components/global';
+import PublicComponent from '#/components/componentInstall';
 import { $t, setupI18n } from '#/locales';
 
 import { initComponentAdapter } from './adapter/component';
 import { initSetupVbenForm } from './adapter/form';
 import App from './app.vue';
+import DataV from '@kjgl77/datav-vue3';
 import { router } from './router';
 
+// 引入全局css
+import './assets/scss/style.scss';
+// 引入图表（所有图标见 icon 目录下的 demo_index.html）
+import './assets/icon/iconfont.css'
 import 'element-plus/dist/index.css';
 import './app.scss';
 
@@ -40,12 +46,16 @@ async function bootstrap(namespace: string) {
   // setDefaultDrawerProps({
   //   zIndex: 2000,
   // });
+
   const app = createApp(App);
 
   app.component('DictTag', DictTag);
   app.component('ExportButton', ExportButton);
   app.component('ColumnSelector', ColumnSelector);
   app.component('BaseTableLayout', BaseTableLayout);
+
+  app.use(PublicComponent);
+  app.use(DataV);
 
   // 全局组件
   // setupGlobalComponent(app);
