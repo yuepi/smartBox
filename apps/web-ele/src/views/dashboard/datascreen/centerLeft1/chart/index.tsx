@@ -23,7 +23,7 @@ export default defineComponent({
         ...e,
         value: Math.floor(Math.random() * 30) + 5, // 随机变化
       }));
-    }, 3000);
+    }, 15_000);
 
     onUnmounted(() => {
       clearInterval(intervalInstance);

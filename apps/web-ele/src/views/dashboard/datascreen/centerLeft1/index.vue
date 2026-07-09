@@ -47,7 +47,7 @@ export default defineComponent({
 
     onMounted(() => {
       setData()
-      intervalInstance = setInterval(changeNumber, 2000)
+      intervalInstance = setInterval(changeNumber, 20_000)
     })
 
     onUnmounted(() => {
@@ -60,7 +60,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="h-[410px] w-[400px] rounded-lg">
+  <div class="h-[410px] w-full rounded-lg">
     <div class="flex h-[380px] flex-col rounded-lg bg-black/60 p-4">
       <!-- 标题区域 -->
       <div class="flex items-center gap-2">

@@ -1,17 +1,17 @@
-import { defineComponent, ref, watch } from 'vue'
+import { defineComponent, ref, watch } from 'vue';
 
 const PropsType = {
   cdata: {
     type: Object,
     require: true,
   },
-} as const
+} as const;
 
 export default defineComponent({
   props: PropsType,
   setup(props) {
-    const chartRef = ref()
-    let options = {}
+    const chartRef = ref();
+    let options = {};
 
     watch(
       () => props.cdata,
@@ -61,7 +61,7 @@ export default defineComponent({
               { offset: 1, color: 'rgba(35,184,210,0)' },
             ],
           },
-        }
+        };
 
         options = {
           title: {
@@ -142,10 +142,21 @@ export default defineComponent({
           xAxis: {
             type: 'category',
             position: 'bottom',
-            axisLine: true,
+            axisLine: {
+              show: true,
+              lineStyle: {
+                color: '#34d399',
+                width: 2,
+              },
+            },
             axisLabel: {
               color: 'rgba(255,255,255,.8)',
               fontSize: 12,
+            },
+            axisTick: {
+              lineStyle: {
+                color: '#34d399',
+              },
             },
             data: val.weekCategory,
           },
@@ -154,24 +165,28 @@ export default defineComponent({
             nameLocation: 'end',
             nameGap: 24,
             nameTextStyle: {
-              color: 'rgba(255,255,255,.5)',
+              color: 'rgba(255,255,255,.8)',
               fontSize: 14,
             },
             max: val.maxData,
             splitNumber: 4,
             axisLine: {
-              lineStyle: { opacity: 0 },
-            },
-            splitLine: {
-              show: true,
+              show: true, // 默认可能隐藏了，设为 true 显示
               lineStyle: {
-                color: '#fff',
-                opacity: 0.1,
+                color: '#34d399', // 👈 轴线颜色
+                width: 2,
               },
             },
             axisLabel: {
               color: 'rgba(255,255,255,.8)',
               fontSize: 12,
+            },
+            splitLine: {
+              show: true,
+              lineStyle: {
+                color: 'rgba(255,107,107,0.3)', // 👈 网格线颜色（半透明红色）
+                type: 'dashed',
+              },
             },
           },
           series: [
@@ -285,24 +300,24 @@ export default defineComponent({
               animation: false,
             },
           ],
-        }
+        };
 
         if (chartRef.value) {
-          chartRef.value.initChart(options)
+          chartRef.value.initChart(options);
         }
       },
       {
         immediate: true,
         deep: true,
-      }
-    )
+      },
+    );
 
     return () => {
       return (
         <div>
           <echart height="400px" ref={chartRef} width="100%" />
         </div>
-      )
-    }
+      );
+    };
   },
-})
+});
