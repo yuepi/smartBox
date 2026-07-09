@@ -22,7 +22,6 @@ export default defineComponent({
       unit: '次',
       showValue: true
     })
-
     return { capsuleConfig }
   },
 })

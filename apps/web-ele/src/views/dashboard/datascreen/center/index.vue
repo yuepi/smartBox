@@ -8,12 +8,12 @@ export default defineComponent({
   setup() {
     // ===== 6个指标卡片数据 =====
     const titleDate = [
-      { number: 12_580, text: '本年累计投递' },
+      { number: 12_580, text: '本年累计投递(次)' },
       { number: 8760, text: '本年回收总量(kg)' },
-      { number: 1420, text: '本年投递订单数' },
-      { number: 3220, text: '本月累计投递' },
+      { number: 1420, text: '本年投递订单数(个)' },
+      { number: 3220, text: '本月累计投递(次)' },
       { number: 2150, text: '本月回收总量(kg)' },
-      { number: 380, text: '本月投递订单数' },
+      { number: 380, text: '本月投递订单数(个)' },
     ]
 
     const titleItem = reactive([])
@@ -40,16 +40,26 @@ export default defineComponent({
     // ===== 排行榜数据 =====
     const ranking = reactive({
       data: [
-        { name: 'A9HPG6EZXJR', value: 156 },
-        { name: 'XK3M9N7WQPL', value: 132 },
-        { name: 'B2D5F8H1JKL', value: 98 },
-        { name: 'C4E7G0I3MNO', value: 87 },
-        { name: 'D6F9H2J5PQR', value: 76 },
-        { name: 'E8G1K4M7STU', value: 65 },
-        { name: 'F0H3L6N9VWX', value: 54 },
-        { name: 'G2J5M8P2YZA', value: 43 },
-        { name: 'H4K7N0Q3BCD', value: 32 },
-        { name: 'I6L9O2R5EFG', value: 21 },
+        { name: '138****1234', value: 156 },
+        { name: '159****5678', value: 132 },
+        { name: '177****9012', value: 98 },
+        { name: '136****3456', value: 87 },
+        { name: '188****7890', value: 76 },
+        { name: '150****2345', value: 65 },
+        { name: '139****6789', value: 54 },
+        { name: '158****0123', value: 43 },
+        { name: '176****4567', value: 32 },
+        { name: '137****8901', value: 21 },
+        { name: '152****3456', value: 18 },
+        { name: '186****7890', value: 15 },
+        { name: '131****2345', value: 12 },
+        { name: '189****6789', value: 9 },
+        { name: '135****0123', value: 7 },
+        { name: '187****4567', value: 5 },
+        { name: '153****8901', value: 4 },
+        { name: '130****2345', value: 3 },
+        { name: '185****6789', value: 2 },
+        { name: '156****0123', value: 1 },
       ],
       carousel: 'single',
       unit: '次',
@@ -113,7 +123,7 @@ v-for="item in titleItem" :key="item.title"
       <div class="col-span-2 row-span-2 rounded bg-black/60 p-3 h-[280px]">
         <div class="mb-2 flex items-center gap-2">
           <i class="iconfont icon-tongji2 text-cyan-400"></i>
-          <span class="text-sm text-white">回收箱投递量排行榜</span>
+          <span class="text-sm text-white">用户投递排行榜</span>
         </div>
         <dv-scroll-ranking-board class="h-[calc(100%-28px)]" :config="ranking" />
       </div>
