@@ -6,14 +6,20 @@ import Chart from '../center/chart/draw'
 export default defineComponent({
   components: { Chart },
   setup() {
-    // ===== 6个指标卡片数据 =====
+    // ===== 卡片数据 =====
     const titleDate = [
+      // 本年汇总
       { number: 12_580, text: '本年累计投递(次)' },
       { number: 8760, text: '本年回收总量(kg)' },
-      { number: 1420, text: '本年投递订单数(个)' },
+      { number: 26_340, text: '本年回收金额(元)' },
+      // 本月汇总
       { number: 3220, text: '本月累计投递(次)' },
       { number: 2150, text: '本月回收总量(kg)' },
-      { number: 380, text: '本月投递订单数(个)' },
+      { number: 6450, text: '本月回收金额(元)' },
+      // 今日数据（当日实时）
+      { number: 89, text: '今日累计投递(次)' },
+      { number: 62, text: '今日回收总量(kg)' },
+      { number: 186, text: '今日回收金额(元)' },
     ]
 
     const titleItem = reactive([])
@@ -105,9 +111,9 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="flex h-full w-full flex-col gap-2 p-2">
-    <!-- ===== 上方：6个指标卡片 (2行 x 3列) ===== -->
-    <div class="grid h-[80px] grid-cols-3 gap-2">
+  <div class="flex h-[450px] w-full flex-col gap-2 p-2">
+    <!-- ===== 上方：12个指标卡片 (2行 x 4列) ===== -->
+    <div class="grid h-[140px] grid-cols-3 gap-2">
       <div
 v-for="item in titleItem" :key="item.title"
         class="flex items-center justify-between rounded bg-black/60 px-3"

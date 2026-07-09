@@ -1,3 +1,15 @@
+<script lang="ts">
+import { defineComponent } from 'vue'
+import Chart from './chart/index'
+
+export default defineComponent({
+  components: { Chart },
+  setup() {
+    return {}
+  },
+})
+</script>
+
 <template>
   <div class="h-[400px] w-full rounded-lg p-4">
     <div class="flex h-full w-full flex-col rounded-lg bg-black/60 p-3">
@@ -14,15 +26,3 @@
     </div>
   </div>
 </template>
-
-<script lang="ts">
-import { defineComponent } from 'vue'
-import Chart from './chart/index'
-
-export default defineComponent({
-  components: { Chart },
-  setup() {
-    return {}
-  },
-})
-</script>

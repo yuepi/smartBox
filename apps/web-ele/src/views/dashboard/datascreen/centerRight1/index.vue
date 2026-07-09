@@ -28,7 +28,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="h-[400px] w-full rounded-lg p-2">
+  <div class="h-[450px] w-full rounded-lg p-2">
     <div class="flex h-full w-full flex-col rounded-lg bg-black/60 p-3">
       <!-- 标题 -->
       <div class="mb-2 flex items-center gap-2">

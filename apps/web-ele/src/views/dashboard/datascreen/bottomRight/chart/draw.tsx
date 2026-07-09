@@ -96,7 +96,7 @@ export default defineComponent({
             trigger: 'item',
           },
           radar: {
-            center: ['68%', '27%'],
+            center: ['68%', '35%'],
             radius: '40%',
             name: {
               color: '#fff',
@@ -315,7 +315,7 @@ export default defineComponent({
     return () => {
       return (
         <div>
-          <echart height="400px" ref={chartRef} width="100%" />
+          <echart height="360px" ref={chartRef} width="100%" />
         </div>
       );
     };
