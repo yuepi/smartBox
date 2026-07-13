@@ -126,3 +126,8 @@ export function remarkOperateApi(params: RemarkOperateParams) {
 export function getImageUrlsByRecycleOrderId(recycleOrderId: number) {
   return requestClient.get('/merchant/recycleOrderImage/queryImageUrlsByRecycleOrderId', { params: { recycleOrderId } });
 }
+
+/** 10. 直接完成订单 */
+export function directCompleteOrderApi(recycleOrderId: number) {
+  return requestClient.post('/merchant/recycleOrder/operate/directComplete', { recycleOrderId });
+}

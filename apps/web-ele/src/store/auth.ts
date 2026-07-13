@@ -5,7 +5,7 @@ import { useRouter } from "vue-router";
 
 import { LOGIN_PATH } from "@vben/constants";
 import { preferences } from "@vben/preferences";
-import { resetAllStores, useAccessStore, useTabbarStore,useUserStore } from "@vben/stores";
+import { resetAllStores, useAccessStore, useTabbarStore, useUserStore } from "@vben/stores";
 
 import { ElMessage, ElNotification } from "element-plus";
 import { defineStore } from "pinia";
@@ -15,7 +15,7 @@ import { $t } from "#/locales";
 import { useDictStore } from '#/store/modules/dict';
 
 export const useAuthStore = defineStore("auth", () => {
-   const tabbarStore = useTabbarStore();
+  const tabbarStore = useTabbarStore();
   const accessStore = useAccessStore();
   const userStore = useUserStore();
   const router = useRouter();
@@ -50,8 +50,8 @@ export const useAuthStore = defineStore("auth", () => {
 
     return {
       userId: userInfo.personId ? String(userInfo.personId) : "",
-      user:userInfo.user,
-      realName: userInfo.personName||userInfo.user.nickName || "",
+      user: userInfo.user,
+      realName: userInfo.personName || userInfo.user.nickName || "",
       avatar: userInfo.avatar || "", // 确保 avatar 是字符串
       roles: permissions,
       homePath: "/dashboard",
@@ -153,8 +153,7 @@ export const useAuthStore = defineStore("auth", () => {
 
       // 清空字典缓存
       useDictStore().clearDict();
-
-              // 关闭所有标签页（传入 router 实例）
+      // 关闭所有标签页（传入 router 实例）
       await tabbarStore.closeAllTabs(router);
 
       // 切换成功后重新获取用户信息
@@ -186,7 +185,7 @@ export const useAuthStore = defineStore("auth", () => {
     try {
       await logoutApi();
 
-       // 清空字典缓存
+      // 清空字典缓存
       useDictStore().clearDict();
     } catch {
       // 不做任何处理
