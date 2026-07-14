@@ -1,88 +1,114 @@
-<script lang="ts" setup>
+<script lang="ts">
 import type { SongItem } from './MusicPlayer/index.vue';
 
-import { onMounted, onUnmounted, reactive, ref } from 'vue'
+import {
+  defineComponent,
+  onMounted,
+  onUnmounted,
+  reactive,
+  ref,
+} from 'vue'
 
-import { subtitle, title, WEEK } from '#/constants/screen'
+import { moduleInfo, subtitle, title, WEEK } from '#/constants/screen'
 import { formatTime } from '#/utils/index'
 import useDraw from '#/utils/useDraw'
 
-// 直接引入组件，<script setup> 架构下无需再手动 components 注册，模板可直接使用
 import BottomLeft from './bottomLeft/index.vue'
 import BottomRight from './bottomRight/index.vue'
 import Center from './center/index.vue'
 import CenterLeft1 from './centerLeft1/index.vue'
+import CenterLeft2 from './centerLeft2/index.vue'
 import CenterRight1 from './centerRight1/index.vue'
-// 引入音乐播放器组件，并顺带引入其规定的 SongItem 接口类型
+import CenterRight2 from './centerRight2/index.vue'
 import MusicPlayer from './MusicPlayer/index.vue';
 
-// * 颜色
-const decorationColors = ['#568aea', '#000000']
-// * 加载标识
-const loading = ref<boolean>(true)
-// * 时间内容
-const timeInfo = reactive({
-  setInterval: 0,
-  dateDay: '',
-  dateYear: '',
-  dateWeek: ''
-})
-// * 适配处理
-const { appRef, calcRate, windowDraw, unWindowDraw } = useDraw()
+export default defineComponent({
+  components: {
+    CenterLeft1,
+    CenterLeft2,
+    Center,
+    CenterRight1,
+    CenterRight2,
+    BottomLeft,
+    BottomRight,
+    MusicPlayer
+  },
+  setup() {
+    // * 颜色
+    const decorationColors = ['#568aea', '#000000']
+    // * 加载标识
+    const loading = ref<boolean>(true)
+    // * 时间内容
+    const timeInfo = reactive({
+      setInterval: 0,
+      dateDay: '',
+      dateYear: '',
+      dateWeek: ''
+    })
+    // * 适配处理
+    const { appRef, calcRate, windowDraw, unWindowDraw } = useDraw()
 
-// 配置你的大屏专属歌单列表
-const bgmList = ref<SongItem[]>([
-   {
-    id: 'hakishuo',
-    name: '哈基说',
-    src: '/hajishuo.mp3',
-    loopStart: 0,
-    loopEnd: 60
-  },
-  {
-    id: 'hakimi',
-    name: '哈基米之歌 (Happy Haki)',
-    src: '/hajimi.mp3', 
-    loopStart: 5,   
-    loopEnd: 35     
-  },
-  {
-    id: 'ksl',
-    name: '圣诞',
-    src: '/ksl.mp3',
-    loopStart: 30,
-    loopEnd: 60
+    // 配置你的大屏专属歌单
+    const bgmList = ref<SongItem[]>([
+      {
+        id: 'hakimi',
+        name: '哈基米之歌 (Happy Haki)',
+        // 这是一个网络公开的高清哈基米可爱洗脑BGM资源，可以直接用来测试
+        src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', // 临时借用标准公开mp3做流测试
+        loopStart: 5,   // 比如这首歌第5秒进入高潮段落
+        loopEnd: 35     // 第35秒时拉回第5秒，实现副歌完美片段循环
+      },
+      {
+        id: 'tech-bgm',
+        name: '数据大屏科技感BGM',
+        // 另一首公开的轻科技感电子乐
+        src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+        loopStart: 0,
+        loopEnd: 60
+      }
+    ])
+    // 生命周期
+    onMounted(() => {
+      cancelLoading()
+      handleTime()
+      // todo 屏幕适应
+      windowDraw()
+      calcRate()
+    })
+
+    onUnmounted(() => {
+      unWindowDraw()
+      clearInterval(timeInfo.setInterval)
+    })
+
+    // methods
+    // todo 处理 loading 展示
+    const cancelLoading = () => {
+      setTimeout(() => {
+        loading.value = false
+      }, 500)
+    }
+
+    // todo 处理时间监听
+    const handleTime = () => {
+      timeInfo.setInterval = setInterval(() => {
+        const date = new Date()
+        timeInfo.dateDay = formatTime(date, 'HH: mm: ss')
+        timeInfo.dateYear = formatTime(date, 'yyyy-MM-dd')
+        timeInfo.dateWeek = WEEK[date.getDay()]
+      }, 1000)
+    }
+
+    // return
+    return {
+      loading,
+      timeInfo,
+      appRef,
+      title,
+      subtitle,
+      moduleInfo
+    }
   }
-])
-
-// todo 处理 loading 展示
-const cancelLoading = () => {
-  setTimeout(() => {
-    loading.value = false
-  }, 500)
-}
-
-// todo 处理时间监听
-const handleTime = () => {
-  timeInfo.setInterval = setInterval(() => {
-    const date = new Date()
-    timeInfo.dateDay = formatTime(date, 'HH: mm: ss')
-    timeInfo.dateYear = formatTime(date, 'yyyy-MM-dd')
-    timeInfo.dateWeek = WEEK[date.getDay()]
-  }, 1000)
-}
-
-// 生命周期
-onMounted(() => {
-  cancelLoading()
-  handleTime()
-  windowDraw()
-  calcRate()
-})
-
-onUnmounted(() => {
-  unWindowDraw()
-  clearInterval(timeInfo.setInterval)
 })
 </script>
 
@@ -104,6 +130,7 @@ onUnmounted(() => {
           <dv-decoration-10 class="dv-dec-10-s" />
         </div>
 
+        <!-- 第二行 -->
         <div class="d-flex jc-between px-2">
           <div class="d-flex aside-width">
             <div class="react-left ml-4 react-l-s">
@@ -129,17 +156,20 @@ onUnmounted(() => {
         </div>
 
         <div class="body-box">
+          <!-- 第三行数据 -->
           <div class="content-box">
             <div>
               <dv-border-box-12>
                 <CenterLeft1 />
               </dv-border-box-12>
             </div>
+            <!-- 中间 -->
             <div>
               <dv-border-box-1>
                 <Center />
               </dv-border-box-1>
             </div>
+            <!-- 中间 -->
             <div>
               <dv-border-box-12>
                 <CenterRight1 />
@@ -147,6 +177,7 @@ onUnmounted(() => {
             </div>
           </div>
 
+          <!-- 第四行数据 -->
           <div class="bototm-box">
             <dv-border-box-13>
               <BottomLeft />
@@ -158,8 +189,7 @@ onUnmounted(() => {
         </div>
       </div>
     </div>
-    
-    <MusicPlayer :songs="bgmList" :default-volume="0.2" :auto-play="false" />
+    <MusicPlayer :songs="bgmList" :default-volume="0.25" :auto-play="false" />
   </div>
 </template>
 

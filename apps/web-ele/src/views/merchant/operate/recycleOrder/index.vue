@@ -12,6 +12,7 @@ import {
 } from "@element-plus/icons-vue";
 import {
   ChatDotRound,
+  Check,
   ScaleToOriginal,
   Warning,
 } from "@element-plus/icons-vue";
@@ -394,8 +395,10 @@ onMounted(() => {
       <el-card shadow="never" class="border-none mb-4 !p-2">
         <el-form :inline="true" :model="queryParams" class="flex flex-wrap gap-x-2 gap-y-2 items-center">
           <el-form-item class="!mb-0 !mr-2">
-            <el-input v-model="queryParams.orderNo" placeholder="请输入" clearable style="width: 200px"
-              @keyup.enter="handleQuery">
+            <el-input
+v-model="queryParams.orderNo" placeholder="请输入" clearable style="width: 200px"
+              @keyup.enter="handleQuery"
+>
               <template #prefix>
                 <span class="text-xs text-gray-400 mr-0.5">订单编号:</span>
               </template>
@@ -403,8 +406,10 @@ onMounted(() => {
           </el-form-item>
 
           <el-form-item class="!mb-0 !mr-2">
-            <el-input v-model="queryParams.memberId" placeholder="请输入" clearable style="width: 200px"
-              @keyup.enter="handleQuery">
+            <el-input
+v-model="queryParams.memberId" placeholder="请输入" clearable style="width: 200px"
+              @keyup.enter="handleQuery"
+>
               <template #prefix>
                 <span class="text-xs text-gray-400 mr-0.5">会员ID:</span>
               </template>
@@ -412,8 +417,10 @@ onMounted(() => {
           </el-form-item>
 
           <el-form-item class="!mb-0 !mr-2">
-            <el-input v-model="queryParams.phoneMember" placeholder="请输入" clearable style="width: 200px"
-              @keyup.enter="handleQuery">
+            <el-input
+v-model="queryParams.phoneMember" placeholder="请输入" clearable style="width: 200px"
+              @keyup.enter="handleQuery"
+>
               <template #prefix>
                 <span class="text-xs text-gray-400 mr-0.5">手机号:</span>
               </template>
@@ -421,16 +428,20 @@ onMounted(() => {
           </el-form-item>
 
           <el-form-item class="!mb-0 !mr-2">
-            <el-tree-select v-model="queryParams.deptId" :data="deptOptions" :props="{
+            <el-tree-select
+v-model="queryParams.deptId" :data="deptOptions" :props="{
               value: 'deptId',
               label: 'deptName',
               children: 'children',
-            }" placeholder="请选择" clearable check-strictly style="width: 200px" class="tree-prefix-dept" />
+            }" placeholder="请选择" clearable check-strictly style="width: 200px" class="tree-prefix-dept"
+/>
           </el-form-item>
 
           <el-form-item class="!mb-0 !mr-2">
-            <el-input v-model="queryParams.deviceNo" placeholder="请输入" clearable style="width: 200px"
-              @keyup.enter="handleQuery">
+            <el-input
+v-model="queryParams.deviceNo" placeholder="请输入" clearable style="width: 200px"
+              @keyup.enter="handleQuery"
+>
               <template #prefix>
                 <span class="text-xs text-gray-400 mr-0.5">设备编号:</span>
               </template>
@@ -438,8 +449,10 @@ onMounted(() => {
           </el-form-item>
 
           <el-form-item class="!mb-0 !mr-2">
-            <el-input v-model="queryParams.deviceName" placeholder="请输入" clearable style="width: 200px"
-              @keyup.enter="handleQuery">
+            <el-input
+v-model="queryParams.deviceName" placeholder="请输入" clearable style="width: 200px"
+              @keyup.enter="handleQuery"
+>
               <template #prefix>
                 <span class="text-xs text-gray-400 mr-0.5">设备名称:</span>
               </template>
@@ -474,8 +487,10 @@ onMounted(() => {
           </el-form-item> -->
 
           <el-form-item class="!mb-0 !mr-2">
-            <el-date-picker v-model="dateRange" type="datetimerange" range-separator="至" start-placeholder="开始时间"
-              end-placeholder="结束时间" value-format="YYYY-MM-DD HH:mm:ss" style="width: 360px" />
+            <el-date-picker
+v-model="dateRange" type="datetimerange" range-separator="至" start-placeholder="开始时间"
+              end-placeholder="结束时间" value-format="YYYY-MM-DD HH:mm:ss" style="width: 360px"
+/>
           </el-form-item>
 
           <el-form-item class="!mb-0 !mr-0 md:ml-auto flex items-center gap-1">
@@ -493,8 +508,10 @@ onMounted(() => {
       <el-card shadow="never" class="border-none !p-2">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-2">
-            <ExportButton :module-code="ModuleCodeMap.RECYCLE_ORDER" :fields="visibleColumns"
-              :find-cond="queryParams" />
+            <ExportButton
+:module-code="ModuleCodeMap.RECYCLE_ORDER" :fields="visibleColumns"
+              :find-cond="queryParams"
+/>
             <span v-if="selectedIds.length > 0" class="text-xs text-gray-400 ml-2">
               已选
               <span class="text-red-500 font-medium">{{
@@ -505,20 +522,26 @@ onMounted(() => {
           </div>
 
           <div class="flex items-center">
-            <ColumnSelector :storage-key="RECYCLE_ORDER_STORAGE_KEY" :default-columns="defaultRecycleOrderColumns"
-              @update:columns="handleColumnsUpdate" />
+            <ColumnSelector
+:storage-key="RECYCLE_ORDER_STORAGE_KEY" :default-columns="defaultRecycleOrderColumns"
+              @update:columns="handleColumnsUpdate"
+/>
           </div>
         </div>
 
-        <el-table v-loading="loading" :data="tableData" border stripe style="width: 100%"
-          @selection-change="handleSelectionChange">
+        <el-table
+v-loading="loading" :data="tableData" border stripe style="width: 100%"
+          @selection-change="handleSelectionChange"
+>
           <!-- 选择列固定写死 -->
           <el-table-column type="selection" width="50" align="center" />
 
           <!-- 动态数据列 -->
-          <el-table-column v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
+          <el-table-column
+v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
             :width="typeof col.width === 'number' ? col.width : undefined" :min-width="col.minWidth" :align="col.align"
-            :show-overflow-tooltip="col.showOverflowTooltip || false">
+            :show-overflow-tooltip="col.showOverflowTooltip || false"
+>
             <template #default="{ row }">
               <!-- 订单状态 -->
               <template v-if="col.key === 'orderStatus'">
@@ -585,19 +608,25 @@ onMounted(() => {
 
         <!-- 分页 -->
         <div class="flex justify-end mt-4">
-          <el-pagination v-model:current-page="queryParams.pageNo" v-model:page-size="queryParams.pageSize"
+          <el-pagination
+v-model:current-page="queryParams.pageNo" v-model:page-size="queryParams.pageSize"
             :total="total" :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper" background
-            @size-change="loadData" @current-change="loadData" />
+            @size-change="loadData" @current-change="loadData"
+/>
         </div>
       </el-card>
     </div>
 
-    <ExportFieldSelector v-model:visible="exportFieldVisible" :fields="exportFields" :loading="exporting"
-      @confirm="handleExportConfirm" />
+    <ExportFieldSelector
+v-model:visible="exportFieldVisible" :fields="exportFields" :loading="exporting"
+      @confirm="handleExportConfirm"
+/>
 
     <!-- 详情弹窗 -->
-    <el-dialog v-model="detailVisible" title="订单详情" width="750px" append-to-body
-      @open="detailData && loadImages(detailData.recycleOrderId)">
+    <el-dialog
+v-model="detailVisible" title="订单详情" width="750px" append-to-body
+      @open="detailData && loadImages(detailData.recycleOrderId)"
+>
       <el-scrollbar max-height="65vh">
         <div v-if="detailData" class="px-3 flex flex-col gap-5">
           <el-descriptions title="基础信息" :column="2" :border="false">
@@ -680,8 +709,10 @@ onMounted(() => {
                 formatAmount(detailData.estimateAmount)
                 }}</span>
             </el-descriptions-item>
-            <el-descriptions-item label="实际金额" :span="3" label-class-name="text-gray-800 !font-bold"
-              class-name="border-t border-dashed border-gray-100 pt-2 mt-1">
+            <el-descriptions-item
+label="实际金额" :span="3" label-class-name="text-gray-800 !font-bold"
+              class-name="border-t border-dashed border-gray-100 pt-2 mt-1"
+>
               <span class="font-mono font-black text-primary text-base">{{
                 formatAmount(detailData.realAmount)
                 }}</span>
@@ -695,10 +726,14 @@ onMounted(() => {
                 <el-empty description="暂无现场图片" :image-size="40" class="!py-2" />
               </div>
               <div v-else class="grid grid-cols-6 gap-2">
-                <div v-for="(url, index) in imageUrls" :key="index"
-                  class="aspect-square rounded border border-gray-100 overflow-hidden bg-gray-50">
-                  <el-image :src="url" fit="cover" :preview-src-list="imageUrls" :initial-index="index"
-                    preview-teleported class="w-full h-full">
+                <div
+v-for="(url, index) in imageUrls" :key="index"
+                  class="aspect-square rounded border border-gray-100 overflow-hidden bg-gray-50"
+>
+                  <el-image
+:src="url" fit="cover" :preview-src-list="imageUrls" :initial-index="index"
+                    preview-teleported class="w-full h-full"
+>
                     <template #error>
                       <div class="flex items-center justify-center h-full text-gray-300 bg-gray-100">
                         <el-icon>
@@ -729,8 +764,10 @@ onMounted(() => {
           </el-radio-group>
         </el-form-item>
         <el-form-item label="重量(kg)" required>
-          <el-input-number v-model="weightForm.weight" :min="0.01" :precision="2" :step="0.1" placeholder="请输入重量"
-            style="width: 100%" />
+          <el-input-number
+v-model="weightForm.weight" :min="0.01" :precision="2" :step="0.1" placeholder="请输入重量"
+            style="width: 100%"
+/>
         </el-form-item>
       </el-form>
       <template #footer>
