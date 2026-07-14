@@ -193,36 +193,32 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div 
-    v-if="currentSong"
+  <div
+v-if="currentSong"
     class="music-player fixed bottom-6 right-6 z-50 flex items-center rounded-full bg-slate-900/80 text-white backdrop-blur-md border border-slate-700/50 shadow-lg transition-all duration-300 ease-in-out select-none overflow-hidden"
     :class="isExpanded ? 'max-w-[400px] h-11 px-3 gap-3' : 'w-11 h-11 justify-center p-0 gap-0'"
-  >
-    <div 
+>
+    <div
       class="flex h-8 w-8 flex-shrink-0 cursor-pointer items-center justify-center rounded-full bg-slate-800/80 hover:bg-slate-700/80 transition-colors"
-      @click="isExpanded = !isExpanded"
-      :title="isExpanded ? '收起播放器' : '展开播放器'"
-    >
+      @click="isExpanded = !isExpanded" :title="isExpanded ? '收起播放器' : '展开播放器'"
+>
       <span
-        class="text-lg transition-transform duration-1000 origin-center block"
+class="text-lg transition-transform duration-1000 origin-center block"
         :class="isPlaying ? 'animate-spin-slow' : ''"
-      >
+>
         🎵
       </span>
     </div>
 
-    <div 
-      v-show="isExpanded" 
-      class="flex items-center gap-3 flex-shrink-0 w-max"
-    >
+    <div v-show="isExpanded" class="flex items-center gap-3 flex-shrink-0 w-max">
       <button class="hover:text-cyan-400 text-sm transition-colors cursor-pointer" title="上一曲" @click="prevTrack">
         ⏮
       </button>
 
-      <button 
-        class="hover:text-cyan-400 text-sm transition-colors cursor-pointer min-w-[32px] text-left" 
+      <button
+class="hover:text-cyan-400 text-sm transition-colors cursor-pointer min-w-[32px] text-left"
         @click="togglePlay"
-      >
+>
         {{ isPlaying ? '暂停' : '播放' }}
       </button>
 
@@ -240,13 +236,9 @@ onUnmounted(() => {
       </button>
 
       <input
-        type="range"
-        min="0"
-        max="100"
-        :value="progress"
-        class="w-16 h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-400"
-        @input="handleSeek"
-      />
+type="range" min="0" max="100" :value="progress"
+        class="w-16 h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-400" @input="handleSeek"
+/>
     </div>
   </div>
 </template>
@@ -267,9 +259,9 @@ onUnmounted(() => {
 }
 
 .music-player {
-  transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-              width 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-              padding 0.3s ease;
+  transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    padding 0.3s ease;
 }
 
 /* 优化 range 样式 */

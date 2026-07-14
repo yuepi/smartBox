@@ -159,7 +159,7 @@ onUnmounted(() => {
       </div>
     </div>
     
-    <MusicPlayer :songs="bgmList" :default-volume="0.2" :auto-play="false" />
+    <MusicPlayer :songs="bgmList" :default-volume="0.2" :auto-play="true" />
   </div>
 </template>
 
