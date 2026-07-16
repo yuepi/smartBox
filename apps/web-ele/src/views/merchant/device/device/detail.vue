@@ -1,8 +1,15 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
-import { ElMessage } from 'element-plus';
-import { getDeviceDetailApi } from '#/api/device/device';
 import type { Device } from '#/api/device/device';
+
+import { getDeviceDetailApi } from '#/api/device/device';
+
+// 引入字典
+const { device_brand, device_hatch_type, device_online_status, device_status } = useDicts([
+  'device_brand',
+  'device_hatch_type',
+  'device_online_status',
+  'device_status',
+]);
 
 // 控制弹窗显示隐藏
 const visible = ref(false);
@@ -16,28 +23,11 @@ async function open(row: Device) {
   try {
     const res = await getDeviceDetailApi(row.deviceId);
     detailData.value = res || row;
-  } catch (error) {
+  } catch {
     ElMessage.error('获取设备详情失败');
     // 如果详情接口报错，退而求其次展示列表传进来的基础数据
     detailData.value = row;
   }
-}
-
-// --- 辅助函数 ---
-function getOnlineStatusText(status: number): string {
-  return status === 1 ? "在线" : "离线";
-}
-
-function getOnlineStatusType(status: number): string {
-  return status === 1 ? "success" : "info";
-}
-
-function getStatusText(status: number): string {
-  return status === 0 ? "启用" : "禁用";
-}
-
-function getHatchTypeText(type: number): string {
-  return type === 0 ? "单仓" : "双仓";
 }
 
 // 必须显式暴露 open 方法
@@ -57,18 +47,16 @@ defineExpose({ open });
         {{ detailData.deviceNo }}
       </el-descriptions-item>
       <el-descriptions-item label="设备品牌">
-        {{ detailData.deviceBrand }}
+        <DictTag :options="device_brand" :value="detailData.deviceBrand" />
       </el-descriptions-item>
       <el-descriptions-item label="设备类型">
-        {{ getHatchTypeText(detailData.deviceHatchType) }}
+        <DictTag :options="device_hatch_type" :value="detailData.deviceHatchType" />
       </el-descriptions-item>
       <el-descriptions-item label="设备套餐">
         {{ detailData.devicePackageId || "-" }}
       </el-descriptions-item>
       <el-descriptions-item label="在线状态">
-        <el-tag :type="getOnlineStatusType(detailData.onlineStatus)" size="small">
-          {{ getOnlineStatusText(detailData.onlineStatus) }}
-        </el-tag>
+        <DictTag :options="device_online_status" :value="detailData.onlineStatus" />
       </el-descriptions-item>
       <el-descriptions-item label="最后心跳">
         {{ detailData.lastHeartTime || "-" }}
@@ -102,9 +90,7 @@ defineExpose({ open });
         {{ detailData.customerPhone || "-" }}
       </el-descriptions-item>
       <el-descriptions-item label="状态">
-        <el-tag :type="detailData.status === 0 ? 'success' : 'danger'" size="small">
-          {{ getStatusText(detailData.status) }}
-        </el-tag>
+        <DictTag :options="device_status" :value="detailData.status" />
       </el-descriptions-item>
     </el-descriptions>
   </el-dialog>

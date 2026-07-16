@@ -1,138 +1,1014 @@
-<script lang="ts" setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
-
-// ===== 配置参数 =====
-const MUSIC_URL = '/bgm.mp3' // 音乐文件路径
-const LOOP_START = 15 // 循环开始时间（秒）
-const LOOP_END = 45 // 循环结束时间（秒）
-const VOLUME = 0.3 // 音量 0-1
-
-// ===== 状态 =====
-const audio = new Audio(MUSIC_URL)
-audio.loop = false // 不使用原生 loop，手动控制
-audio.volume = VOLUME
-
-const isPlaying = ref(false)
-const currentTime = ref(0)
-const duration = ref(0)
-
-// ===== 进度计算 =====
-const progress = computed(() => {
-  if (duration.value === 0) return 0
-  return (currentTime.value / duration.value) * 100
-})
-
-// ===== 核心逻辑：循环段落 =====
-const handleTimeUpdate = () => {
-  currentTime.value = audio.currentTime
-
-  // 如果到达循环结束点，跳回开始点
-  if (audio.currentTime >= LOOP_END) {
-    audio.currentTime = LOOP_START
-  }
-}
-
-// ===== 播放/暂停 =====
-const togglePlay = () => {
-  if (isPlaying.value) {
-    audio.pause()
-  } else {
-    // 如果已经播完或未开始，从循环起点开始
-    if (audio.currentTime === 0 || audio.currentTime >= LOOP_END) {
-      audio.currentTime = LOOP_START
-    }
-    audio.play().catch((error) => {
-      console.warn('音频播放被拦截:', error)
-    })
-  }
-  isPlaying.value = !isPlaying.value
-}
-
-// ===== 进度条跳转 =====
-const handleSeek = (e: Event) => {
-  const target = e.target as HTMLInputElement
-  const percent = Number.parseFloat(target.value) / 100
-  audio.currentTime = percent * duration.value
-
-  // 如果跳转位置超出循环结束点，强制拉到循环起点
-  if (audio.currentTime > LOOP_END) {
-    audio.currentTime = LOOP_START
-  }
-}
-
-// ===== 加载完成时获取总时长 =====
-const handleLoadedMetadata = () => {
-  duration.value = audio.duration
-}
-
-// ===== 页面可见性变化：切后台时暂停 =====
-const handleVisibilityChange = () => {
-  if (document.hidden && isPlaying.value) {
-    audio.pause()
-    isPlaying.value = false
-  }
-}
-
-// ===== 生命周期 =====
-onMounted(() => {
-  audio.addEventListener('timeupdate', handleTimeUpdate)
-  audio.addEventListener('loadedmetadata', handleLoadedMetadata)
-  // 预加载音频
-  audio.load()
-  document.addEventListener('visibilitychange', handleVisibilityChange)
-})
-
-onUnmounted(() => {
-  audio.removeEventListener('timeupdate', handleTimeUpdate)
-  audio.removeEventListener('loadedmetadata', handleLoadedMetadata)
-  document.removeEventListener('visibilitychange', handleVisibilityChange)
-  audio.pause()
-  audio.src = ''
-})
-</script>
-
 <template>
-  <div class="music-player fixed bottom-6 right-6 z-50 flex cursor-pointer items-center gap-2 rounded-full bg-black/60 px-3 py-2 text-white backdrop-blur-sm transition-all hover:bg-black/80">
-    <!-- 音符图标 -->
-    <span
-      class="text-xl transition-transform duration-700"
-      :class="isPlaying ? 'animate-spin-slow' : ''"
-      @click="togglePlay"
-    >
-      🎵
-    </span>
+  <view class="content">
+    <!-- ===== 固定顶部背景图 ===== -->
+    <view class="header-bg">
+      <image src="https://tempapi.huiyifamily.com/profile/charge/images/index/顶部充电场景.png" mode="widthFix"
+        class="header-bg-img"></image>
+    </view>
 
-    <!-- 播放/暂停按钮 -->
-    <span class="text-xs" @click="togglePlay">
-      {{ isPlaying ? '播放中' : '已暂停' }}
-    </span>
+    <!-- 切换汽车桩按钮 -->
+    <view class="switch-btn" @click="turnPage('/packageCar/pages/carIndex')">
+      <text>切换汽车桩</text>
+      <u-icon name="arrow-right" color="#fff" size="20"></u-icon>
+    </view>
 
-    <!-- 进度条（可选） -->
-    <input
-      v-if="isPlaying"
-      type="range"
-      min="0"
-      max="100"
-      :value="progress"
-      class="w-20 accent-cyan-400"
-      @input="handleSeek"
-    />
-  </div>
+    <!-- ===== 原生滚动内容区域  ===== -->
+    <view class="scroll-content">
+      <!-- 占位，背景图空出来一部分 -->
+      <view class="header-placeholder">
+
+      </view>
+
+      <view class="body-container">
+        <view class="charging-container" v-if="chargingOrder.length > 0">
+          <view class="charging-card">
+            <view class="card-left">
+              <image class="car-icon" src="/static/car_icon.png"></image>
+            </view>
+
+            <view class="card-center">
+              <view class="charging-status">
+                <text class="dot"></text>正在充电中...
+              </view>
+              <view class="charging-time">
+                开始时间：{{ formatTimeToHM(chargingOrder[0].startTime || chargingOrder[0].createTime) }}
+              </view>
+            </view>
+
+            <view class="card-right">
+              <view class="end-btn" @click.stop="goToEndCharging(chargingOrder[0])">去结束</view>
+            </view>
+          </view>
+        </view>
+        <!-- 功能图标区域 - 四宫格 -->
+        <view class="icon-wrap">
+          <view class="icon-flex">
+            <view class="icon-item" v-for="item in iconList" :key="item.id" @click="turnPage(item.url)">
+              <view class="icon-card" :style="{ backgroundColor: item.bgColor }">
+                <view class="icon-top">
+                  <text class="icon-title" :style="{ color: item.color }">{{ item.txt }}</text>
+                  <text class="icon-desc">{{ getItemDesc(item.id) }}</text>
+                </view>
+                <view class="icon-bottom">
+                  <view class="icon-arrow">
+                    <u-icon name="arrow-right" color="#333" size="20"></u-icon>
+                  </view>
+                  <image :src="item.icon" class="icon-img"></image>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 快捷入口 - 一行五个 -->
+        <view class="quick-wrap">
+          <view class="quick-grid">
+            <view class="quick-item" v-for="item in quickList" :key="item.id" @click="turnPage(item.url)">
+              <image :src="item.icon" class="quick-img"></image>
+              <text class="quick-text">{{ item.txt }}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 附近电站区域 -->
+        <view class="station-section">
+          <view class="section-header">
+            <view class="section-title">
+              <view class="title-line"></view>
+              <text class="title-text">附近电站</text>
+            </view>
+            <view class="location-info" @click="refreshLocation">
+              <u-icon name="map-fill" color="#02C046" size="28"></u-icon>
+              <text class="location-text">{{ locationText || '正在获取位置...' }}</text>
+              <u-icon name="reload" color="#02C046" size="28" class="refresh-icon"></u-icon>
+            </view>
+          </view>
+
+          <!-- 附近电站列表保持 scroll-view 或同样使用普通 view。这里保持局部滚动，如需整体更顺滑，也可以直接将外层 scroll-view 替换 -->
+          <scroll-view class="station-list" scroll-y refresher-enabled
+            :refresher-triggered="refresherTriggered" @refresherrefresh="onRefresherRefresh"
+            @scrolltolower="onScrollToLower">
+            <view class="station-item" v-for="(item,index) in nearPowerList" :key="index"
+              @click="goToStationDetail(item)">
+              <view class="station-main">
+                <view class="station-info">
+                  <view class="station-name">{{ item.deviceName }}</view>
+                  <view class="station-address">{{ item.deviceAddress }}</view>
+                  <view class="station-status">
+                    <view class="status-tag" :class="item.deviceStatus == 1 ? 'online' : 'offline'">
+                      {{ item.deviceStatus == 1 ? '在线' : '离线' }}
+                    </view>
+                    <view class="socket-info">
+                      <text class="socket-free">空闲{{ item.freeNum || '0' }}</text>
+                      <text class="socket-total">/{{ item.socketNum || '0' }}</text>
+                    </view>
+                  </view>
+                </view>
+                <view class="station-action">
+                  <view class="distance">距你{{ (item.distance || 0).toFixed(0) }}m</view>
+                  <view class="nav-btn" @click.stop="navigateToStation(item)">
+                    <u-icon name="map" color="#fff" size="24"></u-icon>
+                    <text>导航</text>
+                  </view>
+                </view>
+              </view>
+            </view>
+
+            <view class="load-status">
+              <text v-if="nearPowerList.length == 0 && loadingStatus.near != 'loading'"
+                class="no-data">暂无附近电站</text>
+              <text v-if="loadingStatus.near == 'loading'" class="loading-text">加载中...</text>
+              <text v-else-if="loadingStatus.near == 'noMore' && nearPowerList.length > 0"
+                class="no-more-text">— 没有更多了 —</text>
+            </view>
+          </scroll-view>
+        </view>
+      </view>
+    </view>
+
+    <my-tabbar :list="tabbar" mid-button mid-button-size="120" @change="changeTabar"></my-tabbar>
+  </view>
 </template>
 
-<style scoped>
-@keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
-  }
+<script>
+  import mySwiper from "@/components/my-swiper.vue";
+  import myTabbar from "@/components/my-tabbar/my-tabbar.vue"
+  import wechatSDK from "@/utils/wechat.js";
+  import {
+    formatTime
+  } from "@/utils/util";
+  import {
+    ChargingPileModel
+  } from "@/models/chargingPile.js";
+  const chargingPileModel = new ChargingPileModel();
+  import {
+    mapState
+  } from 'vuex'
+  import {
+    UserModel
+  } from "@/models/user.js";
+  const userModel = new UserModel();
+  import {
+    OrderModel
+  } from "@/models/order.js";
+  const orderModel = new OrderModel();
 
-  to {
-    transform: rotate(360deg);
-  }
-}
+  export default {
+    computed: {
+      ...mapState(['tabbar'])
+    },
+    data() {
+      return {
+        statusBarHeight: 20,
+        navBarHeight: 45,
+        swiperList: [],
+        chargingOrder: [], // 充电中订单列表
+        chargingTimer: null, // 充电计时器
+        iconList: [{
+            id: 1,
+            txt: "充电订单",
+            icon: "https://tempapi.huiyifamily.com/profile/charge/images/index/充电订单.png",
+            url: "/packageMy/pages/powerOrder",
+            bgColor: "#ECF8F0",
+            color: "#008C3C"
+          },
+          {
+            id: 2,
+            txt: "充值中心",
+            icon: "https://tempapi.huiyifamily.com/profile/charge/images/index/充值中心.png",
+            url: "/pages/index/chargeCenter",
+            bgColor: "#EEF8EF",
+            color: "#007A2D"
+          },
+          {
+            id: 3,
+            txt: "我的电卡",
+            icon: "https://tempapi.huiyifamily.com/profile/charge/images/index/我的电卡.png",
+            url: "/packageMy/pages/card",
+            bgColor: "#FFF4E6",
+            color: "#C85B00"
+          },
+          {
+            id: 4,
+            txt: "故障报修",
+            icon: "https://tempapi.huiyifamily.com/profile/charge/images/index/故障报修.png",
+            url: "/packageMy/pages/repair",
+            bgColor: "#FDEDEE",
+            color: "#F21818"
+          }
+        ],
+        // 快捷入口列表
+        quickList: [{
+          id: 1,
+          txt: "常用电站",
+          icon: "https://tempapi.huiyifamily.com/profile/charge/images/index/常用电站.png",
+          url: "/packageMy/pages/often"
+        }, {
+          id: 2,
+          txt: "免费充电",
+          icon: "https://tempapi.huiyifamily.com/profile/charge/images/index/免费充电.png",
+          url: "/pages/vod/index"
+        }, {
+          id: 3,
+          txt: "0元加盟",
+          icon: "https://tempapi.huiyifamily.com/profile/charge/images/index/0元加盟.png",
+          url: "/packageIndex/pages/join"
+        }, {
+          id: 4,
+          txt: "使用流程",
+          icon: "https://tempapi.huiyifamily.com/profile/charge/images/index/使用流程.png",
+          url: "/packageIndex/pages/use"
+        }, {
+          id: 5,
+          txt: "我的客服",
+          icon: "https://tempapi.huiyifamily.com/profile/charge/images/index/我的客服.png",
+          url: "/packageIndex/pages/custom"
+        }],
 
-.animate-spin-slow {
-  animation: spin-slow 4s linear infinite;
-}
+        // 附近电站相关数据
+        nearPowerList: [],
+        locationText: '',
+        currentLocation: null,
+        loadingStatus: {
+          near: 'more'
+        },
+        pageParams: {
+          near: {
+            page: 1,
+            pageSize: 10
+          }
+        },
+        // 下拉刷新状态
+        refresherTriggered: false
+      };
+    },
+    created() {
+      this.statusBarHeight = uni.getStorageSync("statusBarHeight");
+      this.navBarHeight = uni.getStorageSync("navBarHeight");
+    },
+    components: {
+      "my-swiper": mySwiper,
+      "my-tabbar": myTabbar
+    },
+    onLoad(options) {
+      this.reqBanners();
+      this.getCurrentLocation();
+
+      if (!uni.getStorageSync('token')) return;
+
+      if (options.redirect) {
+        this.$go("/pages/index/chargeCenter");
+      }
+
+      if (options.sid || options.id || options.deviceId) {
+        const sid = options.sid || options.id || options.deviceId;
+        this.$go(`/pages/index/charge?sid=${sid}`);
+      }
+    },
+    onShow() {
+      if (uni.getStorageSync('token')) {
+        this.getChargingOrders();
+        this.reqMyBalance();
+      }
+    },
+    onUnload() {
+      // 页面卸载时清理计时器
+      this.clearChargingTimer();
+    },
+
+    // 监听原生页面下拉刷新（如果需要原生下拉刷新功能，需在 pages.json 中开启 enablePullDownRefresh）
+    onPullDownRefresh() {
+      this.getCurrentLocation();
+      setTimeout(() => {
+        uni.stopPullDownRefresh();
+      }, 1000);
+    },
+
+    // 分享给朋友（转发）
+    onShareAppMessage() {
+      return {
+        title: `慧亿家首页`,
+        path: `/pages/index/index`,
+        success: () => {
+          // 分享成功回调
+          uni.showToast({
+            title: '分享成功',
+            icon: 'success'
+          })
+        },
+        fail: (err) => {
+          console.log('分享失败:', err)
+        }
+      }
+    },
+
+    // 分享到朋友圈（微信小程序）
+    onShareTimeline() {
+      return {
+        title: `慧亿家首页`,
+      }
+    },
+    methods: {
+      changeTabar(e) {
+        if (e == 2) {
+          this.$scanCode()
+        }
+      },
+      reqBanners() {
+        chargingPileModel.getHomeBanner().then(res => {
+          this.swiperList = res.data;
+        });
+      },
+      getItemDesc(id) {
+        const descMap = {
+          1: '查看充电记录',
+          2: '余额充值管理',
+          3: '电卡信息管理',
+          4: '设备故障报修'
+        };
+        return descMap[id] || '';
+      },
+      turnPage(url) {
+        if (!url) return;
+
+        if (url.startsWith('/pages')) {
+          uni.reLaunch({
+            url: url
+          });
+        } else {
+          // 其他页面使用普通跳转
+          this.$go(url);
+        }
+      },
+      //获取个人余额
+      reqMyBalance() {
+        userModel.getBanlance().then(res => {
+          if (res.code == 200) {
+            this.userMoney = res.data.userMoney;
+          }
+        })
+      },
+
+      // 位置相关方法
+      getCurrentLocation() {
+        // #ifdef H5
+        // 微信网页环境使用微信JS-SDK
+        wechatSDK.getLocation().then((res) => {
+          console.log('获取到的位置信息:', res);
+          this.currentLocation = res;
+          this.reverseGeocode(res.latitude, res.longitude);
+          this.reqNearLocation(true);
+        });
+        // #endif
+
+        // #ifdef MP-WEIXIN
+        // 小程序环境使用uni.getLocation
+        uni.getLocation({
+          type: 'gcj02',
+          success: (res) => {
+            this.currentLocation = res;
+            this.reverseGeocode(res.latitude, res.longitude);
+            this.reqNearLocation(true);
+          }
+        });
+        // #endif
+      },
+
+      // 逆地理编码获取地址信息
+      reverseGeocode(latitude, longitude) {
+        // 模拟解析结果
+        setTimeout(() => {
+          this.locationText = "重新定位";
+        }, 1000);
+      },
+
+      // 刷新位置
+      refreshLocation() {
+        this.getCurrentLocation();
+      },
+
+      // 获取附近电站
+      reqNearLocation(isRefresh = false) {
+        uni.showLoading({
+          mask: true,
+        })
+        if (!this.currentLocation) {
+          this.getCurrentLocation();
+          return;
+        }
+
+        if (this.loadingStatus.near == 'loading') return;
+
+        if (isRefresh) {
+          this.pageParams.near.page = 1;
+          this.loadingStatus.near = 'loading';
+        }
+
+        chargingPileModel.getNearby({
+          longitude: this.currentLocation.longitude,
+          latitude: this.currentLocation.latitude,
+          pageNum: this.pageParams.near.page,
+          pageSize: this.pageParams.near.pageSize
+        }).then(res => {
+          if (res.code == 200) {
+            uni.hideLoading()
+            if (isRefresh) {
+              this.nearPowerList = res.rows || [];
+            } else {
+              this.nearPowerList = [...this.nearPowerList, ...(res.rows || [])];
+            }
+
+            // 判断是否还有更多数据
+            if (res.rows.length < this.pageParams.near.pageSize) {
+              this.loadingStatus.near = 'noMore';
+            } else {
+              this.pageParams.near.page++;
+              this.loadingStatus.near = 'more';
+            }
+          }
+        }).catch(() => {
+          uni.hideLoading()
+          this.loadingStatus.near = 'more';
+        }).finally(() => {
+          // 关闭下拉刷新状态
+          if (this.refresherTriggered) {
+            setTimeout(() => {
+              this.refresherTriggered = false;
+            }, 500);
+          }
+        });
+      },
+      // 下拉刷新
+      onRefresherRefresh() {
+        this.refresherTriggered = true;
+        this.getCurrentLocation();
+      },
+
+      // 触底加载
+      onScrollToLower() {
+        if (this.loadingStatus.near === 'more') {
+          this.reqNearLocation(false);
+        }
+      },
+      // 导航到电站
+      navigateToStation(item) {
+        const {
+          latitude,
+          longitude,
+          deviceName,
+          deviceAddress
+        } = item
+        wx.openLocation({
+          latitude,
+          longitude,
+          name: deviceName, // 可选，如果不知道可以省略
+          address: deviceAddress, // 可选，如果不知道可以省略
+          scale: 28, // 地图缩放级别,范围从1~28。默认为最大
+          success: function(res) {
+            console.log(res);
+          },
+          fail: function(err) {
+            console.log(err);
+          }
+        })
+      },
+
+      // 进入电站详情
+      goToStationDetail(item) {
+        if (item.deviceExtendNo) {
+          uni.navigateTo({
+            url: "/pages/index/charge?sid=" + item.deviceExtendNo
+          });
+        } else {
+          this.$toast('暂无法查看该电站详情')
+        }
+      },
+
+      // 获取充电中订单
+      async getChargingOrders() {
+        try {
+          const currentTime = new Date();
+          const oneYearAgo = new Date(currentTime.getTime() - 365 * 24 * 60 * 60 * 1000);
+
+          const params = {
+            timeSelectCondition: 1,
+            orderStatus: 1, // 1表示充电中
+            deviceType: 1, // 设备类型
+            pageNum: 1,
+            pageSize: 10,
+            endTime: formatTime(currentTime),
+            startTime: formatTime(oneYearAgo)
+          };
+
+          const res = await orderModel.getOrderList(params);
+
+          if (res.code == 200) {
+            this.chargingOrder = res.rows; //暂时过滤掉汽车订单
+
+            // 如果有充电中的订单，启动计时器
+            if (this.chargingOrder.length > 0 && !this.chargingTimer) {
+              this.startChargingTimer();
+            } else if (this.chargingOrder.length == 0 && this.chargingTimer) {
+              clearInterval(this.chargingTimer);
+              this.chargingTimer = null;
+            }
+          }
+        } catch (error) {
+          console.error('获取充电订单失败:', error);
+        }
+      },
+
+      // 启动充电计时器（每分钟更新一次）
+      startChargingTimer() {
+        this.chargingTimer = setInterval(() => {
+          // 触发视图更新
+          this.chargingOrder = [...this.chargingOrder];
+        }, 60000); // 每分钟更新一次
+      },
+
+      // 格式化时间为 HH:mm:ss（只显示时分秒）
+      formatTimeToHM(timeStr) {
+        if (!timeStr) return '--:--:--';
+        const date = new Date(timeStr);
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${hours}:${minutes}:${seconds}`;
+      },
+
+      // 跳转到结束充电页面
+      goToEndCharging(item) {
+        const url = item.deviceType == '3' || item.deviceType == '2' || item.deviceType == '6' ?
+          `/packageCar/pages/recharge?orderId=${item.orderId}` :
+          `/pages/index/startCharge?orderId=${item.orderId}&deviceType=${item.deviceType}&noTip=true`;
+        this.$go(url);
+      },
+
+      // 清理计时器
+      clearChargingTimer() {
+        if (this.chargingTimer) {
+          clearInterval(this.chargingTimer);
+          this.chargingTimer = null;
+        }
+      }
+    }
+  };
+</script>
+
+<style lang="scss">
+  $borderColor: #e6e6e6;
+  $textColor: #333;
+  $textLight: #666;
+  $textLighter: #999;
+
+  page {
+    background: #F5F7FA;
+  }
+
+  .content {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  /* ===== 固定顶部背景图 ===== */
+  .header-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    width: 100%;
+    overflow: hidden;
+
+    .header-bg-img {
+      width: 100%;
+      display: block;
+    }
+  }
+
+  .switch-btn {
+    position: fixed;
+    top: 100rpx;
+    left: 24rpx;
+    display: flex;
+    align-items: center;
+    gap: 8rpx;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(10px);
+    color: #fff;
+    font-size: 24rpx;
+    padding: 12rpx 20rpx;
+    border-radius: 30rpx;
+    z-index: 10;
+
+    &:active {
+      opacity: 0.7;
+      transform: scale(0.96);
+    }
+
+    text {
+      font-weight: 500;
+    }
+  }
+
+  /* ===== 滚动内容区域 ===== */
+  .scroll-content {
+    flex: 1;
+    position: relative;
+    z-index: 2;
+
+  
+  }
+
+  /* ===== 占位高度 ===== */
+  .header-placeholder {
+    width: 100%;
+    height: 600rpx;
+  }
+
+  .body-container {
+    border-radius: 10rpx;
+    background-color: #F5F7FA;
+    padding: 10rpx 24rpx;
+  }
+
+
+  .charging-container {
+    margin: 16rpx 0;
+    position: relative;
+    overflow: hidden;
+    border-radius: 20rpx;
+    background-color: #f8f9fa; // 兜底浅色背景
+    box-shadow: 8rpx 10rpx 12px rgba(0, 0, 0, 0.06);
+
+    background-image: url('https://img2023.cnblogs.com/blog/1810464/202301/1810464-20230114182908887-2040433752.png');
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: 65% center;
+
+    .charging-card {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      padding: 30rpx;
+      height: 140rpx;
+
+      .card-left {
+        margin-right: 24rpx;
+
+        .car-icon {
+          width: 60rpx;
+          height: 50rpx;
+          filter: drop-shadow(0 4rpx 6rpx rgba(0, 0, 0, 0.1));
+        }
+      }
+
+      .card-center {
+        flex: 1;
+
+        .charging-status {
+          font-size: 30rpx;
+          font-weight: bold;
+          color: #333;
+          display: flex;
+          align-items: center;
+
+          .dot {
+            width: 14rpx;
+            height: 14rpx;
+            background: #52c41a;
+            border-radius: 50%;
+            margin-right: 12rpx;
+            box-shadow: 0 0 10rpx #52c41a;
+            animation: blink 1.5s infinite;
+          }
+        }
+
+        .charging-time {
+          font-size: 24rpx;
+          color: #777;
+          margin-top: 6rpx;
+        }
+      }
+
+      .card-right {
+        margin-left: 20rpx;
+
+        .end-btn {
+          background: $themeColor;
+          color: #fff;
+          padding: 10rpx 28rpx;
+          border-radius: 12rpx;
+          font-size: 26rpx;
+          box-shadow: 0 4rpx 10rpx rgba(255, 77, 79, 0.2);
+        }
+      }
+    }
+  }
+
+  // 简单的呼吸灯动画
+  @keyframes blink {
+    0% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0.3;
+    }
+
+    100% {
+      opacity: 1;
+    }
+  }
+
+  /* ===== 功能图标 - 四宫格 ===== */
+  .icon-wrap {
+    margin: 16rpx 0;
+    background: #fff;
+    border-radius: 16rpx;
+    padding: 8rpx;
+    box-shadow: 8rpx 10rpx 12px rgba(0, 0, 0, 0.06);
+
+    .icon-flex {
+      display: flex;
+      gap: 12rpx;
+    }
+
+    .icon-item {
+      flex: 1;
+
+      .icon-card {
+        display: flex;
+        flex-direction: column;
+        border-radius: 16rpx;
+        padding: 16rpx 14rpx 12rpx;
+        min-height: 140rpx;
+        justify-content: space-between;
+
+        .icon-top {
+          display: flex;
+          flex-direction: column;
+
+          .icon-title {
+            font-size: 29rpx;
+            font-weight: 600;
+            line-height: 1.3;
+          }
+
+          .icon-desc {
+            font-size: 18rpx;
+            color: #999;
+            margin-top: 4rpx;
+          }
+        }
+
+        .icon-bottom {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-top: 12rpx;
+
+          .icon-arrow {
+            background-color: #fff;
+            width: 36rpx;
+            height: 36rpx;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+          }
+
+          .icon-img {
+            width: 90rpx;
+            height: 100rpx;
+            flex-shrink: 0;
+          }
+        }
+      }
+    }
+  }
+
+  /* ===== 快捷入口 - 一行五个 ===== */
+  .quick-wrap {
+    margin: 16rpx 0;
+    background: #fff;
+    border-radius: 16rpx;
+    padding: 20rpx 8rpx;
+    box-shadow: 8rpx 10rpx 12px rgba(0, 0, 0, 0.06);
+
+    .quick-grid {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+
+    .quick-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+
+      .quick-img {
+        width: 80rpx;
+        height: 80rpx;
+        margin-bottom: 8rpx;
+      }
+
+      .quick-text {
+        font-size: 24rpx;
+        color: $textColor;
+        text-align: center;
+      }
+    }
+  }
+
+  /* ===== 附近电站区域 ===== */
+  .station-section {
+    background: #fff;
+    margin: 16rpx 0;
+    border-radius: 16rpx;
+    box-shadow: 8rpx 10rpx 12px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24rpx 28rpx;
+      border-bottom: 1rpx solid #f0f0f0;
+
+      .section-title {
+        display: flex;
+        align-items: center;
+
+        .title-line {
+          width: 6rpx;
+          height: 28rpx;
+          background: $themeColor;
+          border-radius: 3rpx;
+          margin-right: 12rpx;
+        }
+
+        .title-text {
+          font-size: 32rpx;
+          font-weight: bold;
+          color: $textColor;
+        }
+      }
+
+      .location-info {
+        display: flex;
+        align-items: center;
+        padding: 6rpx 16rpx;
+        background: #f5f7fa;
+        border-radius: 30rpx;
+        font-size: 28rpx;
+        color: $textLight;
+
+        .location-text {
+          margin: 0 6rpx;
+          max-width: 160rpx;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .refresh-icon {
+          margin-left: 4rpx;
+        }
+      }
+    }
+
+    .station-list {
+      max-height: 600rpx;
+
+      .station-item {
+        padding: 24rpx 28rpx;
+        border-bottom: 1rpx solid #f5f5f5;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .station-main {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+
+          .station-info {
+            flex: 1;
+            min-width: 0;
+
+            .station-name {
+              font-size: 30rpx;
+              font-weight: 600;
+              color: $textColor;
+              margin-bottom: 6rpx;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
+
+            .station-address {
+              font-size: 28rpx;
+              color: $textLight;
+              margin-bottom: 12rpx;
+              line-height: 1.4;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
+
+            .station-status {
+              display: flex;
+              align-items: center;
+
+              .status-tag {
+                padding: 2rpx 14rpx;
+                font-size: 24rpx;
+                border-radius: 20rpx;
+                margin-right: 16rpx;
+
+                &.online {
+                  background: rgba($themeColor, 0.1);
+                  color: $themeColor;
+                }
+
+                &.offline {
+                  background: rgba($textLighter, 0.1);
+                  color: $textLighter;
+                }
+              }
+
+              .socket-info {
+                font-size: 26rpx;
+                color: $textLight;
+
+                .socket-free {
+                  color: $themeColor;
+                }
+
+                .socket-total {
+                  color: $textLighter;
+                }
+              }
+            }
+          }
+
+          .station-action {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            margin-left: 16rpx;
+            flex-shrink: 0;
+
+            .distance {
+              font-size: 24rpx;
+              color: $textLight;
+              margin-bottom: 12rpx;
+            }
+
+            .nav-btn {
+              display: flex;
+              align-items: center;
+              padding: 6rpx 18rpx;
+              background: $themeColor;
+              color: #fff;
+              border-radius: 20rpx;
+              font-size: 28rpx;
+
+              text {
+                margin-left: 6rpx;
+              }
+            }
+          }
+        }
+      }
+
+      .load-status {
+        padding: 24rpx 0;
+        text-align: center;
+        font-size: 24rpx;
+        color: $textLighter;
+
+        .no-data {
+          display: block;
+        }
+
+        .no-more-text {
+          color: #ddd;
+          font-size: 22rpx;
+        }
+      }
+    }
+  }
+
+  /* ===== 底部安全区 ===== */
+  .bottom-safe {
+    height: 20rpx;
+  }
 </style>
-大屏页面我写好了，但我想加个bgm写了个组件，你可以改成比较成熟一点的吗，你看看有啥缺点都可以改，我还想加个上一曲下一曲的功能可以吗，属性变成可以配置的吧，你可以给一个哈基说的mp3文件吗

@@ -52,10 +52,12 @@
     "pinia": "catalog:",
     "qrcode": "catalog:",
     "splitpanes": "catalog:",
+    "unplugin-icons": "^23.0.1",
     "vue": "catalog:",
     "vue-router": "catalog:"
   },
   "devDependencies": {
+    "@iconify-json/ep": "^1.2.4",
     "@types/qrcode": "catalog:",
     "unplugin-auto-import": "^21.0.0",
     "unplugin-element-plus": "catalog:",

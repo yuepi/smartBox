@@ -85,38 +85,32 @@ async function handleStartExport() {
   <div class="inline-block">
     <el-button :loading="exporting" @click="openExportConfig">
       <template #icon>
-            <el-icon v-if="!exporting"><Download /></el-icon>
-        </template>
+        <el-icon v-if="!exporting">
+          <Download />
+        </el-icon>
+      </template>
       {{ btnText }}
     </el-button>
 
     <el-dialog
-      v-model="dialogVisible"
-      title="导出数据配置"
-      width="520px"
-      append-to-body
-      draggable
+v-model="dialogVisible" title="导出数据配置" width="520px" append-to-body draggable
       class="rounded-xl overflow-hidden"
-    >
+>
       <div class="px-2">
-        <div
-          class="flex items-center gap-2 mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg"
-        >
-          <el-icon class="!text-blue-500"><InfoFilled /></el-icon>
+        <div class="flex items-center gap-2 mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+          <el-icon class="!text-blue-500">
+            <InfoFilled />
+          </el-icon>
           <span class="text-xs text-blue-700 dark:text-blue-300">
             请选择需要导出的字段，系统将按照勾选顺序生成 Excel 表格。
           </span>
         </div>
 
-        <div
-          class="flex items-center justify-between px-2 py-2 mb-2 bg-gray-50 dark:bg-zinc-800/50 rounded-md"
-        >
+        <div class="flex items-center justify-between px-2 py-2 mb-2 bg-gray-50 dark:bg-zinc-800/50 rounded-md">
           <el-checkbox
-            :model-value="isAllChecked"
-            :indeterminate="isIndeterminate"
-            @change="handleCheckAllChange"
+:model-value="isAllChecked" :indeterminate="isIndeterminate" @change="handleCheckAllChange"
             class="!h-auto"
-          >
+>
             <span class="text-sm font-bold text-gray-700 dark:text-gray-200">全选所有字段</span>
           </el-checkbox>
           <span class="text-xs text-gray-400">
@@ -127,28 +121,21 @@ async function handleStartExport() {
         <el-scrollbar max-height="360px">
           <div class="grid grid-cols-2 gap-2 p-1">
             <div
-              v-for="field in fields"
-              :key="field.key"
+v-for="field in fields" :key="field.key"
               class="flex items-center px-3 py-2 rounded-md border border-transparent transition-all cursor-pointer"
               :class="[
                 selectedFields.includes(field.key)
                   ? 'bg-primary/5 border-primary/20 shadow-sm'
                   : 'bg-white dark:bg-zinc-900 hover:bg-gray-50 border-gray-100 dark:border-zinc-800',
               ]"
-            >
-              <el-checkbox
-                v-model="selectedFields"
-                :label="field.key"
-                class="w-full !mr-0"
-              >
+>
+              <el-checkbox v-model="selectedFields" :label="field.key" class="w-full !mr-0">
                 <span
-                  class="text-sm transition-colors"
-                  :class="
-                    selectedFields.includes(field.key)
-                      ? 'text-primary font-medium'
-                      : 'text-gray-600'
+class="text-sm transition-colors" :class="selectedFields.includes(field.key)
+                    ? 'text-primary font-medium'
+                    : 'text-gray-600'
                   "
-                >
+>
                   {{ field.label }}
                 </span>
               </el-checkbox>
@@ -160,17 +147,17 @@ async function handleStartExport() {
       <template #footer>
         <div class="flex justify-end gap-3 pt-2">
           <el-button plain class="!rounded-md" @click="dialogVisible = false">
-取消
-</el-button>
+            取消
+          </el-button>
           <el-button
-            type="primary"
-            :loading="exporting"
-            class="!rounded-md !px-6 shadow-lg shadow-primary/20"
+type="primary" :loading="exporting" class="!rounded-md !px-6 shadow-lg shadow-primary/20"
             @click="handleStartExport"
-          >
+>
             <template #icon>
-<el-icon v-if="!exporting"><Download /></el-icon>
-</template>
+              <el-icon v-if="!exporting">
+                <Download />
+              </el-icon>
+            </template>
             开始导出
           </el-button>
         </div>

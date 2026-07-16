@@ -7,21 +7,22 @@ import { initStores } from '@vben/stores';
 import '@vben/styles';
 import '@vben/styles/ele';
 
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+import DataV from '@kjgl77/datav-vue3';
 import { useTitle } from '@vueuse/core';
 import { ElLoading } from 'element-plus';
 
 import BaseTableLayout from '#/components/BaseTableLayout/index.vue';
 import ColumnSelector from '#/components/ColumnSelector/index.vue';
+import PublicComponent from '#/components/componentInstall';
 import DictTag from '#/components/DictTag/index.vue';
 import ExportButton from '#/components/ExportButton/index.vue';
 import { setupGlobalComponent } from '#/components/global';
-import PublicComponent from '#/components/componentInstall';
 import { $t, setupI18n } from '#/locales';
 
 import { initComponentAdapter } from './adapter/component';
 import { initSetupVbenForm } from './adapter/form';
 import App from './app.vue';
-import DataV from '@kjgl77/datav-vue3';
 import { router } from './router';
 
 // 引入全局css
@@ -48,6 +49,11 @@ async function bootstrap(namespace: string) {
   // });
 
   const app = createApp(App);
+
+  // 注册Element Plus图标组件
+  for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+    app.component(key, component);
+  }
 
   app.component('DictTag', DictTag);
   app.component('ExportButton', ExportButton);

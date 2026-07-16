@@ -7,13 +7,11 @@ import { subtitle, title, WEEK } from '#/constants/screen'
 import { formatTime } from '#/utils/index'
 import useDraw from '#/utils/useDraw'
 
-// 直接引入组件，<script setup> 架构下无需再手动 components 注册，模板可直接使用
 import BottomLeft from './bottomLeft/index.vue'
 import BottomRight from './bottomRight/index.vue'
 import Center from './center/index.vue'
 import CenterLeft1 from './centerLeft1/index.vue'
 import CenterRight1 from './centerRight1/index.vue'
-// 引入音乐播放器组件，并顺带引入其规定的 SongItem 接口类型
 import MusicPlayer from './MusicPlayer/index.vue';
 
 // * 颜色

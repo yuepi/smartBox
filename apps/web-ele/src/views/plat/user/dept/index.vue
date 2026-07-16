@@ -1,23 +1,21 @@
 <script lang="tsx" setup>
-import { computed, onMounted, reactive, ref, watch } from 'vue';
+import type { Dept } from '#/api/system/dept';
+import type { TableColumnConfig } from '#/constants/tableColumns';
 
 import { useAccess } from '@vben/access';
 import { Page } from '@vben/common-ui';
 
-import { Delete, Edit, Folder, HomeFilled, OfficeBuilding, Plus, Refresh, Search } from '@element-plus/icons-vue';
-import { ElMessage, ElMessageBox, ElTooltip, ElButton, ElTag } from 'element-plus';
+import { Delete, Edit, Folder, HomeFilled, OfficeBuilding, Plus } from '@element-plus/icons-vue';
+import { ElButton, ElTag, ElTooltip } from 'element-plus';
 
 import { deletePlatDeptApi, getPlatDeptListApi } from '#/api/system/dept';
-import type { Dept } from '#/api/system/dept';
-import ColumnSelector from '#/components/ColumnSelector/index.vue';
 import { defaultDeptColumns, DEPT_STORAGE_KEY } from '#/constants/tableColumns';
-import type { TableColumnConfig } from '#/constants/tableColumns';
 import { ModuleCodeMap } from '#/hooks/useExport';
 
-// 🌟 引入独立拆分出去的弹窗组件
 import DeptModal from './DeptModal.vue';
 
 const { hasAccessByCodes } = useAccess();
+
 
 // --- 表格列配置 ---
 const columnConfig = ref<TableColumnConfig[]>([...defaultDeptColumns]);
@@ -51,7 +49,7 @@ watch(visibleColumns, () => {
   tableKey.value++;
 });
 
-// 转换为 el-table-v2 需要的 columns 格式（内部操作列已重构为“纯图标+Tooltip提示”）
+// 转换为 el-table-v2 需要的 columns 格式
 const tableColumns = computed(() => {
   const cols = visibleColumns.value.length > 0 ? visibleColumns.value : defaultDeptColumns;
 
@@ -106,21 +104,21 @@ const tableColumns = computed(() => {
       fixed: 'right' as const,
       cellRenderer: ({ rowData }: { rowData: Dept }) => (
         <div class="flex w-full justify-center gap-1">
-          {/* 1. 新增子项按钮 */}
+          {/* 1. 新增按钮 */}
           {hasAccessByCodes(['plat:dept:add']) && (
-            <ElTooltip content="新增下级" placement="top" enterable={false}>
+            <ElTooltip content="新增下级" enterable={false} placement="top">
               <ElButton icon={Plus} link onClick={() => handleOpenModal({ parentId: rowData.deptId, deptType: 1, status: 0, sort: 0 })} type="primary" />
             </ElTooltip>
           )}
           {/* 2. 修改按钮 */}
           {hasAccessByCodes(['plat:dept:edit']) && (
-            <ElTooltip content="修改" placement="top" enterable={false}>
+            <ElTooltip content="修改" enterable={false} placement="top">
               <ElButton icon={Edit} link onClick={() => handleOpenModal(rowData)} type="primary" />
             </ElTooltip>
           )}
-          {/* 3. 删除按钮：这里移除了 text-danger，使其放置时视觉降噪，体验极其统一 */}
+          {/* 3. 删除按钮： */}
           {hasAccessByCodes(['plat:dept:del']) && (
-            <ElTooltip content="删除" placement="top" enterable={false}>
+            <ElTooltip content="删除" enterable={false} placement="top">
               <ElButton icon={Delete} link onClick={() => handleDelete(rowData)} type="primary" />
             </ElTooltip>
           )}
@@ -145,7 +143,7 @@ async function loadData() {
 }
 
 // 🌟 打开弹窗
-function handleOpenModal(row?: Partial<Dept> | Dept) {
+function handleOpenModal(row?: Dept | Partial<Dept>) {
   deptModalRef.value?.open(row);
 }
 
@@ -184,8 +182,9 @@ onMounted(() => {
 <template>
   <Page auto-content-height>
     <BaseTableLayout
-      v-model:queryParams="queryParams"
-      v-model:moreParams="moreParams"
+      :total="0"
+      v-model:query-params="queryParams"
+      v-model:more-params="moreParams"
       :loading="loading"
       :is-virtual-table="true"
       @search="loadData"
@@ -216,9 +215,9 @@ onMounted(() => {
       </template>
 
       <template #toolbar-left>
-        <el-button type="primary" plain :icon="Plus" @click="handleOpenModal()" v-access:code="['plat:dept:add']">
+        <ElButton type="primary" plain :icon="Plus" @click="handleOpenModal()" v-access:code="['plat:dept:add']">
           新增部门
-        </el-button>
+        </ElButton>
         <ExportButton :module-code="ModuleCodeMap.DEPT" :fields="visibleColumns" :find-cond="queryParams" />
       </template>
 

@@ -7,7 +7,8 @@ interface Props {
   queryParams: any; // 页面查询参数
   moreParams: boolean; // 展开收起状态
   loading?: boolean; // 表格加载状态
-  total: number; // 分页总条数
+  total?: number; // 分页总条数
+
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -49,8 +50,10 @@ function handleSearchClick() {
           <slot name="search-basic"></slot>
 
           <el-form-item class="filter-actions-group">
-            <el-button type="primary" link class="toggle-link-btn" @click="isExpanded = !isExpanded"
-              v-if="hasAdvancedSearch">
+            <el-button
+type="primary" link class="toggle-link-btn" @click="isExpanded = !isExpanded"
+              v-if="hasAdvancedSearch"
+>
               {{ isExpanded ? '收起筛选' : '更多筛选' }}
               <el-icon class="el-icon--right">
                 <component :is="isExpanded ? ArrowUp : ArrowDown" />
@@ -85,10 +88,12 @@ function handleSearchClick() {
         <slot name="table"></slot>
       </div>
 
-      <div class="pagination-footer-box">
-        <el-pagination v-model:current-page="queryParams.pageNo" v-model:page-size="queryParams.pageSize" :total="total"
-          :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper" background
-          @size-change="emit('search')" @current-change="emit('search')" />
+      <div class="pagination-footer-box" v-if="total > 0">
+        <el-pagination
+v-model:current-page="queryParams.pageNo" v-model:page-size="queryParams.pageSize" :total="total"
+          :page-sizes="[10, 20, 50, 100]" layout="?, sizes, prev, pager, next, jumper" background
+          @size-change="emit('search')" @current-change="emit('search')"
+/>
       </div>
     </div>
   </div>
