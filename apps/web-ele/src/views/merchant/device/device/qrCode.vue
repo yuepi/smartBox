@@ -1,61 +1,201 @@
 <script lang="ts" setup>
-import { ref } from "vue";
-import { ElMessage } from "element-plus";
-import { Download } from "@element-plus/icons-vue";
-import { getQrcodeListApi } from '#/api/device/qrCode';
-import type { Qrcode } from '#/api/device/qrCode';
-import { downOneDeviceQrcodeFileApi, downOneDeviceQrcodeJsonApi } from "#/api/device/device";
+import type { QrcodeData } from '#/api/device/device';
+
+import {
+  batchDownDeviceQrcodeFileApi,
+  batchDownDeviceQrcodeJsonApi,
+  downOneDeviceQrcodeJsonApi,
+} from '#/api/device/device';
 
 const visible = ref(false);
-const deviceId = ref<number>();
-const qrcodeList = ref<Qrcode[]>([]);
 const loading = ref(false);
+const qrcodeList = ref<QrcodeData[]>([]);
+const mode = ref<number>(0); // 0=展示, 1=下载（但下载直接走文件流，这里主要用于展示）
 
-async function open(row: any) {
+// 单条展示
+async function showSingle(deviceId: number) {
+  mode.value = 0;
+  loading.value = true;
   visible.value = true;
-  deviceId.value = row.deviceId;
+  qrcodeList.value = [];
   try {
-    loading.value = true;
-    const res = await getQrcodeListApi({ deviceId: row.deviceId });
+    const res = await downOneDeviceQrcodeJsonApi(deviceId);
     qrcodeList.value = res || [];
   } catch {
-    ElMessage.error("获取二维码失败");
+    ElMessage.error('获取二维码失败');
   } finally {
     loading.value = false;
   }
 }
 
-async function downloadSingleImage(item: Qrcode) {
+// 单条下载
+async function downloadSingle(item: QrcodeData) {
   try {
-    await downOneDeviceQrcodeFileApi(item.qrcodeId);
-    ElMessage.success("图片导出成功");
-  } catch {}
+    const url = item.base64QrCode || item.qrCodeUrl;
+    if (!url) {
+      ElMessage.warning('该二维码暂无下载链接');
+      return;
+    }
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${item.qrCode || 'qrCode'}.png`;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    ElMessage.success('下载成功');
+  } catch {
+    ElMessage.error('下载失败');
+  }
 }
 
-async function downloadSingleJson(item: Qrcode) {
+// 批量展示
+async function showBatch(deviceIds: number[]) {
+  if (!deviceIds || deviceIds.length === 0) {
+    ElMessage.warning('请先选择设备');
+    return;
+  }
+  mode.value = 0;
+  loading.value = true;
+  visible.value = true;
+  qrcodeList.value = [];
   try {
-    await downOneDeviceQrcodeJsonApi(item.qrcodeId);
-    ElMessage.success("JSON配置导出成功");
-  } catch {}
+    const res = await batchDownDeviceQrcodeJsonApi(deviceIds);
+    qrcodeList.value = res || [];
+    if (qrcodeList.value.length === 0) {
+      ElMessage.info('暂无二维码数据');
+    }
+  } catch {
+    ElMessage.error('获取二维码失败');
+  } finally {
+    loading.value = false;
+  }
 }
 
-defineExpose({ open });
+// 批量下载（打包成 zip）
+async function downloadBatch(deviceIds: number[]) {
+  if (!deviceIds || deviceIds.length === 0) {
+    ElMessage.warning('请先选择设备');
+    return;
+  }
+  loading.value = true;
+  try {
+    const blob = await batchDownDeviceQrcodeFileApi(deviceIds);
+    const blobData = blob.data || blob;
+    let downloadName = `qrcodes_${Date.now()}.zip`;
+    const contentDisposition = blob.headers?.['content-disposition'];
+    if (contentDisposition) {
+      const fileNameMatch = contentDisposition.match(/filename\*?=['"]?(?:UTF-8'')?([^"';]+)['"]?/i);
+      if (fileNameMatch && fileNameMatch[1]) {
+        downloadName = decodeURIComponent(fileNameMatch[1]);
+      }
+    }
+    const url = window.URL.createObjectURL(new Blob([blobData]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = downloadName;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+    ElMessage.success('下载成功');
+  } catch {
+    ElMessage.error('批量下载失败');
+  } finally {
+    loading.value = false;
+  }
+}
+
+// 关闭弹窗
+function handleClose() {
+  visible.value = false;
+  qrcodeList.value = [];
+}
+
+// 暴露方法
+defineExpose({
+  showSingle,
+  showBatch,
+  downloadBatch,
+});
 </script>
 
 <template>
-  <el-dialog v-model="visible" title="设备二维码资产清单" width="680px" append-to-body>
-    <div v-loading="loading" class="min-h-[200px] p-2">
-      <el-empty v-if="!qrcodeList.length" description="暂无关联二维码" />
-      <div v-else class="grid grid-cols-3 gap-4">
-        <div v-for="item in qrcodeList" :key="item.qrcodeId" class="border border-gray-100 rounded p-2 flex flex-col items-center bg-gray-50/50">
-          <el-image :src="item.qrcodeUrl" :preview-src-list="qrcodeList.map(q => q.qrcodeUrl)" class="w-32 h-32 rounded shadow-inner" fit="cover" />
-          <span class="text-xs text-gray-500 mt-2 font-medium">通道: {{ item.channelNo }}</span>
-          <div class="flex gap-1 w-full mt-2">
-            <el-button type="primary" size="small" plain class="flex-1" :icon="Download" @click="downloadSingleImage(item)">图片</el-button>
-            <el-button type="success" size="small" plain class="flex-1" :icon="Download" @click="downloadSingleJson(item)">JSON</el-button>
+  <el-dialog
+    v-model="visible"
+    title="设备二维码"
+    width="900px"
+    append-to-body
+    class="rounded-xl"
+    @close="handleClose"
+  >
+    <div v-loading="loading" class="min-height-[400px]">
+      <el-scrollbar max-height="550px" always>
+        <div v-if="qrcodeList.length === 0 && !loading" class="py-12">
+          <el-empty description="暂无二维码数据" />
+        </div>
+        <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-2">
+          <div
+            v-for="(item, index) in qrcodeList"
+            :key="item.qrCode || index"
+            class="group relative bg-gray-50 dark:bg-zinc-800/50 rounded-lg p-3 border border-gray-100 dark:border-zinc-700 transition-all hover:shadow-md hover:border-primary/30"
+          >
+            <div class="mb-2">
+              <div class="text-[11px] text-gray-400 uppercase tracking-wider mb-1">QR Code No.</div>
+              <div
+                class="text-xs font-mono font-bold text-gray-700 dark:text-gray-200 truncate"
+                :title="item.qrCode"
+              >
+                {{ item.qrCode || '-' }}
+              </div>
+            </div>
+            <div
+              class="relative aspect-square bg-white rounded-md overflow-hidden border border-gray-200 shadow-inner group-hover:border-primary/20"
+            >
+              <el-image
+                :src="item.base64QrCode || item.qrCodeUrl"
+                fit="contain"
+                class="w-full h-full p-2"
+                :preview-src-list="qrcodeList.map((i) => i.base64QrCode || i.qrCodeUrl)"
+                :initial-index="index"
+                preview-teleported
+              >
+                <template #placeholder>
+                  <div class="flex items-center justify-center h-full bg-gray-50 text-gray-400">
+                    <el-icon class="is-loading">
+                      <Loading />
+                    </el-icon>
+                  </div>
+                </template>
+              </el-image>
+              <div
+                class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none"
+              >
+                <el-icon color="white" :size="24">
+                  <View />
+                </el-icon>
+              </div>
+            </div>
+            <div class="mt-3">
+              <el-button
+                type="primary"
+                plain
+                size="small"
+                class="w-full !rounded-md"
+                icon="Download"
+                @click="downloadSingle(item)"
+              >
+                下载单图
+              </el-button>
+            </div>
           </div>
         </div>
-      </div>
+      </el-scrollbar>
     </div>
+    <template #footer>
+      <div class="flex justify-between items-center px-2">
+        <span class="text-xs text-gray-400">提示：点击图片可查看高清大图并轮播</span>
+        <el-button @click="handleClose" class="!rounded-md">关闭</el-button>
+      </div>
+    </template>
   </el-dialog>
 </template>
