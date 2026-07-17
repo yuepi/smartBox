@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, onMounted, reactive,ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 
 import { Page } from "@vben/common-ui";
 
@@ -213,8 +213,19 @@ async function handleDownloadQrcode(row: Qrcode) {
     const link = document.createElement("a");
     link.href = url;
 
-    // 如果是单个下载
-    link.download = `QR_${row.qrcodeCode}.zip`;
+    // 从响应头获取文件名
+    const contentDisposition = res.headers?.['content-disposition'];
+    let filename = `QR_${row.qrcodeCode}.png`; // 默认名称
+
+    if (contentDisposition) {
+      // 匹配 filename*=UTF-8''filename 或 filename="filename"
+      const matches = /filename\*=UTF-8''([^;]+)|filename="([^"]+)"/i.exec(contentDisposition);
+      if (matches) {
+        filename = decodeURIComponent(matches[1] || matches[2]);
+      }
+    }
+
+    link.download = filename;
 
     document.body.append(link);
     link.click();
@@ -330,22 +341,15 @@ onMounted(() => {
 
 <template>
   <Page auto-content-height>
-     <div class="p-0">
+    <div class="p-0">
       <!-- 查询表单 -->
       <el-card shadow="never" class="border-none mb-4 !p-2">
-        <el-form
-          :inline="true"
-          :model="queryParams"
-          class="flex flex-wrap gap-x-2 gap-y-2 items-center"
-        >
+        <el-form :inline="true" :model="queryParams" class="flex flex-wrap gap-x-2 gap-y-2 items-center">
           <el-form-item class="!mb-0 !mr-2">
             <el-input
-              v-model="queryParams.qrcodeCode"
-              placeholder="请输入"
-              clearable
-              style="width: 200px"
+v-model="queryParams.qrcodeCode" placeholder="请输入" clearable style="width: 200px"
               @keyup.enter="handleQuery"
-            >
+>
               <template #prefix>
                 <span class="text-xs text-gray-400 mr-0.5">二维码编号:</span>
               </template>
@@ -353,29 +357,16 @@ onMounted(() => {
           </el-form-item>
 
           <el-form-item class="!mb-0 !mr-2">
-            <el-select
-              v-model="queryParams.qrcodeType"
-              clearable
-              style="width: 200px"
-            >
+            <el-select v-model="queryParams.qrcodeType" clearable style="width: 200px">
               <template #prefix>
                 <span class="text-xs text-gray-400 mr-0.5">二维码类型:</span>
               </template>
-              <el-option
-                v-for="item in qrcodeTypeOptions"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
+              <el-option v-for="item in qrcodeTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
             </el-select>
           </el-form-item>
 
           <el-form-item class="!mb-0 !mr-2">
-            <el-select
-              v-model="queryParams.bindFlag"
-              clearable
-              style="width: 200px"
-            >
+            <el-select v-model="queryParams.bindFlag" clearable style="width: 200px">
               <template #prefix>
                 <span class="text-xs text-gray-400 mr-0.5">绑定状态:</span>
               </template>
@@ -385,20 +376,11 @@ onMounted(() => {
           </el-form-item>
 
           <el-form-item class="!mb-0 !mr-2">
-            <el-select
-              v-model="queryParams.status"
-              clearable
-              style="width: 200px"
-            >
+            <el-select v-model="queryParams.status" clearable style="width: 200px">
               <template #prefix>
                 <span class="text-xs text-gray-400 mr-0.5">状态:</span>
               </template>
-              <el-option
-                v-for="item in statusOptions"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
+              <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
             </el-select>
           </el-form-item>
 
@@ -421,24 +403,18 @@ onMounted(() => {
               生成二维码
             </el-button>
             <el-button :loading="exporting" @click="openExportSelector">
-    导出
-  </el-button>
+              导出
+            </el-button>
             <el-button
-              type="success"
-              plain
-              :icon="Picture"
-              :disabled="selectedIds.length === 0"
+type="success" plain :icon="Picture" :disabled="selectedIds.length === 0"
               @click="handleBatchShowQrcode"
-            >
+>
               批量展示
             </el-button>
             <el-button
-              type="warning"
-              plain
-              :icon="Download"
-              :disabled="selectedIds.length === 0"
+type="warning" plain :icon="Download" :disabled="selectedIds.length === 0"
               @click="handleBatchDownloadQrcode"
-            >
+>
               批量下载
             </el-button>
             <span v-if="selectedIds.length > 0" class="text-xs text-gray-400 ml-2">
@@ -448,77 +424,46 @@ onMounted(() => {
 
           <div class="flex items-center">
             <ColumnSelector
-              :storage-key="QRCODE_STORAGE_KEY"
-              :default-columns="defaultQrcodeColumns"
+:storage-key="QRCODE_STORAGE_KEY" :default-columns="defaultQrcodeColumns"
               @update:columns="handleColumnsUpdate"
-            />
+/>
           </div>
         </div>
 
         <el-table
-          v-loading="loading"
-          :data="tableData"
-          border
-          stripe
-          style="width: 100%"
+v-loading="loading" :data="tableData" border stripe style="width: 100%"
           @selection-change="handleSelectionChange"
-        >
+>
           <!-- 选择列固定写死 -->
           <el-table-column type="selection" width="50" align="center" />
 
           <!-- 动态数据列 -->
           <el-table-column
-            v-for="col in visibleColumns"
-            :key="col.key"
-            :prop="col.key"
-            :label="col.label"
-            :width="typeof col.width === 'number' ? col.width : undefined"
-            :min-width="col.minWidth"
-            :align="col.align"
-          >
+v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
+            :width="typeof col.width === 'number' ? col.width : undefined" :min-width="col.minWidth" :align="col.align"
+>
             <template #default="{ row }">
               <!-- 二维码类型 -->
               <template v-if="col.key === 'qrcodeType'">
-                <el-tag
-                  :type="row.qrcodeType === 0 ? 'primary' : 'success'"
-                  size="small"
-                  round
-                  effect="light"
-                >
+                <el-tag :type="row.qrcodeType === 0 ? 'primary' : 'success'" size="small" round effect="light">
                   {{ getQrcodeTypeText(row.qrcodeType) }}
                 </el-tag>
               </template>
               <!-- 绑定状态 -->
               <template v-else-if="col.key === 'bindFlag'">
-                <el-tag
-                  :type="row.bindFlag === 1 ? 'success' : 'info'"
-                  size="small"
-                  round
-                  effect="light"
-                >
+                <el-tag :type="row.bindFlag === 1 ? 'success' : 'info'" size="small" round effect="light">
                   {{ row.bindFlag === 1 ? "已绑定" : "未绑定" }}
                 </el-tag>
               </template>
               <!-- 状态 -->
               <template v-else-if="col.key === 'status'">
-                <el-tag
-                  :type="row.status === 0 ? 'success' : 'danger'"
-                  size="small"
-                  round
-                  effect="light"
-                >
+                <el-tag :type="row.status === 0 ? 'success' : 'danger'" size="small" round effect="light">
                   {{ getStatusText(row.status) }}
                 </el-tag>
               </template>
               <!-- 二维码图片 -->
               <template v-else-if="col.key === 'qrcodeUrl'">
-                <el-button
-                  v-if="row.qrcodeUrl"
-                  link
-                  type="primary"
-                  size="small"
-                  @click="showQrcodeImage(row)"
-                >
+                <el-button v-if="row.qrcodeUrl" link type="primary" size="small" @click="showQrcodeImage(row)">
                   查看图片
                 </el-button>
                 <span v-else class="text-gray-400">-</span>
@@ -553,77 +498,42 @@ onMounted(() => {
         <!-- 分页 -->
         <div class="flex justify-end mt-4">
           <el-pagination
-            v-model:current-page="queryParams.pageNo"
-            v-model:page-size="queryParams.pageSize"
-            :total="total"
-            :page-sizes="[10, 20, 50, 100]"
-            layout="total, sizes, prev, pager, next, jumper"
-            background
-            @size-change="loadData"
-            @current-change="loadData"
-          />
+v-model:current-page="queryParams.pageNo" v-model:page-size="queryParams.pageSize"
+            :total="total" :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper" background
+            @size-change="loadData" @current-change="loadData"
+/>
         </div>
       </el-card>
     </div>
 
     <ExportFieldSelector
-  v-model:visible="exportFieldVisible"
-  :fields="exportFields"
-  :loading="exporting"
-  @confirm="handleExportConfirm"
+v-model:visible="exportFieldVisible" :fields="exportFields" :loading="exporting"
+      @confirm="handleExportConfirm"
 />
 
     <!-- 生成二维码弹窗 -->
-    <el-dialog
-      v-model="generateVisible"
-      title="生成二维码"
-      width="500px"
-      append-to-body
-    >
+    <el-dialog v-model="generateVisible" title="生成二维码" width="500px" append-to-body>
       <el-form :model="generateForm" label-width="100px">
         <el-form-item label="二维码类型" required>
-          <el-select
-            v-model="generateForm.qrcodeType"
-            placeholder="请选择"
-            style="width: 100%"
-          >
-            <el-option
-              v-for="item in qrcodeTypeOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
+          <el-select v-model="generateForm.qrcodeType" placeholder="请选择" style="width: 100%">
+            <el-option v-for="item in qrcodeTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="生成数量" required>
-          <el-input-number
-            v-model="generateForm.qrcodeTotal"
-            :min="1"
-            :max="1000"
-            style="width: 100%"
-          />
+          <el-input-number v-model="generateForm.qrcodeTotal" :min="1" :max="1000" style="width: 100%" />
           <div class="text-gray-400 text-xs mt-1">最多一次生成1000个二维码</div>
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="generateVisible = false">取消</el-button>
-        <el-button
-          type="primary"
-          :loading="generateSubmitting"
-          @click="submitGenerate"
-        >
+        <el-button type="primary" :loading="generateSubmitting" @click="submitGenerate">
           确定
         </el-button>
       </template>
     </el-dialog>
 
     <!-- 详情弹窗 -->
-    <el-dialog
-      v-model="detailVisible"
-      title="二维码详情"
-      width="800px"
-      append-to-body
-    >
+    <el-dialog v-model="detailVisible" title="二维码详情" width="800px" append-to-body>
       <el-descriptions :column="2" border v-if="detailData">
         <el-descriptions-item label="二维码ID">
           {{ detailData.qrcodeId }}
@@ -635,10 +545,7 @@ onMounted(() => {
           {{ getQrcodeTypeText(detailData.qrcodeType) }}
         </el-descriptions-item>
         <el-descriptions-item label="绑定状态">
-          <el-tag
-            :type="detailData.bindFlag === 1 ? 'success' : 'info'"
-            size="small"
-          >
+          <el-tag :type="detailData.bindFlag === 1 ? 'success' : 'info'" size="small">
             {{ detailData.bindFlag === 1 ? "已绑定" : "未绑定" }}
           </el-tag>
         </el-descriptions-item>
@@ -646,10 +553,7 @@ onMounted(() => {
           {{ detailData.bizId || "-" }}
         </el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag
-            :type="detailData.status === 0 ? 'success' : 'danger'"
-            size="small"
-          >
+          <el-tag :type="detailData.status === 0 ? 'success' : 'danger'" size="small">
             {{ getStatusText(detailData.status) }}
           </el-tag>
         </el-descriptions-item>
@@ -665,13 +569,7 @@ onMounted(() => {
     </el-dialog>
 
     <!-- 二维码展示弹窗 -->
-    <el-dialog
-      v-model="qrcodeVisible"
-      :title="qrcodeTitle"
-      width="900px"
-      append-to-body
-      class="rounded-xl"
-    >
+    <el-dialog v-model="qrcodeVisible" :title="qrcodeTitle" width="900px" append-to-body class="rounded-xl">
       <div v-loading="qrcodeLoading" class="min-height-[400px]">
         <el-scrollbar max-height="550px" always>
           <div v-if="qrcodeList.length === 0 && !qrcodeLoading" class="py-12">
@@ -679,26 +577,20 @@ onMounted(() => {
           </div>
 
           <!-- 优化后的网格列表 -->
-          <div
-            v-else
-            class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-2"
-          >
+          <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-2">
             <div
-              v-for="(item, index) in qrcodeList"
-              :key="item.qrcodeId"
+v-for="(item, index) in qrcodeList" :key="item.qrcodeId"
               class="group relative bg-gray-50 dark:bg-zinc-800/50 rounded-lg p-3 border border-gray-100 dark:border-zinc-700 transition-all hover:shadow-md hover:border-primary/30"
-            >
+>
               <!-- 编号标签 -->
               <div class="mb-2">
-                <div
-                  class="text-[11px] text-gray-400 uppercase tracking-wider mb-1"
-                >
+                <div class="text-[11px] text-gray-400 uppercase tracking-wider mb-1">
                   QR Code No.
                 </div>
                 <div
-                  class="text-xs font-mono font-bold text-gray-700 dark:text-gray-200 truncate"
+class="text-xs font-mono font-bold text-gray-700 dark:text-gray-200 truncate"
                   :title="item.qrcodeCode"
-                >
+>
                   {{ item.qrcodeCode }}
                 </div>
               </div>
@@ -706,22 +598,17 @@ onMounted(() => {
               <!-- 二维码图片展示区 -->
               <div
                 class="relative aspect-square bg-white rounded-md overflow-hidden border border-gray-200 shadow-inner group-hover:border-primary/20"
-              >
+>
                 <el-image
-                  :src="item.base64QrCode || item.qrcodeUrl"
-                  fit="contain"
-                  class="w-full h-full p-2"
-                  :preview-src-list="
-                    qrcodeList.map((i) => i.base64QrCode || i.qrcodeUrl)
-                  "
-                  :initial-index="index"
-                  preview-teleported
-                >
+:src="item.base64QrCode || item.qrcodeUrl" fit="contain" class="w-full h-full p-2"
+                  :preview-src-list="qrcodeList.map((i) => i.base64QrCode || i.qrcodeUrl)
+                    " :initial-index="index" preview-teleported
+>
                   <template #placeholder>
-                    <div
-                      class="flex items-center justify-center h-full bg-gray-50 text-gray-400"
-                    >
-                      <el-icon class="is-loading"><Loading /></el-icon>
+                    <div class="flex items-center justify-center h-full bg-gray-50 text-gray-400">
+                      <el-icon class="is-loading">
+                        <Loading />
+                      </el-icon>
                     </div>
                   </template>
                 </el-image>
@@ -729,21 +616,19 @@ onMounted(() => {
                 <!-- 悬停提示遮罩 -->
                 <div
                   class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none"
-                >
-                  <el-icon color="white" :size="24"><View /></el-icon>
+>
+                  <el-icon color="white" :size="24">
+                    <View />
+                  </el-icon>
                 </div>
               </div>
 
               <!-- 底部下载按钮 -->
               <div class="mt-3">
                 <el-button
-                  type="primary"
-                  plain
-                  size="small"
-                  class="w-full !rounded-md"
-                  :icon="Download"
+type="primary" plain size="small" class="w-full !rounded-md" :icon="Download"
                   @click="handleDownloadQrcode(item)"
-                >
+>
                   下载单图
                 </el-button>
               </div>
