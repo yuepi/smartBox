@@ -67,6 +67,11 @@ export function generateQrcodeApi(data: GenerateQrcodeParams) {
   return requestClient.post('/merchant/qrcode/generatorQrcode', data);
 }
 
+/** 5. 删除二维码 */
+export function deleteQrcodeApi(qrcodeId: number) {
+  return requestClient.delete(`/merchant/qrcode/delete/${qrcodeId}`);
+}
+
 /** 5.1 批量下载二维码（返回文件流/Blob） */
 export function batchDownQrcodeFileApi(data: BatchQrcodeParams) {
   return requestClient.post(
