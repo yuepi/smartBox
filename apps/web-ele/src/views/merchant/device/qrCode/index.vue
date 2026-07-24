@@ -14,7 +14,7 @@ import { ModuleCodeMap } from "#/hooks/useExport";
 
 import DetailDialog from './Detail.vue';
 import GenerateDialog from './Generate.vue';
-import ShowDialog from './ShowDialog.vue/index.js';
+import ShowDialog from './ShowDialog.vue';
 
 const { qrcode_type, qrcode_bind_status, qrcode_status } = useDicts([
   'qrcode_type',
