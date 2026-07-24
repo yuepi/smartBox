@@ -12,9 +12,9 @@ import {
 import { defaultQrcodeColumns, QRCODE_STORAGE_KEY } from '#/constants/tableColumns';
 import { ModuleCodeMap } from "#/hooks/useExport";
 
-import DetailDialog from './DetailDialog.vue';
-import GenerateDialog from './GenerateDialog.vue';
-import ShowDialog from './ShowDialog.vue';
+import DetailDialog from './Detail.vue';
+import GenerateDialog from './Generate.vue';
+import ShowDialog from './ShowDialog.vue/index.js';
 
 const { qrcode_type, qrcode_bind_status, qrcode_status } = useDicts([
   'qrcode_type',

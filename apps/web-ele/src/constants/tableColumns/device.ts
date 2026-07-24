@@ -102,7 +102,7 @@ export const defaultConfigColumns: TableColumnConfig[] = [
   { key: 'deliverDoorHandOpenCount', label: '夹手开门次数', visible: false, width: 120, align: 'center' },
   { key: 'fanTempMax', label: '风扇温度上限', visible: false, width: 120, align: 'center' },
   { key: 'fanTempMin', label: '风扇温度下限', visible: false, width: 120, align: 'center' },
-  { key: 'topLightType', label: '顶部灯光', visible: true, width: 100, align: 'center' },
+  { key: 'topLightType', label: '顶部灯光', visible: false, width: 100, align: 'center' },
   { key: 'topLightBrightness', label: '顶部亮度', visible: false, width: 100, align: 'center' },
   { key: 'outLightType', label: '箱外灯光', visible: false, width: 100, align: 'center' },
   { key: 'outLightBrightness', label: '箱外亮度', visible: false, width: 100, align: 'center' },

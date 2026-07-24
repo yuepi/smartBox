@@ -104,10 +104,10 @@ v-model:current-page="queryParams.pageNo" v-model:page-size="queryParams.pageSiz
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 5px;
   width: 100%;
   height: 100%;
-  padding: 12px;
+  padding: 5px;
   overflow: hidden;
   background-color: #f8fafc;
   transition: background-color 0.3s;

@@ -1,18 +1,17 @@
 <script lang="tsx" setup>
-import { computed, onMounted, reactive, ref, watch } from 'vue';
+
+
+import type { Menu } from '#/api/system/menu';
+import type { TableColumnConfig } from '#/constants/tableColumns';
 
 import { useAccess } from '@vben/access';
 import { Page } from '@vben/common-ui';
 
-import { Delete, Document, Edit, Folder, Operation, Plus, Refresh, Search } from '@element-plus/icons-vue';
-import { ElMessage, ElMessageBox, ElTooltip, ElButton, ElTag } from 'element-plus';
+import { Delete, Document, Edit, Folder, Operation, Plus } from "@element-plus/icons-vue";
 
-import { deletePlatMenuApi, getPlatMenuListApi, clearMenuCacheApi, refreshMenuCacheApi } from '#/api/system/menu';
-import type { Menu } from '#/api/system/menu';
-import ColumnSelector from '#/components/ColumnSelector/index.vue';
+import { clearMenuCacheApi, deletePlatMenuApi, getPlatMenuListApi, refreshMenuCacheApi } from '#/api/system/menu';
 import { defaultMenuColumns, MENU_STORAGE_KEY } from '#/constants/tableColumns';
-import type { TableColumnConfig } from '#/constants/tableColumns';
-import { ModuleCodeMap } from '#/hooks/useExport';
+import { ModuleCodeMap } from "#/hooks/useExport";
 
 // 🌟 引入独立拆分出去的弹窗组件
 import MenuModal from './MenuModal.vue';
@@ -98,6 +97,12 @@ const tableColumns = computed(() => {
     align: col.align || 'left',
     cellRenderer: ({ rowData, cells }: { cells: any[]; rowData: Menu }) => {
       switch (col.key) {
+        case 'code':
+        case 'component':
+        case 'path': {
+          const text = rowData[col.key] || '-';
+          return <span class="truncate text-sm text-gray-500">{text}</span>;
+        }
         case 'menuName': {
           return (
             <div class="flex w-full items-center gap-1 overflow-hidden">
@@ -132,12 +137,6 @@ const tableColumns = computed(() => {
             </ElTag>
           );
         }
-        case 'code':
-        case 'component':
-        case 'path': {
-          const text = rowData[col.key] || '-';
-          return <span class="truncate text-sm text-gray-500">{text}</span>;
-        }
         default: {
           const text = (rowData as any)[col.key] ?? '-';
           return <span>{text}</span>;
@@ -158,19 +157,19 @@ const tableColumns = computed(() => {
         <div class="flex w-full justify-center gap-1">
           {/* 1. 新增子菜单按钮 */}
           {hasAccessByCodes(['plat:menu:add']) && (
-            <ElTooltip content="新增下级" placement="top" enterable={false}>
+            <ElTooltip content="新增下级" enterable={false} placement="top">
               <ElButton icon={Plus} link onClick={() => handleOpenModal({ parentId: rowData.menuId, menuType: 0, platformType: 0, status: 0, sort: 0 })} type="primary" />
             </ElTooltip>
           )}
           {/* 2. 修改按钮 */}
           {hasAccessByCodes(['plat:menu:edit']) && (
-            <ElTooltip content="修改" placement="top" enterable={false}>
+            <ElTooltip content="修改" enterable={false} placement="top">
               <ElButton icon={Edit} link onClick={() => handleOpenModal(rowData)} type="primary" />
             </ElTooltip>
           )}
           {/* 3. 删除按钮 */}
           {hasAccessByCodes(['plat:menu:del']) && (
-            <ElTooltip content="删除" placement="top" enterable={false}>
+            <ElTooltip content="删除" enterable={false} placement="top">
               <ElButton icon={Delete} link onClick={() => handleDelete(rowData)} type="primary" />
             </ElTooltip>
           )}
@@ -195,7 +194,7 @@ async function loadData() {
 }
 
 // 🌟 打开弹窗
-function handleOpenModal(row?: Partial<Menu> | Menu) {
+function handleOpenModal(row?: Menu | Partial<Menu>) {
   menuModalRef.value?.open(row);
 }
 
@@ -258,12 +257,16 @@ onMounted(() => {
 
 <template>
   <Page auto-content-height>
-    <BaseTableLayout v-model:queryParams="queryParams" v-model:moreParams="moreParams" :loading="loading"
-      :is-virtual-table="true" @search="loadData" @reset="resetQuery">
+    <BaseTableLayout
+v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="loading"
+      :is-virtual-table="true" @search="loadData" @reset="resetQuery"
+>
       <template #search-basic>
         <el-form-item>
-          <el-input v-model="queryParams.menuName" placeholder="请输入" clearable style="width: 200px"
-            @keyup.enter="handleQuery">
+          <el-input
+v-model="queryParams.menuName" placeholder="请输入" clearable style="width: 200px"
+            @keyup.enter="handleQuery"
+>
             <template #prefix><span class="text-xs text-gray-400 mr-0.5">菜单名称:</span></template>
           </el-input>
         </el-form-item>
@@ -273,53 +276,72 @@ onMounted(() => {
         <el-form-item>
           <el-select v-model="queryParams.menuType" clearable style="width: 200px" placeholder="请选择">
             <template #prefix><span class="text-xs text-gray-400 mr-0.5">类型:</span></template>
-            <el-option v-for="item in [{ label: '目录', value: 0 }, { label: '菜单', value: 1 }, { label: '按钮', value: 2 }]"
-              :key="item.value" :label="item.label" :value="item.value" />
+            <el-option
+v-for="item in [
+              { label: '目录', value: 0 },
+              { label: '菜单', value: 1 },
+              { label: '按钮', value: 2 },
+            ]" :key="item.value" :label="item.label" :value="item.value"
+/>
           </el-select>
         </el-form-item>
 
         <el-form-item>
           <el-select v-model="queryParams.platformType" clearable style="width: 200px" placeholder="请选择">
             <template #prefix><span class="text-xs text-gray-400 mr-0.5">归属:</span></template>
-            <el-option v-for="item in [{ label: '平台菜单', value: 0 }, { label: '商户菜单', value: 1 }]" :key="item.value"
-              :label="item.label" :value="item.value" />
+            <el-option
+v-for="item in [
+              { label: '平台菜单', value: 0 },
+              { label: '商户菜单', value: 1 },
+            ]" :key="item.value" :label="item.label" :value="item.value"
+/>
           </el-select>
         </el-form-item>
 
         <el-form-item>
           <el-select v-model="queryParams.status" clearable style="width: 200px" placeholder="请选择">
             <template #prefix><span class="text-xs text-gray-400 mr-0.5">状态:</span></template>
-            <el-option v-for="item in [{ label: '启用', value: 0 }, { label: '禁用', value: 1 }]" :key="item.value"
-              :label="item.label" :value="item.value" />
+            <el-option
+v-for="item in [
+              { label: '启用', value: 0 },
+              { label: '禁用', value: 1 },
+            ]" :key="item.value" :label="item.label" :value="item.value"
+/>
           </el-select>
         </el-form-item>
       </template>
 
       <template #toolbar-left>
-        <el-button type="primary" plain :icon="Plus" @click="handleOpenModal()" v-access:code="['plat:menu:add']">
+        <el-button type="primary" plain icon="Plus" @click="handleOpenModal()" v-access:code="['plat:menu:add']">
           新增菜单
         </el-button>
-        <el-button type="warning" plain :icon="Refresh" @click="handleRefreshCache">
+        <el-button type="warning" plain icon="Refresh" @click="handleRefreshCache">
           刷新缓存
         </el-button>
-        <el-button type="danger" plain :icon="Delete" @click="handleClearCache">
+        <el-button type="danger" plain icon="Delete" @click="handleClearCache">
           清除缓存
         </el-button>
-        <ExportButton :module-code="ModuleCodeMap.MENU" :fields="visibleColumns" :find-cond="queryParams"
-          v-access:code="['plat:menu:export']" />
+        <ExportButton
+:module-code="ModuleCodeMap.MENU" :fields="visibleColumns" :find-cond="queryParams"
+          v-access:code="['plat:menu:export']"
+/>
       </template>
 
       <template #toolbar-right>
-        <ColumnSelector :storage-key="MENU_STORAGE_KEY" :default-columns="defaultMenuColumns"
-          @update:columns="handleColumnsUpdate" />
+        <ColumnSelector
+:storage-key="MENU_STORAGE_KEY" :default-columns="defaultMenuColumns"
+          @update:columns="handleColumnsUpdate"
+/>
       </template>
 
       <template #table>
         <div :style="{ height: 'calc(100% - 1px)' }">
           <el-auto-resizer>
             <template #default="{ height, width } = {}">
-              <el-table-v2 v-if="height && width" :key="tableKey" :columns="tableColumns" :data="tableData"
-                :width="width" :height="height" :row-key="rowKey" expand-column-key="menuName" fixed />
+              <el-table-v2
+v-if="height && width" :key="tableKey" :columns="tableColumns" :data="tableData"
+                :width="width" :height="height" :row-key="rowKey" expand-column-key="menuName" fixed
+/>
             </template>
           </el-auto-resizer>
         </div>

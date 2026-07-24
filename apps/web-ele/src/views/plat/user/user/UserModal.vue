@@ -2,14 +2,10 @@
 import type { Dept } from '#/api/system/dept';
 import type { User } from '#/api/system/user';
 
-import { ref } from 'vue';
-
-import { ElMessage } from 'element-plus';
-
 import { getPlatDeptListApi } from '#/api/system/dept';
 import { getPlatRoleListApi } from '#/api/system/role';
 import { addPlatUserApi, editPlatUserApi, getPlatUserDetailApi } from '#/api/system/user';
-import { useDicts } from '#/hooks/useDict';
+
 
 const emit = defineEmits(['success']);
 
@@ -25,7 +21,6 @@ const formData = ref<Partial<User>>({});
 const deptTreeData = ref<Dept[]>([]);
 const roleOptions = ref<any[]>([]);
 
-// ✨ 核心提升：内部消化下拉数据加载
 async function loadModalOptions() {
   try {
     // 并发请求部门和角色，不阻碍彼此

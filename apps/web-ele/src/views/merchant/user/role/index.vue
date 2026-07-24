@@ -1,13 +1,11 @@
 <script lang="ts" setup>
-import { computed, onMounted, reactive, ref } from "vue";
+import type { Role, RolePageParams } from '#/api/system/role';
+import type { TableColumnConfig } from '#/constants/tableColumns';
+
 import { Page } from "@vben/common-ui";
-import { Delete, Edit, Plus } from "@element-plus/icons-vue";
-import { ElMessage, ElMessageBox } from "element-plus";
 
 import { deleteMerchantRoleApi, getMerchantRolePageApi } from '#/api/system/role';
-import type { Role, RolePageParams } from '#/api/system/role';
 import { defaultRoleColumns, ROLE_STORAGE_KEY } from '#/constants/tableColumns';
-import type { TableColumnConfig } from '#/constants/tableColumns';
 import { ModuleCodeMap } from "#/hooks/useExport";
 
 // 🌟 引入拆分出去的弹窗组件
@@ -123,13 +121,17 @@ onMounted(() => {
 
 <template>
   <Page auto-content-height>
-    <BaseTableLayout v-model:queryParams="queryParams" v-model:moreParams="moreParams" :loading="loading" :total="total"
-      @search="loadData" @reset="resetQuery">
+    <BaseTableLayout
+v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="loading" :total="total"
+      @search="loadData" @reset="resetQuery"
+>
       <!-- 📥 1. 基础常驻筛选项 -->
       <template #search-basic>
         <el-form-item>
-          <el-input v-model="queryParams.roleName" placeholder="请输入" clearable style="width: 200px"
-            @keyup.enter="handleQuery">
+          <el-input
+v-model="queryParams.roleName" placeholder="请输入" clearable style="width: 200px"
+            @keyup.enter="handleQuery"
+>
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">角色名称:</span>
             </template>
@@ -137,8 +139,10 @@ onMounted(() => {
         </el-form-item>
 
         <el-form-item>
-          <el-input v-model="queryParams.roleCode" placeholder="请输入" clearable style="width: 200px"
-            @keyup.enter="handleQuery">
+          <el-input
+v-model="queryParams.roleCode" placeholder="请输入" clearable style="width: 200px"
+            @keyup.enter="handleQuery"
+>
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">角色编码:</span>
             </template>
@@ -153,20 +157,24 @@ onMounted(() => {
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">状态:</span>
             </template>
-            <el-option v-for="item in [{ label: '启用', value: 0 }, { label: '禁用', value: 1 }]" :key="item.value"
-              :label="item.label" :value="item.value" />
+            <el-option
+v-for="item in [{ label: '启用', value: 0 }, { label: '禁用', value: 1 }]" :key="item.value"
+              :label="item.label" :value="item.value"
+/>
           </el-select>
         </el-form-item>
       </template>
 
       <!-- 📥 3. 工具栏左侧 -->
       <template #toolbar-left>
-        <el-button type="primary" plain :icon="Plus" @click="handleOpenModal()" v-access:code="['merchant:role:add']">
+        <el-button type="primary" plain icon="Plus" @click="handleOpenModal()" v-access:code="['merchant:role:add']">
           新增角色
         </el-button>
         <ExportButton :module-code="ModuleCodeMap.ROLE" :fields="visibleColumns" :find-cond="queryParams" />
-        <el-button type="danger" plain :icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete()"
-          v-access:code="['merchant:role:del']">
+        <el-button
+type="danger" plain icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete()"
+          v-access:code="['merchant:role:del']"
+>
           批量删除
         </el-button>
 
@@ -181,19 +189,25 @@ onMounted(() => {
 
       <!-- 📥 4. 工具栏右侧 -->
       <template #toolbar-right>
-        <ColumnSelector :storage-key="ROLE_STORAGE_KEY" :default-columns="defaultRoleColumns"
-          @update:columns="handleColumnsUpdate" />
+        <ColumnSelector
+:storage-key="ROLE_STORAGE_KEY" :default-columns="defaultRoleColumns"
+          @update:columns="handleColumnsUpdate"
+/>
       </template>
 
       <!-- 📥 5. 表格数据列 -->
       <template #table>
-        <el-table :data="tableData" border stripe style="width: 100%; height: 100%"
-          @selection-change="handleSelectionChange">
+        <el-table
+:data="tableData" border stripe style="width: 100%; height: 100%"
+          @selection-change="handleSelectionChange"
+>
           <el-table-column type="selection" width="50" align="center" />
 
-          <el-table-column v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
+          <el-table-column
+v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
             :width="typeof col.width === 'number' ? col.width : undefined" :min-width="col.minWidth" :align="col.align"
-            :show-overflow-tooltip="col.showOverflowTooltip || false">
+            :show-overflow-tooltip="col.showOverflowTooltip || false"
+>
             <template #default="{ row }">
               <template v-if="col.key === 'status'">
                 <el-tag :type="row.status === 0 ? 'success' : 'danger'" size="small" round effect="light">
@@ -212,13 +226,17 @@ onMounted(() => {
           <el-table-column label="操作" width="100" fixed="right" align="center">
             <template #default="{ row }">
               <el-tooltip content="修改" placement="top" :enterable="false">
-                <el-button link type="primary" :icon="Edit" @click="handleOpenModal(row)"
-                  v-access:code="['merchant:role:edit']" />
+                <el-button
+link type="primary" icon="Edit" @click="handleOpenModal(row)"
+                  v-access:code="['merchant:role:edit']"
+/>
               </el-tooltip>
 
               <el-tooltip content="删除" placement="top" :enterable="false">
-                <el-button link type="danger" :icon="Delete" @click="handleDelete(row)"
-                  v-access:code="['merchant:role:del']" />
+                <el-button
+link type="danger" icon="Delete" @click="handleDelete(row)"
+                  v-access:code="['merchant:role:del']"
+/>
               </el-tooltip>
             </template>
           </el-table-column>

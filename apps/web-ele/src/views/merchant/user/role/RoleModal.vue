@@ -1,14 +1,11 @@
 <script lang="ts" setup>
-import { nextTick, ref } from "vue";
-import { ElMessage } from "element-plus";
-import { InfoFilled } from "@element-plus/icons-vue";
+import type { Dept } from '#/api/system/dept';
+import type { Role } from '#/api/system/role';
 
 import { getMerchantDeptListApi } from '#/api/system/dept';
-import type { Dept } from '#/api/system/dept';
 import { getMerchantMenuListApi } from "#/api/system/menu";
 import { addMerchantRoleApi, editMerchantRoleApi, getMerchantRoleDetailApi } from '#/api/system/role';
-import type { Role } from '#/api/system/role';
-import MemberSelector from "#/components/MemberSelector/index.vue";
+
 
 const emit = defineEmits(["success"]);
 
@@ -41,17 +38,7 @@ async function open(row?: Role) {
   menuTreeData.value = [];
   deptTreeData.value = [];
 
-  if (!row) {
-    formTitle.value = "新增角色";
-    formData.value = {
-      status: 0,
-      sort: 0,
-      scope: 1,
-      members: [],
-      menuIds: [],
-      deptIds: [],
-    };
-  } else {
+  if (row) {
     try {
       formTitle.value = "编辑角色";
       const res = await getMerchantRoleDetailApi(row.roleId);
@@ -62,6 +49,16 @@ async function open(row?: Role) {
     } catch {
       ElMessage.error("获取角色信息失败");
     }
+  } else {
+    formTitle.value = "新增角色";
+    formData.value = {
+      status: 0,
+      sort: 0,
+      scope: 1,
+      members: [],
+      menuIds: [],
+      deptIds: [],
+    };
   }
 }
 

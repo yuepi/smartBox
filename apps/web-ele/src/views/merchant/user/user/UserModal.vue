@@ -2,14 +2,10 @@
 import type { Dept } from '#/api/system/dept';
 import type { User } from '#/api/system/user';
 
-import { ref } from 'vue';
-
-import { ElMessage } from 'element-plus';
-
 import { getMerchantDeptListApi } from '#/api/system/dept';
 import { getMerchantRoleListApi } from '#/api/system/role';
 import { addMerchantUserApi, editMerchantUserApi, getMerchantUserDetailApi } from '#/api/system/user';
-import { useDicts } from '#/hooks/useDict';
+
 
 const emit = defineEmits(['success']);
 

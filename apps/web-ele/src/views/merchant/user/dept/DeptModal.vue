@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
-import { ElMessage } from 'element-plus';
-import { addMerchantDeptApi, editMerchantDeptApi, getMerchantDeptDetailApi, getMerchantDeptListApi } from '#/api/system/dept';
+
 import type { Dept } from '#/api/system/dept';
+
+import { addMerchantDeptApi, editMerchantDeptApi, getMerchantDeptDetailApi, getMerchantDeptListApi } from '#/api/system/dept';
 
 const emit = defineEmits(['success']);
 
@@ -41,18 +41,14 @@ async function loadParentDeptOptions() {
 }
 
 // 🌟 核心对外开放的初始化开窗方法
-async function open(row?: Partial<Dept> | Dept) {
+async function open(row?: Dept | Partial<Dept>) {
   formVisible.value = true;
 
   if (!row) {
     formTitle.value = '新增部门';
     formData.value = { parentId: 0, deptType: 1, status: 0, sort: 0 };
     await loadParentDeptOptions();
-  } else if (!row.deptId) {
-    formTitle.value = '新增部门';
-    formData.value = { ...row };
-    await loadParentDeptOptions();
-  } else {
+  } else if (row.deptId) {
     try {
       formTitle.value = '编辑部门';
       const res = await getMerchantDeptDetailApi(row.deptId);
@@ -61,6 +57,10 @@ async function open(row?: Partial<Dept> | Dept) {
     } catch {
       ElMessage.error('获取部门信息失败');
     }
+  } else {
+    formTitle.value = '新增部门';
+    formData.value = { ...row };
+    await loadParentDeptOptions();
   }
 }
 
@@ -96,14 +96,17 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <el-dialog v-model="formVisible" :title="formTitle" width="520px" append-to-body
-    class="rounded-xl overflow-hidden shadow-2xl">
+  <el-dialog
+v-model="formVisible" :title="formTitle" width="520px" append-to-body
+    class="rounded-xl overflow-hidden shadow-2xl"
+>
     <el-form :model="formData" label-position="top" class="p-2">
-
-      <el-form-item label="上级部门" required>
-        <el-tree-select v-model="formData.parentId" :data="parentDeptOptions"
-          :props="{ label: 'deptName', value: 'deptId', children: 'children' }" value-key="deptId" placeholder="请选择上级部门"
-          check-strictly default-expand-all clearable style="width: 100%" />
+<el-form-item label="上级部门" required>
+        <el-tree-select
+v-model="formData.parentId" :data="parentDeptOptions"
+          :props="{ label: 'deptName', children: 'children' }" value-key="deptId" placeholder="请选择上级部门"
+          check-strictly default-expand-all clearable style="width: 100%"
+/>
       </el-form-item>
 
       <el-form-item label="部门名称" required>
@@ -124,8 +127,10 @@ async function handleSubmit() {
 
       <el-form-item label="状态">
         <div class="h-10 flex items-center">
-          <el-switch v-model="formData.status" :active-value="0" :inactive-value="1" active-text="启用" inactive-text="禁用"
-            inline-prompt />
+          <el-switch
+v-model="formData.status" :active-value="0" :inactive-value="1" active-text="启用" inactive-text="禁用"
+            inline-prompt
+/>
         </div>
       </el-form-item>
     </el-form>

@@ -1,8 +1,7 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
-import { ElMessage } from 'element-plus';
-import { addMerchantMenuApi, editMerchantMenuApi, getMerchantMenuDetailApi, getMerchantMenuListApi } from '#/api/system/menu';
 import type { Menu } from '#/api/system/menu';
+
+import { addMerchantMenuApi, editMerchantMenuApi, getMerchantMenuDetailApi, getMerchantMenuListApi } from '#/api/system/menu';
 
 const emit = defineEmits(['success']);
 
@@ -80,18 +79,14 @@ async function loadParentMenuOptions() {
 }
 
 // 🌟 核心对外开放的初始化开窗方法
-async function open(row?: Partial<Menu> | Menu) {
+async function open(row?: Menu | Partial<Menu>) {
   formVisible.value = true;
 
   if (!row) {
     formTitle.value = '新增菜单';
     formData.value = { parentId: 0, menuType: 0, platformType: 0, status: 0, sort: 0 };
     await loadParentMenuOptions();
-  } else if (!row.menuId) {
-    formTitle.value = '新增菜单';
-    formData.value = { ...row };
-    await loadParentMenuOptions();
-  } else {
+  } else if (row.menuId) {
     try {
       formTitle.value = '编辑菜单';
       const res = await getMerchantMenuDetailApi(row.menuId);
@@ -100,6 +95,10 @@ async function open(row?: Partial<Menu> | Menu) {
     } catch {
       ElMessage.error('获取菜单信息失败');
     }
+  } else {
+    formTitle.value = '新增菜单';
+    formData.value = { ...row };
+    await loadParentMenuOptions();
   }
 }
 
@@ -137,9 +136,11 @@ async function handleSubmit() {
   <el-dialog v-model="formVisible" :title="formTitle" width="540px" append-to-body>
     <el-form :model="formData" label-position="top">
       <el-form-item label="上级菜单">
-        <el-tree-select v-model="formData.parentId" :data="parentMenuOptions"
+        <el-tree-select
+v-model="formData.parentId" :data="parentMenuOptions"
           :props="{ value: 'menuId', label: 'menuName', children: 'children' }" value-key="menuId" placeholder="请选择上级菜单"
-          check-strictly filterable default-expand-all clearable style="width: 100%" />
+          check-strictly filterable default-expand-all clearable style="width: 100%"
+/>
       </el-form-item>
 
       <el-form-item label="菜单名称" required>
@@ -148,13 +149,13 @@ async function handleSubmit() {
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4">
         <el-form-item label="菜单类型" required>
-          <el-select v-model="formData.menuType" placeholder="请选择菜单类型" >
+          <el-select v-model="formData.menuType" placeholder="请选择菜单类型">
             <el-option v-for="item in menuTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
 
         <el-form-item label="菜单归属">
-          <el-select v-model="formData.platformType" placeholder="请选择归属" >
+          <el-select v-model="formData.platformType" placeholder="请选择归属">
             <el-option v-for="item in platformTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
@@ -180,8 +181,10 @@ async function handleSubmit() {
 
       <el-form-item label="状态">
         <div class="h-10 flex items-center">
-          <el-switch v-model="formData.status" :active-value="0" :inactive-value="1" active-text="启用" inactive-text="禁用"
-            inline-prompt />
+          <el-switch
+v-model="formData.status" :active-value="0" :inactive-value="1" active-text="启用" inactive-text="禁用"
+            inline-prompt
+/>
         </div>
       </el-form-item>
     </el-form>

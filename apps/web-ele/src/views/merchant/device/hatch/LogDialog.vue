@@ -1,10 +1,4 @@
-<!-- src/views/merchant/device/hatch/LogDialog.vue -->
 <script lang="ts" setup>
-import { computed, reactive, ref,watch } from "vue";
-
-import { Refresh, Search } from "@element-plus/icons-vue";
-import { ElMessage } from "element-plus";
-
 import { getDeviceHatchWeightLogListApi } from "#/api/device/deviceHatch";
 import { getRecentDays, getThisMonth } from "#/utils/date";
 

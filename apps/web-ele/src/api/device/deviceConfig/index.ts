@@ -3,16 +3,32 @@ import { requestClient } from '#/api/request';
 /** 设备参数配置类型定义 */
 export interface DeviceConfig {
   deviceConfigId: number;
+  merchantId: number;
   configName: string;
-  deviceBrand: number; // 0=傻瓜环保
-  fullWeightThreshold: number; // 满仓重量阈值(kg)
-  waitTime: number; // 等待时间(秒)
-  shutDoorTime: number; // 关门延时(秒)
-  logoutTime: number; // 退出延时(秒)
-  lightType: number; // 灯光类型:0=定时 1=感应 2=常亮
-  lightStartTime: string; // 灯光开始时间 HH:mm:ss
-  lightEndTime: string; // 灯光结束时间 HH:mm:ss
-  status: number; // 0=启用 1=禁用
+  deviceBrand: number;
+  status: number;
+  outLightBrightness: number;
+  deliverEndTimeout: number;
+  recycleEndTimeout: number;
+  deliverDoorMotorTimeout: number;
+  deliverDoorHandStopCount: number;
+  deliverDoorHandOpenCount: number;
+  fanTempMax: number;
+  fanTempMin: number;
+  topLightType: number;
+  topLightOnTime: string;
+  topLightOffTime: string;
+  topLightBrightness: number;
+  outLightType: number;
+  outLightOnTime: string;
+  outLightOffTime: string;
+  normalBanners: string;
+  fullBanners: string;
+  maintainBanners: string;
+  forbidImages: string;
+  businessOpenTime: string;
+  businessCloseTime: string;
+  weightThreshold: number;
 }
 
 /** 设备配置分页参数 */
@@ -36,7 +52,9 @@ export function getDeviceConfigListApi(params?: any) {
 
 /** 3. 设备配置详情 */
 export function getDeviceConfigDetailApi(deviceConfigId: number) {
-  return requestClient.get('/merchant/deviceConfig/detail', { params: { deviceConfigId } });
+  return requestClient.get('/merchant/deviceConfig/detail', {
+    params: { deviceConfigId },
+  });
 }
 
 /** 4. 新增设备配置 */
@@ -51,5 +69,7 @@ export function editDeviceConfigApi(data: Partial<DeviceConfig>) {
 
 /** 6. 删除设备配置 */
 export function deleteDeviceConfigApi(deviceConfigId: number) {
-  return requestClient.post('/merchant/deviceConfig/delete', { deviceConfigId });
+  return requestClient.post('/merchant/deviceConfig/delete', {
+    deviceConfigId,
+  });
 }

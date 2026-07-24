@@ -1,45 +1,21 @@
 <script lang="ts" setup>
-import { computed, onMounted, reactive, ref } from "vue";
+import type { DeviceHatch, DeviceHatchPageParams } from '#/api/device/deviceHatch';
+import type { TableColumnConfig } from '#/constants/tableColumns';
 
-import { Page } from "@vben/common-ui";
+import { Page } from '@vben/common-ui';
 
+import { getDeviceListApi } from '#/api/device/device';
 import {
-  Delete,
-  DeleteFilled,
-  DocumentCopy,
-  Edit,
-  Plus,
-  Refresh,
-  Search,
-} from "@element-plus/icons-vue";
-import { ElMessage, ElMessageBox } from "element-plus";
-
-import { type Device, getDeviceListApi } from "#/api/device/device";
-import {
-  addDeviceHatchApi,
   deleteDeviceHatchApi,
-  type DeviceHatch,
-  type DeviceHatchPageParams,
-  editDeviceHatchApi,
-  getDeviceHatchDetailApi,
   getDeviceHatchPageApi,
-} from "#/api/device/deviceHatch";
-import {
-  type DevicePackage,
-  getDevicePackageListApi,
-} from "#/api/device/devicePackage";
-import ColumnSelector from "#/components/ColumnSelector/index.vue";
-import ExportFieldSelector from "#/components/ExportFieldSelector/index.vue";
-import {
-  defaultHatchColumns,
-  HATCH_STORAGE_KEY,
-  type TableColumnConfig,
-} from "#/constants/tableColumns";
-import { ModuleCodeMap } from "#/hooks/useExport";
+} from '#/api/device/deviceHatch';
+import { defaultHatchColumns, HATCH_STORAGE_KEY } from '#/constants/tableColumns';
+import { ModuleCodeMap } from '#/hooks/useExport';
 
-import LogDialog from "./LogDialog.vue";
+import HatchForm from './HatchForm.vue';
+import LogDialog from './LogDialog.vue';
 
-// 表格列配置
+// --- 表格列配置 ---
 const columnConfig = ref<TableColumnConfig[]>([...defaultHatchColumns]);
 
 function handleColumnsUpdate(newColumns: TableColumnConfig[]) {
@@ -50,11 +26,13 @@ const visibleColumns = computed(() => {
   return columnConfig.value.filter((col) => col.visible);
 });
 
-// 日志弹窗相关
+// --- 引用 ---
+const hatchFormRef = ref();
 const logDialogVisible = ref(false);
 const currentLogHatchId = ref(0);
-const currentLogHatchName = ref("");
+const currentLogHatchName = ref('');
 
+// --- 日志 ---
 function handleLog(row: DeviceHatch) {
   currentLogHatchId.value = row.deviceHatchId;
   currentLogHatchName.value = row.hatchName;
@@ -66,29 +44,10 @@ const loading = ref(false);
 const tableData = ref<DeviceHatch[]>([]);
 const total = ref(0);
 const selectedIds = ref<number[]>([]);
-
-// 表单弹窗控制
-const formVisible = ref(false);
-const formTitle = ref("");
-const formData = ref<Partial<DeviceHatch>>({});
-const formSubmitting = ref(false);
+const moreParams = ref(false);
 
 // 下拉选项
 const deviceOptions = ref<Device[]>([]);
-const packageOptions = ref<DevicePackage[]>([]);
-
-// 仓口状态选项
-const hatchStatusOptions = [
-  { label: "全部", value: undefined },
-  { label: "未满", value: 0 },
-  { label: "已满", value: 1 },
-];
-
-// 状态选项
-const statusOptions = [
-  { label: "启用", value: 0 },
-  { label: "禁用", value: 1 },
-];
 
 // 查询参数
 const queryParams = reactive<DeviceHatchPageParams>({
@@ -101,26 +60,22 @@ const queryParams = reactive<DeviceHatchPageParams>({
 
 // --- 辅助函数 ---
 function getHatchStatusText(status: number): string {
-  return status === 0 ? "未满" : "已满";
+  return status === 0 ? '未满' : '已满';
 }
 
 function getHatchStatusType(status: number): string {
-  return status === 0 ? "success" : "danger";
+  return status === 0 ? 'success' : 'danger';
 }
 
 function getStatusText(status: number): string {
-  return status === 0 ? "启用" : "禁用";
+  return status === 0 ? '启用' : '禁用';
 }
 
 // --- 加载选项 ---
 async function loadOptions() {
   try {
-    const [deviceRes, packageRes] = await Promise.all([
-      getDeviceListApi({ status: 0 }),
-      getDevicePackageListApi({ status: 0 }),
-    ]);
+    const deviceRes = await getDeviceListApi({ status: 0 });
     deviceOptions.value = deviceRes || [];
-    packageOptions.value = packageRes || [];
   } catch (error) {
     console.error(error);
   }
@@ -135,112 +90,40 @@ async function loadData() {
     total.value = res.total || 0;
   } catch (error) {
     console.error(error);
-    ElMessage.error("加载数据失败");
+    ElMessage.error('加载数据失败');
   } finally {
     loading.value = false;
   }
 }
 
-// --- 清空仓口（重置重量）---
-async function handleClean(row: DeviceHatch) {
-  try {
-    await ElMessageBox.confirm(
-      `确定要清空仓口【${row.hatchName}】吗？清空后当前重量将归零。`,
-      "清空仓口",
-      {
-        type: "warning",
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-      }
-    );
-
-    // 调用清空接口（如果没有单独接口，可以通过编辑接口设置 currentWeight=0）
-    await editDeviceHatchApi({
-      deviceHatchId: row.deviceHatchId,
-      currentWeight: 0,
-      hatchStatus: 0,
-    });
-    ElMessage.success("清空成功");
-    loadData();
-  } catch {
-    // 取消操作
-  }
-}
-
-// --- 新增/编辑 ---
+// --- 新增 ---
 function handleAdd() {
-  formTitle.value = "新增仓口";
-  formData.value = {
-    status: 0,
-    hatchStatus: 0,
-    currentWeight: 0,
-    weightThreshold: 100,
-  };
-  formVisible.value = true;
+  hatchFormRef.value?.open();
 }
 
-async function handleEdit(row: DeviceHatch) {
-  try {
-    formTitle.value = "编辑仓口";
-    const res = await getDeviceHatchDetailApi(row.deviceHatchId);
-    formData.value = res || {};
-    formVisible.value = true;
-  } catch {
-    ElMessage.error("获取仓口信息失败");
-  }
-}
-
-async function handleSubmit() {
-  if (!formData.value.hatchName?.trim()) {
-    ElMessage.warning("请输入仓口名称");
-    return;
-  }
-  if (!formData.value.deviceId) {
-    ElMessage.warning("请选择所属设备");
-    return;
-  }
-
-  formSubmitting.value = true;
-  try {
-    const api = formData.value.deviceHatchId
-      ? editDeviceHatchApi
-      : addDeviceHatchApi;
-    await api(formData.value);
-    ElMessage.success(formData.value.deviceHatchId ? "修改成功" : "新增成功");
-    formVisible.value = false;
-    handleQuery();
-  } catch {
-    ElMessage.error("操作失败");
-  } finally {
-    formSubmitting.value = false;
-  }
+// --- 编辑 ---
+function handleEdit(row: DeviceHatch) {
+  hatchFormRef.value?.open(row);
 }
 
 // --- 删除 ---
 async function handleDelete(row?: DeviceHatch) {
   let ids: number[] = [];
-
   if (row) {
     ids = [row.deviceHatchId];
   } else {
     if (selectedIds.value.length === 0) {
-      ElMessage.warning("请选择要删除的记录");
+      ElMessage.warning('请选择要删除的记录');
       return;
     }
     ids = selectedIds.value;
   }
 
   try {
-    await ElMessageBox.confirm(
-      `确定要删除选中的 ${ids.length} 条仓口吗？`,
-      "提示",
-      { type: "warning" }
-    );
-
+    await ElMessageBox.confirm(`确定要删除选中的 ${ids.length} 条仓口吗？`, '提示', { type: 'warning' });
     for (const id of ids) {
       await deleteDeviceHatchApi(id);
     }
-
     ElMessage.success(`成功删除 ${ids.length} 条仓口`);
     selectedIds.value = [];
     handleQuery();
@@ -274,140 +157,83 @@ onMounted(() => {
 
 <template>
   <Page auto-content-height>
-    <div class="p-0">
-      <!-- 查询表单 -->
-      <el-card shadow="never" class="border-none mb-4 !p-2">
-        <el-form
-          :inline="true"
-          :model="queryParams"
-          class="flex flex-wrap gap-x-2 gap-y-2 items-center"
-        >
-          <el-form-item class="!mb-0 !mr-2">
-            <el-select
-              v-model="queryParams.deviceId"
-              clearable
-              filterable
-              style="width: 200px"
-              @change="handleQuery"
-            >
-              <template #prefix>
-                <span class="text-xs text-gray-400 mr-0.5">所属设备:</span>
-              </template>
-              <el-option
-                v-for="item in deviceOptions"
-                :key="item.deviceId"
-                :label="item.deviceName"
-                :value="item.deviceId"
-              />
-            </el-select>
-          </el-form-item>
+    <BaseTableLayout
+      v-model:query-params="queryParams"
+      v-model:more-params="moreParams"
+      :loading="loading"
+      :total="total"
+      @search="loadData"
+      @reset="resetQuery"
+    >
+      <!-- 📥 基础筛选项 -->
+      <template #search-basic>
+        <el-form-item>
+          <el-select v-model="queryParams.deviceId" clearable filterable style="width: 200px" @change="handleQuery">
+            <template #prefix>
+              <span class="text-xs text-gray-400 mr-0.5">所属设备:</span>
+            </template>
+            <el-option v-for="item in deviceOptions" :key="item.deviceId" :label="item.deviceName" :value="item.deviceId" />
+          </el-select>
+        </el-form-item>
+      </template>
 
-          <el-form-item class="!mb-0 !mr-2">
-            <el-select
-              v-model="queryParams.hatchStatus"
-              clearable
-              style="width: 200px"
-            >
-              <template #prefix>
-                <span class="text-xs text-gray-400 mr-0.5">仓口状态:</span>
-              </template>
-              <el-option
-                v-for="item in hatchStatusOptions"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
-          </el-form-item>
+      <!-- 📥 高级筛选项 -->
+      <template #search-advanced>
+        <el-form-item>
+          <el-select v-model="queryParams.hatchStatus" clearable style="width: 200px">
+            <template #prefix>
+              <span class="text-xs text-gray-400 mr-0.5">仓口状态:</span>
+            </template>
+            <el-option label="未满" :value="0" />
+            <el-option label="已满" :value="1" />
+          </el-select>
+        </el-form-item>
 
-          <el-form-item class="!mb-0 !mr-2">
-            <el-select
-              v-model="queryParams.status"
-              clearable
-              style="width: 200px"
-            >
-              <template #prefix>
-                <span class="text-xs text-gray-400 mr-0.5">状态:</span>
-              </template>
-              <el-option
-                v-for="item in statusOptions"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
-          </el-form-item>
+        <el-form-item>
+          <el-select v-model="queryParams.status" clearable style="width: 200px">
+            <template #prefix>
+              <span class="text-xs text-gray-400 mr-0.5">状态:</span>
+            </template>
+            <el-option label="启用" :value="0" />
+            <el-option label="禁用" :value="1" />
+          </el-select>
+        </el-form-item>
+      </template>
 
-          <el-form-item class="!mb-0 !mr-0 md:ml-auto flex items-center gap-1">
-            <el-tooltip content="查询" placement="top">
-              <el-button
-                type="primary"
-                :icon="Search"
-                circle
-                @click="handleQuery"
-              />
-            </el-tooltip>
-            <el-tooltip content="重置" placement="top">
-              <el-button :icon="Refresh" circle @click="resetQuery" />
-            </el-tooltip>
-          </el-form-item>
-        </el-form>
-      </el-card>
+      <!-- 📥 工具栏左侧 -->
+      <template #toolbar-left>
+        <el-button type="primary" icon="Plus" @click="handleAdd">新增仓口</el-button>
+        <ExportButton :module-code="ModuleCodeMap.DEVICE_HATCH" :fields="visibleColumns" :find-cond="queryParams" />
+        <el-button type="danger" plain icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete()">
+          批量删除
+        </el-button>
+        <transition name="el-fade-in">
+          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-xs text-gray-400">
+            已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
+          </span>
+        </transition>
+      </template>
 
-      <!-- 数据表格 -->
-      <el-card shadow="never" class="border-none !p-2">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center gap-2">
-            <el-button type="primary" :icon="Plus" @click="handleAdd">
-              新增仓口
-            </el-button>
-            <ExportButton
-            :module-code="ModuleCodeMap.DEVICE_HATCH"
-            :fields="visibleColumns"
-            :find-cond="queryParams"
-          />
-            <el-button
-              type="danger"
-              plain
-              :icon="Delete"
-              :disabled="selectedIds.length === 0"
-              @click="handleDelete()"
-            >
-              批量删除
-            </el-button>
-            <span
-              v-if="selectedIds.length > 0"
-              class="text-xs text-gray-400 ml-2"
-            >
-              已选
-              <span class="text-red-500 font-medium">{{
-                selectedIds.length
-              }}</span>
-              项
-            </span>
-          </div>
+      <!-- 📥 工具栏右侧 -->
+      <template #toolbar-right>
+        <ColumnSelector
+          :storage-key="HATCH_STORAGE_KEY"
+          :default-columns="defaultHatchColumns"
+          @update:columns="handleColumnsUpdate"
+        />
+      </template>
 
-          <div class="flex items-center">
-            <ColumnSelector
-              :storage-key="HATCH_STORAGE_KEY"
-              :default-columns="defaultHatchColumns"
-              @update:columns="handleColumnsUpdate"
-            />
-          </div>
-        </div>
-
+      <!-- 📥 表格 -->
+      <template #table>
         <el-table
-          v-loading="loading"
           :data="tableData"
           border
           stripe
-          style="width: 100%"
+          style="width: 100%; height: 100%"
           @selection-change="handleSelectionChange"
         >
-          <!-- 选择列固定写死 -->
           <el-table-column type="selection" width="50" align="center" />
 
-          <!-- 动态数据列 -->
           <el-table-column
             v-for="col in visibleColumns"
             :key="col.key"
@@ -419,235 +245,64 @@ onMounted(() => {
             :show-overflow-tooltip="col.showOverflowTooltip || false"
           >
             <template #default="{ row }">
-              <!-- 仓口编号 -->
               <template v-if="col.key === 'hatchNo'">
                 {{ row.hatchNo }}
               </template>
-              <!-- 当前重量 -->
               <template v-else-if="col.key === 'currentWeight'">
-                <span
-                  :class="{
-                    'text-orange-500':
-                      row.currentWeight >= (row.weightThreshold || 100),
-                  }"
-                >
+                <span :class="{ 'text-orange-500': row.currentWeight >= (row.weightThreshold || 100) }">
                   {{ (row.currentWeight || 0).toFixed(2) }} kg
                 </span>
               </template>
-              <!-- 满仓阈值 -->
               <template v-else-if="col.key === 'weightThreshold'">
                 {{ (row.weightThreshold || 100).toFixed(2) }} kg
               </template>
-              <!-- 仓口状态 -->
               <template v-else-if="col.key === 'hatchStatus'">
-                <el-tag
-                  :type="getHatchStatusType(row.hatchStatus)"
-                  size="small"
-                  round
-                  effect="light"
-                >
+                <el-tag :type="getHatchStatusType(row.hatchStatus)" size="small" round effect="light">
                   {{ getHatchStatusText(row.hatchStatus) }}
                 </el-tag>
               </template>
-              <!-- 最后清运时间 -->
               <template v-else-if="col.key === 'lastCleanTime'">
-                {{ row.lastCleanTime || "-" }}
+                {{ row.lastCleanTime || '-' }}
               </template>
-              <!-- 状态 -->
               <template v-else-if="col.key === 'status'">
-                <el-tag
-                  :type="row.status === 0 ? 'success' : 'danger'"
-                  size="small"
-                  round
-                  effect="light"
-                >
+                <el-tag :type="row.status === 0 ? 'success' : 'danger'" size="small" round effect="light">
                   {{ getStatusText(row.status) }}
                 </el-tag>
               </template>
-              <!-- 所属设备 -->
               <template v-else-if="col.key === 'deviceId'">
-                {{ row.deviceName || row.deviceId || "-" }}
+                {{ row.deviceName || row.deviceId || '-' }}
               </template>
-              <!-- 普通字段 -->
               <template v-else>
                 {{ (row as any)[col.key] ?? '-' }}
               </template>
             </template>
           </el-table-column>
 
-          <!-- 操作列固定写死 -->
-          <el-table-column
-            label="操作"
-            width="300"
-            fixed="right"
-            align="center"
-          >
+          <el-table-column label="操作" width="150" fixed="right" align="center">
             <template #default="{ row }">
-              <el-button
-                link
-                type="info"
-                :icon="DocumentCopy"
-                @click="handleLog(row)"
-              >
-                日志
-              </el-button>
-              <el-button
-                link
-                type="warning"
-                :icon="DeleteFilled"
-                @click="handleClean(row)"
-              >
-                清空
-              </el-button>
-              <el-button
-                link
-                type="primary"
-                :icon="Edit"
-                @click="handleEdit(row)"
-              >
-                编辑
-              </el-button>
-              <el-button
-                link
-                type="danger"
-                :icon="Delete"
-                @click="handleDelete(row)"
-              >
-                删除
-              </el-button>
+              <el-tooltip content="日志" placement="top" :enterable="false">
+                <el-button link type="info" icon="DocumentCopy" @click="handleLog(row)" />
+              </el-tooltip>
+              <el-tooltip content="编辑" placement="top" :enterable="false">
+                <el-button link type="primary" icon="Edit" @click="handleEdit(row)" />
+              </el-tooltip>
+              <el-tooltip content="删除" placement="top" :enterable="false">
+                <el-button link type="danger" icon="Delete" @click="handleDelete(row)" />
+              </el-tooltip>
             </template>
           </el-table-column>
         </el-table>
+      </template>
+    </BaseTableLayout>
 
-        <!-- 分页 -->
-        <div class="flex justify-end mt-4">
-          <el-pagination
-            v-model:current-page="queryParams.pageNo"
-            v-model:page-size="queryParams.pageSize"
-            :total="total"
-            :page-sizes="[10, 20, 50, 100]"
-            layout="total, sizes, prev, pager, next, jumper"
-            background
-            @size-change="loadData"
-            @current-change="loadData"
-          />
-        </div>
-      </el-card>
-    </div>
+    <!-- ===== 弹窗们 ===== -->
+    <HatchForm ref="hatchFormRef" @success="handleQuery" />
 
-    <!-- 日志弹窗组件 -->
     <LogDialog
       v-model:visible="logDialogVisible"
       :device-hatch-id="currentLogHatchId"
       :device-hatch-name="currentLogHatchName"
     />
-
-    <ExportFieldSelector
-      v-model:visible="exportFieldVisible"
-      :fields="exportFields"
-      :loading="exporting"
-      @confirm="handleExportConfirm"
-    />
-
-    <!-- 新增/编辑弹窗 -->
-    <el-dialog
-      v-model="formVisible"
-      :title="formTitle"
-      width="800px"
-      append-to-body
-    >
-      <el-form :model="formData" label-width="110px">
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="仓口名称" required>
-              <el-input
-                v-model="formData.hatchName"
-                placeholder="请输入仓口名称"
-              />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="仓口编号">
-              <el-input
-                v-model="formData.hatchNo"
-                placeholder="请输入仓口编号"
-              />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-form-item label="所属设备" required>
-          <el-select
-            v-model="formData.deviceId"
-            placeholder="请选择设备"
-            clearable
-            filterable
-            style="width: 100%"
-          >
-            <el-option
-              v-for="item in deviceOptions"
-              :key="item.deviceId"
-              :label="item.deviceName"
-              :value="item.deviceId"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="绑定套餐">
-          <el-select
-            v-model="formData.devicePackageId"
-            placeholder="请选择计费套餐"
-            clearable
-            style="width: 100%"
-          >
-            <el-option
-              v-for="item in packageOptions"
-              :key="item.devicePackageId"
-              :label="item.packageName"
-              :value="item.devicePackageId"
-            />
-          </el-select>
-        </el-form-item>
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="当前重量(kg)">
-              <el-input-number
-                v-model="formData.currentWeight"
-                :min="0"
-                :max="500"
-                :precision="2"
-                style="width: 100%"
-              />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="满仓阈值(kg)">
-              <el-input-number
-                v-model="formData.weightThreshold"
-                :min="0"
-                :max="500"
-                :precision="2"
-                style="width: 100%"
-              />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-form-item label="状态">
-          <el-radio-group v-model="formData.status">
-            <el-radio :value="0">启用</el-radio>
-            <el-radio :value="1">禁用</el-radio>
-          </el-radio-group>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="formVisible = false">取消</el-button>
-        <el-button
-          type="primary"
-          :loading="formSubmitting"
-          @click="handleSubmit"
-        >
-          确定
-        </el-button>
-      </template>
-    </el-dialog>
   </Page>
 </template>
 
@@ -655,5 +310,9 @@ onMounted(() => {
 .text-orange-500 {
   font-weight: 500;
   color: #e6a23c;
+}
+
+.selected-alert-badge {
+  display: inline-block;
 }
 </style>
