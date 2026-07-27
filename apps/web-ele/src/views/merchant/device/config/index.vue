@@ -8,6 +8,7 @@ import { deleteDeviceConfigApi, getDeviceConfigPageApi } from '#/api/device/devi
 import { CONFIG_STORAGE_KEY, defaultConfigColumns } from '#/constants/tableColumns';
 import { ModuleCodeMap } from '#/hooks/useExport';
 
+import BindDeviceDialog from './BindDeviceDialog.vue';
 import ConfigForm from './ConfigForm.vue';
 
 const { device_brand } = useDicts(['device_brand']);
@@ -25,6 +26,7 @@ const visibleColumns = computed(() => {
 
 // --- 引用 ---
 const configFormRef = ref();
+const bindDialogRef = ref();
 
 // --- 状态变量 ---
 const loading = ref(false);
@@ -60,6 +62,12 @@ async function loadData() {
   } finally {
     loading.value = false;
   }
+}
+
+// 打开绑定弹窗
+function handleBindDevice(row: DeviceConfig) {
+  console.log(row);
+  bindDialogRef.value?.open(row.deviceConfigId, row.configName);
 }
 
 // --- 新增 ---
@@ -123,23 +131,16 @@ onMounted(() => {
 <template>
   <Page auto-content-height>
     <BaseTableLayout
-      v-model:query-params="queryParams"
-      v-model:more-params="moreParams"
-      :loading="loading"
-      :total="total"
-      @search="loadData"
-      @reset="resetQuery"
-    >
+v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="loading"
+      :total="total" @search="loadData" @reset="resetQuery"
+>
       <!-- 📥 基础筛选项 -->
       <template #search-basic>
         <el-form-item>
           <el-input
-            v-model="queryParams.configName"
-            placeholder="请输入"
-            clearable
-            style="width: 200px"
+v-model="queryParams.configName" placeholder="请输入" clearable style="width: 200px"
             @keyup.enter="handleQuery"
-          >
+>
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">配置名称:</span>
             </template>
@@ -154,12 +155,7 @@ onMounted(() => {
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">设备品牌:</span>
             </template>
-            <el-option
-              v-for="item in device_brand"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
+            <el-option v-for="item in device_brand" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
 
@@ -169,11 +165,9 @@ onMounted(() => {
               <span class="text-xs text-gray-400 mr-0.5">状态:</span>
             </template>
             <el-option
-              v-for="item in [{ label: '启用', value: 0 }, { label: '禁用', value: 1 }]"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
+v-for="item in [{ label: '启用', value: 0 }, { label: '禁用', value: 1 }]" :key="item.value"
+              :label="item.label" :value="item.value"
+/>
           </el-select>
         </el-form-item>
       </template>
@@ -183,18 +177,8 @@ onMounted(() => {
         <el-button type="primary" icon="Plus" @click="handleAdd">
           新增配置
         </el-button>
-        <ExportButton
-          :module-code="ModuleCodeMap.CONFIG"
-          :fields="visibleColumns"
-          :find-cond="queryParams"
-        />
-        <el-button
-          type="danger"
-          plain
-          icon="Delete"
-          :disabled="selectedIds.length === 0"
-          @click="handleDelete()"
-        >
+        <ExportButton :module-code="ModuleCodeMap.CONFIG" :fields="visibleColumns" :find-cond="queryParams" />
+        <el-button type="danger" plain icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete()">
           批量删除
         </el-button>
         <transition name="el-fade-in">
@@ -207,32 +191,23 @@ onMounted(() => {
       <!-- 📥 工具栏右侧 -->
       <template #toolbar-right>
         <ColumnSelector
-          :storage-key="CONFIG_STORAGE_KEY"
-          :default-columns="defaultConfigColumns"
+:storage-key="CONFIG_STORAGE_KEY" :default-columns="defaultConfigColumns"
           @update:columns="handleColumnsUpdate"
-        />
+/>
       </template>
 
       <!-- 📥 表格 -->
       <template #table>
         <el-table
-          :data="tableData"
-          border
-          stripe
-          style="width: 100%; height: 100%"
+:data="tableData" border stripe style="width: 100%; height: 100%"
           @selection-change="handleSelectionChange"
-        >
+>
           <el-table-column type="selection" width="50" align="center" />
 
           <el-table-column
-            v-for="col in visibleColumns"
-            :key="col.key"
-            :prop="col.key"
-            :label="col.label"
-            :width="typeof col.width === 'number' ? col.width : undefined"
-            :min-width="col.minWidth"
-            :align="col.align"
-          >
+v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
+            :width="typeof col.width === 'number' ? col.width : undefined" :min-width="col.minWidth" :align="col.align"
+>
             <template #default="{ row }">
               <template v-if="col.key === 'deviceBrand'">
                 <DictTag :options="device_brand" :value="row.deviceBrand" />
@@ -244,12 +219,7 @@ onMounted(() => {
                 {{ row.recycleEndTimeout }}s
               </template>
               <template v-else-if="col.key === 'status'">
-                <el-tag
-                  :type="row.status === 0 ? 'success' : 'danger'"
-                  size="small"
-                  round
-                  effect="light"
-                >
+                <el-tag :type="row.status === 0 ? 'success' : 'danger'" size="small" round effect="light">
                   {{ getStatusText(row.status) }}
                 </el-tag>
               </template>
@@ -264,6 +234,9 @@ onMounted(() => {
               <el-tooltip content="编辑" placement="top" :enterable="false">
                 <el-button link type="primary" icon="Edit" @click="handleEdit(row)" />
               </el-tooltip>
+              <el-tooltip content="绑定设备" placement="top" :enterable="false">
+                <el-button link type="success" icon="Link" @click="handleBindDevice(row)" />
+              </el-tooltip>
               <el-tooltip content="删除" placement="top" :enterable="false">
                 <el-button link type="danger" icon="Delete" @click="handleDelete(row)" />
               </el-tooltip>
@@ -275,6 +248,9 @@ onMounted(() => {
 
     <!-- ===== 弹窗 ===== -->
     <ConfigForm ref="configFormRef" @success="handleQuery" />
+
+    <!-- ===== 绑定设备弹窗 ===== -->
+    <BindDeviceDialog ref="bindDialogRef" @success="handleQuery" />
   </Page>
 </template>
 

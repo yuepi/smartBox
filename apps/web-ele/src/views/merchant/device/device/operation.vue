@@ -30,6 +30,8 @@ const operationTypeOptions = [
   { label: '屏幕截图', value: 7, needHatch: false },
   { label: '开仓门灯', value: 8, needHatch: false },
   { label: '关仓门灯', value: 9, needHatch: false },
+  { label: '满溢上报', value: 10, needHatch: true },
+  { label: '满溢解除', value: 11, needHatch: true },
   { label: '开门行程', value: 12, needHatch: false },
 ];
 

@@ -12,7 +12,7 @@ export const VBEN_DOC_URL = 'https://doc.vben.pro';
  * @zh_CN Vben Logo
  */
 export const VBEN_LOGO_URL =
-  'https://tempapi.huiyifamily.com/profile/avatar/2024/08/12/logo.jpg';
+  'https://tempapi.huiyifamily.com/profile/huishou/logo.png';
 
 /**
  * @zh_CN Vben Admin 首页地址

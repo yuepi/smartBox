@@ -112,7 +112,6 @@ v-model:current-page="queryParams.pageNo" v-model:page-size="queryParams.pageSiz
   background-color: #f8fafc;
   transition: background-color 0.3s;
 
-  :host-context(.dark) &,
   .dark & {
     background-color: #14161a !important;
   }
@@ -223,8 +222,7 @@ v-model:current-page="queryParams.pageNo" v-model:page-size="queryParams.pageSiz
   overflow: hidden;
   background: #fff;
   border-radius: 6px;
-
-  :host-context(.dark) &,
+  
   .dark & {
     background: #1e1e1e !important;
     box-shadow: none;

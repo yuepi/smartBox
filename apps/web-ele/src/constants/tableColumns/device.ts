@@ -63,7 +63,7 @@ export const HATCH_STORAGE_KEY = 'hatch_table_columns';
 export const defaultHatchColumns: TableColumnConfig[] = [
   { key: 'deviceHatchId', label: '仓口ID', visible: true, width: 80, align: 'center' },
   { key: 'hatchName', label: '仓口名称', visible: true, minWidth: 140, align: 'left' },
-  { key: 'hatchNo', label: '仓口编号', visible: true, width: 150, align: 'center' },
+  { key: 'hatchNo', label: '仓口编号', visible: true, width: 200, align: 'center' },
   { key: 'deviceId', label: '所属设备', visible: true, width: 150, align: 'center', showOverflowTooltip: true },
   { key: 'currentWeight', label: '当前重量(kg)', visible: true, width: 120, align: 'right' },
   { key: 'weightThreshold', label: '满仓阈值(kg)', visible: true, width: 120, align: 'right' },

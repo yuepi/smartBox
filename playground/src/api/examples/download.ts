@@ -8,7 +8,7 @@ import { requestClient } from '../request';
  */
 async function downloadFile1() {
   return requestClient.download<Blob>(
-    'https://tempapi.huiyifamily.com/profile/avatar/2024/08/12/logo.jpg',
+    'https://tempapi.huiyifamily.com/profile/huishou/logo.png',
   );
 }
 
@@ -18,7 +18,7 @@ async function downloadFile1() {
  */
 async function downloadFile2() {
   return requestClient.download<RequestResponse<Blob>>(
-    'https://tempapi.huiyifamily.com/profile/avatar/2024/08/12/logo.jpg',
+    'https://tempapi.huiyifamily.com/profile/huishou/logo.png',
     {
       responseReturn: 'raw',
     },

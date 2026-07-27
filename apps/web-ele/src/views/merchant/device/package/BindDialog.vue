@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import type { DeviceHatch } from '#/api/device/deviceHatch';
-import type { DevicePackage } from '#/api/device/devicePackage';
-import type { HatchBindPackageRecord } from '#/api/device/devicePackage';
+import type {
+  DevicePackage,
+  HatchBindPackageRecord,
+} from '#/api/device/devicePackage';
 
 import { getDeviceHatchListApi } from '#/api/device/deviceHatch';
 import {
@@ -10,93 +12,163 @@ import {
   hatchUnBindPackageApi,
 } from '#/api/device/devicePackage';
 
+// ===== Emits =====
 const emit = defineEmits<{
   (e: 'success'): void;
 }>();
 
+// ===== 基础状态 =====
 const visible = ref(false);
-const loading = ref(false);
+const submitting = ref(false);
 const currentPackage = ref<DevicePackage | null>(null);
-const bindForm = reactive({ deviceHatchIds: [] as number[] });
 
-// 仓口列表
-const hatchList = ref<DeviceHatch[]>([]);
-const hatchLoading = ref(false);
+// ===== 左侧：未绑定仓口 =====
+const unboundLoading = ref(false);
+const unboundData = ref<DeviceHatch[]>([]);
+const selectedUnboundIds = ref<number[]>([]);
+const unboundSearchKeyword = ref('');
 
-// 已绑定仓口列表
-const boundHatchList = ref<HatchBindPackageRecord[]>([]);
-const boundHatchTotal = ref(0);
-const boundHatchLoading = ref(false);
-const boundHatchPage = reactive({ pageNo: 1, pageSize: 10 });
+// ===== 右侧：已绑定仓口 =====
+const boundLoading = ref(false);
+const boundData = ref<HatchBindPackageRecord[]>([]);
+const boundTotal = ref(0);
+const selectedBoundRecordIds = ref<number[]>([]);
+const boundSearchKeyword = ref('');
+const boundParams = reactive({
+  pageNo: 1,
+  pageSize: 10,
+});
 
-function open(row: DevicePackage) {
-  currentPackage.value = row;
-  bindForm.deviceHatchIds = [];
-  boundHatchPage.pageNo = 1;
-  visible.value = true;
-  loadBoundHatchList();
-  loadHatchList();
-}
+// ===== 核心数据加载 =====
 
-async function loadHatchList() {
-  try {
-    hatchLoading.value = true;
-    const res = await getDeviceHatchListApi({ status: 0 });
-    const boundIds = new Set(boundHatchList.value.map((item) => item.deviceHatchId));
-    hatchList.value = (res || []).filter(
-      (hatch: DeviceHatch) => !boundIds.has(hatch.deviceHatchId)
-    );
-  } finally {
-    hatchLoading.value = false;
-  }
-}
-
+// 1. 加载已绑定仓口（分页）
 async function loadBoundHatchList() {
   if (!currentPackage.value) return;
+  boundLoading.value = true;
   try {
-    boundHatchLoading.value = true;
     const res = await hatchBindPackagePageApi({
-      pageNo: boundHatchPage.pageNo,
-      pageSize: boundHatchPage.pageSize,
+      pageNo: boundParams.pageNo,
+      pageSize: boundParams.pageSize,
       devicePackageId: currentPackage.value.devicePackageId,
     });
-    boundHatchList.value = res.records || [];
-    boundHatchTotal.value = res.total || 0;
+    boundData.value = res.records || [];
+    boundTotal.value = res.total || 0;
+  } catch {
+    ElMessage.error('加载已绑定仓口失败');
   } finally {
-    boundHatchLoading.value = false;
+    boundLoading.value = false;
   }
 }
 
-function handlePageChange() {
-  loadBoundHatchList();
-  loadHatchList();
-}
-
-async function handleBindSubmit() {
+// 2. 加载未绑定仓口（前端求差集 & 本地过滤）
+async function loadUnboundHatchList() {
   if (!currentPackage.value) return;
-  if (bindForm.deviceHatchIds.length === 0) {
-    ElMessage.warning('请选择要绑定的仓口');
-    return;
-  }
-  loading.value = true;
+  unboundLoading.value = true;
   try {
+    // ----- 前端求差集逻辑 Start -----
+    const [allHatches, boundRes] = await Promise.all([
+      getDeviceHatchListApi({ status: 0 }),
+      hatchBindPackagePageApi({
+        pageNo: 1,
+        pageSize: 9999, // 查出所有已绑定的仓口做差集
+        devicePackageId: currentPackage.value.devicePackageId,
+      }),
+    ]);
+
+    const boundIds = new Set(
+      (boundRes.records || []).map((item) => item.deviceHatchId)
+    );
+    let list = (allHatches || []).filter(
+      (hatch: DeviceHatch) => !boundIds.has(hatch.deviceHatchId)
+    );
+
+    // 本地搜索筛选（支持搜 设备名称 或 仓口名称）
+    if (unboundSearchKeyword.value.trim()) {
+      const kw = unboundSearchKeyword.value.trim().toLowerCase();
+      list = list.filter(
+        (h: DeviceHatch) =>
+          h.deviceName?.toLowerCase().includes(kw) ||
+          h.hatchName?.toLowerCase().includes(kw)
+      );
+    }
+    unboundData.value = list;
+    // ----- 前端求差集逻辑 End -----
+  } catch {
+    ElMessage.error('加载待绑定仓口失败');
+  } finally {
+    unboundLoading.value = false;
+  }
+}
+
+// 刷新左右双栏
+async function refreshAll() {
+  selectedUnboundIds.value = [];
+  selectedBoundRecordIds.value = [];
+  await Promise.all([loadBoundHatchList(), loadUnboundHatchList()]);
+}
+
+// ===== 动作操作 =====
+
+// 打开弹窗
+async function open(row: DevicePackage) {
+  currentPackage.value = row;
+  visible.value = true;
+
+  boundParams.pageNo = 1;
+  unboundSearchKeyword.value = '';
+  boundSearchKeyword.value = '';
+
+  await refreshAll();
+}
+
+// 绑定选中仓口（左 -> 右）
+async function handleBind() {
+  if (!currentPackage.value || selectedUnboundIds.value.length === 0) return;
+
+  try {
+    submitting.value = true;
     await hatchBindPackageApi({
-      deviceHatchIds: bindForm.deviceHatchIds,
+      deviceHatchIds: selectedUnboundIds.value,
       devicePackageId: currentPackage.value.devicePackageId,
     });
-    ElMessage.success(`成功绑定 ${bindForm.deviceHatchIds.length} 个仓口`);
-    bindForm.deviceHatchIds = [];
-    await loadBoundHatchList();
-    await loadHatchList();
+    ElMessage.success(`成功绑定 ${selectedUnboundIds.value.length} 个仓口`);
+    await refreshAll();
     emit('success');
   } catch {
     ElMessage.error('绑定失败');
   } finally {
-    loading.value = false;
+    submitting.value = false;
   }
 }
 
-async function handleUnbindHatch(record: HatchBindPackageRecord) {
+// 批量解绑选中仓口（右 -> 左）
+async function handleUnbind() {
+  if (!currentPackage.value || selectedBoundRecordIds.value.length === 0)
+    return;
+
+  try {
+    await ElMessageBox.confirm(
+      `确定要解绑选中的 ${selectedBoundRecordIds.value.length} 个仓口计费标准吗？`,
+      '提示',
+      { type: 'warning' }
+    );
+    submitting.value = true;
+    await hatchUnBindPackageApi({
+      deviceHatchIds: selectedBoundRecordIds.value,
+      devicePackageId: currentPackage.value.devicePackageId,
+    });
+    ElMessage.success('解绑成功');
+    await refreshAll();
+    emit('success');
+  } catch {
+    // 取消解绑
+  } finally {
+    submitting.value = false;
+  }
+}
+
+// 单行直接解绑（快捷按钮）
+async function handleSingleUnbind(record: HatchBindPackageRecord) {
   if (!currentPackage.value) return;
   try {
     await ElMessageBox.confirm(
@@ -104,16 +176,35 @@ async function handleUnbindHatch(record: HatchBindPackageRecord) {
       '提示',
       { type: 'warning' }
     );
+    submitting.value = true;
     await hatchUnBindPackageApi({
       deviceHatchIds: [record.deviceHatchId],
       devicePackageId: currentPackage.value.devicePackageId,
     });
     ElMessage.success('解绑成功');
-    await loadBoundHatchList();
-    await loadHatchList();
+    await refreshAll();
+    emit('success');
   } catch {
-    // 取消解绑
+    // 用户取消
+  } finally {
+    submitting.value = false;
   }
+}
+
+// 右侧本地搜索过滤当前页数据
+const filteredBoundData = computed(() => {
+  if (!boundSearchKeyword.value.trim()) return boundData.value;
+  const kw = boundSearchKeyword.value.trim().toLowerCase();
+  return boundData.value.filter(
+    (item: HatchBindPackageRecord) =>
+      item.deviceName?.toLowerCase().includes(kw) ||
+      item.hatchName?.toLowerCase().includes(kw)
+  );
+});
+
+// 右侧分页切换
+function handleBoundPageChange() {
+  loadBoundHatchList();
 }
 
 defineExpose({ open });
@@ -122,83 +213,178 @@ defineExpose({ open });
 <template>
   <el-dialog
     v-model="visible"
-    :title="`绑定仓口 - ${currentPackage?.packageName}`"
-    width="1000px"
+    :title="`绑定仓口 - ${currentPackage?.packageName || ''}`"
+    width="1200px"
     append-to-body
+    destroy-on-close
+    @close="visible = false"
   >
-    <el-row :gutter="20">
-      <!-- 左侧：待绑定 -->
-      <el-col :span="12">
-        <div class="bind-section">
-          <div class="bind-title">待绑定仓口</div>
-          <el-select
-            v-model="bindForm.deviceHatchIds"
-            multiple
-            filterable
-            placeholder="请选择要绑定的仓口"
-            style="width: 100%"
-            :loading="hatchLoading"
+    <div class="transfer-container flex items-center gap-4">
+      <div
+        class="panel flex-1 border border-gray-200 rounded p-3 flex flex-col h-[520px]"
+      >
+        <div
+          class="panel-header flex items-center justify-between mb-3 pb-2 border-b"
+        >
+          <span class="font-medium text-gray-700">待绑定仓口 ({{ unboundData.length }})</span>
+          <span
+            v-if="selectedUnboundIds.length > 0"
+            class="text-xs text-primary"
           >
-            <el-option
-              v-for="item in hatchList"
-              :key="item.deviceHatchId"
-              :label="`${item.deviceName} - ${item.hatchName}`"
-              :value="item.deviceHatchId"
-            />
-          </el-select>
-          <div class="bind-tip">提示：只能选择未绑定计费标准的仓口</div>
+            已选 {{ selectedUnboundIds.length }} 个
+          </span>
         </div>
-      </el-col>
 
-      <!-- 右侧：已绑定 -->
-      <el-col :span="12">
-        <div class="bind-section">
-          <div class="bind-title">已绑定仓口</div>
-          <el-table v-loading="boundHatchLoading" :data="boundHatchList" border style="width: 100%">
-            <el-table-column prop="deviceName" label="设备名称" min-width="120" show-overflow-tooltip />
-            <el-table-column prop="hatchName" label="仓口名称" width="180" />
-            <el-table-column label="操作" width="80" align="center">
+        <div class="mb-3">
+          <el-input
+            v-model="unboundSearchKeyword"
+            placeholder="搜索设备名称/仓口名称"
+            clearable
+            @keyup.enter="loadUnboundHatchList"
+            @clear="loadUnboundHatchList"
+          />
+        </div>
+
+        <div class="flex-1 overflow-hidden">
+          <el-table
+            v-loading="unboundLoading"
+            :data="unboundData"
+            height="100%"
+            stripe
+            @selection-change="
+              (val: DeviceHatch[]) => {
+                selectedUnboundIds = val.map((v) => v.deviceHatchId);
+              }
+            "
+          >
+            <el-table-column type="selection" width="40" align="center" />
+            <el-table-column
+              prop="deviceName"
+              label="设备名称"
+              min-width="120"
+              show-overflow-tooltip
+            />
+            <el-table-column
+              prop="hatchName"
+              label="仓口名称"
+              min-width="120"
+              show-overflow-tooltip
+            />
+          </el-table>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-3 justify-center items-center px-1">
+        <el-button
+          type="primary"
+          :disabled="selectedUnboundIds.length === 0"
+          :loading="submitting"
+          @click="handleBind"
+        >
+          绑定 <el-icon class="el-icon--right"><ArrowRight /></el-icon>
+        </el-button>
+
+        <el-button
+          type="danger"
+          plain
+          :disabled="selectedBoundRecordIds.length === 0"
+          :loading="submitting"
+          @click="handleUnbind"
+        >
+          <el-icon class="el-icon--left"><ArrowLeft /></el-icon> 解绑
+        </el-button>
+      </div>
+
+      <div
+        class="panel flex-1 border border-gray-200 rounded p-3 flex flex-col h-[520px]"
+      >
+        <div
+          class="panel-header flex items-center justify-between mb-3 pb-2 border-b"
+        >
+          <span class="font-medium text-gray-700">已绑定仓口 ({{ boundTotal }})</span>
+          <span
+            v-if="selectedBoundRecordIds.length > 0"
+            class="text-xs text-danger"
+          >
+            已选 {{ selectedBoundRecordIds.length }} 个
+          </span>
+        </div>
+
+        <div class="mb-3">
+          <el-input
+            v-model="boundSearchKeyword"
+            placeholder="筛选当前页设备/仓口"
+            clearable
+          />
+        </div>
+
+        <div class="flex-1 overflow-hidden">
+          <el-table
+            v-loading="boundLoading"
+            :data="filteredBoundData"
+            height="100%"
+            stripe
+            @selection-change="
+              (val: HatchBindPackageRecord[]) => {
+                selectedBoundRecordIds = val.map((v) => v.deviceHatchId);
+              }
+            "
+          >
+            <el-table-column type="selection" width="40" align="center" />
+            <el-table-column
+              prop="deviceName"
+              label="设备名称"
+              min-width="120"
+              show-overflow-tooltip
+            />
+            <el-table-column
+              prop="hatchName"
+              label="仓口名称"
+              min-width="120"
+              show-overflow-tooltip
+            />
+            <el-table-column
+              label="操作"
+              width="60"
+              align="center"
+              fixed="right"
+            >
               <template #default="{ row }">
-                <el-button link type="danger" size="small" @click="handleUnbindHatch(row)">解绑</el-button>
+                <el-button
+                  link
+                  type="danger"
+                  size="small"
+                  :loading="submitting"
+                  @click="handleSingleUnbind(row)"
+                >
+                  解绑
+                </el-button>
               </template>
             </el-table-column>
           </el-table>
-          <div class="flex justify-end mt-2">
-            <el-pagination
-              v-model:current-page="boundHatchPage.pageNo"
-              v-model:page-size="boundHatchPage.pageSize"
-              :total="boundHatchTotal"
-              :page-sizes="[5, 10, 20]"
-              layout="total, sizes, prev, pager, next"
-              size="small"
-              @size-change="handlePageChange"
-              @current-change="handlePageChange"
-            />
-          </div>
         </div>
-      </el-col>
-    </el-row>
+
+        <div class="mt-2 pt-2 border-t flex justify-end">
+          <el-pagination
+            v-model:current-page="boundParams.pageNo"
+            v-model:page-size="boundParams.pageSize"
+            :total="boundTotal"
+            layout="total, prev, pager, next"
+            size="small"
+            @current-change="handleBoundPageChange"
+          />
+        </div>
+      </div>
+    </div>
+
     <template #footer>
-      <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :loading="loading" @click="handleBindSubmit">确定绑定</el-button>
+      <el-button @click="visible = false">关闭</el-button>
     </template>
   </el-dialog>
 </template>
 
 <style scoped>
-.bind-section {
-  .bind-title {
-    padding-left: 8px;
-    margin-bottom: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    border-left: 3px solid #409eff;
-  }
-
-  .bind-tip {
-    margin-top: 8px;
-    font-size: 12px;
-    color: #909399;
-  }
+.transfer-container :deep(.el-table .el-table__cell) {
+  padding: 6px 0;
 }
 </style>

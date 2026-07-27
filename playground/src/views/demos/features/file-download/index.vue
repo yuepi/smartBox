@@ -53,7 +53,7 @@ function getResponse() {
         @click="
           downloadFileFromImageUrl({
             source:
-              'https://tempapi.huiyifamily.com/profile/avatar/2024/08/12/logo.jpg',
+              'https://tempapi.huiyifamily.com/profile/huishou/logo.png',
             fileName: 'vben-logo.png',
           })
         "

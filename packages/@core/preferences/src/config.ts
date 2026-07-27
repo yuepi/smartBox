@@ -67,7 +67,7 @@ const defaultPreferences: Preferences = {
   logo: {
     enable: true,
     fit: 'contain',
-    source: 'https://tempapi.huiyifamily.com/profile/avatar/2024/08/12/logo.jpg',
+    source: 'https://tempapi.huiyifamily.com/profile/huishou/logo.png',
   },
   navigation: {
     accordion: true,

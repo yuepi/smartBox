@@ -410,7 +410,7 @@ const defaultPreferences: Preferences = {
   logo: {
     enable: true,
     fit: 'contain',
-    source: 'https://tempapi.huiyifamily.com/profile/avatar/2024/08/12/logo.jpg',
+    source: 'https://tempapi.huiyifamily.com/profile/huishou/logo.png',
     // sourceDark: 'https://unpkg.com/@vbenjs/static-source@0.1.7/source/logo-dark.webp', // 可选：暗色主题logo
   },
   navigation: {

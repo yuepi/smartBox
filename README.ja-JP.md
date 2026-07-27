@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://github.com/anncwb/vue-vben-admin">
-    <img alt="VbenAdmin Logo" width="215" src="https://tempapi.huiyifamily.com/profile/avatar/2024/08/12/logo.jpg">
+    <img alt="VbenAdmin Logo" width="215" src="https://tempapi.huiyifamily.com/profile/huishou/logo.png">
   </a>
   <br>
   <br>

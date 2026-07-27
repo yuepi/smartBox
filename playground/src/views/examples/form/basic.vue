@@ -477,7 +477,7 @@ function handleSetFormValue() {
         name: 'example.png',
         status: 'done',
         uid: '-1',
-        url: 'https://tempapi.huiyifamily.com/profile/avatar/2024/08/12/logo.jpg',
+        url: 'https://tempapi.huiyifamily.com/profile/huishou/logo.png',
       },
     ],
     mentions: '@afc163',

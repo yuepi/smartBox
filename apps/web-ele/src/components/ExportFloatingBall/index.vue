@@ -1,12 +1,9 @@
-<!-- components/ExportFloatingBall/index.vue -->
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
-import { Close, Delete, Download, Refresh, RefreshRight } from '@element-plus/icons-vue';
-import { ElBadge, ElButton, ElMessage, ElScrollbar, ElTag } from 'element-plus';
+
+import type { ExportTask } from '#/api/common/export';
 
 import { delExportTasksApi, ExportStatusMap, getExportTasksApi, onceAgainExportExcelApi } from '#/api/common/export';
-import type { ExportTask } from '#/api/common/export';
 
 defineOptions({ name: 'ExportFloatingBall' });
 
@@ -18,7 +15,10 @@ const deletingId = ref<null | number>(null);
 let pollingTimer: null | ReturnType<typeof setInterval> = null;
 
 const hasPending = computed(() => tasks.value.some(t => [0, 1].includes(t.exportStatus)));
-const hasUnread = computed(() => tasks.value.some(t => [0, 1, 3].includes(t.exportStatus)));
+
+const unreadCount = computed(() =>
+  tasks.value.filter(t => [0, 1, 3].includes(t.exportStatus)).length
+);
 
 function getModuleName(moduleCode: number): string {
   const map: Record<number, string> = {
@@ -170,10 +170,11 @@ onUnmounted(() => {
   <div class="export-sidebar" :class="{ 'is-open': showPanel }">
     <!-- 触发表单 -->
     <div class="export-trigger" @click="togglePanel" v-show="!showPanel">
-      <el-badge :value="hasUnread ? '' : undefined" :is-dot="hasUnread">
+      <el-badge :value="unreadCount" :hidden="unreadCount === 0" :max="99" :offset="[-10, 0]">
         <div class="trigger-icon">
-          <el-icon :size="20"><Download /></el-icon>
-          <span v-if="hasPending" class="status-dot"></span>
+          <el-icon :size="20">
+            <Download />
+          </el-icon>
         </div>
       </el-badge>
     </div>
@@ -184,9 +185,9 @@ onUnmounted(() => {
         <div class="panel-header">
           <span class="panel-title">导出任务</span>
           <div class="panel-actions">
-            <el-button link size="small" :icon="Refresh" :loading="loading" @click="handleRefresh" />
-            <el-button link size="small" :icon="Delete" :disabled="tasks.length === 0" @click="handleClear" />
-            <el-button link size="small" :icon="Close" @click="showPanel = false" />
+            <el-button link size="small" icon="Refresh" :loading="loading" @click="handleRefresh" />
+            <el-button link size="small" icon="Delete" :disabled="tasks.length === 0" @click="handleClear" />
+            <el-button link size="small" icon="Close" @click="showPanel = false" />
           </div>
         </div>
 
@@ -209,33 +210,21 @@ onUnmounted(() => {
                 <span v-if="task.exportCount > 0" class="task-count">共 {{ task.exportCount }} 条</span>
                 <div class="task-actions">
                   <el-button
-                    v-if="task.exportStatus === 2"
-                    link
-                    size="small"
-                    type="primary"
-                    :icon="Download"
+v-if="task.exportStatus === 2" link size="small" type="primary" icon="Download"
                     @click.stop="downloadFile(task.fileAddr, task.fileName)"
-                  >
+>
                     下载
                   </el-button>
                   <el-button
-                    v-if="task.exportStatus === 3"
-                    link
-                    size="small"
-                    :icon="RefreshRight"
-                    :loading="retryingId === task.exportId"
-                    @click.stop="handleRetry(task, $event)"
-                  >
+v-if="task.exportStatus === 3" link size="small" icon="RefreshRight"
+                    :loading="retryingId === task.exportId" @click.stop="handleRetry(task, $event)"
+>
                     重试
                   </el-button>
                   <el-button
-                    link
-                    size="small"
-                    type="danger"
-                    :icon="Delete"
-                    :loading="deletingId === task.exportId"
+link size="small" type="danger" icon="Delete" :loading="deletingId === task.exportId"
                     @click.stop="handleDelete(task, $event)"
-                  >
+>
                     删除
                   </el-button>
                 </div>
@@ -289,35 +278,6 @@ onUnmounted(() => {
     .el-icon {
       color: #409eff;
     }
-
-    .status-dot {
-      position: absolute;
-      top: 6px;
-      right: 6px;
-      width: 8px;
-      height: 8px;
-      background-color: #f56c6c;
-      border: 2px solid white;
-      border-radius: 50%;
-      animation: pulse 1.5s infinite;
-    }
-  }
-}
-
-@keyframes pulse {
-  0% {
-    opacity: 1;
-    transform: scale(0.8);
-  }
-
-  70% {
-    opacity: 0.7;
-    transform: scale(1.2);
-  }
-
-  100% {
-    opacity: 1;
-    transform: scale(0.8);
   }
 }
 

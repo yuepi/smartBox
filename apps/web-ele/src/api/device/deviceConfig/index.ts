@@ -38,6 +38,7 @@ export interface DeviceConfigPageParams {
   configName?: string;
   deviceBrand?: number;
   status?: number;
+  deviceConfigId?: number;
 }
 
 /** 1. 分页查询设备配置 */
@@ -72,4 +73,24 @@ export function deleteDeviceConfigApi(deviceConfigId: number) {
   return requestClient.post('/merchant/deviceConfig/delete', {
     deviceConfigId,
   });
+}
+
+/** 7. 设备绑定 */
+export function deviceBindDeviceConfigApi(data: {
+  deviceConfigId: number;
+  deviceIds: number[];
+}) {
+  return requestClient.post('/merchant/deviceConfig/bind', data);
+}
+
+/** 8. 设备解绑 */
+export function deviceUnBindDeviceConfigApi(data: {
+  deviceIds: number[];
+}) {
+  return requestClient.post('/merchant/deviceConfig/unbind', data);
+}
+
+/** 9. 设备绑定分页查询 */
+export function deviceBindDeviceConfigPageApi(params: DeviceConfigPageParams) {
+  return requestClient.get('/merchant/deviceConfig/bind/deviceBindDeviceConfigPage', { params });
 }

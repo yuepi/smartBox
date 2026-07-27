@@ -8,7 +8,7 @@ hero:
   text: Enterprise-Level Management System Framework
   tagline: Fully Upgraded, Ready to Use, Simple and Efficient
   image:
-    src: https://tempapi.huiyifamily.com/profile/avatar/2024/08/12/logo.jpg
+    src: https://tempapi.huiyifamily.com/profile/huishou/logo.png
     alt: Vben Admin
   actions:
     - theme: brand
