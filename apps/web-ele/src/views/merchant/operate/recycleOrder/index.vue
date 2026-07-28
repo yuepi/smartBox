@@ -434,7 +434,7 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
       </template>
     </BaseTableLayout>
 
-    <!-- ===== 弹窗们 ===== -->
+    <!-- ===== 弹窗 ===== -->
     <OrderDetail ref="orderDetailRef" />
     <OrderWeight ref="orderWeightRef" @success="handleQuery" />
     <OrderRemark ref="orderRemarkRef" @success="handleQuery" />

@@ -1,23 +1,14 @@
-// hooks/useDict.ts
+import type { Ref } from 'vue';
+
 import type { DictDataOption } from '#/api/system/dict/dictData';
 
 import { ref } from 'vue';
-import type { Ref } from 'vue';
 
 import { getDictDataByCodeApi } from '#/api/system/dict/dictData';
 import { useDictStore } from '#/store/modules/dict';
 
 // 正在请求中的字典（用于去重）
 const pendingRequests = new Map<string, Promise<DictDataOption[]>>();
-
-function getTagTypeByValue(value: number): DictDataOption['elTagType'] {
-  const typeMap: Record<number, any> = {
-    0: 'success',
-    1: 'danger',
-    2: 'warning',
-  };
-  return typeMap[value] || 'info';
-}
 
 /**
  * 批量获取字典数据
@@ -54,7 +45,6 @@ export function useDicts<T extends string>(dictCodes: T[]): Record<T, Ref<DictDa
             const dictOptions = res.map((item) => ({
               label: item.itemLabel,
               value: item.itemValue,
-              elTagType: getTagTypeByValue(item.itemValue),
               elTagClass: item.listClass,
             }));
             // 同步到 Pinia 供下次使用

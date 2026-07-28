@@ -4,12 +4,11 @@ import { computed } from 'vue';
 interface DictOption {
   label: string;
   value: number | string;
-  elTagType?: 'danger' | 'info' | 'primary' | 'success' | 'warning';
-  elTagClass?: string; // 扩展：支持自定义类名
+  elTagClass?: 'danger' | 'info' | 'primary' | 'success' | 'warning';
 }
 
 interface Props {
-  options: DictOption[];
+  options?: DictOption[];
   value: (number | string)[] | null | number | string | undefined;
   showValue?: boolean;
   separator?: string;
@@ -28,9 +27,9 @@ const props = withDefaults(defineProps<Props>(), {
 // 1. 优化查找性能：使用 Set 并预处理字符串转换
 const valuesSet = computed(() => {
   if (props.value === null || props.value === undefined || props.value === '') return new Set();
-  
-  const rawValues = Array.isArray(props.value) 
-    ? props.value 
+
+  const rawValues = Array.isArray(props.value)
+    ? props.value
     : String(props.value).split(props.separator);
 
   // 注意：不要使用 filter(Boolean)，改为处理空格和无效字符，保留数字 0
@@ -53,26 +52,13 @@ const unmatchValues = computed(() => {
 <template>
   <div class="dict-tag flex flex-wrap gap-1">
     <template v-for="item in matchedOptions" :key="item.value">
-      <el-tag
-        :type="item.elTagType || 'info'"
-        :size="size"
-        :effect="effect"
-        :class="item.elTagClass"
-        disable-transitions
-      >
+      <el-tag :type="item.elTagClass || 'info'" :size="size" :effect="effect" disable-transitions>
         {{ item.label }}
       </el-tag>
     </template>
 
     <template v-if="showValue && unmatchValues.length > 0">
-      <el-tag 
-        v-for="val in unmatchValues" 
-        :key="val" 
-        type="info" 
-        :size="size" 
-        effect="plain"
-        class="opacity-70"
-      >
+      <el-tag v-for="val in unmatchValues" :key="val" type="info" :size="size" effect="plain" class="opacity-70">
         {{ val }}
       </el-tag>
     </template>
@@ -83,7 +69,9 @@ const unmatchValues = computed(() => {
 .dict-tag {
   display: inline-flex;
   flex-wrap: wrap;
-  gap: 4px; /* 确保标签之间有间距 */
+  gap: 4px;
+
+  /* 确保标签之间有间距 */
   vertical-align: middle;
 }
 </style>
