@@ -419,10 +419,11 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
                 <el-button link type="primary" icon="More" />
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item command="abnormal" :icon="Warning">异常订单</el-dropdown-item>
-                    <el-dropdown-item command="weight" :icon="ScaleToOriginal">补重/扣重</el-dropdown-item>
-                    <el-dropdown-item command="remark" :icon="ChatDotRound">添加备注</el-dropdown-item>
-                    <el-dropdown-item command="directComplete" :icon="Check">直接完成</el-dropdown-item>
+                    <el-dropdown-item command="abnormal" icon="Warning">异常订单</el-dropdown-item>
+                    <el-dropdown-item command="cancel" icon="Close">取消异常</el-dropdown-item>
+                    <el-dropdown-item command="weight" icon="ScaleToOriginal">补重/扣重</el-dropdown-item>
+                    <el-dropdown-item command="remark" icon="ChatDotRound">添加备注</el-dropdown-item>
+                    <el-dropdown-item command="directComplete" icon="Check">直接完成</el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
