@@ -60,7 +60,7 @@ export interface RecycleOrderPageParams {
   orderStatus?: number;
   payStatus?: number;
   memberId?: number;
-  phoneMember?: string;
+  memberPhone?: string;
   startTime?: string;
   endTime?: string;
   deviceNo?: string;
@@ -109,6 +109,11 @@ export interface RemarkOperateParams {
 /** 6. 异常订单 */
 export function abnormalOrderApi(recycleOrderId: number) {
   return requestClient.post('/merchant/recycleOrder/operate/abnormal', { recycleOrderId });
+}
+
+/** 6. 取消订单 */
+export function cancelOrderApi(recycleOrderId: number) {
+  return requestClient.post('/merchant/recycleOrder/operate/cancel', { recycleOrderId });
 }
 
 /** 7. 补重/扣重 */

@@ -7,6 +7,7 @@ import { Page } from '@vben/common-ui';
 import { getDeviceListApi } from '#/api/device/device';
 import {
   abnormalOrderApi,
+  cancelOrderApi,
   deleteRecycleOrderApi,
   directCompleteOrderApi,
   getRecycleOrderPageApi,
@@ -60,7 +61,7 @@ const queryParams = reactive<RecycleOrderPageParams>({
   orderStatus: undefined,
   payStatus: undefined,
   memberId: undefined,
-  phoneMember: undefined,
+  memberPhone: undefined,
   startTime: undefined,
   endTime: undefined,
   deviceNo: undefined,
@@ -135,18 +136,36 @@ async function handleAbnormal(row: RecycleOrder) {
     });
     await abnormalOrderApi(row.recycleOrderId);
     ElMessage.success('已标记为异常');
-    handleQuery();
+    loadData();
   } catch {
     // 取消操作
   }
 }
+
+// --- 取消订单 ---
+async function handleCancel(row: RecycleOrder) {
+  try {
+    await ElMessageBox.confirm(`确定要将订单【${row.orderNo}】标记为已取消吗？`, '取消订单', {
+      type: 'warning',
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+    });
+    await cancelOrderApi(row.recycleOrderId);
+    ElMessage.success('已标记为已取消');
+    loadData();
+  } catch {
+    // 取消操作
+  }
+}
+
+
 
 // --- 直接完成 ---
 async function handleDirectComplete(row: RecycleOrder) {
   try {
     await directCompleteOrderApi(row.recycleOrderId);
     ElMessage.success('直接通过成功');
-    handleQuery();
+    loadData();
   } catch {
     ElMessage.error('直接通过失败');
   }
@@ -181,7 +200,7 @@ async function handleDelete(row?: RecycleOrder) {
     }
     ElMessage.success(`成功删除 ${ids.length} 条订单`);
     selectedIds.value = [];
-    handleQuery();
+    loadData();
   } catch {
     // 取消删除
   }
@@ -191,6 +210,10 @@ function handleCommand(cmd: string, row: RecycleOrder) {
   switch (cmd) {
     case 'abnormal': {
       handleAbnormal(row);
+      break;
+    }
+    case 'cancel': {
+      handleCancel(row);
       break;
     }
     case 'directComplete': {
@@ -224,7 +247,7 @@ function resetQuery() {
   queryParams.deviceId = undefined;
   queryParams.orderStatus = undefined;
   queryParams.payStatus = undefined;
-  queryParams.phoneMember = undefined;
+  queryParams.memberPhone = undefined;
   queryParams.startTime = undefined;
   queryParams.endTime = undefined;
   queryParams.deviceNo = undefined;
@@ -272,7 +295,7 @@ v-model="queryParams.memberId" placeholder="请输入" clearable style="width: 2
 
         <el-form-item>
           <el-input
-v-model="queryParams.phoneMember" placeholder="请输入" clearable style="width: 200px"
+v-model="queryParams.memberPhone" placeholder="请输入" clearable style="width: 200px"
             @keyup.enter="handleQuery"
 >
             <template #prefix>
