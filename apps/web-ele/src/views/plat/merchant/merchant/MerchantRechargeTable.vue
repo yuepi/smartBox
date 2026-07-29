@@ -1,23 +1,12 @@
-<!-- components/MerchantRechargeTable.vue -->
- <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue';
 
-import { Refresh, Search } from '@element-plus/icons-vue';
-import { ElMessage } from 'element-plus';
+ <script setup lang="ts">
+
+import type { MerchantRecharge, MerchantRechargePageParams } from '#/api/system/merchant';
+import type { TableColumnConfig } from '#/constants/tableColumns';
 
 import { refundByMerchantApi } from '#/api/common/pay';
-import {
-  getPlatMerchantRechargePageApi,
-  type MerchantRecharge,
-  type MerchantRechargePageParams,
-} from '#/api/system/merchant';
-import ColumnSelector from '#/components/ColumnSelector/index.vue';
-import DictTag from '#/components/DictTag/index.vue';
-import {
-  defaultMerchantRechargeColumns,
-  MERCHANT_RECHARGE_STORAGE_KEY,
-  type TableColumnConfig,
-} from '#/constants/tableColumns';
+import { getPlatMerchantRechargePageApi } from '#/api/system/merchant';
+import { defaultMerchantRechargeColumns, MERCHANT_RECHARGE_STORAGE_KEY } from '#/constants/tableColumns';
 import { useDicts } from '#/hooks/useDict';
 import { ModuleCodeMap } from '#/hooks/useExport';
 
@@ -60,20 +49,6 @@ const refundVisible = ref(false);
 const currentOrder = ref<MerchantRecharge | null>(null);
 const refundAmount = ref(0);
 const refundSubmitting = ref(false);
-
-const payStatusOptions = [
-  { label: "待支付", value: 0 },
-  { label: "支付中", value: 1 },
-  { label: "已支付", value: 2 },
-  { label: "支付失败", value: 3 },
-];
-
-const refundStatusOptions = [
-  { label: "未退款", value: 0 },
-  { label: "退款中", value: 1 },
-  { label: "已退款", value: 2 },
-  { label: "退款失败", value: 3 },
-];
 
 watch(dateRange, (newVal) => {
   if (newVal?.length === 2) {
@@ -203,14 +178,14 @@ defineExpose({ loadData });
         <el-form-item class="!mb-0 !mr-2">
           <el-select v-model="queryParams.status" clearable style="width: 200px">
             <template #prefix><span class="text-xs text-gray-400 mr-0.5">支付状态:</span></template>
-            <el-option v-for="item in payStatusOptions" :key="item.value" :label="item.label" :value="item.value" />
+            <el-option v-for="item in pay_status" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
 
         <el-form-item class="!mb-0 !mr-2">
           <el-select v-model="queryParams.refundStatus" clearable style="width: 200px">
             <template #prefix><span class="text-xs text-gray-400 mr-0.5">退款状态:</span></template>
-            <el-option v-for="item in refundStatusOptions" :key="item.value" :label="item.label" :value="item.value" />
+            <el-option v-for="item in refund_status" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
 
@@ -223,10 +198,10 @@ v-model="dateRange" type="datetimerange" range-separator="至"
 
         <el-form-item class="!mb-0 !mr-0 md:ml-auto flex items-center gap-1">
           <el-tooltip content="查询" placement="top">
-            <el-button type="primary" :icon="Search" circle @click="loadData" />
+            <el-button type="primary" icon="Search" circle @click="loadData" />
           </el-tooltip>
           <el-tooltip content="重置" placement="top">
-            <el-button :icon="Refresh" circle @click="resetQuery" />
+            <el-button icon="Refresh" circle @click="resetQuery" />
           </el-tooltip>
         </el-form-item>
       </el-form>

@@ -1,21 +1,10 @@
 <!-- components/MerchantFlowTable.vue -->
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from "vue";
+import type { MerchantAccountFlow, MerchantAccountFlowPageParams } from '#/api/system/merchant';
+import type { TableColumnConfig } from '#/constants/tableColumns';
 
-import { Refresh, Search } from "@element-plus/icons-vue";
-import { ElMessage } from "element-plus";
-
-import {
-  getPlatMerchantAccountFlowPageApi,
-  type MerchantAccountFlow,
-  type MerchantAccountFlowPageParams,
-} from "#/api/system/merchant";
-import ColumnSelector from "#/components/ColumnSelector/index.vue";
-import {
-  defaultMerchantFlowColumns,
-  MERCHANT_FLOW_STORAGE_KEY,
-  type TableColumnConfig,
-} from "#/constants/tableColumns";
+import { getPlatMerchantAccountFlowPageApi } from '#/api/system/merchant';
+import { defaultMerchantFlowColumns, MERCHANT_FLOW_STORAGE_KEY } from '#/constants/tableColumns';
 import { ModuleCodeMap } from "#/hooks/useExport";
 
 const props = defineProps<{ merchantId: number }>();
@@ -156,10 +145,10 @@ defineExpose({ loadData });
 
         <el-form-item class="!mb-0 !mr-0 md:ml-auto flex items-center gap-1">
           <el-tooltip content="查询" placement="top">
-            <el-button type="primary" :icon="Search" circle @click="loadData" />
+            <el-button type="primary" icon="Search" circle @click="loadData" />
           </el-tooltip>
           <el-tooltip content="重置" placement="top">
-            <el-button :icon="Refresh" circle @click="resetQuery" />
+            <el-button icon="Refresh" circle @click="resetQuery" />
           </el-tooltip>
         </el-form-item>
       </el-form>

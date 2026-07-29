@@ -1,3 +1,5 @@
+import type { DictDataOption } from '#/api/system/dict/dictData';
+
 import { requestClient } from '#/api/request';
 import { useDictStore } from '#/store/modules/dict';
 /**
@@ -15,8 +17,8 @@ export const useDict = (...args: string[]): { [key: string]: DictDataOption[] } 
       res.value[dictType] = dicts;
     } else {
       const backData = await requestClient.get(`/tool/dict/main/data?code=${dictType}`);
-      res.value[dictType] = backData.map((p: any): DictDataOption => ({ label: p.label, value: p.value, elTagType: p.shsty, elTagClass: p.shsty }));
-      useDictStore().setDict(dictType, res.value[dictType]);
+      res.value[dictType] = backData.map((p: any): DictDataOption => ({ label: p.label, value: p.value, elTagClass: p.shsty }));
+      useDictStore().setDict(dictType, res.value[dictType] || []);
     }
   });
   return res.value;

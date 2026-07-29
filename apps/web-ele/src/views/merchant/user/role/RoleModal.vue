@@ -188,6 +188,28 @@ function handleMemberChange(members: any[]) {
   formData.value.members = members;
 }
 
+function validateMenu(): boolean {
+  const menuIds = formData.value.menuIds || [];
+  if (menuIds.length === 0) {
+    ElMessage.warning('请至少选择一个菜单权限');
+    return false;
+  }
+  return true;
+}
+
+function validateDataScope(): boolean {
+  // 如果数据权限范围不是"自定数据权限"(scope !== 2)，不需要校验部门树
+  if (formData.value.scope !== 2) {
+    return true;
+  }
+  const deptIds = formData.value.deptIds || [];
+  if (deptIds.length === 0) {
+    ElMessage.warning('请至少选择一个部门数据权限');
+    return false;
+  }
+  return true;
+}
+
 // --- 提交操作 ---
 async function handleSubmit() {
   if (!formData.value.roleName?.trim()) {
@@ -198,6 +220,8 @@ async function handleSubmit() {
     ElMessage.warning("请输入角色编码");
     return;
   }
+  if (!validateMenu()) return;
+  if (!validateDataScope()) return;
 
   formSubmitting.value = true;
   try {
