@@ -1,4 +1,7 @@
 <script lang="ts" setup>
+import type { Merchant, MerchantConfig, MerchantPageParams, MerchantRecharge } from '#/api/system/merchant';
+import type { TableColumnConfig } from '#/constants/tableColumns';
+
 import { computed, nextTick, onMounted, reactive, ref } from "vue";
 
 import { Page } from "@vben/common-ui";
@@ -17,13 +20,11 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { refundByMerchantApi } from "#/api/common/pay";
 import { getPlatMenuListApi } from "#/api/system/menu";
 import { addPlatMerchantApi, deletePlatMerchantApi, editPlatMerchantApi, editPlatMerchantConfigApi, getPlatMerchantAccountApi, getPlatMerchantConfigDetailApi, getPlatMerchantDetailApi, getPlatMerchantPageApi } from '#/api/system/merchant';
-import type { Merchant, MerchantConfig, MerchantPageParams, MerchantRecharge } from '#/api/system/merchant';
 import AreaCascader from "#/components/AreaCascader/index.vue";
 import ColumnSelector from "#/components/ColumnSelector/index.vue";
 import ExportFieldSelector from "#/components/ExportFieldSelector/index.vue";
 import MapPicker from "#/components/MapPicker/index.vue";
 import { defaultMerchantColumns, MERCHANT_STORAGE_KEY } from '#/constants/tableColumns';
-import type { TableColumnConfig } from '#/constants/tableColumns';
 import { ModuleCodeMap, useExport } from "#/hooks/useExport";
 
 import MerchantFlowTable from "./MerchantFlowTable.vue";
@@ -42,7 +43,7 @@ const visibleColumns = computed(() => {
   return columnConfig.value.filter((col) => col.visible);
 });
 
-const getExportableFields = compute./MerchantRechargeTable.vue
+const getExportableFields = computed(() => {
   return visibleColumns.value.map((col) => ({
     prop: col.key,
     label: col.label,
