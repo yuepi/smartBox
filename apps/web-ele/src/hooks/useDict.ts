@@ -70,15 +70,3 @@ export function useDicts<T extends string>(dictCodes: T[]): Record<T, Ref<DictDa
   return result;
 }
 
-/**
- * 获取单个字典数据
- * @param dictCode 字典编码
- * @returns 字典选项的响应式数据
- * 
- * @example
- * const statusOptions = useDict('user_status');
- * // statusOptions.value 就是字典选项数组
- */
-export function useDict(dictCode: string): Ref<DictDataOption[]> {
-  return useDicts([dictCode])[dictCode];
-}

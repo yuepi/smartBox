@@ -9,7 +9,7 @@ export interface DictData {
   itemValue: number;
   sort: number;
   cssClass: string;
-  listClass: string;
+  listClass: '' | 'danger' | 'info' | 'primary' | 'success' | 'warning';
   defaultFlag: number; // 0=否,1=是
   status: number; // 0=启用,1=禁用
   remark: string;

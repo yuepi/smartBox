@@ -102,7 +102,7 @@ function handleOpenRefund(row: MerchantRecharge) {
   refundDialogRef.value?.open(row);
 }
 
-// --- 打开弹窗 ---
+// --- 打开抽屉 ---
 async function open(row: Merchant) {
   currentMerchant.value = row;
   visible.value = true;
@@ -114,13 +114,21 @@ defineExpose({ open });
 </script>
 
 <template>
-  <el-dialog
+  <!-- 
+    el-dialog → el-drawer
+    主要改动：
+    1. title → 用 header 插槽
+    2. width → size
+    3. 去掉 append-to-body（默认就是）
+  -->
+  <el-drawer
     v-model="visible"
     :title="`账户详情 - ${currentMerchant?.merchantName}`"
-    width="1200px"
-    append-to-body
+    size="70%"
+    :close-on-click-modal="false"
+    destroy-on-close
   >
-    <div v-loading="loading">
+    <div v-loading="loading" class="drawer-content">
       <!-- 账户信息 -->
       <el-descriptions :column="3" border v-if="accountDetail">
         <el-descriptions-item label="商户名称">{{ currentMerchant?.merchantName }}</el-descriptions-item>
@@ -177,56 +185,58 @@ defineExpose({ open });
       </el-tabs>
     </div>
 
+    <!-- 底部操作栏（抽屉自带 footer 插槽） -->
     <template #footer>
-      <el-button @click="visible = false">关闭</el-button>
-      <el-button type="primary" @click="currentMerchant && loadData(currentMerchant.merchantId)" :loading="loading">
-        刷新
-      </el-button>
+      <div class="drawer-footer">
+        <el-button @click="visible = false">关闭</el-button>
+        <el-button type="primary" @click="currentMerchant && loadData(currentMerchant.merchantId)" :loading="loading">
+          刷新
+        </el-button>
+      </div>
     </template>
+  </el-drawer>
 
-    <!-- 充值订单详情 -->
-    <el-dialog v-model="rechargeDetailVisible" title="充值订单详情" width="600px" append-to-body>
-      <el-descriptions :column="2" border v-if="rechargeDetail">
-        <el-descriptions-item label="充值ID">{{ rechargeDetail.merchantRechargeId }}</el-descriptions-item>
-        <el-descriptions-item label="充值单号">{{ rechargeDetail.rechargeNo }}</el-descriptions-item>
-        <el-descriptions-item label="充值金额">
-          <span class="text-success">¥ {{ (rechargeDetail.amount || 0).toFixed(2) }}</span>
-        </el-descriptions-item>
-        <el-descriptions-item label="支付状态">
-          <el-tag :type="rechargeDetail.status === 2 ? 'success' : 'warning'" size="small">
-            {{ rechargeDetail.status === 2 ? '已支付' : '待支付' }}
-          </el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item label="充值人">{{ rechargeDetail.rechargeUserName || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="支付时间">{{ rechargeDetail.payTime || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="退款状态">
-          <el-tag :type="rechargeDetail.refundStatus === 2 ? 'success' : 'info'" size="small">
-            {{ rechargeDetail.refundStatus === 2 ? '已退款' : '未退款' }}
-          </el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item label="退款金额">
-          {{ rechargeDetail.totalRefundAmount > 0 ? `¥ ${(rechargeDetail.totalRefundAmount || 0).toFixed(2)}` : '-' }}
-        </el-descriptions-item>
-        <el-descriptions-item label="退款时间">{{ rechargeDetail.refundTime || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="支付请求ID" :span="2">{{ rechargeDetail.payRequestId || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="退款请求ID" :span="2">{{ rechargeDetail.refundRequestId || '-' }}</el-descriptions-item>
-      </el-descriptions>
-      <template #footer>
-        <el-button @click="rechargeDetailVisible = false">关闭</el-button>
-      </template>
-    </el-dialog>
-
-    <!-- 退款弹窗 -->
-    <RefundDialog ref="refundDialogRef" />
+  <!-- 充值订单详情（保持弹窗） -->
+  <el-dialog v-model="rechargeDetailVisible" title="充值订单详情" width="600px" append-to-body>
+    <el-descriptions :column="2" border v-if="rechargeDetail">
+      <el-descriptions-item label="充值ID">{{ rechargeDetail.merchantRechargeId }}</el-descriptions-item>
+      <el-descriptions-item label="充值单号">{{ rechargeDetail.rechargeNo }}</el-descriptions-item>
+      <el-descriptions-item label="充值金额">
+        <span class="text-success">¥ {{ (rechargeDetail.amount || 0).toFixed(2) }}</span>
+      </el-descriptions-item>
+      <el-descriptions-item label="支付状态">
+        <el-tag :type="rechargeDetail.status === 2 ? 'success' : 'warning'" size="small">
+          {{ rechargeDetail.status === 2 ? '已支付' : '待支付' }}
+        </el-tag>
+      </el-descriptions-item>
+      <el-descriptions-item label="充值人">{{ rechargeDetail.rechargeUserName || '-' }}</el-descriptions-item>
+      <el-descriptions-item label="支付时间">{{ rechargeDetail.payTime || '-' }}</el-descriptions-item>
+      <el-descriptions-item label="退款状态">
+        <el-tag :type="rechargeDetail.refundStatus === 2 ? 'success' : 'info'" size="small">
+          {{ rechargeDetail.refundStatus === 2 ? '已退款' : '未退款' }}
+        </el-tag>
+      </el-descriptions-item>
+      <el-descriptions-item label="退款金额">
+        {{ rechargeDetail.totalRefundAmount > 0 ? `¥ ${(rechargeDetail.totalRefundAmount || 0).toFixed(2)}` : '-' }}
+      </el-descriptions-item>
+      <el-descriptions-item label="退款时间">{{ rechargeDetail.refundTime || '-' }}</el-descriptions-item>
+      <el-descriptions-item label="支付请求ID" :span="2">{{ rechargeDetail.payRequestId || '-' }}</el-descriptions-item>
+      <el-descriptions-item label="退款请求ID" :span="2">{{ rechargeDetail.refundRequestId || '-' }}</el-descriptions-item>
+    </el-descriptions>
+    <template #footer>
+      <el-button @click="rechargeDetailVisible = false">关闭</el-button>
+    </template>
   </el-dialog>
+
+  <!-- 退款弹窗 -->
+  <RefundDialog ref="refundDialogRef" />
 </template>
 
 <style scoped>
-.text-success {
-  color: #67c23a;
-}
 
-.text-danger {
-  color: #f56c6c;
+.drawer-footer {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
 }
 </style>
