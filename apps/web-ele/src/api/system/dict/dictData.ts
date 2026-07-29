@@ -9,7 +9,7 @@ export interface DictData {
   itemValue: number;
   sort: number;
   cssClass: string;
-  listClass: '' | 'danger' | 'info' | 'primary' | 'success' | 'warning';
+  listClass: 'danger' | 'info' | 'primary' | 'success' | 'warning';
   defaultFlag: number; // 0=否,1=是
   status: number; // 0=启用,1=禁用
   remark: string;
@@ -39,10 +39,8 @@ export interface DictDataPageResult {
 export interface DictDataOption {
   label: string;
   value: number;
-  elTagType?: 'danger' | 'info' | 'primary' | 'success' | 'warning';
-  elTagClass?: string;
+  elTagClass?: 'danger' | 'info' | 'primary' | 'success' | 'warning';
 }
-
 
 /**
  * 分页查询字典明细
@@ -58,7 +56,6 @@ export function getDictDataListApi(dictId?: number) {
   return requestClient.get('/plat/dictData/list', { params: { dictId } });
 }
 
-
 /**
  * 查询字典明细详情
  */
@@ -66,13 +63,12 @@ export function getDictDataDetailApi(dictDataId: number) {
   return requestClient.get('/plat/dictData/detail', { params: { dictDataId } });
 }
 
-
 /**
  * 查询字典明细详情（根据字典编码）
  */
 export function getDictDataByCodeApi(dictCode: string) {
-  return requestClient.get<DictData[]>('/common/dict/listByDictCode', { 
-    params: { dictCode } 
+  return requestClient.get<DictData[]>('/common/dict/listByDictCode', {
+    params: { dictCode },
   });
 }
 

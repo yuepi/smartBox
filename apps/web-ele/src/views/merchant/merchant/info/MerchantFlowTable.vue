@@ -114,8 +114,8 @@ defineExpose({ loadData });
         </el-form-item>
 
         <el-form-item class="filter-actions">
-          <el-button type="primary" :icon="Search" @click="loadData">查询</el-button>
-          <el-button :icon="Refresh" @click="resetQuery">重置</el-button>
+          <el-button type="primary" icon="Search" @click="loadData">查询</el-button>
+          <el-button icon="Refresh" @click="resetQuery">重置</el-button>
         </el-form-item>
       </el-form>
     </div>
