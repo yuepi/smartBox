@@ -60,3 +60,7 @@ vite.config.ts.*
 skills-lock.json
 .atomcode
 datalog
+
+# 自动生成的类型文件
+apps/web-ele/.eslintrc-auto-import.json
+apps/web-ele/components.d.ts
