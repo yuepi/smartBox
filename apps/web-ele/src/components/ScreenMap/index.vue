@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import AMapLoader from '@amap/amap-jsapi-loader';
 
-
 interface DevicePoint {
   lng: number;
   lat: number;
@@ -11,7 +10,7 @@ interface DevicePoint {
 }
 
 const props = defineProps<{
-  center?: { lat: number; lng: number; };
+  center?: { lat: number; lng: number };
   height?: string;
   points?: DevicePoint[];
   zoom?: number;
@@ -19,11 +18,13 @@ const props = defineProps<{
 
 const mapContainer = ref<HTMLDivElement>();
 const isFullscreen = ref(false);
-let map: any;
-let markers: any[] = [];
+
+let AMapObj: any = null;
+let map: any = null;
+let cluster: any = null;
 
 const defaultCenter = props.center || { lng: 116.397_428, lat: 39.909_23 };
-const defaultZoom = props.zoom || 12;
+const defaultZoom = props.zoom || 11;
 
 const statusColorMap = {
   online: '#22d3ee',
@@ -31,50 +32,36 @@ const statusColorMap = {
   full: '#f59e0b',
 };
 
-// 进入全屏
-const enterFullscreen = () => {
-  const el = mapContainer.value;
-  if (el && el.requestFullscreen) {
-      el.requestFullscreen();
-    }
-};
-
-// 退出全屏
-const exitFullscreen = () => {
-  if (document.fullscreenElement) {
-    document.exitFullscreen();
-  }
-};
-
-// 切换全屏
+// 全屏控制
 const toggleFullscreen = () => {
+  if (!mapContainer.value) return;
   if (document.fullscreenElement) {
-    exitFullscreen();
+    document.exitFullscreen?.();
   } else {
-    enterFullscreen();
+    mapContainer.value.requestFullscreen?.();
   }
 };
 
-// 监听全屏变化
 const handleFullscreenChange = () => {
   isFullscreen.value = !!document.fullscreenElement;
-  // 全屏后重新调整地图大小
+  // 延迟让 DOM 尺寸更新完成后，通知高德地图重新计算画布尺寸
   setTimeout(() => {
     if (map) {
+      map.resize();
       map.setFitView();
     }
-  }, 300);
+  }, 200);
 };
 
 const loadMap = async () => {
   try {
-    const AMap = await AMapLoader.load({
+    AMapObj = await AMapLoader.load({
       key: 'a2f1a77c9013204bd92f42e88da34657',
       version: '2.0',
       plugins: ['AMap.MarkerCluster'],
     });
 
-    map = new AMap.Map(mapContainer.value, {
+    map = new AMapObj.Map(mapContainer.value, {
       zoom: defaultZoom,
       center: [defaultCenter.lng, defaultCenter.lat],
       viewMode: '2D',
@@ -83,99 +70,148 @@ const loadMap = async () => {
       features: ['bg', 'road', 'building', 'point'],
     });
 
-    if (props.points?.length) {
-      addMarkers(props.points);
-    }
+    // 初始化点位数据
+    const dataPoints = props.points?.length ? props.points : generateMockPoints(500);
+    renderCluster(dataPoints);
 
-    if (!props.points?.length) {
-      addMockMarkers();
-    }
   } catch (error) {
     console.error('地图加载失败：', error);
   }
 };
 
-const addMarkers = (points: DevicePoint[]) => {
-  if (!map) return;
-  if (markers.length > 0) {
-    map.remove(markers);
-    markers = [];
+/**
+ * 使用 高德 2.0 纯数据聚合模式（极速、不卡顿）
+ */
+const renderCluster = (points: DevicePoint[]) => {
+  if (!map || !AMapObj) return;
+
+  // 1. 如果已有聚合实例，清理并销毁
+  if (cluster) {
+    cluster.setMap(null);
+    cluster = null;
   }
 
-  const amapMarkers = points.map((point) => {
-    const status = point.status || 'online';
-    const color = statusColorMap[status] || '#22d3ee';
+  // 2. 将数据转换为 AMap.MarkerCluster 所需格式 [{ lnglat: [lng, lat], ...data }]
+  const clusterData = points.map((p) => ({
+    lnglat: [p.lng, p.lat],
+    name: p.name,
+    value: p.value,
+    status: p.status || 'online',
+  }));
 
-    // @ts-ignore
-    const marker = new AMap.Marker({
-      position: [point.lng, point.lat],
-      title: point.name || '',
-     
-      label: {
-        content: `<div style="
-          background: rgba(0,0,0,0.7);
-          color: #fff;
-          padding: 2px 8px;
-          border-radius: 4px;
-          font-size: 11px;
-          white-space: nowrap;
-          border: 1px solid ${color};
-          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        ">${point.name || ''}</div>`,
-        direction: 'top',
-        offset: new AMap.Pixel(0, -8),
-      },
-    });
-
-    marker.on('click', () => {
-      const info = `
-        <div style="padding:8px 12px;font-size:13px;">
-          <div style="font-weight:bold;margin-bottom:4px;">${point.name || '设备'}</div>
-          <div style="color:#666;">投递量：${point.value || 0} 次</div>
-          <div style="color:#666;">状态：${status === 'online' ? '在线' : (status === 'full' ? '满箱' : '离线')}</div>
-        </div>
+  // 3. 创建数据驱动的聚合点
+  cluster = new AMapObj.MarkerCluster(map, clusterData, {
+    gridSize: 80,
+    maxZoom: 15, // 超过 15 级不再聚合，散开展示
+    
+    // 自定义非聚合点（单个设备点）的样式
+    renderMarker: (ctx: any) => {
+      const data = ctx.data[0];
+      const color = statusColorMap[data.status as keyof typeof statusColorMap] || '#22d3ee';
+      
+      const content = `
+        <div style="
+          width: 14px; 
+          height: 14px; 
+          background-color: ${color}; 
+          border-radius: 50%; 
+          border: 2px solid #fff; 
+          box-shadow: 0 0 8px ${color};
+          cursor: pointer;
+        "></div>
       `;
-      // @ts-ignore
-      const infoWindow = new AMap.InfoWindow({
-        content: info,
-        offset: new AMap.Pixel(0, -30),
-      });
-      infoWindow.open(map, [point.lng, point.lat]);
-    });
+      
+      ctx.marker.setContent(content);
+      ctx.marker.setOffset(new AMapObj.Pixel(-7, -7));
 
-    return marker;
+      // 绑定点击事件，弹窗展示明细
+      ctx.marker.on('click', () => {
+        const infoContent = `
+          <div style="padding:8px 12px;font-size:13px;color:#333;">
+            <div style="font-weight:bold;margin-bottom:4px;">${data.name || '设备'}</div>
+            <div>投递量：${data.value || 0} 次</div>
+            <div>状态：${data.status === 'online' ? '在线' : (data.status === 'full' ? '满箱' : '离线')}</div>
+          </div>
+        `;
+        const infoWindow = new AMapObj.InfoWindow({
+          content: infoContent,
+          offset: new AMapObj.Pixel(0, -10),
+        });
+        infoWindow.open(map, data.lnglat);
+      });
+    },
+
+    // 自定义聚合簇（数字球）的样式
+    renderCluster: (ctx: any) => {
+      const count = ctx.count;
+      const factor = Math.min(count / 100, 1);
+      const size = 32 + factor * 16; // 动态计算簇的大小
+
+      const content = `
+        <div style="
+          width: ${size}px;
+          height: ${size}px;
+          line-height: ${size}px;
+          background: rgba(34, 211, 238, 0.85);
+          border: 2px solid #ffffff;
+          border-radius: 50%;
+          color: #000;
+          font-weight: bold;
+          font-size: 13px;
+          text-align: center;
+          box-shadow: 0 0 12px rgba(34, 211, 238, 0.6);
+          cursor: pointer;
+        ">${count}</div>
+      `;
+      
+      ctx.marker.setContent(content);
+      ctx.marker.setOffset(new AMapObj.Pixel(-size / 2, -size / 2));
+    }
   });
 
-  markers = amapMarkers;
-  map.add(markers);
+  // 点击聚合簇自动放大并拉近视野
+  cluster.on('click', (e: any) => {
+    if (e.clusterData && e.clusterData.length > 0) {
+      const currentZoom = map.getZoom();
+      map.setZoomAndCenter(currentZoom + 2, e.lnglat);
+    }
+  });
 
+  // 自适应调整视野视角范围
   if (points.length > 0) {
-    map.setFitView(markers, false, [60, 60, 60, 60]);
+    map.setFitView(null, false, [60, 60, 60, 60]);
   }
 };
 
-// 模拟数据
-const addMockMarkers = () => {
-  const mockPoints: DevicePoint[] = [
-    { lng: 116.397_428, lat: 39.909_23, name: '阳光花园', value: 156, status: 'online' },
-    { lng: 116.420_428, lat: 39.929_23, name: '翠湖苑', value: 132, status: 'online' },
-    { lng: 116.380_428, lat: 39.899_23, name: '龙湖花园', value: 98, status: 'online' },
-    { lng: 116.440_428, lat: 39.919_23, name: '滨江新城', value: 87, status: 'full' },
-    { lng: 116.360_428, lat: 39.939_23, name: '南山花园', value: 76, status: 'online' },
-    { lng: 116.450_428, lat: 39.889_23, name: '东湖苑', value: 65, status: 'offline' },
-    { lng: 116.340_428, lat: 39.909_23, name: '西郊花园', value: 54, status: 'online' },
-    { lng: 116.470_428, lat: 39.929_23, name: '北苑小区', value: 43, status: 'online' },
-    { lng: 116.310_428, lat: 39.899_23, name: '南湖花园', value: 32, status: 'full' },
-    { lng: 116.500_428, lat: 39.909_23, name: '中心花园', value: 21, status: 'online' },
-  ];
-  addMarkers(mockPoints);
+// 生成 500+ 随机测试点位
+const generateMockPoints = (count = 500): DevicePoint[] => {
+  const points: DevicePoint[] = [];
+  const baseLng = 116.397_428;
+  const baseLat = 39.909_23;
+  const statuses: ('full' | 'offline' | 'online')[] = ['online', 'offline', 'full'];
+
+  for (let i = 0; i < count; i++) {
+    // 在北京周边随机生成坐标
+    const lng = baseLng + (Math.random() - 0.5) * 0.4;
+    const lat = baseLat + (Math.random() - 0.5) * 0.4;
+    const status = statuses[Math.floor(Math.random() * statuses.length)];
+    
+    points.push({
+      lng,
+      lat,
+      name: `设备 #${i + 1}`,
+      value: Math.floor(Math.random() * 200),
+      status,
+    });
+  }
+  return points;
 };
 
 watch(
   () => props.points,
   (newPoints) => {
     if (map && newPoints?.length) {
-      addMarkers(newPoints);
+      renderCluster(newPoints);
     }
   },
   { deep: true }
@@ -187,6 +223,9 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  if (cluster) {
+    cluster.setMap(null);
+  }
   if (map) {
     map.destroy();
     map = null;
@@ -195,7 +234,7 @@ onBeforeUnmount(() => {
 });
 
 defineExpose({
-  addMarkers,
+  renderCluster,
   toggleFullscreen,
 });
 </script>
@@ -211,13 +250,13 @@ defineExpose({
         </el-icon>
         <span>{{ isFullscreen ? '退出全屏' : '全屏' }}</span>
       </div>
-    </div>
 
-    <!-- 图例 -->
-    <div class="map-legend">
-      <span class="legend-item"><span class="dot online"></span>在线</span>
-      <span class="legend-item"><span class="dot full"></span>满箱</span>
-      <span class="legend-item"><span class="dot offline"></span>离线</span>
+      <!-- 图例组件放到地图容器内部，方便全屏时一同展示 -->
+      <div class="map-legend">
+        <span class="legend-item"><span class="dot online"></span>在线</span>
+        <span class="legend-item"><span class="dot full"></span>满箱</span>
+        <span class="legend-item"><span class="dot offline"></span>离线</span>
+      </div>
     </div>
   </div>
 </template>
@@ -269,11 +308,13 @@ defineExpose({
   position: absolute;
   right: 16px;
   bottom: 16px;
+  z-index: 100;
   display: flex;
   gap: 12px;
   padding: 6px 14px;
   font-size: 12px;
   color: #d1d5db;
+  pointer-events: none;
   background: rgb(0 0 0 / 60%);
   border-radius: 20px;
   backdrop-filter: blur(4px);
