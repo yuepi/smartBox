@@ -65,7 +65,7 @@ const loadMap = async () => {
       zoom: defaultZoom,
       center: [defaultCenter.lng, defaultCenter.lat],
       viewMode: '2D',
-      mapStyle: 'amap://styles/dark',
+      mapStyle: 'amap://styles/darkblue',
       showIndoorMap: false,
       features: ['bg', 'road', 'building', 'point'],
     });
@@ -79,19 +79,14 @@ const loadMap = async () => {
   }
 };
 
-/**
- * 使用 高德 2.0 纯数据聚合模式（极速、不卡顿）
- */
 const renderCluster = (points: DevicePoint[]) => {
   if (!map || !AMapObj) return;
 
-  // 1. 如果已有聚合实例，清理并销毁
   if (cluster) {
     cluster.setMap(null);
     cluster = null;
   }
 
-  // 2. 将数据转换为 AMap.MarkerCluster 所需格式 [{ lnglat: [lng, lat], ...data }]
   const clusterData = points.map((p) => ({
     lnglat: [p.lng, p.lat],
     name: p.name,
@@ -99,32 +94,30 @@ const renderCluster = (points: DevicePoint[]) => {
     status: p.status || 'online',
   }));
 
-  // 3. 创建数据驱动的聚合点
   cluster = new AMapObj.MarkerCluster(map, clusterData, {
     gridSize: 80,
-    maxZoom: 15, // 超过 15 级不再聚合，散开展示
+    maxZoom: 15,
     
-    // 自定义非聚合点（单个设备点）的样式
+    // 【修改点】：单点渲染 —— 从小圆点变成“地图扎针 (Pin)”
     renderMarker: (ctx: any) => {
       const data = ctx.data[0];
       const color = statusColorMap[data.status as keyof typeof statusColorMap] || '#22d3ee';
       
-      const content = `
-        <div style="
-          width: 14px; 
-          height: 14px; 
-          background-color: ${color}; 
-          border-radius: 50%; 
-          border: 2px solid #fff; 
-          box-shadow: 0 0 8px ${color};
-          cursor: pointer;
-        "></div>
+      // 使用 CSS border 技巧绘制经典的水滴定位针样式
+      const pinContent = `
+        <div class="custom-map-pin" style="--pin-color: ${color};">
+          <div class="pin-head">
+            <div class="pin-inner-dot"></div>
+          </div>
+          <div class="pin-tail"></div>
+        </div>
       `;
       
-      ctx.marker.setContent(content);
-      ctx.marker.setOffset(new AMapObj.Pixel(-7, -7));
+      ctx.marker.setContent(pinContent);
+      // 将 Marker 的锚点偏移对准“针尖”位置（下中对齐）
+      ctx.marker.setOffset(new AMapObj.Pixel(-12, -32));
 
-      // 绑定点击事件，弹窗展示明细
+      // 点击弹窗
       ctx.marker.on('click', () => {
         const infoContent = `
           <div style="padding:8px 12px;font-size:13px;color:#333;">
@@ -135,31 +128,31 @@ const renderCluster = (points: DevicePoint[]) => {
         `;
         const infoWindow = new AMapObj.InfoWindow({
           content: infoContent,
-          offset: new AMapObj.Pixel(0, -10),
+          offset: new AMapObj.Pixel(0, -32),
         });
         infoWindow.open(map, data.lnglat);
       });
     },
 
-    // 自定义聚合簇（数字球）的样式
+    // 聚合簇依然保留科技感数字球
     renderCluster: (ctx: any) => {
       const count = ctx.count;
       const factor = Math.min(count / 100, 1);
-      const size = 32 + factor * 16; // 动态计算簇的大小
+      const size = 34 + factor * 16;
 
       const content = `
         <div style="
           width: ${size}px;
           height: ${size}px;
           line-height: ${size}px;
-          background: rgba(34, 211, 238, 0.85);
-          border: 2px solid #ffffff;
+          background: rgba(14, 116, 144, 0.85);
+          border: 2px solid #38bdf8;
           border-radius: 50%;
-          color: #000;
+          color: #fff;
           font-weight: bold;
           font-size: 13px;
           text-align: center;
-          box-shadow: 0 0 12px rgba(34, 211, 238, 0.6);
+          box-shadow: 0 0 15px rgba(56, 189, 248, 0.6);
           cursor: pointer;
         ">${count}</div>
       `;
@@ -169,7 +162,6 @@ const renderCluster = (points: DevicePoint[]) => {
     }
   });
 
-  // 点击聚合簇自动放大并拉近视野
   cluster.on('click', (e: any) => {
     if (e.clusterData && e.clusterData.length > 0) {
       const currentZoom = map.getZoom();
@@ -177,7 +169,6 @@ const renderCluster = (points: DevicePoint[]) => {
     }
   });
 
-  // 自适应调整视野视角范围
   if (points.length > 0) {
     map.setFitView(null, false, [60, 60, 60, 60]);
   }
@@ -246,7 +237,7 @@ defineExpose({
       <div class="fullscreen-btn" @click="toggleFullscreen">
         <el-icon :size="20">
           <FullScreen v-if="!isFullscreen" />
-          <FullScreenExit v-else />
+          <Close v-else />
         </el-icon>
         <span>{{ isFullscreen ? '退出全屏' : '全屏' }}</span>
       </div>
@@ -361,5 +352,52 @@ defineExpose({
 .map-container:fullscreen .map-legend {
   right: 30px;
   bottom: 30px;
+}
+
+/* 自定义扎在地图上的定位针 (Map Pin) */
+:deep(.custom-map-pin) {
+  position: relative;
+  width: 24px;
+  height: 32px;
+  cursor: pointer;
+}
+
+/* 头部圆圈 */
+:deep(.custom-map-pin .pin-head) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background-color: var(--pin-color);
+  border: 2px solid #fff;
+  border-radius: 50% 50% 50% 0;
+  box-shadow: 0 0 10px var(--pin-color);
+  transform: rotate(-45deg);
+}
+
+/* 针头内部小白点 */
+:deep(.custom-map-pin .pin-inner-dot) {
+  width: 8px;
+  height: 8px;
+  background-color: #fff;
+  border-radius: 50%;
+}
+
+/* 针尖投射下的微弱阴影（增加立体扎根感） */
+:deep(.custom-map-pin)::after {
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 12px;
+  height: 4px;
+  content: '';
+  background: rgb(0 0 0 / 40%);
+  border-radius: 50%;
+  filter: blur(1px);
+  transform: translateX(-50%);
 }
 </style>
