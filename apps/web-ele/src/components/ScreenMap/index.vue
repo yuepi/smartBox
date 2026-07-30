@@ -53,6 +53,32 @@ const handleFullscreenChange = () => {
   }, 200);
 };
 
+// 获取当前位置
+const getCurrentLocation = (): Promise<{ lat: number; lng: number; }> => {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error('浏览器不支持定位'));
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        resolve({
+          lng: position.coords.longitude,
+          lat: position.coords.latitude,
+        });
+      },
+      (error) => {
+        reject(error);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 60_000,
+      }
+    );
+  });
+};
+
 const loadMap = async () => {
   try {
     AMapObj = await AMapLoader.load({
@@ -61,9 +87,19 @@ const loadMap = async () => {
       plugins: ['AMap.MarkerCluster'],
     });
 
+    let center = defaultCenter;
+    try {
+      const location = await getCurrentLocation();
+      center = location;
+      console.log('📍 使用当前位置作为地图中心:', center);
+    } catch {
+      console.warn('⚠️ 获取位置失败，使用默认中心:', defaultCenter);
+    }
+
+
     map = new AMapObj.Map(mapContainer.value, {
       zoom: defaultZoom,
-      center: [defaultCenter.lng, defaultCenter.lat],
+      center: [center.lng, center.lat],
       viewMode: '2D',
       mapStyle: 'amap://styles/82ace86db0cd03ac02e4a5d1790eaeef',
       //  mapStyle: 'amap://styles/darkblue',
