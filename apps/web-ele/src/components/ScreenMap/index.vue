@@ -27,7 +27,7 @@ const defaultCenter = props.center || { lng: 116.397_428, lat: 39.909_23 };
 const defaultZoom = props.zoom || 11;
 
 const statusColorMap = {
-  online: '#22d3ee',
+  online: '#4c65d4',
   offline: '#6b7280',
   full: '#f59e0b',
 };
@@ -65,7 +65,8 @@ const loadMap = async () => {
       zoom: defaultZoom,
       center: [defaultCenter.lng, defaultCenter.lat],
       viewMode: '2D',
-      mapStyle: 'amap://styles/darkblue',
+      mapStyle: 'amap://styles/82ace86db0cd03ac02e4a5d1790eaeef',
+      //  mapStyle: 'amap://styles/darkblue',
       showIndoorMap: false,
       features: ['bg', 'road', 'building', 'point'],
     });
@@ -97,25 +98,20 @@ const renderCluster = (points: DevicePoint[]) => {
   cluster = new AMapObj.MarkerCluster(map, clusterData, {
     gridSize: 80,
     maxZoom: 15,
-    
-    // 【修改点】：单点渲染 —— 从小圆点变成“地图扎针 (Pin)”
     renderMarker: (ctx: any) => {
       const data = ctx.data[0];
-      const color = statusColorMap[data.status as keyof typeof statusColorMap] || '#22d3ee';
-      
-      // 使用 CSS border 技巧绘制经典的水滴定位针样式
+      const color = statusColorMap[data.status as keyof typeof statusColorMap] || '#4c65d4';
+
+      // 清理了无用标签，Pin 结构极简且标准
       const pinContent = `
         <div class="custom-map-pin" style="--pin-color: ${color};">
-          <div class="pin-head">
-            <div class="pin-inner-dot"></div>
-          </div>
-          <div class="pin-tail"></div>
+          <div class="pin-head"></div>
+          <div class="pin-inner-dot"></div>
+          <div class="pin-shadow"></div>
         </div>
       `;
-      
       ctx.marker.setContent(pinContent);
-      // 将 Marker 的锚点偏移对准“针尖”位置（下中对齐）
-      ctx.marker.setOffset(new AMapObj.Pixel(-12, -32));
+      ctx.marker.setOffset(new AMapObj.Pixel(-17, -56));
 
       // 点击弹窗
       ctx.marker.on('click', () => {
@@ -128,35 +124,23 @@ const renderCluster = (points: DevicePoint[]) => {
         `;
         const infoWindow = new AMapObj.InfoWindow({
           content: infoContent,
-          offset: new AMapObj.Pixel(0, -32),
+          offset: new AMapObj.Pixel(0, -56),
         });
         infoWindow.open(map, data.lnglat);
       });
     },
 
-    // 聚合簇依然保留科技感数字球
-    renderCluster: (ctx: any) => {
+    renderClusterMarker: (ctx: any) => {
       const count = ctx.count;
       const factor = Math.min(count / 100, 1);
-      const size = 34 + factor * 16;
+      const size = Math.floor(48 + factor * 24);
 
       const content = `
-        <div style="
-          width: ${size}px;
-          height: ${size}px;
-          line-height: ${size}px;
-          background: rgba(14, 116, 144, 0.85);
-          border: 2px solid #38bdf8;
-          border-radius: 50%;
-          color: #fff;
-          font-weight: bold;
-          font-size: 13px;
-          text-align: center;
-          box-shadow: 0 0 15px rgba(56, 189, 248, 0.6);
-          cursor: pointer;
-        ">${count}</div>
+        <div class="custom-cluster-node" style="width: ${size}px; height: ${size}px; line-height: ${size}px;">
+          <span class="cluster-count">${count}</span>
+        </div>
       `;
-      
+
       ctx.marker.setContent(content);
       ctx.marker.setOffset(new AMapObj.Pixel(-size / 2, -size / 2));
     }
@@ -186,7 +170,7 @@ const generateMockPoints = (count = 500): DevicePoint[] => {
     const lng = baseLng + (Math.random() - 0.5) * 0.4;
     const lat = baseLat + (Math.random() - 0.5) * 0.4;
     const status = statuses[Math.floor(Math.random() * statuses.length)];
-    
+
     points.push({
       lng,
       lat,
@@ -252,7 +236,7 @@ defineExpose({
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .screen-map-wrapper {
   position: relative;
   width: 100%;
@@ -325,7 +309,7 @@ defineExpose({
 }
 
 .dot.online {
-  background: #22d3ee;
+  background: #4c65d4;
 }
 
 .dot.full {
@@ -354,50 +338,110 @@ defineExpose({
   bottom: 30px;
 }
 
-/* 自定义扎在地图上的定位针 (Map Pin) */
 :deep(.custom-map-pin) {
   position: relative;
-  width: 24px;
-  height: 32px;
+  width: 34px;
+  height: 56px;
   cursor: pointer;
+  transition: transform 0.2s ease;
 }
 
-/* 头部圆圈 */
+:deep(.custom-map-pin:hover) {
+  transform: scale(1.12);
+}
+
 :deep(.custom-map-pin .pin-head) {
   position: absolute;
   top: 0;
   left: 0;
+  width: 34px;
+  height: 34px;
+  background-color: var(--pin-color);
+  border: 2px solid #fff;
+  border-radius: 50% 50% 0;
+  box-shadow:
+    0 0 16px var(--pin-color),
+    inset 0 0 8px rgb(255 255 255 / 40%);
+  transform: rotate(45deg);
+  transform-origin: 50% 50%;
+}
+
+:deep(.custom-map-pin .pin-inner-dot) {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  background-color: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 30%);
+}
+
+:deep(.custom-map-pin .pin-shadow) {
+  position: absolute;
+  bottom: -3px;
+  left: 50%;
+  z-index: -1;
+  width: 22px;
+  height: 6px;
+  background: rgb(0 0 0 / 55%);
+  border-radius: 50%;
+  filter: blur(2px);
+  transform: translateX(-50%);
+}
+
+:deep(.custom-cluster-node) {
+  position: relative;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  background-color: var(--pin-color);
-  border: 2px solid #fff;
-  border-radius: 50% 50% 50% 0;
-  box-shadow: 0 0 10px var(--pin-color);
-  transform: rotate(-45deg);
-}
-
-/* 针头内部小白点 */
-:deep(.custom-map-pin .pin-inner-dot) {
-  width: 8px;
-  height: 8px;
-  background-color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 50%);
+  cursor: pointer;
+  background: radial-gradient(circle, rgb(14 165 233 / 95%) 0%, rgb(3 105 161 / 85%) 100%);
+  border: 3px solid #7dd3fc;
   border-radius: 50%;
+  box-shadow:
+    0 0 20px rgb(56 189 248 / 80%),
+    inset 0 0 12px rgb(255 255 255 / 40%);
+  transition: transform 0.2s ease;
 }
 
-/* 针尖投射下的微弱阴影（增加立体扎根感） */
-:deep(.custom-map-pin)::after {
+
+:deep(.custom-cluster-node)::before {
   position: absolute;
-  bottom: -2px;
-  left: 50%;
-  width: 12px;
-  height: 4px;
+  inset: -8px;
+  z-index: -1;
   content: '';
-  background: rgb(0 0 0 / 40%);
+  background: rgb(56 189 248 / 25%);
+  border: 1px solid rgb(125 211 252 / 40%);
   border-radius: 50%;
-  filter: blur(1px);
-  transform: translateX(-50%);
+  animation: cluster-pulse 2.5s infinite ease-in-out;
+}
+
+:deep(.custom-cluster-node:hover) {
+  transform: scale(1.1);
+}
+
+@keyframes cluster-pulse {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.95);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+
+  100% {
+    opacity: 0.6;
+    transform: scale(0.95);
+  }
 }
 </style>
