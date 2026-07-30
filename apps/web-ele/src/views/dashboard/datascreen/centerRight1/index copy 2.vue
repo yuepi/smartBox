@@ -1,11 +1,10 @@
 <script lang="ts">
 import { defineComponent, reactive } from 'vue'
-import ScreenMap from '#/components/ScreenMap.vue';
 
 import Chart from './chart/index.tsx'
 
 export default defineComponent({
-  components: { Chart, ScreenMap },
+  components: { Chart},
   setup() {
     const capsuleConfig = reactive({
       data: [
@@ -36,7 +35,6 @@ export default defineComponent({
         <i class="iconfont icon-align-left text-cyan-400"></i>
         <span class="text-sm text-white">小区投递量排行</span>
         <dv-decoration-3 style="width: 100px;height: 20px;" />
-        
       </div>
 
       <!-- 胶囊图 + 图表 -->
