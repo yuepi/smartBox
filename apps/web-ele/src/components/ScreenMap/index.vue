@@ -91,7 +91,6 @@ const loadMap = async () => {
     try {
       const location = await getCurrentLocation();
       center = location;
-      console.log('📍 使用当前位置作为地图中心:', center);
     } catch {
       console.warn('⚠️ 获取位置失败，使用默认中心:', defaultCenter);
     }

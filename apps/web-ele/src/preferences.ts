@@ -16,6 +16,8 @@ export const overridesPreferences = defineOverridesPreferences({
     checkUpdatesInterval: 1,
     // 登录过期模式，modal 弹窗提示，redirect 重定向到登录页
     loginExpiredMode: 'modal',
+    watermark: true,
+    watermarkContent: '慧小分智能回收',
   },
   logo: {
     source: import.meta.env.VITE_APP_LOGO,

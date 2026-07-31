@@ -161,6 +161,10 @@ function resetQuery() {
   loadData();
 }
 
+onMounted(() => {
+  loadData();
+});
+
 defineExpose({ loadData });
 </script>
 

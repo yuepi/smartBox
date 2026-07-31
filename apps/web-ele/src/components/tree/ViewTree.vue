@@ -1,13 +1,12 @@
 <script lang="ts" setup>
-import type { ElTree } from "element-plus";
+import type { FilterNodeMethodFunction, TreeInstance } from "element-plus";
 
-import { onMounted, reactive, ref, watch } from "vue";
 
-import { MoreFilled, Search } from "@element-plus/icons-vue";
+interface Tree {
+  [key: string]: any
+}
 
-// ✨ 1. 规范 Props 声明，并适配你们项目的属性字段
 const props = defineProps({
-  // 异步获取树数据的 API 函数（传入封装好的 API 比传 URL 字符串更符合 TS 安全）
   api: {
     type: Function,
     required: true,
@@ -20,7 +19,6 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  // 🛠️ 关键改动：因为你们后端的部门属性是 deptId 和 deptName，这里做成配置项提高通用性
   nodeKey: {
     type: String,
     default: "deptId",
@@ -31,10 +29,10 @@ const props = defineProps({
   }
 });
 
-const emits = defineEmits(["node-click"]);
+const emits = defineEmits(["nodeClick"]);
 
 const filterText = ref("");
-const treeRef = ref<InstanceType<typeof ElTree>>();
+const treeRef = ref<TreeInstance>();
 
 const defaultProps = {
   children: "children",
@@ -42,11 +40,10 @@ const defaultProps = {
 };
 
 const state = reactive({
-  data: [] as any[],
+  data: [] as Tree[],
   loading: false,
 });
 
-// ✨ 2. 核心数据请求逻辑（改用传进来的统一 API）
 const treeQuery = async () => {
   try {
     state.loading = true;
@@ -60,24 +57,23 @@ const treeQuery = async () => {
 };
 
 // 过滤搜索
-const filterNode = (value: string, data: any) => {
+const filterNode: FilterNodeMethodFunction = (value: string, data: Tree) => {
   if (!value) return true;
   return data[props.labelKey].includes(value);
 };
 
 watch(filterText, (val: string) => {
-  treeRef.value?.filter(val);
+    treeRef.value?.filter(val);
+
 });
 
 // 节点点击向外发射事件
-const nodeClick = (node: any) => {
-  emits("node-click", node);
+const nodeClick = (node: Tree) => {
+  emits("nodeClick", node);
 };
 
-// ✨ 3. 修复原作者“全部展开/折叠”的底层隐患，改用官方正规逻辑
 const toggleExpandAll = (isExpand: boolean) => {
   if (!treeRef.value) return;
-  // 通过根节点一层层向下操作节点对象的 expanded 属性，安全稳定
   const nodes = treeRef.value.store.nodesMap;
   for (const key in nodes) {
     if (nodes[key]) {
@@ -101,8 +97,7 @@ const handleCommand = async (command: string) => {
       break;
     }
     case "rootNode": {
-      // 点击根目录，相当于清空部门筛选条件，查全部
-      emits("node-click", null);
+      emits("nodeClick", null);
       break;
     }
   }
@@ -121,10 +116,10 @@ defineExpose({ refresh: treeQuery });
     <template #header>
       <div class="flex items-center gap-1">
         <div class="flex-1">
-          <el-input :prefix-icon="Search" v-model="filterText" :placeholder="props.tip" clearable size="default" />
+          <el-input prefix-icon="Search" v-model="filterText" :placeholder="props.tip" clearable size="default" />
         </div>
         <el-dropdown @command="handleCommand" trigger="click">
-          <el-button :icon="MoreFilled" class="!px-2" />
+          <el-button icon="MoreFilled" class="!px-2" />
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item command="expandAll">全部展开</el-dropdown-item>

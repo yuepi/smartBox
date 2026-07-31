@@ -29,7 +29,7 @@
   "dependencies": {
     "@amap/amap-jsapi-loader": "catalog:",
     "@element-plus/icons-vue": "catalog:",
-    "@kjgl77/datav-vue3": "^1.7.4",
+    "@kjgl77/datav-vue3": "catalog:",
     "@vben/access": "workspace:*",
     "@vben/common-ui": "workspace:*",
     "@vben/constants": "workspace:*",
@@ -52,15 +52,15 @@
     "pinia": "catalog:",
     "qrcode": "catalog:",
     "splitpanes": "catalog:",
-    "unplugin-icons": "^23.0.1",
+    "unplugin-icons": "catalog:",
     "vue": "catalog:",
     "vue-router": "catalog:"
   },
   "devDependencies": {
-    "@iconify-json/ep": "^1.2.4",
+    "@iconify-json/ep": "catalog:",
     "@types/qrcode": "catalog:",
-    "unplugin-auto-import": "^21.0.0",
+    "unplugin-auto-import": "catalog:",
     "unplugin-element-plus": "catalog:",
-    "unplugin-vue-components": "^32.1.0"
+    "unplugin-vue-components": "catalog:"
   }
 }
