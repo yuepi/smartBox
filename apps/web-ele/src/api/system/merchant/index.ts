@@ -139,7 +139,7 @@ export interface MerchantRechargePageParams {
   endTime?: string;
 }
 
-//平台维度商户接口
+// 平台维度商户接口
 /**
  * 分页查询商户
  */
@@ -213,9 +213,18 @@ export function getPlatMerchantConfigDetailApi(merchantId: number) {
 export function editPlatMerchantConfigApi(data: Partial<MerchantConfig>) {
   return requestClient.post('/plat/merchantConfig/edit', data);
 }
+/** 数据迁移 */
+export function dataMigrationApi(data: FormData) {
+  return requestClient.post('/merchant/dataMigration/migrate', data, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+}
 
 
-//商户接口
+
+// 商户接口
 /** 1. 商户信息详情 */
 export function getMerchantInfoApi(merchantId: number) {
   return requestClient.get('/merchant/merchant/detail', { params: { merchantId } });

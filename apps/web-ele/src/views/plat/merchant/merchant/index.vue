@@ -10,6 +10,7 @@ import { ModuleCodeMap } from '#/hooks/useExport';
 
 import MerchantAccountDialog from './MerchantAccountDialog.vue';
 import MerchantForm from './MerchantForm.vue';
+import MigrationDialog from './MigrationDialog.vue';
 
 // --- 表格列配置 ---
 const columnConfig = ref<TableColumnConfig[]>([...defaultMerchantColumns]);
@@ -25,6 +26,7 @@ const visibleColumns = computed(() => {
 // --- 引用 ---
 const merchantFormRef = ref();
 const accountDialogRef = ref();
+const migrationDialogRef = ref();
 
 // --- 状态变量 ---
 const loading = ref(false);
@@ -77,6 +79,11 @@ function handleEdit(row: Merchant) {
 // --- 账户 ---
 function handleViewAccount(row: Merchant) {
   accountDialogRef.value?.open(row);
+}
+
+// --- 数据迁移 ---
+function handleMigration(row: Merchant) {
+  migrationDialogRef.value?.open(row);
 }
 
 // --- 删除 ---
@@ -279,6 +286,9 @@ onMounted(() => {
               <el-tooltip content="编辑" placement="top" :enterable="false">
                 <el-button link type="primary" icon="Edit" @click="handleEdit(row)" />
               </el-tooltip>
+               <el-tooltip content="数据迁移" placement="top" :enterable="false">
+              <el-button link type="warning" icon="Upload" @click="handleMigration(row)" />
+            </el-tooltip>
               <el-tooltip content="删除" placement="top" :enterable="false">
                 <el-button link type="danger" icon="Delete" @click="handleDelete(row)" />
               </el-tooltip>
@@ -291,6 +301,7 @@ onMounted(() => {
     <!-- ===== 弹窗们 ===== -->
     <MerchantForm ref="merchantFormRef" @success="handleQuery" />
     <MerchantAccountDialog ref="accountDialogRef" />
+    <MigrationDialog ref="migrationDialogRef" @success="handleQuery" />
   </Page>
 </template>
 
