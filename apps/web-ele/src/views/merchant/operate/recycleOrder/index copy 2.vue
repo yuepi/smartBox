@@ -51,14 +51,6 @@ const dateRange = ref<string[]>([]);
 const deviceOptions = ref<Device[]>([]);
 const deptOptions = ref<Dept[]>([]);
 
-// 订单状态选项（写死）
-const orderStatusOptions = [
-  { label: '审核中', value: 3 },
-  { label: '已完成', value: 4 },
-  { label: '异常', value: 6 },
-  { label: '投递失败', value: 8 },
-];
-
 // 查询参数
 const queryParams = reactive<RecycleOrderPageParams>({
   pageNo: 1,
@@ -75,14 +67,6 @@ const queryParams = reactive<RecycleOrderPageParams>({
   deviceNo: undefined,
   deviceName: undefined,
 });
-
-// --- 操作弹窗（异常/取消异常/直接完成 加备注） ---
-const actionDialogVisible = ref(false);
-const actionDialogTitle = ref('');
-const actionDialogLoading = ref(false);
-const actionType = ref<'abnormal' | 'cancel' | 'directComplete'>('abnormal');
-const currentRow = ref<null | RecycleOrder>(null);
-const actionRemark = ref('');
 
 // --- 初始化日期 ---
 function initDateRange() {
@@ -106,22 +90,6 @@ watch(dateRange, (newVal) => {
 function formatAmount(amount: number): string {
   if (amount === undefined || amount === null) return '¥ 0.00';
   return `¥ ${amount.toFixed(2)}`;
-}
-
-// --- 快速筛选 ---
-function handleDeviceNameClick(deviceName: string) {
-  queryParams.deviceName = deviceName;
-  handleQuery();
-}
-
-function handleDeviceNoClick(deviceNo: string) {
-  queryParams.deviceNo = deviceNo;
-  handleQuery();
-}
-
-function handleMemberPhoneClick(phone: string) {
-  queryParams.memberPhone = phone;
-  handleQuery();
 }
 
 // --- 加载选项 ---
@@ -159,65 +127,47 @@ function handleView(row: RecycleOrder) {
 }
 
 // --- 异常订单 ---
-function handleAbnormal(row: RecycleOrder) {
-  currentRow.value = row;
-  actionType.value = 'abnormal';
-  actionDialogTitle.value = '异常订单';
-  actionRemark.value = '';
-  actionDialogVisible.value = true;
-}
-
-// --- 取消异常 ---
-function handleCancelAbnormal(row: RecycleOrder) {
-  currentRow.value = row;
-  actionType.value = 'cancel';
-  actionDialogTitle.value = '取消异常';
-  actionRemark.value = '';
-  actionDialogVisible.value = true;
-}
-
-// --- 直接完成 ---
-function handleDirectComplete(row: RecycleOrder) {
-  currentRow.value = row;
-  actionType.value = 'directComplete';
-  actionDialogTitle.value = '直接完成';
-  actionRemark.value = '';
-  actionDialogVisible.value = true;
-}
-
-// --- 提交操作弹窗 ---
-async function handleActionSubmit() {
-  if (!currentRow.value) return;
-
-  actionDialogLoading.value = true;
+async function handleAbnormal(row: RecycleOrder) {
   try {
-    switch (actionType.value) {
-      case 'abnormal': {
-        await abnormalOrderApi(currentRow.value.recycleOrderId, actionRemark.value);
-        ElMessage.success('已标记为异常');
-
-        break;
-      }
-      case 'cancel': {
-        await cancelOrderApi(currentRow.value.recycleOrderId, actionRemark.value);
-        ElMessage.success('已取消异常');
-
-        break;
-      }
-      case 'directComplete': {
-        await directCompleteOrderApi(currentRow.value.recycleOrderId, actionRemark.value);
-        ElMessage.success('直接完成成功');
-
-        break;
-      }
-      // No default
-    }
-    actionDialogVisible.value = false;
+    await ElMessageBox.confirm(`确定要将订单【${row.orderNo}】标记为异常吗？`, '异常订单', {
+      type: 'warning',
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+    });
+    await abnormalOrderApi(row.recycleOrderId);
+    ElMessage.success('已标记为异常');
     loadData();
   } catch {
-    ElMessage.error('操作失败');
-  } finally {
-    actionDialogLoading.value = false;
+    // 取消操作
+  }
+}
+
+// --- 取消订单 ---
+async function handleCancel(row: RecycleOrder) {
+  try {
+    await ElMessageBox.confirm(`确定要将订单【${row.orderNo}】标记为已取消吗？`, '取消订单', {
+      type: 'warning',
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+    });
+    await cancelOrderApi(row.recycleOrderId);
+    ElMessage.success('已标记为已取消');
+    loadData();
+  } catch {
+    // 取消操作
+  }
+}
+
+
+
+// --- 直接完成 ---
+async function handleDirectComplete(row: RecycleOrder) {
+  try {
+    await directCompleteOrderApi(row.recycleOrderId);
+    ElMessage.success('直接通过成功');
+    loadData();
+  } catch {
+    ElMessage.error('直接通过失败');
   }
 }
 
@@ -253,6 +203,31 @@ async function handleDelete(row?: RecycleOrder) {
     loadData();
   } catch {
     // 取消删除
+  }
+}
+
+function handleCommand(cmd: string, row: RecycleOrder) {
+  switch (cmd) {
+    case 'abnormal': {
+      handleAbnormal(row);
+      break;
+    }
+    case 'cancel': {
+      handleCancel(row);
+      break;
+    }
+    case 'directComplete': {
+      handleDirectComplete(row);
+      break;
+    }
+    case 'remark': {
+      handleRemark(row);
+      break;
+    }
+    case 'weight': {
+      handleWeight(row);
+      break;
+    }
   }
 }
 
@@ -364,13 +339,12 @@ v-model="queryParams.deviceName" placeholder="请输入" clearable style="width:
           </el-input>
         </el-form-item>
 
-        <!-- 订单状态 - 写死选项 -->
         <el-form-item>
           <el-select v-model="queryParams.orderStatus" clearable style="width: 200px">
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">订单状态:</span>
             </template>
-            <el-option v-for="item in orderStatusOptions" :key="item.value" :label="item.label" :value="item.value" />
+            <el-option v-for="item in order_status" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
 
@@ -417,68 +391,17 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
             :show-overflow-tooltip="col.showOverflowTooltip || false"
 >
             <template #default="{ row }">
-              <!-- 订单状态 -->
               <template v-if="col.key === 'orderStatus'">
                 <DictTag :options="order_status" :value="row.orderStatus" />
               </template>
-              <!-- 投递重量 -->
               <template v-else-if="col.key === 'weight'">
                 {{ row.weight?.toFixed(2) || 0 }} kg
               </template>
-              <!-- 实际金额 -->
               <template v-else-if="col.key === 'realAmount'">
                 <span class="font-medium text-primary">{{ formatAmount(row.realAmount) }}</span>
               </template>
-              <!-- 投递前后重量 -->
               <template v-else-if="col.key === 'beforeAfterWeight'">
                 <span>{{ (row.beforeWeight || 0).toFixed(2) }} → {{ (row.afterWeight || 0).toFixed(2) }} kg</span>
-              </template>
-              <!-- 内网抓拍图片 -->
-              <template v-else-if="col.key === 'imageUrls'">
-                <div class="flex items-center gap-1 justify-center">
-                  <template v-if="row.imageUrls && row.imageUrls.length > 0">
-                    <el-image
-v-for="(url, idx) in row.imageUrls.slice(0, 3)" :key="idx" :src="url"
-                      :preview-src-list="row.imageUrls" :initial-index="idx" fit="cover"
-                      style="width: 32px; height: 32px; cursor: pointer; border: 1px solid #dcdfe6; border-radius: 4px;"
-                      preview-teleported
-/>
-                    <el-tag v-if="row.imageUrls.length > 3" size="small" type="info">
-                      +{{ row.imageUrls.length - 3 }}
-                    </el-tag>
-                  </template>
-                  <span v-else class="text-gray-400">-</span>
-                </div>
-              </template>
-              <!-- 设备名称 - 点击快速筛选 -->
-              <template v-else-if="col.key === 'deviceName'">
-                <el-link
-v-if="row.deviceName" type="primary" :underline="false" class="table-link-ellipsis"
-                  @click="handleDeviceNameClick(row.deviceName)" style="cursor: pointer;"
->
-                  {{ row.deviceName }}
-                </el-link>
-                <span v-else>-</span>
-              </template>
-              <!-- 设备编号 - 点击快速筛选 -->
-              <template v-else-if="col.key === 'deviceNo'">
-                <el-link
-v-if="row.deviceNo" type="primary" :underline="false" class="table-link-ellipsis"
-                  @click="handleDeviceNoClick(row.deviceNo)" style="cursor: pointer;"
->
-                  {{ row.deviceNo }}
-                </el-link>
-                <span v-else>-</span>
-              </template>
-              <!-- 手机号 - 点击快速筛选 -->
-              <template v-else-if="col.key === 'memberPhone'">
-                <el-link
-v-if="row.memberPhone" type="primary" :underline="false" class="table-link-ellipsis"
-                  @click="handleMemberPhoneClick(row.memberPhone)" style="cursor: pointer;"
->
-                  {{ row.memberPhone }}
-                </el-link>
-                <span v-else>-</span>
               </template>
               <template v-else>
                 {{ (row as any)[col.key] ?? '-' }}
@@ -486,28 +409,24 @@ v-if="row.memberPhone" type="primary" :underline="false" class="table-link-ellip
             </template>
           </el-table-column>
 
-          <!-- 操作列 - 平铺按钮 -->
-          <el-table-column label="操作" width="220" fixed="right" align="center">
+          <el-table-column label="操作" width="150" fixed="right" align="center">
             <template #default="{ row }">
               <div class="action-buttons">
-                <el-tooltip content="详情" placement="top" :enterable="false">
-                  <el-button link type="primary" icon="View" @click="handleView(row)" />
-                </el-tooltip>
-                <el-tooltip content="异常订单" placement="top" :enterable="false">
-                  <el-button link type="danger" icon="Warning" @click="handleAbnormal(row)" />
-                </el-tooltip>
-                <el-tooltip content="取消异常" placement="top" :enterable="false">
-                  <el-button link type="success" icon="Close" @click="handleCancelAbnormal(row)" />
-                </el-tooltip>
-                <el-tooltip content="直接完成" placement="top" :enterable="false">
-                  <el-button link type="primary" icon="Check" @click="handleDirectComplete(row)" />
-                </el-tooltip>
-                <el-tooltip content="补重/扣重" placement="top" :enterable="false">
-                  <el-button link type="warning" icon="ScaleToOriginal" @click="handleWeight(row)" />
-                </el-tooltip>
-                <el-tooltip content="添加备注" placement="top" :enterable="false">
-                  <el-button link type="info" icon="ChatDotRound" @click="handleRemark(row)" />
-                </el-tooltip>
+              <el-tooltip content="详情" placement="top" :enterable="false">
+                <el-button link type="primary" icon="View" @click="handleView(row)" />
+              </el-tooltip>
+              <el-dropdown @command="(cmd: string) => handleCommand(cmd, row)">
+                <el-button link type="primary" icon="More" />
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="abnormal" icon="Warning">异常订单</el-dropdown-item>
+                    <el-dropdown-item command="cancel" icon="Close">取消异常</el-dropdown-item>
+                    <el-dropdown-item command="weight" icon="ScaleToOriginal">补重/扣重</el-dropdown-item>
+                    <el-dropdown-item command="remark" icon="ChatDotRound">添加备注</el-dropdown-item>
+                    <el-dropdown-item command="directComplete" icon="Check">直接完成</el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
               </div>
             </template>
           </el-table-column>
@@ -519,34 +438,17 @@ v-if="row.memberPhone" type="primary" :underline="false" class="table-link-ellip
     <OrderDetail ref="orderDetailRef" />
     <OrderWeight ref="orderWeightRef" @success="handleQuery" />
     <OrderRemark ref="orderRemarkRef" @success="handleQuery" />
-
-    <!-- 操作弹窗（异常/取消异常/直接完成） -->
-    <el-dialog v-model="actionDialogVisible" :title="actionDialogTitle" width="450px" append-to-body>
-      <el-form label-width="80px">
-        <el-form-item label="备注">
-          <el-input v-model="actionRemark" type="textarea" :rows="4" placeholder="请输入备注（可选）" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="actionDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="actionDialogLoading" @click="handleActionSubmit">
-          确定
-        </el-button>
-      </template>
-    </el-dialog>
   </Page>
 </template>
 
 <style scoped lang="scss">
 .action-buttons {
   display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
+  gap: 6px;
   align-items: center;
   justify-content: center;
 
   .el-button {
-    padding: 4px 6px;
     margin-right: 0;
     margin-left: 0;
   }
@@ -567,9 +469,5 @@ v-if="row.memberPhone" type="primary" :underline="false" class="table-link-ellip
   pointer-events: none;
   content: "部门:";
   transform: translateY(-50%);
-}
-
-.selected-alert-badge {
-  display: inline-block;
 }
 </style>

@@ -21,6 +21,28 @@ const dynamicRoutes: RouteRecordRaw[] = mergeRouteModules(dynamicRouteFiles);
 const staticRoutes: RouteRecordRaw[] = [];
 const externalRoutes: RouteRecordRaw[] = [];
 
+/**
+ * 递归给所有叶子路由添加 keepAlive
+ */
+function addKeepAliveToRoutes(routeList: RouteRecordRaw[]) {
+  routeList.forEach((route) => {
+    if (route.children && route.children.length > 0) {
+      // 有子路由：递归处理
+      addKeepAliveToRoutes(route.children);
+    } else {
+      // 叶子路由：添加 keepAlive
+      if (!route.meta) route.meta = {};
+      // 如果没显式设置过 keepAlive，默认开启
+      if (route.meta.keepAlive === undefined) {
+        route.meta.keepAlive = true;
+      }
+    }
+  });
+}
+
+/** 给动态路由添加 keepAlive */
+addKeepAliveToRoutes(dynamicRoutes);
+
 /** 路由列表，由基本路由、外部路由和404兜底路由组成
  *  无需走权限验证（会一直显示在菜单中） */
 const routes: RouteRecordRaw[] = [

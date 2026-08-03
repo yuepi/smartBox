@@ -49,6 +49,7 @@
     "dayjs": "catalog:",
     "echarts": "catalog:",
     "element-plus": "catalog:",
+    "gsap": "^3.15.0",
     "pinia": "catalog:",
     "qrcode": "catalog:",
     "splitpanes": "catalog:",

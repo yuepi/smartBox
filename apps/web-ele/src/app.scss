@@ -169,3 +169,13 @@
     color: #ef4444;
   }
 }
+
+// 表格中可点击链接的省略号样式
+.table-link-ellipsis {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
