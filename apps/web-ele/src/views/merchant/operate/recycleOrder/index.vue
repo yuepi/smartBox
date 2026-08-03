@@ -124,6 +124,17 @@ function handleMemberPhoneClick(phone: string) {
   handleQuery();
 }
 
+function handleDeptNameClick(row: RecycleOrder) {
+  const dept = deptOptions.value.find((d) => d.deptName === row.deptName);
+  if (dept) {
+    queryParams.deptId = dept.deptId;
+  } else {
+    // 兜底：用名称搜索（如果后端支持）
+    queryParams.deptName = row.deptName;
+  }
+  handleQuery();
+}
+
 // --- 加载选项 ---
 async function loadOptions() {
   try {
@@ -414,7 +425,7 @@ v-model="dateRange" type="datetimerange" range-separator="至" start-placeholder
           <el-table-column
 v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
             :width="typeof col.width === 'number' ? col.width : undefined" :min-width="col.minWidth" :align="col.align"
-            :show-overflow-tooltip="col.showOverflowTooltip || false"
+            :show-overflow-tooltip="col.showOverflowTooltip || false" :fixed="col.fixed"
 >
             <template #default="{ row }">
               <!-- 订单状态 -->
@@ -450,6 +461,17 @@ v-for="(url, idx) in row.imageUrls.slice(0, 3)" :key="idx" :src="url"
                   <span v-else class="text-gray-400">-</span>
                 </div>
               </template>
+
+              <!-- 小区名称 - 点击快速筛选 -->
+            <template v-else-if="col.key === 'deptName'">
+              <span
+v-if="row.deptName" class="table-link-text" @click="handleDeptNameClick(row)"
+                :title="row.deptName"
+>
+                {{ row.deptName }}
+              </span>
+              <span v-else>-</span>
+            </template>
               <!-- 设备名称 - 点击快速筛选 -->
               <template v-else-if="col.key === 'deviceName'">
                 <span v-if="row.deviceName" class="table-link-text" @click="handleDeviceNameClick(row.deviceName)">
@@ -477,7 +499,7 @@ v-for="(url, idx) in row.imageUrls.slice(0, 3)" :key="idx" :src="url"
                 {{ (row as any)[col.key] ?? '-' }}
               </template>
             </template>
-          </el-table-column>
+</el-table-column>
 
           <!-- 操作列 - 平铺按钮 -->
           <el-table-column label="操作" width="220" fixed="right" align="center">

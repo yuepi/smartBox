@@ -4,6 +4,7 @@ import { computed } from 'vue';
 import { AuthPageLayout } from '@vben/layouts';
 import { preferences } from '@vben/preferences';
 
+import loginImage from '#/assets/loginImage.png';
 import { $t } from '#/locales';
 
 const appName = computed(() => preferences.app.name);
@@ -19,7 +20,9 @@ const logoDark = computed(() => preferences.logo.sourceDark);
     :page-description="$t('authentication.pageDesc')"
     :page-title="$t('authentication.pageTitle')"
     :toolbar="false"
-   >
+    :slogan-image="loginImage"
+  >
+>
     <!-- 自定义工具栏 -->
     <!-- <template #toolbar></template> -->
   </AuthPageLayout>

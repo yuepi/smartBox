@@ -48,5 +48,11 @@ const formSchema = computed((): VbenFormSchema[] => {
     :form-schema="formSchema"
     :loading="authStore.loginLoading"
     @submit="authStore.authLogin"
-  />
+    title="欢迎登录 绿色回收平台"
+    sub-title="科技助力垃圾分类，共创绿色数字生态"
+    :show-third-party-login="false"
+    :show-code-login="false"
+    :show-qrcode-login="false"
+    :show-register="false"
+/>
 </template>

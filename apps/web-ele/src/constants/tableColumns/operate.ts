@@ -6,11 +6,11 @@ export const RECYCLE_ORDER_STORAGE_KEY = 'recycle_order_table_columns';
 
 export const defaultRecycleOrderColumns: TableColumnConfig[] = [
   // { key: 'recycleOrderId', label: '订单ID', visible: true, width: 80, align: 'center' },
-  { key: 'orderNo', label: '订单编号', visible: false, minWidth: 200, align: 'center', fixed: true, showOverflowTooltip: true },
+  { key: 'orderNo', label: '订单编号', visible: false, minWidth: 200, align: 'center', showOverflowTooltip: true },
   // { key: 'merchantId', label: '商户ID', visible: false, width: 80, align: 'center' },
     { key: 'memberId', label: '会员ID', visible: false, width: 80, align: 'center' },
   { key: 'memberName', label: '会员名称', visible: false, width: 120, align: 'center' },
-  { key: 'memberPhone', label: '手机号', visible: true, width: 120, align: 'center' },
+  { key: 'memberPhone', label: '手机号', visible: true, width: 120, align: 'center',fixed: true },
   // { key: 'deptId', label: '小区ID', visible: false, width: 80, align: 'center' },
   { key: 'deptName', label: '小区名称', visible: true, minWidth: 150, align: 'center', showOverflowTooltip: true },
   { key: 'deviceId', label: '设备ID', visible: false, width: 80, align: 'center' },
