@@ -452,32 +452,25 @@ v-for="(url, idx) in row.imageUrls.slice(0, 3)" :key="idx" :src="url"
               </template>
               <!-- 设备名称 - 点击快速筛选 -->
               <template v-else-if="col.key === 'deviceName'">
-                <el-link
-v-if="row.deviceName" type="primary" :underline="false" class="table-link-ellipsis"
-                  @click="handleDeviceNameClick(row.deviceName)" style="cursor: pointer;"
->
+                <span v-if="row.deviceName" class="table-link-text" @click="handleDeviceNameClick(row.deviceName)">
                   {{ row.deviceName }}
-                </el-link>
+                </span>
                 <span v-else>-</span>
               </template>
+
               <!-- 设备编号 - 点击快速筛选 -->
               <template v-else-if="col.key === 'deviceNo'">
-                <el-link
-v-if="row.deviceNo" type="primary" :underline="false" class="table-link-ellipsis"
-                  @click="handleDeviceNoClick(row.deviceNo)" style="cursor: pointer;"
->
+                <span v-if="row.deviceNo" class="table-link-text" @click="handleDeviceNoClick(row.deviceNo)">
                   {{ row.deviceNo }}
-                </el-link>
+                </span>
                 <span v-else>-</span>
               </template>
+
               <!-- 手机号 - 点击快速筛选 -->
               <template v-else-if="col.key === 'memberPhone'">
-                <el-link
-v-if="row.memberPhone" type="primary" :underline="false" class="table-link-ellipsis"
-                  @click="handleMemberPhoneClick(row.memberPhone)" style="cursor: pointer;"
->
+                <span v-if="row.memberPhone" class="table-link-text" @click="handleMemberPhoneClick(row.memberPhone)">
                   {{ row.memberPhone }}
-                </el-link>
+                </span>
                 <span v-else>-</span>
               </template>
               <template v-else>

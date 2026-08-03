@@ -170,12 +170,17 @@
   }
 }
 
-// 表格中可点击链接的省略号样式
-.table-link-ellipsis {
-  display: inline-block;
-  max-width: 100%;
+.table-link-text {
+  display: block;
+  width: 100%;
   overflow: hidden;
+  color: var(--el-color-primary);
+  cursor: pointer;
   text-overflow: ellipsis;
   white-space: nowrap;
-  vertical-align: middle;
+
+  &:hover {
+    color: var(--el-color-primary-light-3);
+    text-decoration: underline;
+  }
 }
