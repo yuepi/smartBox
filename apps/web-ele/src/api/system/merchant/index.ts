@@ -213,9 +213,10 @@ export function getPlatMerchantConfigDetailApi(merchantId: number) {
 export function editPlatMerchantConfigApi(data: Partial<MerchantConfig>) {
   return requestClient.post('/plat/merchantConfig/edit', data);
 }
+
 /** 数据迁移 */
 export function dataMigrationApi(data: FormData) {
-  return requestClient.post('/merchant/dataMigration/migrate', data, {
+  return requestClient.post('/plat/dataMigration/migrate', data, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },

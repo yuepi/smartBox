@@ -72,7 +72,7 @@ defineExpose({ open });
   <el-dialog
     v-model="visible"
     title="数据迁移"
-    width="500px"
+    width="650px"
     append-to-body
   >
     <el-form label-width="100px">
