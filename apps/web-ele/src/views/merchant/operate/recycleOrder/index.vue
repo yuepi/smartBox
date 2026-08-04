@@ -508,13 +508,13 @@ v-if="row.deptName" class="table-link-text" @click="handleDeptNameClick(row)"
                 <el-tooltip content="详情" placement="top" :enterable="false">
                   <el-button link type="primary" icon="View" @click="handleView(row)" />
                 </el-tooltip>
-                <el-tooltip content="异常订单" placement="top" :enterable="false">
+                <el-tooltip content="标记异常" placement="top" :enterable="false" v-if="[0, 1, 2, 3, 4, 7].includes(row.orderStatus)">
                   <el-button link type="danger" icon="Warning" @click="handleAbnormal(row)" />
                 </el-tooltip>
-                <el-tooltip content="取消异常" placement="top" :enterable="false">
+                <el-tooltip content="取消异常" placement="top" :enterable="false" v-if="row.orderStatus === 6">
                   <el-button link type="success" icon="Close" @click="handleCancelAbnormal(row)" />
                 </el-tooltip>
-                <el-tooltip content="直接完成" placement="top" :enterable="false">
+                <el-tooltip content="直接完成" placement="top" :enterable="false" v-if="[0, 1, 2, 3].includes(row.orderStatus)">
                   <el-button link type="primary" icon="Check" @click="handleDirectComplete(row)" />
                 </el-tooltip>
                 <el-tooltip content="补重/扣重" placement="top" :enterable="false">

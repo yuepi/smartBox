@@ -223,8 +223,6 @@ export function dataMigrationApi(data: FormData) {
   });
 }
 
-
-
 // 商户接口
 /** 1. 商户信息详情 */
 export function getMerchantInfoApi(merchantId: number) {
