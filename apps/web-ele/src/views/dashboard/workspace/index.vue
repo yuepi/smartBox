@@ -3,12 +3,16 @@ import type { DeviceStatusData, OverviewData } from '#/api/common/workspace';
 
 import { useRouter } from 'vue-router';
 
+import { useAccess } from '@vben/access';
+
+const { hasAccessByCodes } = useAccess();
+
 import { preferences } from '@vben/preferences';
 import { useUserStore } from '@vben/stores';
 import { openWindow } from '@vben/utils';
 
 // 引入 Element Plus 图标组件
-import { Cpu, Document, Tickets, User, Wallet } from '@element-plus/icons-vue';
+import { Cpu, Document, Tickets, Wallet } from '@element-plus/icons-vue';
 // 引入原生 ECharts
 import * as echarts from 'echarts';
 
@@ -35,16 +39,25 @@ const merchantStatus = computed(() => {
     : { text: '停用', type: 'danger' };
 });
 
+// 过滤有权限的菜单
+const filteredNavItems = computed(() => {
+  return quickNavItems.filter((item) => {
+    if (!item.authority?.length) return true;
+    return item.authority.some((code) => hasAccessByCodes([code]));
+  });
+});
+
 // ==================== 2. 常用功能 ====================
 const quickNavItems = [
-  { title: '设备管理', url: '/device', icon: Cpu, color: '#10B981' },
-  { title: '设备配置', url: '/deviceConfig', icon: Tickets, color: '#EC4899' },
-  { title: '回收订单', url: '/recycleOrder', icon: Document, color: '#3B82F6' },
-  { title: '用户管理', url: '/user', icon: User, color: '#8B5CF6' },
-  { title: '会员管理', url: '/member', icon: Tickets, color: '#EC4899' },
-  { title: '提现审核', url: '/withdraw', icon: Wallet, color: '#F59E0B' },
-  { title: '计费套餐', url: '/devicePackage', icon: Tickets, color: '#EC4899' },
-  { title: '二维码', url: '/qrcode', icon: Tickets, color: '#EC4899' },
+  { title: '设备管理', url: '/device', icon: Cpu, color: '#10B981', authority: ['merchant:manage:device'] },
+  { title: '设备配置', url: '/deviceConfig', icon: Tickets, color: '#EC4899', authority: ['merchant:device:config'] },
+  { title: '计费套餐', url: '/devicePackage', icon: Tickets, color: '#EC4899', authority: ['merchant:device:package'] },
+  { title: '二维码', url: '/qrcode', icon: Tickets, color: '#EC4899', authority: ['merchant:qrcode'] },
+  { title: '回收订单', url: '/recycleOrder', icon: Document, color: '#3B82F6', authority: ['merchant:recycle:order'] },
+  { title: '清运任务', url: '/cleanTask', icon: Tickets, color: '#EC4899', authority: ['merchant:recycle:cleanTask'] },
+  { title: '分拣任务', url: '/sortTask', icon: Tickets, color: '#EC4899', authority: ['merchant:recycle:sortTask'] },
+  { title: '会员列表', url: '/member', icon: Tickets, color: '#EC4899', authority: ['merchant:member:list'] },
+  { title: '提现审核', url: '/withdraw', icon: Wallet, color: '#F59E0B', authority: ['merchant:member:withdraw'] },
 ];
 
 function navTo(url: string) {
@@ -413,7 +426,7 @@ watch([rankingType, rankingDateRange], fetchRanking);
         </div>
         <div class="grid grid-cols-3 gap-3 overflow-y-auto pr-1 flex-1 min-h-0">
           <div
-v-for="(item, idx) in quickNavItems" :key="idx"
+v-for="(item, idx) in filteredNavItems" :key="idx"
             class="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-700/40 cursor-pointer transition-colors group"
             @click="navTo(item.url)"
 >
@@ -428,7 +441,7 @@ v-for="(item, idx) in quickNavItems" :key="idx"
             <span
               class="text-[11px] text-gray-600 dark:text-gray-300 font-medium text-center truncate w-full group-hover:text-blue-600"
 >{{
-              item.title }}</span>
+                item.title }}</span>
           </div>
         </div>
       </div>

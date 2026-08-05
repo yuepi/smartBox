@@ -19,6 +19,7 @@ export const overridesPreferences = defineOverridesPreferences({
     watermark: true,
     watermarkContent: '慧小分智能回收',
     defaultHomePath: '/workspace',
+    
   },
   logo: {
     source: import.meta.env.VITE_APP_LOGO,
