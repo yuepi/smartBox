@@ -501,7 +501,7 @@ v-if="row.deptName" class="table-link-text" @click="handleDeptNameClick(row)"
             </template>
 </el-table-column>
 
-          <!-- 操作列 - 平铺按钮 -->
+          <!-- 操作列 -->
           <el-table-column label="操作" width="220" fixed="right" align="center">
             <template #default="{ row }">
               <div class="action-buttons">

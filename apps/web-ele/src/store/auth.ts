@@ -10,7 +10,8 @@ import { resetAllStores, useAccessStore, useTabbarStore, useUserStore } from "@v
 import { ElMessage, ElNotification } from "element-plus";
 import { defineStore } from "pinia";
 
-import { type AuthApi, changeMerchantApi, getUserInfoApi, loginApi, logoutApi } from "#/api";
+import { changeMerchantApi, getUserInfoApi, loginApi, logoutApi } from '#/api';
+import type { AuthApi } from '#/api';
 import { $t } from "#/locales";
 import { useDictStore } from '#/store/modules/dict';
 
@@ -170,7 +171,7 @@ export const useAuthStore = defineStore("auth", () => {
       accessStore.setAccessCodes(accessCodes);
 
       window.location.reload();
-      await router.push('/analytics');
+      await router.push('/workspace');
 
     } catch (error) {
       console.error("切换商户失败", error);
