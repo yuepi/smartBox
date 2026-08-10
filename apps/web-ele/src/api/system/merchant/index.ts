@@ -50,6 +50,9 @@ export interface MerchantConfig {
   merchantId: number;
   orderWalletSync: number; // 0=不需要审核到钱包, 1=需要审核到预计收益
   status: number; // 0=启用,1=禁用
+  firstOrderNoAudit: number; // 0=否(需审核) 1=是(首次订单直接入账)
+  autoAuditEnabled: number; // 0=禁用 1=启用
+  autoAuditHours: number; // 小时，默认 24
 }
 
 /** 商户信息类型定义 */

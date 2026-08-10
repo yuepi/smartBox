@@ -82,6 +82,9 @@ async function handleSaveConfig() {
       merchantConfigId: configData.value.merchantConfigId,
       orderWalletSync: configData.value.orderWalletSync,
       status: configData.value.status,
+      firstOrderNoAudit: configData.value.firstOrderNoAudit,
+      autoAuditEnabled: configData.value.autoAuditEnabled,
+      autoAuditHours: configData.value.autoAuditHours,
     });
     ElMessage.success('保存成功');
   } catch {
@@ -114,20 +117,10 @@ defineExpose({ open });
 </script>
 
 <template>
-  <!-- 
-    el-dialog → el-drawer
-    主要改动：
-    1. title → 用 header 插槽
-    2. width → size
-    3. 去掉 append-to-body（默认就是）
-  -->
   <el-drawer
-    v-model="visible"
-    :title="`账户详情 - ${currentMerchant?.merchantName}`"
-    size="70%"
-    :close-on-click-modal="false"
-    destroy-on-close
-  >
+v-model="visible" :title="`账户详情 - ${currentMerchant?.merchantName}`" size="70%"
+    :close-on-click-modal="false" destroy-on-close
+>
     <div v-loading="loading" class="drawer-content">
       <!-- 账户信息 -->
       <el-descriptions :column="3" border v-if="accountDetail">
@@ -155,10 +148,9 @@ defineExpose({ open });
       <el-tabs v-model="activeTab" class="mt-4">
         <el-tab-pane label="充值订单" name="recharge">
           <MerchantRechargeTable
-            :merchant-id="currentMerchant?.merchantId"
-            @view-detail="handleViewRecharge"
+:merchant-id="currentMerchant?.merchantId" @view-detail="handleViewRecharge"
             @open-refund="handleOpenRefund"
-          />
+/>
         </el-tab-pane>
 
         <el-tab-pane label="资金流水" name="flow">
@@ -167,7 +159,7 @@ defineExpose({ open });
 
         <el-tab-pane label="商户配置" name="config">
           <div v-loading="configLoading" class="config-form">
-            <el-form v-if="configData" :model="configData" label-width="180px" label-position="right">
+            <el-form v-if="configData" :model="configData" label-width="220px" label-position="right">
               <el-form-item label="回收订单审核方式">
                 <el-select v-model="configData.orderWalletSync" placeholder="请选择" style="width: 100%">
                   <el-option label="不需要审核，直接到钱包" :value="0" />
@@ -175,6 +167,29 @@ defineExpose({ open });
                 </el-select>
                 <div class="text-gray-400 text-xs mt-1">选择后影响回收订单的收益结算方式</div>
               </el-form-item>
+
+              <el-form-item label="用户首次订单免审核">
+                <el-radio-group v-model="configData.firstOrderNoAudit">
+                  <el-radio :value="1">是</el-radio>
+                  <el-radio :value="0">否</el-radio>
+                </el-radio-group>
+                <div class="text-gray-400 text-xs ml-2">开启后，用户首次订单无需审核直接入账</div>
+              </el-form-item>
+
+              <el-form-item label="自动审核开关">
+                <el-radio-group v-model="configData.autoAuditEnabled">
+                  <el-radio :value="1">启用</el-radio>
+                  <el-radio :value="0">禁用</el-radio>
+                </el-radio-group>
+                <div class="text-gray-400 text-xs ml-2">开启后，到达设定时间订单自动审核通过</div>
+              </el-form-item>
+
+              <el-form-item v-if="configData.autoAuditEnabled === 1" label="自动审核时间阈值">
+                <el-input-number v-model="configData.autoAuditHours" :min="1" :max="720" style="width: 200px" />
+                <span class="ml-2 text-gray-500">小时</span>
+                <div class="text-gray-400 text-xs m2-1">订单创建超过此时间后自动审核通过，默认 24 小时</div>
+              </el-form-item>
+
               <el-form-item>
                 <el-button type="primary" :loading="configSubmitting" @click="handleSaveConfig">保存配置</el-button>
               </el-form-item>
@@ -185,7 +200,7 @@ defineExpose({ open });
       </el-tabs>
     </div>
 
-    <!-- 底部操作栏（抽屉自带 footer 插槽） -->
+    <!-- 底部操作栏 -->
     <template #footer>
       <div class="drawer-footer">
         <el-button @click="visible = false">关闭</el-button>
@@ -196,7 +211,7 @@ defineExpose({ open });
     </template>
   </el-drawer>
 
-  <!-- 充值订单详情（保持弹窗） -->
+  <!-- 充值订单详情 -->
   <el-dialog v-model="rechargeDetailVisible" title="充值订单详情" width="600px" append-to-body>
     <el-descriptions :column="2" border v-if="rechargeDetail">
       <el-descriptions-item label="充值ID">{{ rechargeDetail.merchantRechargeId }}</el-descriptions-item>
@@ -233,7 +248,6 @@ defineExpose({ open });
 </template>
 
 <style scoped>
-
 .drawer-footer {
   display: flex;
   gap: 8px;
