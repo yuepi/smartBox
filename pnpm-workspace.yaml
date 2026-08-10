@@ -80,6 +80,7 @@ catalog:
   '@tiptap/starter-kit': ^3.23.6
   '@tiptap/vue-3': ^3.23.6
   '@tsdown/css': ^0.22.0
+  '@types/ali-oss': ^6.23.3
   '@types/archiver': ^7.0.0
   '@types/html-minifier-terser': ^7.0.2
   '@types/json-bigint': ^1.0.4
@@ -140,6 +141,7 @@ catalog:
   find-up: ^8.0.0
   get-port: ^7.2.0
   globals: ^17.6.0
+  gsap: ^3.15.0
   h3: ^1.15.11
   happy-dom: ^20.9.0
   html-minifier-terser: ^7.2.0

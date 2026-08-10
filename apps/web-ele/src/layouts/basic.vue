@@ -160,7 +160,6 @@ watch(
 </script>
 
 <template>
-  <!-- <ExportFloatingBall /> -->
   <BasicLayout @clear-preferences-and-logout="handleLogout">
     <template #user-dropdown>
       <UserDropdown

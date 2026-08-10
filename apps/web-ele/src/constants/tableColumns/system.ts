@@ -1,4 +1,5 @@
 // constants/tableColumns/system.ts
+import type { TableColumnConfig } from './types';
 
 // ========== 登录日志 ==========
 export const LOGIN_LOG_STORAGE_KEY = 'login_log_table_columns';

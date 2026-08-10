@@ -1,21 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
-
-import {
-  ArrowRight,
-  Back,
-  Delete,
-  Document,
-  Download,
-  Files,
-  Folder,
-  Upload,
-  View,
-} from "@element-plus/icons-vue";
 import OSS from "ali-oss";
-import { ElLoading, ElMessage, ElMessageBox } from "element-plus";
-
-
 
 // 定义文件/文件夹数据结构
 interface OssItem {
@@ -230,14 +214,12 @@ function handleCreateFolder() {
     .catch(() => {});
 }
 
-// ✨ 宝塔核心逻辑：当文件/文件夹被选择或拖入时触发
+// 当文件/文件夹被选择或拖入时触发
 function handleFileChange(uploadFile: any, uploadFiles: any) {
   console.log(uploadFile, uploadFiles);
-  // 我们只接管 ready 状态的新文件
   if (uploadFile.status !== "ready") return;
 
   const rawFile = uploadFile.raw;
-  // 关键：提取原生的相对路径，如果没有（说明是单文件），则直接用文件名
   const relativePath =
     rawFile.customRelativePath || rawFile.webkitRelativePath || rawFile.name;
   // const relativePath = rawFile.webkitRelativePath || rawFile.name;
@@ -249,7 +231,7 @@ function handleFileChange(uploadFile: any, uploadFiles: any) {
   fileList.value = uploadFiles;
 }
 
-// ✨ 宝塔核心逻辑：移除队列中的某一个文件
+// 移除队列中的某一个文件
 function handleRemoveQueue(file: ExtendedUploadFile) {
   const index = fileList.value.findIndex((item) => item.uid === file.uid);
   if (index !== -1) {
@@ -257,7 +239,7 @@ function handleRemoveQueue(file: ExtendedUploadFile) {
   }
 }
 
-// ✨ 宝塔核心逻辑：点击“开始上传”按钮，触发有序的队列分片同步
+// 点击“开始上传”按钮，触发有序的队列分片同步
 async function startBatchUpload() {
   // 过滤出所有等待上传的文件
   const pendingFiles = fileList.value.filter((f) => f.status === "ready");
@@ -269,7 +251,6 @@ async function startBatchUpload() {
   isUploading.value = true;
   const client = await getOssClient();
 
-  // 像宝塔一样，使用 for 循环严格控制文件一个接一个排队上传，防止并发冲突和疯狂弹窗
   for (let i = 0; i < fileList.value.length; i++) {
     const currentFile = fileList.value[i];
     if (currentFile.status !== "ready") continue;
@@ -364,7 +345,7 @@ async function handleDownload(row: OssItem) {
     const ext = row.name.split(".").pop()?.toLowerCase();
 
     if (ext === "apk") {
-      // ✨ 突破核心：利用 ali-oss SDK 的底层 get 方法直接获取文件的 ArrayBuffer 原始字节
+      // 利用 ali-oss SDK 的底层 get 方法直接获取文件的 ArrayBuffer 原始字节
       // 这样完全不走浏览器的普通 URL 路由，阿里云的公网 APK 过滤器直接失效
       const result = await client.get(row.fullPath);
 
@@ -506,7 +487,7 @@ function handleNativeDrop(e: DragEvent) {
   }, 200);
 }
 
-// ✨ 新增：深度递归解析拖拽文件夹目录树
+// 深度递归解析拖拽文件夹目录树
 function traverseFileTree(item: any, path: string, fileListResult: File[]) {
   path = path || "";
   if (item.isFile) {
@@ -543,7 +524,7 @@ onMounted(() => {
       <div class="path-box">
         <el-button
           :disabled="!currentDir"
-          :icon="Back"
+          icon="Back"
           size="small"
           @click="handleBack"
         >
@@ -556,12 +537,12 @@ onMounted(() => {
       </div>
 
       <div class="action-buttons">
-        <el-button type="success" :icon="Folder" @click="handleCreateFolder">
+        <el-button type="success" icon="Folder" @click="handleCreateFolder">
           新建文件夹
         </el-button>
         <el-button
           type="primary"
-          :icon="Upload"
+          icon="Upload"
           @click="uploadDialogVisible = true"
         >
           上传文件到此目录
@@ -593,7 +574,7 @@ onMounted(() => {
                 plain
                 size="small"
                 :disabled="isUploading"
-                :icon="Files"
+                icon="Files"
               >
                 选择文件
               </el-button>
@@ -614,7 +595,7 @@ onMounted(() => {
                 plain
                 size="small"
                 :disabled="isUploading"
-                :icon="Folder"
+                icon="Folder"
               >
                 选择文件夹
               </el-button>
@@ -765,7 +746,7 @@ onMounted(() => {
             <el-button
               v-if="!scope.row.isFolder"
               type="primary"
-              :icon="View"
+              icon="View"
               circle
               size="small"
               title="查看内容"
@@ -774,7 +755,7 @@ onMounted(() => {
             <el-button
               v-if="!scope.row.isFolder"
               type="success"
-              :icon="Download"
+              icon="Download"
               circle
               size="small"
               title="强行下载"
@@ -782,7 +763,7 @@ onMounted(() => {
             />
             <el-button
               type="danger"
-              :icon="Delete"
+              icon="Delete"
               circle
               size="small"
               title="删除"
@@ -893,7 +874,7 @@ onMounted(() => {
               <el-button
                 type="success"
                 size="small"
-                :icon="Download"
+                icon="Download"
                 @click="handleDownload(activeFileDetail as any)"
               >
                 强制下载到本地查看
@@ -911,7 +892,7 @@ onMounted(() => {
           <el-button
             size="small"
             type="primary"
-            :icon="Download"
+            icon="Download"
             @click="handleDownload(activeFileDetail as any)"
           >
             下载文件
@@ -950,7 +931,6 @@ onMounted(() => {
     }
   }
 
-  // ✨ 宝塔式精美样式重构
   .baota-upload-wrapper {
     display: flex;
     flex-direction: column;
@@ -995,14 +975,12 @@ onMounted(() => {
         display: flex;
         align-items: center;
         justify-content: center;
-        
-        // 确保空提示在 flex 容器下能居中
+
         .empty-drag-tip {
           padding: 0; // 居中了就不需要大 padding 往外撑了，靠 flex 即可
         }
       }
 
-      // ✨ 当文件悬浮在上方时，激活动态高亮特效（高仿宝塔/天蓝色）
       &.is-dragover {
         background-color: #f0f7ff;
         border-color: #409eff;
@@ -1039,8 +1017,7 @@ onMounted(() => {
           }
         }
       }
-
-      // ✨ 复刻宝塔的核心数据滚动网格表格
+      
       .baota-file-table {
         width: 100%;
         font-size: 13px;

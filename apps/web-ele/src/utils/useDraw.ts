@@ -15,10 +15,10 @@ export default function useDraw() {
   const baseHeight = 1080
 
   // * 需保持的比例（默认1.77778）
-  const baseProportion = parseFloat((baseWidth / baseHeight).toFixed(5))
+  const baseProportion = Number.parseFloat((baseWidth / baseHeight).toFixed(5))
   const calcRate = () => {
     // 当前宽高比
-    const currentRate = parseFloat((window.innerWidth / window.innerHeight).toFixed(5))
+    const currentRate = Number.parseFloat((window.innerWidth / window.innerHeight).toFixed(5))
     if (appRef.value) {
       if (currentRate > baseProportion) {
         // 表示更宽
@@ -36,7 +36,7 @@ export default function useDraw() {
 
   const resize = () => {
     clearTimeout(timer.value)
-    timer.value = setTimeout(() => {
+    timer.value = window.setTimeout(() => {
       calcRate()
     }, 200)
   }

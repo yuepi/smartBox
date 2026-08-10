@@ -59,6 +59,7 @@
   },
   "devDependencies": {
     "@iconify-json/ep": "catalog:",
+    "@types/ali-oss": "^6.23.3",
     "@types/qrcode": "catalog:",
     "unplugin-auto-import": "catalog:",
     "unplugin-element-plus": "catalog:",

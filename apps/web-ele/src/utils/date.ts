@@ -34,7 +34,6 @@ export function getRecentDays(days: number) {
  * 获取今天的开始和结束
  */
 export function getToday() {
-  const now = new Date();
   const startDate = new Date();
   startDate.setHours(0, 0, 0, 0);
   
