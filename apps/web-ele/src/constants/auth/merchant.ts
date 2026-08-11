@@ -1,6 +1,6 @@
 // MANAGE为父级路由（目录），ROUTE为子级路由（具体页面），ADD、EDIT、DEL为操作权限
 export const MERCHANT_PERMISSIONS = {
-  /** 用户管理分组 */
+  /** 用户管理（父级目录） */
   USER_GROUP: {
     MANAGE: 'merchant:manage:user', // 父级目录
     USER: {

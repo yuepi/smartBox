@@ -15,6 +15,7 @@ import { defaultDeviceColumns, DEVICE_STORAGE_KEY } from '#/constants/tableColum
 import { ModuleCodeMap } from "#/hooks/useExport";
 
 import DetailModal from './detail.vue';
+import DeviceImagePreview from './deviceImagePreview.vue';
 import EditModal from './edit.vue';
 import IpPortModal from './ipPort.vue';
 import OperateModal from './operation.vue';
@@ -47,6 +48,7 @@ const upgradeModalRef = ref();
 const ipPortModalRef = ref();
 const operateModalRef = ref();
 const qrCodeModalRef = ref();
+const imagePreviewRef = ref();
 
 // --- 状态变量 ---
 const loading = ref(false);
@@ -172,6 +174,11 @@ function handleUpgrade(row: Device) {
   upgradeModalRef.value?.open(row.deviceId);
 }
 
+function handleQuickCapture(row: Device) {
+  // 传入设备ID和操作类型(13=抓拍)
+  imagePreviewRef.value?.open(row.deviceId, 13);
+}
+
 // --- 删除 ---
 async function handleDelete(row?: Device) {
   let ids: number[] = [];
@@ -226,40 +233,26 @@ onMounted(() => {
 <template>
   <Page auto-content-height>
     <BaseTableLayout
-      v-model:query-params="queryParams"
-      v-model:more-params="moreParams"
-      :loading="loading"
-      :total="total"
-      @search="loadData"
-      @reset="resetQuery"
-    >
+v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="loading"
+      :total="total" @search="loadData" @reset="resetQuery"
+>
       <!-- 📥 基础常驻筛选项 -->
       <template #search-basic>
         <el-form-item>
           <el-tree-select
-            v-model="queryParams.deptId"
-            :data="deptOptions"
-            :props="{
-              value: 'deptId',
-              label: 'deptName',
-              children: 'children',
-            }"
-            placeholder="请选择"
-            clearable
-            check-strictly
-            style="width: 200px"
-            class="tree-prefix-dept"
-          />
+v-model="queryParams.deptId" :data="deptOptions" :props="{
+            value: 'deptId',
+            label: 'deptName',
+            children: 'children',
+          }" placeholder="请选择" clearable check-strictly style="width: 200px" class="tree-prefix-dept"
+/>
         </el-form-item>
 
         <el-form-item>
           <el-input
-            v-model="queryParams.deviceName"
-            placeholder="请输入"
-            clearable
-            style="width: 200px"
+v-model="queryParams.deviceName" placeholder="请输入" clearable style="width: 200px"
             @keyup.enter="handleQuery"
-          >
+>
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">设备名称:</span>
             </template>
@@ -268,12 +261,9 @@ onMounted(() => {
 
         <el-form-item>
           <el-input
-            v-model="queryParams.deviceNo"
-            placeholder="请输入"
-            clearable
-            style="width: 200px"
+v-model="queryParams.deviceNo" placeholder="请输入" clearable style="width: 200px"
             @keyup.enter="handleQuery"
-          >
+>
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">设备编号:</span>
             </template>
@@ -282,12 +272,9 @@ onMounted(() => {
 
         <el-form-item>
           <el-input
-            v-model="queryParams.qrCode"
-            placeholder="请输入"
-            clearable
-            style="width: 200px"
+v-model="queryParams.qrCode" placeholder="请输入" clearable style="width: 200px"
             @keyup.enter="handleQuery"
-          >
+>
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">面贴编号:</span>
             </template>
@@ -302,12 +289,7 @@ onMounted(() => {
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">在线状态:</span>
             </template>
-            <el-option
-              v-for="item in device_online_status"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
+            <el-option v-for="item in device_online_status" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
 
@@ -316,12 +298,7 @@ onMounted(() => {
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">状态:</span>
             </template>
-            <el-option
-              v-for="item in device_status"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
+            <el-option v-for="item in device_status" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
       </template>
@@ -331,28 +308,17 @@ onMounted(() => {
         <el-button type="primary" plain icon="Plus" @click="handleAdd">
           新增设备
         </el-button>
-        <ExportButton
-          :module-code="ModuleCodeMap.DEVICE"
-          :fields="visibleColumns"
-          :find-cond="queryParams"
-        />
-        <el-button
-          type="danger"
-          plain
-          icon="Delete"
-          :disabled="selectedIds.length === 0"
-          @click="handleDelete()"
-        >
+        <ExportButton :module-code="ModuleCodeMap.DEVICE" :fields="visibleColumns" :find-cond="queryParams" />
+        <el-button type="danger" plain icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete()">
           批量删除
         </el-button>
 
-        <el-dropdown
-          v-if="selectedIds.length > 0"
-          @command="handleBatchQrcodeCommand"
-        >
+        <el-dropdown v-if="selectedIds.length > 0" @command="handleBatchQrcodeCommand">
           <el-button type="primary" plain>
             批量二维码
-            <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+            <el-icon class="el-icon--right">
+              <ArrowDown />
+            </el-icon>
           </el-button>
           <template #dropdown>
             <el-dropdown-menu>
@@ -374,33 +340,24 @@ onMounted(() => {
       <!-- 📥 工具栏右侧 -->
       <template #toolbar-right>
         <ColumnSelector
-          :storage-key="DEVICE_STORAGE_KEY"
-          :default-columns="defaultDeviceColumns"
+:storage-key="DEVICE_STORAGE_KEY" :default-columns="defaultDeviceColumns"
           @update:columns="handleColumnsUpdate"
-        />
+/>
       </template>
 
       <!-- 📥 表格 -->
       <template #table>
         <el-table
-          :data="tableData"
-          border
-          stripe
-          style="width: 100%; height: 100%"
+:data="tableData" border stripe style="width: 100%; height: 100%"
           @selection-change="handleSelectionChange"
-        >
+>
           <el-table-column type="selection" width="55" align="center" />
 
           <el-table-column
-            v-for="col in visibleColumns"
-            :key="col.key"
-            :prop="col.key"
-            :label="col.label"
-            :width="typeof col.width === 'number' ? col.width : undefined"
-            :min-width="col.minWidth"
-            :align="col.align"
+v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
+            :width="typeof col.width === 'number' ? col.width : undefined" :min-width="col.minWidth" :align="col.align"
             :show-overflow-tooltip="col.showOverflowTooltip || false"
-          >
+>
             <template #default="{ row }">
               <template v-if="col.key === 'deviceHatchType'">
                 <DictTag :options="device_hatch_type" :value="row.deviceHatchType" />
@@ -418,11 +375,9 @@ onMounted(() => {
                 <div class="flex items-center justify-center gap-1">
                   <span>{{ row.qrCode || "-" }}</span>
                   <el-icon
-                    v-if="row.qrCode"
-                    class="cursor-pointer text-primary hover:text-primary-dark"
-                    title="查看二维码"
+v-if="row.qrCode" class="cursor-pointer text-primary hover:text-primary-dark" title="查看二维码"
                     @click.stop="handleQrcodeShow(row)"
-                  >
+>
                     <Picture />
                   </el-icon>
                 </div>
@@ -444,6 +399,10 @@ onMounted(() => {
                 </el-tooltip>
                 <el-tooltip content="编辑" placement="top" :enterable="false">
                   <el-button link type="primary" icon="Edit" @click="handleEdit(row)" />
+                </el-tooltip>
+                <!-- 桶内抓拍 -->
+                <el-tooltip content="桶内抓拍" placement="top" :enterable="false">
+                  <el-button link type="primary" icon="Camera" @click="handleQuickCapture(row)" />
                 </el-tooltip>
                 <el-tooltip content="删除" placement="top" :enterable="false">
                   <el-button link type="danger" icon="Delete" @click="handleDelete(row)" />
@@ -473,6 +432,7 @@ onMounted(() => {
     <IpPortModal ref="ipPortModalRef" />
     <OperateModal ref="operateModalRef" />
     <QrcodeModal ref="qrCodeModalRef" />
+    <DeviceImagePreview ref="imagePreviewRef" />
   </Page>
 </template>
 
@@ -505,6 +465,4 @@ onMounted(() => {
   content: "部门:";
   transform: translateY(-50%);
 }
-
-
 </style>

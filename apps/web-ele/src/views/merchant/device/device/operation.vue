@@ -5,11 +5,14 @@ import type { DeviceHatch } from '#/api/device/deviceHatch';
 import { operateDeviceApi } from '#/api/device/device';
 import { getDeviceHatchListApi } from '#/api/device/deviceHatch';
 
+import DeviceImagePreview from './deviceImagePreview.vue';
+
 const emit = defineEmits<{
   (e: 'success', deviceId: number, opType: number): void;
 }>();
 const visible = ref(false);
 const loading = ref(false);
+const imagePreviewRef = ref();
 
 // 操作数据
 const deviceId = ref<number>(0);
@@ -33,6 +36,7 @@ const operationTypeOptions = [
   { label: '满溢上报', value: 10, needHatch: true },
   { label: '满溢解除', value: 11, needHatch: true },
   { label: '开门行程', value: 12, needHatch: false },
+  { label: '桶内抓拍', value: 13, needHatch: false },
 ];
 
 // --- 获取仓口列表 ---
@@ -65,6 +69,15 @@ async function open(row: Device) {
 // --- 提交 ---
 async function handleSubmit() {
   const opType = operationType.value;
+  const isImageOp = opType === 7 || opType === 13;
+  if (isImageOp) {
+    visible.value = false;
+    imagePreviewRef.value?.open(
+      deviceId.value,
+      opType,
+    );
+    return;
+  }
   const params: any = {
     operateType: opType,
     deviceId: deviceId.value,
@@ -128,4 +141,7 @@ defineExpose({ open });
       <el-button type="primary" :loading="loading" @click="handleSubmit">确定</el-button>
     </template>
   </el-dialog>
+
+  <!-- 图片预览弹窗 -->
+  <DeviceImagePreview ref="imagePreviewRef" @success="() => { /* 刷新列表等 */ }" />
 </template>
