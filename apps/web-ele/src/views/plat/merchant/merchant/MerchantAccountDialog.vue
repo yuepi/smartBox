@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { Merchant, MerchantConfig, MerchantRecharge } from '#/api/system/merchant';
+import type { Merchant, MerchantRecharge } from '#/api/system/merchant';
 
 import {
   editPlatMerchantConfigApi,
@@ -14,8 +14,6 @@ import RefundDialog from './RefundDialog.vue';
 // --- 状态 ---
 const visible = ref(false);
 const loading = ref(false);
-const configLoading = ref(false);
-const configSubmitting = ref(false);
 const currentMerchant = ref<Merchant | null>(null);
 const accountDetail = ref<null | {
   balance: number;
@@ -23,7 +21,6 @@ const accountDetail = ref<null | {
   merchantId: number;
   status: number;
 }>(null);
-const configData = ref<MerchantConfig | null>(null);
 const activeTab = ref('recharge');
 
 // 充值订单详情
@@ -55,42 +52,18 @@ function formatBalance(balance: number): string {
 async function loadData(merchantId: number) {
   loading.value = true;
   try {
-    const [accountRes, configRes] = await Promise.all([
-      getPlatMerchantAccountApi(merchantId),
-      getPlatMerchantConfigDetailApi(merchantId),
-    ]);
+    const accountRes = await getPlatMerchantAccountApi(merchantId);
+  
     accountDetail.value = accountRes || {
       merchantAccountId: 0,
       merchantId,
       balance: 0,
       status: 1,
     };
-    configData.value = configRes;
   } catch {
     ElMessage.error('获取账户信息失败');
   } finally {
     loading.value = false;
-  }
-}
-
-// --- 保存配置 ---
-async function handleSaveConfig() {
-  if (!configData.value) return;
-  configSubmitting.value = true;
-  try {
-    await editPlatMerchantConfigApi({
-      merchantConfigId: configData.value.merchantConfigId,
-      orderWalletSync: configData.value.orderWalletSync,
-      status: configData.value.status,
-      firstOrderNoAudit: configData.value.firstOrderNoAudit,
-      autoAuditEnabled: configData.value.autoAuditEnabled,
-      autoAuditHours: configData.value.autoAuditHours,
-    });
-    ElMessage.success('保存成功');
-  } catch {
-    ElMessage.error('保存失败');
-  } finally {
-    configSubmitting.value = false;
   }
 }
 
@@ -148,61 +121,27 @@ v-model="visible" :title="`账户详情 - ${currentMerchant?.merchantName}`" siz
       <el-tabs v-model="activeTab" class="mt-4">
         <el-tab-pane label="充值订单" name="recharge">
           <MerchantRechargeTable
-:merchant-id="currentMerchant?.merchantId" @view-detail="handleViewRecharge"
+:merchant-id="currentMerchant!.merchantId" @view-detail="handleViewRecharge"
             @open-refund="handleOpenRefund"
 />
         </el-tab-pane>
 
         <el-tab-pane label="资金流水" name="flow">
-          <MerchantFlowTable :merchant-id="currentMerchant?.merchantId" />
+          <MerchantFlowTable :merchant-id="currentMerchant!.merchantId" />
         </el-tab-pane>
 
         <el-tab-pane label="商户配置" name="config">
-          <div v-loading="configLoading" class="config-form">
-            <el-form v-if="configData" :model="configData" label-width="220px" label-position="right">
-              <el-form-item label="回收订单审核方式">
-                <el-select v-model="configData.orderWalletSync" placeholder="请选择" style="width: 100%">
-                  <el-option label="不需要审核，直接到钱包" :value="0" />
-                  <el-option label="需要审核，到预计收益" :value="1" />
-                </el-select>
-                <div class="text-gray-400 text-xs mt-1">选择后影响回收订单的收益结算方式</div>
-              </el-form-item>
-
-              <el-form-item label="用户首次订单免审核">
-                <el-radio-group v-model="configData.firstOrderNoAudit">
-                  <el-radio :value="1">是</el-radio>
-                  <el-radio :value="0">否</el-radio>
-                </el-radio-group>
-                <div class="text-gray-400 text-xs ml-2">开启后，用户首次订单无需审核直接入账</div>
-              </el-form-item>
-
-              <el-form-item label="自动审核开关">
-                <el-radio-group v-model="configData.autoAuditEnabled">
-                  <el-radio :value="1">启用</el-radio>
-                  <el-radio :value="0">禁用</el-radio>
-                </el-radio-group>
-                <div class="text-gray-400 text-xs ml-2">开启后，到达设定时间订单自动审核通过</div>
-              </el-form-item>
-
-              <el-form-item v-if="configData.autoAuditEnabled === 1" label="自动审核时间阈值">
-                <el-input-number v-model="configData.autoAuditHours" :min="1" :max="720" style="width: 200px" />
-                <span class="ml-2 text-gray-500">小时</span>
-                <div class="text-gray-400 text-xs m2-1">订单创建超过此时间后自动审核通过，默认 24 小时</div>
-              </el-form-item>
-
-              <el-form-item>
-                <el-button type="primary" :loading="configSubmitting" @click="handleSaveConfig">保存配置</el-button>
-              </el-form-item>
-            </el-form>
-            <el-empty v-else description="暂无配置信息" />
-          </div>
+          <MerchantConfigForm
+:merchant-id="currentMerchant!.merchantId"
+            :get-config-api="getPlatMerchantConfigDetailApi" :save-config-api="editPlatMerchantConfigApi"
+/>
         </el-tab-pane>
       </el-tabs>
     </div>
 
     <!-- 底部操作栏 -->
     <template #footer>
-      <div class="drawer-footer">
+      <div class="flex justify-end gap-2 px-4 py-2">
         <el-button @click="visible = false">关闭</el-button>
         <el-button type="primary" @click="currentMerchant && loadData(currentMerchant.merchantId)" :loading="loading">
           刷新
@@ -246,11 +185,3 @@ v-model="visible" :title="`账户详情 - ${currentMerchant?.merchantName}`" siz
   <!-- 退款弹窗 -->
   <RefundDialog ref="refundDialogRef" />
 </template>
-
-<style scoped>
-.drawer-footer {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-}
-</style>

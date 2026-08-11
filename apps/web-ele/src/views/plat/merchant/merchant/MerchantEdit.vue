@@ -3,8 +3,6 @@ import type { Merchant } from '#/api/system/merchant';
 
 import { getPlatMenuListApi } from '#/api/system/menu';
 import { addPlatMerchantApi, editPlatMerchantApi, getPlatMerchantDetailApi } from '#/api/system/merchant';
-import AreaCascader from '#/components/AreaCascader/index.vue';
-import MapPicker from '#/components/MapPicker/index.vue';
 
 const emit = defineEmits<{
   (e: 'success'): void;
@@ -21,6 +19,15 @@ const areaCodes = ref('');
 const menuTreeRef = ref();
 const menuTreeData = ref<any[]>([]);
 const menuLoading = ref(false);
+const logoList = computed({
+  get: () => {
+    if (!formData.value.logo) return []
+    return [formData.value.logo]
+  },
+  set: (val: string[]) => {
+    formData.value.logo = val.length > 0 ? val[0] : ''
+  },
+})
 
 const formData = ref<Partial<Merchant>>({
   status: 0,
@@ -185,7 +192,6 @@ async function handleSubmit() {
     formData.value.cityCode = cityCode;
     formData.value.districtCode = districtCode;
   }
-  formData.value.areaCodes = areaCodes.value;
 
   loading.value = true;
   try {
@@ -205,6 +211,7 @@ async function handleSubmit() {
 function resetForm() {
   if (formRef.value) formRef.value.resetFields();
   location.value = null;
+  logoList.value = [];
   areaCodes.value = '';
 }
 
@@ -246,7 +253,8 @@ defineExpose({ open });
               </el-row>
 
               <el-form-item label="商户Logo">
-                <el-input v-model="formData.logo" placeholder="请输入Logo图片URL" />
+                <UploadImage v-model="logoList" :limit="1" :file-size="5" :file-type="['png', 'jpg', 'jpeg']" />
+                <div class="text-gray-400 text-xs mt-1">建议尺寸：200*200px，支持png、jpg、jpeg格式，大小不超过5MB</div>
               </el-form-item>
 
               <el-form-item label="区域">
@@ -261,25 +269,17 @@ defineExpose({ open });
                 <el-col :span="12">
                   <el-form-item label="经度">
                     <el-input-number
-                      v-model="formData.longitude"
-                      :precision="6"
-                      :step="0.000001"
-                      placeholder="经度"
-                      :controls="false"
-                      style="width: 100%"
-                    />
+v-model="formData.longitude" :precision="6" :step="0.000001" placeholder="经度"
+                      :controls="false" style="width: 100%"
+/>
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
                   <el-form-item label="纬度">
                     <el-input-number
-                      v-model="formData.latitude"
-                      :precision="6"
-                      :step="0.000001"
-                      placeholder="纬度"
-                      :controls="false"
-                      style="width: 100%"
-                    />
+v-model="formData.latitude" :precision="6" :step="0.000001" placeholder="纬度"
+                      :controls="false" style="width: 100%"
+/>
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -306,15 +306,10 @@ defineExpose({ open });
         <div class="menu-permission-wrapper">
           <div class="menu-tip">提示：勾选下方菜单，设置商户可访问的菜单权限</div>
           <el-tree
-            ref="menuTreeRef"
-            :data="menuTreeData"
-            show-checkbox
-            node-key="menuId"
-            :props="{ label: 'menuName', children: 'children' }"
-            :default-checked-keys="formData.merchantMenuIds"
-            default-expand-all
-            class="menu-tree"
-          />
+ref="menuTreeRef" :data="menuTreeData" show-checkbox node-key="menuId"
+            :props="{ label: 'menuName', children: 'children' }" :default-checked-keys="formData.merchantMenuIds"
+            default-expand-all class="menu-tree"
+/>
         </div>
       </el-tab-pane>
     </el-tabs>

@@ -2,9 +2,10 @@
 import { Page } from '@vben/common-ui';
 import { useUserStore } from '@vben/stores';
 
+import { editMerchantConfigApi, getMerchantConfigDetailApi } from '#/api/system/merchant';
+
 import MerchantAccountInfo from './MerchantAccountInfo.vue';
 import MerchantBasicInfo from './MerchantBasicInfo.vue';
-import MerchantConfigTab from './MerchantConfigTab.vue';
 import MerchantFlowTable from './MerchantFlowTable.vue';
 import MerchantRechargeTable from './MerchantRechargeTable.vue';
 
@@ -142,7 +143,11 @@ onMounted(async () => {
           </el-tab-pane>
 
           <el-tab-pane label="商户配置" name="config">
-            <MerchantConfigTab :merchant-id="merchantId" />
+            <MerchantConfigForm
+  :merchant-id="merchantId"
+  :get-config-api="getMerchantConfigDetailApi"
+  :save-config-api="editMerchantConfigApi"
+/>
           </el-tab-pane>
         </el-tabs>
       </el-card>

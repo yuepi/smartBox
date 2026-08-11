@@ -9,7 +9,7 @@ import { defaultMerchantColumns, MERCHANT_STORAGE_KEY } from '#/constants/tableC
 import { ModuleCodeMap } from '#/hooks/useExport';
 
 import MerchantAccountDialog from './MerchantAccountDialog.vue';
-import MerchantForm from './MerchantForm.vue';
+import MerchantEdit from './MerchantEdit.vue';
 import MigrationDialog from './MigrationDialog.vue';
 
 // --- 表格列配置 ---
@@ -299,7 +299,7 @@ onMounted(() => {
     </BaseTableLayout>
 
     <!-- ===== 弹窗们 ===== -->
-    <MerchantForm ref="merchantFormRef" @success="handleQuery" />
+    <MerchantEdit ref="merchantFormRef" @success="handleQuery" />
     <MerchantAccountDialog ref="accountDialogRef" />
     <MigrationDialog ref="migrationDialogRef" @success="handleQuery" />
   </Page>
