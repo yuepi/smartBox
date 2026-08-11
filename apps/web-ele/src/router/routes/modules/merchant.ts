@@ -1,5 +1,6 @@
 import type { RouteRecordRaw } from 'vue-router';
 
+import { PERMISSIONS } from '#/constants/auth';
 import { $t } from '#/locales';
 
 const routes: RouteRecordRaw[] = [
@@ -11,7 +12,7 @@ const routes: RouteRecordRaw[] = [
       icon: 'lucide:settings',
       title: $t('page.merchant.title') || '商户管理',
       order: 90,
-      authority: ['plat:manage:merchant'],
+      authority: [PERMISSIONS.PLAT.MERCHANT.MANAGE],
     },
     children: [
       {
@@ -21,7 +22,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           icon: 'lucide:store',
           title: $t('page.merchant.merchant') || '商户管理',
-          authority: ['plat:merchant'],
+          authority: [PERMISSIONS.PLAT.MERCHANT.MERCHANT.ROUTE],
         },
       }
     ],
@@ -34,7 +35,7 @@ const routes: RouteRecordRaw[] = [
       icon: 'lucide:store',
       title: $t('page.merchant.center') || '商户中心',
       order: 90,
-      authority: ['merchant:manage:merchant'],
+      authority: [PERMISSIONS.MERCHANT.MERCHANT.MANAGE],
     },
     children: [
       {
@@ -44,7 +45,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           icon: 'lucide:settings',
           title: $t('page.merchant.info') || '商户信息',
-          authority: ['merchant:merchant:detail'],
+          authority: [PERMISSIONS.MERCHANT.MERCHANT.INFO.ROUTE],
         },
       },
     ],

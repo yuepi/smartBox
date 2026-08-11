@@ -1,5 +1,6 @@
 import type { RouteRecordRaw } from 'vue-router';
 
+import { PERMISSIONS } from '#/constants/auth';
 import { $t } from '#/locales';
 
 const routes: RouteRecordRaw[] = [
@@ -8,7 +9,7 @@ const routes: RouteRecordRaw[] = [
       icon: 'lucide:cpu',
       title: $t('page.device.title') || '设备管理',
       order: 10,
-      authority: ['merchant:manage:device'],
+      authority: [PERMISSIONS.MERCHANT.DEVICE.MANAGE],
     },
     name: 'DeviceManagement',
     path: 'merchant/device',
@@ -21,7 +22,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           icon: 'lucide:box',
           title: $t('page.device.list') || '设备管理',
-          authority: ['merchant:device'],
+          authority: [PERMISSIONS.MERCHANT.DEVICE.LIST.ROUTE],
         },
       },
       {
@@ -31,7 +32,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           icon: 'lucide:settings',
           title: $t('page.device.config') || '设备配置',
-          authority: ['merchant:device:config'],
+          authority: [PERMISSIONS.MERCHANT.DEVICE.CONFIG.ROUTE],
         },
       },
       {
@@ -41,7 +42,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           icon: 'lucide:layout-grid',
           title: $t('page.device.hatch') || '仓口配置',
-          authority: ['merchant:device:hatch'],
+          authority: [PERMISSIONS.MERCHANT.DEVICE.HATCH.ROUTE],
         },
       },
       {
@@ -51,7 +52,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           icon: 'lucide:shopping-bag',
           title: $t('page.device.bag') || '包袋管理',
-          authority: ['merchant:device:bag'],
+          authority: [PERMISSIONS.MERCHANT.DEVICE.BAG.ROUTE],
         },
       },
       {
@@ -61,7 +62,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           icon: 'lucide:calculator',
           title: $t('page.device.package') || '计费套餐',
-          authority: ['merchant:device:package'],
+          authority: [PERMISSIONS.MERCHANT.DEVICE.PACKAGE.ROUTE],
         },
       },
       {
@@ -71,7 +72,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           icon: 'lucide:alert-triangle',
           title: $t('page.device.fault') || '设备故障',
-          authority: ['merchant:device:fault'],
+          authority: [PERMISSIONS.MERCHANT.DEVICE.FAULT.ROUTE],
         },
       },
       {
@@ -81,7 +82,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           icon: 'lucide:qr-code',
           title: $t('page.device.qrCode') || '二维码',
-          authority: ['merchant:qrcode'],
+          authority: [PERMISSIONS.MERCHANT.DEVICE.QRCODE.ROUTE],
         },
       },
     ],

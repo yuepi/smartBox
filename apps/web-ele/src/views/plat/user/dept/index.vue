@@ -8,6 +8,7 @@ import { Page } from '@vben/common-ui';
 import { Delete, Edit, Folder, HomeFilled, OfficeBuilding, Plus } from "@element-plus/icons-vue";
 
 import { deletePlatDeptApi, getPlatDeptListApi } from '#/api/system/dept';
+import { PERMISSIONS } from '#/constants/auth';
 import { defaultDeptColumns, DEPT_STORAGE_KEY } from '#/constants/tableColumns';
 import { ModuleCodeMap } from "#/hooks/useExport";
 
@@ -98,25 +99,23 @@ const tableColumns = computed(() => {
     {
       key: 'operate',
       title: '操作',
-      width: 120, // 🌟 换成纯图标后，操作列宽度从 280 完美缩减至 120！
+      width: 120, 
       align: 'center',
       fixed: 'right' as const,
       cellRenderer: ({ rowData }: { rowData: Dept }) => (
         <div class="flex w-full justify-center gap-1">
-          {/* 1. 新增按钮 */}
-          {hasAccessByCodes(['plat:dept:add']) && (
+          {/* 使用变量校验权限 */}
+          {hasAccessByCodes([PERMISSIONS.PLAT.USER_GROUP.DEPT.ADD]) && (
             <ElTooltip content="新增下级" enterable={false} placement="top">
               <ElButton icon={Plus} link onClick={() => handleOpenModal({ parentId: rowData.deptId, deptType: 1, status: 0, sort: 0 })} type="primary" />
             </ElTooltip>
           )}
-          {/* 2. 修改按钮 */}
-          {hasAccessByCodes(['plat:dept:edit']) && (
+          {hasAccessByCodes([PERMISSIONS.PLAT.USER_GROUP.DEPT.EDIT]) && (
             <ElTooltip content="修改" enterable={false} placement="top">
               <ElButton icon={Edit} link onClick={() => handleOpenModal(rowData)} type="primary" />
             </ElTooltip>
           )}
-          {/* 3. 删除按钮： */}
-          {hasAccessByCodes(['plat:dept:del']) && (
+          {hasAccessByCodes([PERMISSIONS.PLAT.USER_GROUP.DEPT.DEL]) && (
             <ElTooltip content="删除" enterable={false} placement="top">
               <ElButton icon={Delete} link onClick={() => handleDelete(rowData)} type="primary" />
             </ElTooltip>
@@ -218,7 +217,7 @@ v-for="item in [{ label: '启用', value: 0 }, { label: '禁用', value: 1 }]" :
       </template>
 
       <template #toolbar-left>
-        <ElButton type="primary" plain icon="Plus" @click="handleOpenModal()" v-access:code="['plat:dept:add']">
+        <ElButton type="primary" plain icon="Plus" @click="handleOpenModal()" v-access:code="[PERMISSIONS.PLAT.USER_GROUP.DEPT.ADD]">
           新增部门
         </ElButton>
         <ExportButton :module-code="ModuleCodeMap.DEPT" :fields="visibleColumns" :find-cond="queryParams" />

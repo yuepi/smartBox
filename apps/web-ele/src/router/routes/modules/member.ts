@@ -1,5 +1,6 @@
 import type { RouteRecordRaw } from 'vue-router';
 
+import { PERMISSIONS } from '#/constants/auth';
 import { $t } from '#/locales';
 
 const routes: RouteRecordRaw[] = [
@@ -8,7 +9,7 @@ const routes: RouteRecordRaw[] = [
       icon: 'lucide:users',
       title: $t('page.member.title') || '会员财务',
       order: 30,
-      authority: ['merchant:manage:finance'],
+      authority: [PERMISSIONS.MERCHANT.MEMBER.MANAGE],
     },
     name: 'MemberManagement',
     path: 'merchant/member',
@@ -21,27 +22,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           icon: 'lucide:user-round',
           title: $t('page.member.list') || '会员列表',
-          authority: ['merchant:member:list'],
-        },
-      },
-      {
-        name: 'MemberWallet',
-        path: '/wallet',
-        component: () => import('#/views/merchant/member/wallet/index.vue'),
-        meta: {
-          icon: 'lucide:wallet',
-          title: $t('page.member.wallet') || '会员钱包',
-          authority: ['merchant:member:wallet'],
-        },
-      },
-      {
-        name: 'MemberWalletFlow',
-        path: '/walletFlow',
-        component: () => import('#/views/merchant/member/walletFlow/index.vue'),
-        meta: {
-          icon: 'lucide:repeat',
-          title: $t('page.member.walletFlow') || '会员流水',
-          authority: ['merchant:member:flow'],
+          authority: [PERMISSIONS.MERCHANT.MEMBER.LIST.ROUTE],
         },
       },
       {
@@ -51,7 +32,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           icon: 'lucide:banknote',
           title: $t('page.member.withdraw') || '提现审核',
-          authority: ['merchant:member:withdraw'],
+          authority: [PERMISSIONS.MERCHANT.MEMBER.WITHDRAW.ROUTE],
         },
       },
     ],

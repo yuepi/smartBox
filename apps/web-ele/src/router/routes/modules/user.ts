@@ -1,5 +1,6 @@
 import type { RouteRecordRaw } from 'vue-router';
 
+import { PERMISSIONS } from '#/constants/auth';
 import { $t } from '#/locales';
 
 const routes: RouteRecordRaw[] = [
@@ -11,7 +12,7 @@ const routes: RouteRecordRaw[] = [
       icon: 'lucide:settings',
       title: $t('page.user.title') || '用户管理',
       order: 100,
-      authority: ['plat:manage:user'],
+      authority: [PERMISSIONS.PLAT.USER_GROUP.MANAGE],
     },
     children: [
       {
@@ -21,7 +22,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           icon: 'lucide:users',
           title: $t('page.user.user') || '用户管理',
-          authority: ['plat:user'],
+          authority: [PERMISSIONS.PLAT.USER_GROUP.USER.ROUTE],
         },
       },
       {
@@ -31,7 +32,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           icon: 'lucide:shield-check',
           title: $t('page.user.role') || '角色管理',
-          authority: ['plat:role'],
+          authority: [PERMISSIONS.PLAT.USER_GROUP.ROLE.ROUTE],
         },
       },
       {
@@ -41,7 +42,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           icon: 'lucide:menu',
           title: $t('page.user.menu') || '菜单管理',
-          authority: ['plat:menu'],
+          authority: [PERMISSIONS.PLAT.USER_GROUP.MENU.ROUTE],
         },
       },
       {
@@ -51,7 +52,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           icon: 'lucide:network',
           title: $t('page.user.dept') || '部门管理',
-          authority: ['plat:dept'],
+          authority: [PERMISSIONS.PLAT.USER_GROUP.DEPT.ROUTE],
         },
       },
     ],
@@ -64,7 +65,7 @@ const routes: RouteRecordRaw[] = [
       icon: 'lucide:settings',
       title: $t('page.user.title') || '用户管理',
       order: 100,
-      authority: ['merchant:manage:user'],
+      authority: [PERMISSIONS.MERCHANT.USER_GROUP.MANAGE],
     },
     children: [
       {
@@ -74,7 +75,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           icon: 'lucide:users',
           title: $t('page.user.user') || '用户管理',
-          authority: ['merchant:user'],
+          authority: [PERMISSIONS.MERCHANT.USER_GROUP.USER.ROUTE],
         },
       },
       {
@@ -84,7 +85,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           icon: 'lucide:shield-check',
           title: $t('page.user.role') || '角色管理',
-          authority: ['merchant:role'],
+          authority: [PERMISSIONS.MERCHANT.USER_GROUP.ROLE.ROUTE],
         },
       },
       {
@@ -94,7 +95,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           icon: 'lucide:menu',
           title: $t('page.user.menu') || '菜单管理',
-          authority: ['merchant:menu'],
+          authority: [PERMISSIONS.MERCHANT.USER_GROUP.MENU.ROUTE],
         },
       },
       {
@@ -104,7 +105,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           icon: 'lucide:network',
           title: $t('page.user.dept') || '部门管理',
-          authority: ['merchant:dept'],
+          authority: [PERMISSIONS.MERCHANT.USER_GROUP.DEPT.ROUTE],
         },
       },
     ],
