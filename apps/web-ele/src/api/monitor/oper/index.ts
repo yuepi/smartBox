@@ -53,6 +53,8 @@ export interface OperLogPageResult {
 
 // 通用响应结构
 export interface ApiResponse<T> {
+  records: never[];
+  total: number;
   code: number;
   message: string;
   module: string;

@@ -30,6 +30,8 @@ export interface UserPageParams {
   pageSize: number;
   userId?: number;
   nickName?: string;
+  phone?: string;
+  userName?: string;
   email?: string;
   sex?: number;
   superAdminFlag?: number;

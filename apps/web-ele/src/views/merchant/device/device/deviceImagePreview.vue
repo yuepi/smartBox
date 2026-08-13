@@ -97,8 +97,10 @@ const open = async (id: number, type: 7 | 13) => {
       globalLoading.value = false;
 
       const url = await pollImageForHatch(id, type, undefined, 0, 'screen');
-      imageList.value[0].imageUrl = url;
-      imageList.value[0].loading = false;
+      if (imageList.value[0]) {
+        imageList.value[0].imageUrl = url;
+        imageList.value[0].loading = false;
+      }
       return;
     }
 
@@ -112,8 +114,10 @@ const open = async (id: number, type: 7 | 13) => {
       globalLoading.value = false;
 
       const url = await pollImageForHatch(id, type, undefined, 0, 'no-hatch');
-      imageList.value[0].imageUrl = url;
-      imageList.value[0].loading = false;
+      if (imageList.value[0]) {
+        imageList.value[0].imageUrl = url;
+        imageList.value[0].loading = false;
+      }
     } else {
       // 查到几个仓口，就自动并发请求几个仓口
       imageList.value = hatches.map((h) => ({
@@ -165,6 +169,13 @@ const handleRetryItem = async (index: number) => {
   } finally {
     item.loading = false;
   }
+};
+
+// 预览图片
+const handlePreviewImage = () => {
+  const item = imageList.value[Number(activeTab.value)];
+  if (!item) return;
+  window.open(item.imageUrl, '_blank');
 };
 
 const handleClose = () => {
@@ -246,7 +257,7 @@ defineExpose({ open, close: handleClose });
       <el-button
         v-if="imageList[Number(activeTab)]?.imageUrl"
         type="primary"
-        @click="window.open(imageList[Number(activeTab)].imageUrl, '_blank')"
+        @click="handlePreviewImage"
       >
         查看原图
       </el-button>

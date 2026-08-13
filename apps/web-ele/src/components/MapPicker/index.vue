@@ -91,8 +91,8 @@ const loadMap = async () => {
  */
 function transformAdcodeToPath(adcode: string): string {
   if (!adcode || adcode.length !== 6) return "";
-  const province = adcode.slice(0, 2) + "0000";
-  const city = adcode.slice(0, 4) + "00";
+  const province = `${adcode.slice(0, 2)}0000`;
+  const city = `${adcode.slice(0, 4)}00`;
   const district = adcode;
   return `${province},${city},${district}`;
 }
@@ -288,12 +288,9 @@ onBeforeUnmount(() => {
     <!-- 搜索框 + 定位按钮 -->
     <div class="map-search">
       <el-input
-        v-model="searchKeyword"
-        placeholder="搜索地点"
-        clearable
-        @keyup.enter="handleSearch"
+v-model="searchKeyword" placeholder="搜索地点" clearable @keyup.enter="handleSearch"
         @clear="handleClearSearch"
-      >
+>
         <template #prefix>
           <el-icon>
             <Search />
@@ -306,13 +303,9 @@ onBeforeUnmount(() => {
 
       <!-- 🌟 定位按钮 -->
       <el-button
-        class="location-btn"
-        icon="Location"
-        :loading="locationLoading"
-        circle
-        title="定位到当前位置"
+class="location-btn" icon="Location" :loading="locationLoading" circle title="定位到当前位置"
         @click="handleGetLocation"
-      />
+/>
 
       <!-- 搜索结果列表 -->
       <div v-if="searchResults.length > 0" class="search-results-wrapper">
@@ -324,12 +317,7 @@ onBeforeUnmount(() => {
           </el-icon>
         </div>
         <div v-show="showResults" class="search-results">
-          <div
-            v-for="(item, index) in searchResults"
-            :key="index"
-            class="result-item"
-            @click="selectResult(item)"
-          >
+          <div v-for="(item, index) in searchResults" :key="index" class="result-item" @click="selectResult(item)">
             <div class="result-name">{{ item.name }}</div>
             <div class="result-address">{{ item.address }}</div>
           </div>

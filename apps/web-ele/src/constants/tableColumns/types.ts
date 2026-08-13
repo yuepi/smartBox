@@ -1,12 +1,14 @@
+import type { Alignment } from "element-plus";
+
 // constants/tableColumns/types.ts
 export interface TableColumnConfig {
   key: string;
   label: string;
   visible: boolean;
   fixed?: boolean;
-  width?: number | string;
+  width: number;
   minWidth?: number;
-  align?: 'center' | 'left' | 'right';
+  align?: Alignment;
   sortable?: boolean;
   formatter?: (row: any) => string;
   showOverflowTooltip?: boolean;

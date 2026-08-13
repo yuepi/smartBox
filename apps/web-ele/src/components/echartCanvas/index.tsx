@@ -1,8 +1,8 @@
-import { defineComponent, onMounted, ref, watch, onBeforeUnmount, reactive } from 'vue'
+import { defineComponent, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import * as echarts from 'echarts'
 // import fujianJson from '#/common/echart/map/fujian.json'
 import chinaJson from '#/common/echart/map/china.json'
 import theme from '#/common/echart/style/theme.js' // 引入默认主题
-import * as echarts from 'echarts'
 
 // 定义类型
 const PropsType = {
@@ -83,9 +83,9 @@ export default defineComponent({
     return () => {
       const { id, className, height, width } = props
       return <div
-        ref={chartRef}
-        id={id as string}
         class={className as string}
+        id={id as string}
+        ref={chartRef}
         style={{
           'height': height as string,
           'width': width as string

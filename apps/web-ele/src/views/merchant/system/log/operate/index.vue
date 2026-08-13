@@ -72,6 +72,7 @@ function handleView(row: OperLog) {
 
 // --- 删除 ---
 async function handleDelete(row?: OperLog) {
+  // eslint-disable-next-line no-useless-assignment
   let ids: number[] = [];
   if (row) {
     ids = [row.operLogId];
@@ -207,8 +208,8 @@ onMounted(() => {
 
       <!-- 📥 工具栏左侧 -->
       <template #toolbar-left>
-        <ExportButton :module-code="ModuleCodeMap.OPER_LOG" :fields="visibleColumns" :find-cond="queryParams" />
-        <el-button type="danger" plain icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete">
+        <ExportButton :module-code="ModuleCodeMap.OPERATE_LOG" :fields="visibleColumns" :find-cond="queryParams" />
+        <el-button type="danger" plain icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete()">
           批量删除
         </el-button>
         <transition name="el-fade-in">

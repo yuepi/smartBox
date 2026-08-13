@@ -109,7 +109,7 @@ defineExpose({
           :disabled="readonly"
         />
         <span class="ml-2 text-gray-500">小时</span>
-        <div class="text-gray-400 text-xs mt-1">订单创建超过此时间后自动审核通过，默认 24 小时</div>
+        <div class="text-gray-400 text-xs ml-2">订单创建超过此时间后自动审核通过，默认 24 小时</div>
       </el-form-item>
 
       <el-form-item>

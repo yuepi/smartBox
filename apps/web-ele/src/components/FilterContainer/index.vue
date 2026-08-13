@@ -18,9 +18,8 @@ const toggleText = computed(() => props.expanded ? '收起筛选' : '更多筛�
 <template>
   <div class="vben-filter-wrapper">
     <el-form :inline="true" :model="modelValue" class="filter-grid-form" @submit.prevent>
-<div class="filter-row-basic">
+      <div class="filter-row-basic">
         <slot></slot>
-
         <el-form-item class="filter-actions-group">
           <el-button type="primary" link class="toggle-link-btn" @click="emit('update:expanded', !expanded)">
             {{ toggleText }}
@@ -28,7 +27,7 @@ const toggleText = computed(() => props.expanded ? '收起筛选' : '更多筛�
               <component :is="expanded ? ArrowUp : ArrowDown" />
             </el-icon>
           </el-button>
-          
+
           <el-tooltip content="查询" placement="top">
             <el-button type="primary" :icon="Search" circle @click="emit('search')" />
           </el-tooltip>
@@ -41,7 +40,7 @@ const toggleText = computed(() => props.expanded ? '收起筛选' : '更多筛�
       <div class="filter-row-expanded" :class="[{ 'is-expanded': expanded }]">
         <slot name="advanced"></slot>
       </div>
-</el-form>
+    </el-form>
   </div>
 </template>
 
@@ -55,7 +54,7 @@ const toggleText = computed(() => props.expanded ? '收起筛选' : '更多筛�
   transition: background-color 0.3s, box-shadow 0.3s;
 
   .dark & {
-    background: #1e1e1e !important; // 联动你上面 pane 的暗色背景 #2a2a2a 或者 #1e1e1e
+    background: #1e1e1e !important;
     box-shadow: none;
   }
 
@@ -66,7 +65,7 @@ const toggleText = computed(() => props.expanded ? '收起筛选' : '更多筛�
     :deep(.el-form-item) {
       margin-right: 0 !important;
       margin-bottom: 0 !important;
-      
+
       .el-form-item__label {
         padding-right: 8px;
         font-size: 13px;
@@ -82,7 +81,6 @@ const toggleText = computed(() => props.expanded ? '收起筛选' : '更多筛�
       align-items: center;
     }
 
-    // ⚡ 核心组件级动效：自闭环，不污染全局
     .filter-row-expanded {
       display: flex;
       flex-wrap: wrap;
@@ -94,14 +92,16 @@ const toggleText = computed(() => props.expanded ? '收起筛选' : '更多筛�
       overflow: hidden;
       border-top: 1px dashed transparent;
       opacity: 0;
-      transition: 
+      transition:
         max-height 0.28s cubic-bezier(0.4, 0, 0.2, 1),
         opacity 0.2s ease,
         padding-top 0.28s ease,
         margin-top 0.28s ease;
 
       &.is-expanded {
-        max-height: 80px; /* 预期最大高度 */
+        max-height: 80px;
+
+        /* 预期最大高度 */
         padding-top: 12px;
         margin-top: 12px;
         border-top-color: #f1f5f9;
@@ -128,10 +128,14 @@ const toggleText = computed(() => props.expanded ? '收起筛选' : '更多筛�
         .dark & {
           color: #94a3b8;
 
-          &:hover { color: #409eff; }
+          &:hover {
+            color: #409eff;
+          }
         }
 
-        &:hover { color: #3b82f6; }
+        &:hover {
+          color: #3b82f6;
+        }
       }
     }
   }

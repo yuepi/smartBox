@@ -105,15 +105,39 @@ export interface RemarkOperateParams {
   remark: string;
 }
 
-
-/** 6. 异常订单 */
-export function abnormalOrderApi(recycleOrderId: number) {
-  return requestClient.post('/merchant/recycleOrder/operate/abnormal', { recycleOrderId });
+/** 标记异常订单参数 */
+export interface AbnormalOrderParams {
+  recycleOrderId: number;
+  remark: string; // 异常/违规原因
+  deductWeight?: number; // 扣除重量(kg)
 }
 
-/** 6. 取消订单 */
-export function cancelOrderApi(recycleOrderId: number) {
-  return requestClient.post('/merchant/recycleOrder/operate/cancel', { recycleOrderId });
+/** 取消订单参数 */
+export interface CancelOrderParams {
+  recycleOrderId: number;
+  remark?: string; // 取消原因
+}
+
+/** 直接完成订单参数 */
+export interface DirectCompleteOrderParams {
+  recycleOrderId: number;
+  remark?: string; // 备注/完成原因
+}
+
+
+/** 6. 标记异常订单 */
+export function abnormalOrderApi(data: AbnormalOrderParams) {
+  return requestClient.post('/merchant/recycleOrder/operate/abnormal', data);
+}
+
+/** 7. 取消订单 */
+export function cancelOrderApi(data: CancelOrderParams) {
+  return requestClient.post('/merchant/recycleOrder/operate/cancel', data);
+}
+
+/** 10. 直接完成订单 */
+export function directCompleteOrderApi(data: DirectCompleteOrderParams) {
+  return requestClient.post('/merchant/recycleOrder/operate/directComplete', data);
 }
 
 /** 7. 补重/扣重 */
@@ -132,7 +156,4 @@ export function getImageUrlsByRecycleOrderId(recycleOrderId: number) {
   return requestClient.get('/merchant/recycleOrderImage/queryImageUrlsByRecycleOrderId', { params: { recycleOrderId } });
 }
 
-/** 10. 直接完成订单 */
-export function directCompleteOrderApi(recycleOrderId: number) {
-  return requestClient.post('/merchant/recycleOrder/operate/directComplete', { recycleOrderId });
-}
+

@@ -6,7 +6,6 @@ import { Page } from '@vben/common-ui';
 
 import { getDeviceListApi } from '#/api/device/device';
 import {
-  abnormalOrderApi,
   cancelOrderApi,
   deleteRecycleOrderApi,
   directCompleteOrderApi,
@@ -17,6 +16,7 @@ import { defaultRecycleOrderColumns, RECYCLE_ORDER_STORAGE_KEY } from '#/constan
 import { ModuleCodeMap } from '#/hooks/useExport';
 import { getRecentDays } from '#/utils/date';
 
+import AbnormalDialog from './AbnormalDialog.vue';
 import OrderDetail from './OrderDetail.vue';
 import OrderRemark from './OrderRemark.vue';
 import OrderWeight from './OrderWeight.vue';
@@ -38,6 +38,7 @@ const visibleColumns = computed(() => {
 const orderDetailRef = ref();
 const orderWeightRef = ref();
 const orderRemarkRef = ref();
+const abnormalDialogRef = ref();
 
 // --- 状态变量 ---
 const loading = ref(false);
@@ -169,13 +170,9 @@ function handleView(row: RecycleOrder) {
   orderDetailRef.value?.open(row);
 }
 
-// --- 异常订单 ---
+// --- 异常弹窗 ---
 function handleAbnormal(row: RecycleOrder) {
-  currentRow.value = row;
-  actionType.value = 'abnormal';
-  actionDialogTitle.value = '异常订单';
-  actionRemark.value = '';
-  actionDialogVisible.value = true;
+  abnormalDialogRef.value?.open(row);
 }
 
 // --- 取消异常 ---
@@ -203,20 +200,14 @@ async function handleActionSubmit() {
   actionDialogLoading.value = true;
   try {
     switch (actionType.value) {
-      case 'abnormal': {
-        await abnormalOrderApi(currentRow.value.recycleOrderId, actionRemark.value);
-        ElMessage.success('已标记为异常');
-
-        break;
-      }
       case 'cancel': {
-        await cancelOrderApi(currentRow.value.recycleOrderId, actionRemark.value);
+        await cancelOrderApi({ recycleOrderId: currentRow.value.recycleOrderId, remark: actionRemark.value });
         ElMessage.success('已取消异常');
 
         break;
       }
       case 'directComplete': {
-        await directCompleteOrderApi(currentRow.value.recycleOrderId, actionRemark.value);
+        await directCompleteOrderApi({ recycleOrderId: currentRow.value.recycleOrderId, remark: actionRemark.value });
         ElMessage.success('直接完成成功');
 
         break;
@@ -534,6 +525,7 @@ v-if="row.deptName" class="table-link-text" @click="handleDeptNameClick(row)"
     <OrderDetail ref="orderDetailRef" />
     <OrderWeight ref="orderWeightRef" @success="handleQuery" />
     <OrderRemark ref="orderRemarkRef" @success="handleQuery" />
+    <AbnormalDialog ref="abnormalDialogRef" @success="handleQuery" />
 
     <!-- 操作弹窗（异常/取消异常/直接完成） -->
     <el-dialog v-model="actionDialogVisible" :title="actionDialogTitle" width="450px" append-to-body>

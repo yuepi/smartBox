@@ -1,18 +1,7 @@
 <script setup lang="ts">
-import { computed, nextTick, reactive, ref,watch } from "vue";
+import type { User, UserPageParams } from '#/api/system/user';
 
-import {
-  CircleClose,
-  Refresh,
-  Search,
-} from "@element-plus/icons-vue";
-import { ElMessage } from "element-plus";
-
-import {
-  getPlatUserPageApi,
-  type User,
-  type UserPageParams,
-} from "#/api/system/user";
+import { getPlatUserPageApi } from '#/api/system/user';
 
 interface Props {
   modelValue?: User[]; // 已选中的用户列表
@@ -248,11 +237,11 @@ watch(
             <el-form-item class="!mb-0 !mr-0 flex items-center gap-1">
               <el-button
                 type="primary"
-                :icon="Search"
+                icon="Search"
                 circle
                 @click="handleSearch"
               />
-              <el-button :icon="Refresh" circle @click="resetSearch" />
+              <el-button icon="Refresh" circle @click="resetSearch" />
             </el-form-item>
           </el-form>
 
@@ -367,7 +356,7 @@ watch(
                 <div
                   class="w-5 h-5 rounded-md bg-blue-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0"
                 >
-                  {{ (user.nickName || user.userName || "员").slice(-1) }}
+                  {{ (user.nickName || user.userName || "员").slice(0, 1) }}
                 </div>
                 <span
                   class="truncate font-medium text-gray-700 dark:text-gray-300"

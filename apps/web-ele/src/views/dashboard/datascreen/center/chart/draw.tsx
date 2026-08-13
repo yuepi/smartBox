@@ -1,4 +1,4 @@
-import { defineComponent, watch, shallowReactive } from 'vue'
+import { defineComponent, shallowReactive, watch } from 'vue'
 
 // 声明类型
 const PropsType = {
@@ -84,7 +84,7 @@ export default defineComponent({
       const width = "120px"
 
       return <div>
-        <echart options={options} height={height} width={width} />
+        <echart height={height} options={options} width={width} />
       </div>
     }
   }

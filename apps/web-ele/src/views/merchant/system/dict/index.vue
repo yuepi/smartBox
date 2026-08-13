@@ -1,37 +1,12 @@
 <script lang="ts" setup>
-import { onMounted, reactive, ref, computed } from 'vue';
-import { ElMessage, ElMessageBox } from 'element-plus';
-import {
-  Search,
-  Refresh,
-  Delete,
-  Plus,
-  Edit,
-  ArrowLeft,
-  ArrowRight,
-  Document,
-} from '@element-plus/icons-vue';
+
+import type { Dict, DictPageParams } from '#/api/system/dict/dict';
+import type { DictData, DictDataPageParams } from '#/api/system/dict/dictData';
+
 import { Page } from '@vben/common-ui';
 
-import {
-  getDictPageApi,
-  getDictDetailApi,
-  addDictApi,
-  editDictApi,
-  deleteDictApi,
-  type Dict,
-  type DictPageParams,
-} from '#/api/system/dict/dict';
-
-import {
-  getDictDataPageApi,
-  getDictDataDetailApi,
-  addDictDataApi,
-  editDictDataApi,
-  deleteDictDataApi,
-  type DictData,
-  type DictDataPageParams,
-} from '#/api/system/dict/dictData';
+import { addDictApi, deleteDictApi, editDictApi, getDictDetailApi, getDictPageApi } from '#/api/system/dict/dict';
+import { addDictDataApi, deleteDictDataApi, editDictDataApi, getDictDataDetailApi, getDictDataPageApi } from '#/api/system/dict/dictData';
 
 // ==================== 字典主表 ====================
 const loading = ref(false);
@@ -165,6 +140,7 @@ async function handleDictSubmit() {
 }
 
 async function handleDictDelete(row?: Dict) {
+  // eslint-disable-next-line no-useless-assignment
   let ids: number[] = [];
 
   if (row) {
@@ -302,6 +278,7 @@ async function handleDataSubmit() {
 }
 
 async function handleDataDelete(row?: DictData) {
+  // eslint-disable-next-line no-useless-assignment
   let ids: number[] = [];
 
   if (row) {
@@ -363,11 +340,13 @@ onMounted(() => {
             <div class="flex justify-between items-center">
               <span>字典列表</span>
               <div>
-                <el-button type="primary" size="small" :icon="Plus" @click="handleDictAdd">
+                <el-button type="primary" size="small" icon="Plus" @click="handleDictAdd">
                   新增
                 </el-button>
-                <el-button type="danger" size="small" plain :icon="Delete" :disabled="selectedIds.length === 0"
-                  @click="handleDictDelete()">
+                <el-button
+type="danger" size="small" plain icon="Delete" :disabled="selectedIds.length === 0"
+                  @click="handleDictDelete()"
+>
                   批量删除
                 </el-button>
               </div>
@@ -377,23 +356,29 @@ onMounted(() => {
           <!-- 查询表单 -->
           <el-form :inline="true" :model="queryParams" class="mb-4">
             <el-form-item label="字典名称">
-              <el-input v-model="queryParams.dictName" placeholder="请输入" clearable size="small" style="width: 120px"
-                @keyup.enter="handleQuery" />
+              <el-input
+v-model="queryParams.dictName" placeholder="请输入" clearable size="small" style="width: 120px"
+                @keyup.enter="handleQuery"
+/>
             </el-form-item>
             <el-form-item label="字典编码">
-              <el-input v-model="queryParams.dictCode" placeholder="请输入" clearable size="small" style="width: 120px"
-                @keyup.enter="handleQuery" />
+              <el-input
+v-model="queryParams.dictCode" placeholder="请输入" clearable size="small" style="width: 120px"
+                @keyup.enter="handleQuery"
+/>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" size="small" :icon="Search" @click="handleQuery">
+              <el-button type="primary" size="small" icon="Search" @click="handleQuery">
                 查询
               </el-button>
-              <el-button size="small" :icon="Refresh" @click="resetQuery">重置</el-button>
+              <el-button size="small" icon="Refresh" @click="resetQuery">重置</el-button>
             </el-form-item>
           </el-form>
 
-          <el-table v-loading="loading" :data="tableData" border size="small" height="calc(100vh - 340px)"
-            highlight-current-row @selection-change="handleDictSelectionChange" @row-click="handleDictRowClick">
+          <el-table
+v-loading="loading" :data="tableData" border size="small" height="calc(100vh - 340px)"
+            highlight-current-row @selection-change="handleDictSelectionChange" @row-click="handleDictRowClick"
+>
             <el-table-column type="selection" width="40" align="center" />
             <el-table-column prop="dictName" label="字典名称" min-width="120" show-overflow-tooltip />
             <el-table-column prop="dictCode" label="字典编码" min-width="120" show-overflow-tooltip />
@@ -406,10 +391,10 @@ onMounted(() => {
             </el-table-column>
             <el-table-column label="操作" width="150" align="center" fixed="right">
               <template #default="{ row }">
-                <el-button link type="primary" :icon="Edit" @click.stop="handleDictEdit(row)">
+                <el-button link type="primary" icon="Edit" @click.stop="handleDictEdit(row)">
                   编辑
                 </el-button>
-                <el-button link type="danger" :icon="Delete" @click.stop="handleDictDelete(row)">
+                <el-button link type="danger" icon="Delete" @click.stop="handleDictDelete(row)">
                   删除
                 </el-button>
               </template>
@@ -418,9 +403,11 @@ onMounted(() => {
 
           <!-- 字典分页 -->
           <div class="flex justify-end mt-4">
-            <el-pagination v-model:current-page="queryParams.pageNo" v-model:page-size="queryParams.pageSize"
+            <el-pagination
+v-model:current-page="queryParams.pageNo" v-model:page-size="queryParams.pageSize"
               :total="total" :page-sizes="[10, 20, 50]" layout="total, sizes, prev, pager, next" size="small"
-              @size-change="loadData" @current-change="loadData" />
+              @size-change="loadData" @current-change="loadData"
+/>
           </div>
         </el-card>
       </el-col>
@@ -437,11 +424,13 @@ onMounted(() => {
                 </span>
               </div>
               <div>
-                <el-button type="primary" size="small" :icon="Plus" :disabled="!currentDict" @click="handleDataAdd">
+                <el-button type="primary" size="small" icon="Plus" :disabled="!currentDict" @click="handleDataAdd">
                   新增
                 </el-button>
-                <el-button type="danger" size="small" plain :icon="Delete" :disabled="dataSelectedIds.length === 0"
-                  @click="handleDataDelete()">
+                <el-button
+type="danger" size="small" plain icon="Delete" :disabled="dataSelectedIds.length === 0"
+                  @click="handleDataDelete()"
+>
                   批量删除
                 </el-button>
               </div>
@@ -451,8 +440,10 @@ onMounted(() => {
           <!-- 字典项查询表单 -->
           <el-form :inline="true" :model="dataQueryParams" class="mb-4">
             <el-form-item label="标签">
-              <el-input v-model="dataQueryParams.itemLabel" placeholder="请输入" clearable size="small"
-                style="width: 120px" @keyup.enter="handleDataQuery" />
+              <el-input
+v-model="dataQueryParams.itemLabel" placeholder="请输入" clearable size="small"
+                style="width: 120px" @keyup.enter="handleDataQuery"
+/>
             </el-form-item>
             <el-form-item label="状态">
               <el-select v-model="dataQueryParams.status" placeholder="全部" clearable size="small" style="width: 90px">
@@ -460,15 +451,17 @@ onMounted(() => {
               </el-select>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" size="small" :icon="Search" @click="handleDataQuery">
+              <el-button type="primary" size="small" icon="Search" @click="handleDataQuery">
                 查询
               </el-button>
-              <el-button size="small" :icon="Refresh" @click="resetDataQuery">重置</el-button>
+              <el-button size="small" icon="Refresh" @click="resetDataQuery">重置</el-button>
             </el-form-item>
           </el-form>
 
-          <el-table v-loading="dataLoading" :data="dataTableData" border size="small" height="calc(100vh - 340px)"
-            @selection-change="handleDataSelectionChange">
+          <el-table
+v-loading="dataLoading" :data="dataTableData" border size="small" height="calc(100vh - 340px)"
+            @selection-change="handleDataSelectionChange"
+>
             <el-table-column type="selection" width="40" align="center" />
             <el-table-column prop="itemLabel" label="显示标签" min-width="120" show-overflow-tooltip />
             <el-table-column prop="itemValue" label="字典值" min-width="100" align="center" />
@@ -487,10 +480,10 @@ onMounted(() => {
             </el-table-column>
             <el-table-column label="操作" width="150" align="center" fixed="right">
               <template #default="{ row }">
-                <el-button link type="primary" :icon="Edit" @click="handleDataEdit(row)">
+                <el-button link type="primary" icon="Edit" @click="handleDataEdit(row)">
                   编辑
                 </el-button>
-                <el-button link type="danger" :icon="Delete" @click="handleDataDelete(row)">
+                <el-button link type="danger" icon="Delete" @click="handleDataDelete(row)">
                   删除
                 </el-button>
               </template>
@@ -499,9 +492,11 @@ onMounted(() => {
 
           <!-- 字典项分页 -->
           <div class="flex justify-end mt-4">
-            <el-pagination v-model:current-page="dataQueryParams.pageNo" v-model:page-size="dataQueryParams.pageSize"
+            <el-pagination
+v-model:current-page="dataQueryParams.pageNo" v-model:page-size="dataQueryParams.pageSize"
               :total="dataTotal" :page-sizes="[10, 20, 50]" layout="total, sizes, prev, pager, next" size="small"
-              @size-change="loadDataData" @current-change="loadDataData" />
+              @size-change="loadDataData" @current-change="loadDataData"
+/>
           </div>
         </el-card>
       </el-col>
