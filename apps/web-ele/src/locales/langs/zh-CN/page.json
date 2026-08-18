@@ -63,5 +63,14 @@
     "title": "日志管理",
     "loginLog": "登录日志",
     "operationLog": "操作日志"
+  },
+  "stock": {
+    "title": "库存管理",
+    "warehouse": "仓库管理",
+    "customer": "客户管理",
+    "in": "入库管理",
+    "out": "出库管理",
+    "current": "库存查询",
+    "check": "库存盘点"
   }
 }

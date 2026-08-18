@@ -230,7 +230,7 @@ onUnmounted(() => {
                   }}</span>
                 <ElTag :type="getStatusType(task.exportStatus)" effect="light" size="small">
                   {{
-                    ExportStatusMap[task.exportStatus]?.label || '未知'
+                    (ExportStatusMap as Record<number, { label: string }>)[task.exportStatus]?.label || '未知'
                   }}
                 </ElTag>
               </div>
@@ -290,6 +290,12 @@ v-if="task.exportStatus === 3" :loading="retryingId === task.exportId" icon="Ref
     </div>
   </ElPopover>
 </template>
+
+<style lang="scss">
+.export-popover.el-popper {
+  padding: 0 !important;
+}
+</style>
 
 <style scoped lang="scss">
 /* ===== 触发按钮样式 ===== */

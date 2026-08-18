@@ -112,4 +112,68 @@ export const MERCHANT_PERMISSIONS = {
       ROUTE: 'merchant:qrcode',
     },
   },
+
+  STOCK: {
+      /** 库存管理-父级目录 */
+      MANAGE: 'merchant:manage:stock',
+
+      /** 仓库管理 */
+      WAREHOUSE: {
+        ROUTE: 'merchant:stock:warehouse',
+        ADD: 'merchant:stock:warehouse:add',
+        EDIT: 'merchant:stock:warehouse:edit',
+        DEL: 'merchant:stock:warehouse:del',
+        // 货位操作
+        LOCATION_ADD: 'merchant:stock:location:add',
+        LOCATION_EDIT: 'merchant:stock:location:edit',
+        LOCATION_DEL: 'merchant:stock:location:del',
+      },
+
+      /** 客户管理（回收商） */
+      CUSTOMER: {
+        ROUTE: 'merchant:stock:customer',
+        ADD: 'merchant:stock:customer:add',
+        EDIT: 'merchant:stock:customer:edit',
+        DEL: 'merchant:stock:customer:del',
+      },
+
+      /** 入库管理 */
+      IN: {
+        ROUTE: 'merchant:stock:in',
+        ADD: 'merchant:stock:in:add',
+        EDIT: 'merchant:stock:in:edit',
+        DEL: 'merchant:stock:in:del',
+        SUBMIT: 'merchant:stock:in:submit', // 提交入库
+        DETAIL: 'merchant:stock:in:detail',
+      },
+
+      /** 出库管理 */
+      OUT: {
+        ROUTE: 'merchant:stock:out',
+        ADD: 'merchant:stock:out:add',
+        EDIT: 'merchant:stock:out:edit',
+        DEL: 'merchant:stock:out:del',
+        SUBMIT: 'merchant:stock:out:submit', // 提交出库
+        CANCEL: 'merchant:stock:out:cancel', // 取消出库
+        DETAIL: 'merchant:stock:out:detail',
+      },
+
+      /** 库存查询 */
+      CURRENT: {
+        ROUTE: 'merchant:stock:current',
+        DETAIL: 'merchant:stock:current:detail',
+        EXPORT: 'merchant:stock:current:export',
+      },
+
+      /** 库存盘点 */
+      CHECK: {
+        ROUTE: 'merchant:stock:check',
+        ADD: 'merchant:stock:check:add', // 创建盘点单
+        EDIT: 'merchant:stock:check:edit',
+        DEL: 'merchant:stock:check:del',
+        EXECUTE: 'merchant:stock:check:execute', // 执行盘点
+        CONFIRM: 'merchant:stock:check:confirm', // 确认盘点
+        DETAIL: 'merchant:stock:check:detail',
+      },
+    },
 } as const;

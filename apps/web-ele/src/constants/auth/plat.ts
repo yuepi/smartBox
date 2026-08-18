@@ -60,4 +60,5 @@ export const PLAT_PERMISSIONS = {
       ROUTE: 'plat:merchant',
     }
   },
+  
 } as const;

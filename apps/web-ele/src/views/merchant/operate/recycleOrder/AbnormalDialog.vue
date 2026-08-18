@@ -50,8 +50,7 @@ function open(row: RecycleOrder) {
 }
 
 // 1. 修改【扣除金额】
-function handleAmountInput(val: null | number) {
-  let amount = val || 0;
+function handleAmountInput(amount = 0) {
   // 边界限制
   if (amount > orderInfo.totalAmount) {
     amount = orderInfo.totalAmount;
@@ -75,8 +74,7 @@ function handleAmountInput(val: null | number) {
 }
 
 // 2. 修改【扣除重量】
-function handleWeightInput(val: null | number) {
-  let weight = val || 0;
+function handleWeightInput(weight = 0) {
   // 边界限制
   if (weight > orderInfo.weight) {
     weight = orderInfo.weight;
@@ -105,7 +103,8 @@ function checkIsAllDeduct() {
 }
 
 // 3. 勾选/取消勾选【环保金-全部扣除】
-function handleAllAmountChange(checked: boolean) {
+function handleAllAmountChange(val: boolean | number | string) {
+  const checked = Boolean(val);
   formData.isAllAmountDeduct = checked;
   if (checked) {
     formData.deductAmount = orderInfo.totalAmount;
@@ -119,7 +118,8 @@ function handleAllAmountChange(checked: boolean) {
 }
 
 // 4. 勾选/取消勾选【重量-全部扣除】
-function handleAllWeightChange(checked: boolean) {
+function handleAllWeightChange(val: boolean | number | string) {
+  const checked = Boolean(val);
   formData.isAllWeightDeduct = checked;
   if (checked) {
     formData.deductWeight = orderInfo.weight;

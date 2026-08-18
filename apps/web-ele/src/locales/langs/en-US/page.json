@@ -63,5 +63,14 @@
     "title": "Log Management",
     "loginLog": "Login Log",
     "operationLog": "Operation Log"
+  },
+  "stock": {
+    "title": "Stock Management",
+    "warehouse": "Warehouse Management",
+    "customer": "Customer Management",
+    "in": "Inbound Management",
+    "out": "Outbound Management",
+    "current": "Stock Query",
+    "check": "Stock Check"
   }
 }
