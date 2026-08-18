@@ -2,7 +2,7 @@
 import type { StockCheck } from '#/api/stock/stockCheck';
 import type { StockCheckItem } from '#/api/stock/stockCheckItem';
 
-import { getStockCheckDetailApi } from '#/api/stock/stockCheck
+import { getStockCheckDetailApi } from '#/api/stock/stockCheck';
 import { getStockCheckItemListByStockCheckIdApi } from '#/api/stock/stockCheckItem';
 
 const { stock_check_type, stock_check_status, stock_package_type } = useDicts([

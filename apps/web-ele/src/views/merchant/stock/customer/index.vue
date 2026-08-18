@@ -19,7 +19,7 @@ function handleColumnsUpdate(newColumns: TableColumnConfig[]) {
   columnConfig.value = newColumns;
 }
 
-const visibleColumns = computed((
+const visibleColumns = computed(() => {
   return columnConfig.value.filter((col) => col.visible);
 });
 

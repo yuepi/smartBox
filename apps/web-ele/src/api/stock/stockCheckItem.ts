@@ -69,3 +69,10 @@ export function deleteStockCheckItemApi(stockCheckItemId: number) {
     stockCheckItemId,
   });
 }
+
+/** 根据盘点单ID查询盘点明细列表 */
+export function getStockCheckItemListByStockCheckIdApi(stockCheckId: number) {
+  return requestClient.get<StockCheckItem[]>('/merchant/stockCheckItem/listByStockCheckId', {
+    params: { stockCheckId },
+  });
+}
