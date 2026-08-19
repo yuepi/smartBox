@@ -28,10 +28,6 @@ export const overridesPreferences = defineOverridesPreferences({
    header: {
     menuAlign: "center",
   },
-  tabbar:{
-    showRefresh: false,
-    showMaximize: false,
-  },
   theme: {
     builtinType: "green",
     colorPrimary: "hsl(161 90% 43%)",

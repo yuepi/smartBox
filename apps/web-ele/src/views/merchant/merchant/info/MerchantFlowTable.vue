@@ -90,7 +90,7 @@ defineExpose({ loadData });
     <div class="filter-bar">
       <el-form :inline="true" :model="queryParams" class="filter-form">
         <el-form-item>
-          <el-select v-model="queryParams.changeType" clearable style="width: 180px" placeholder="变动类型">
+          <el-select v-model="queryParams.changeType" clearable style="width: 180px" placeholder="请选择">
             <template #prefix><span class="text-xs text-gray-400">变动类型:</span></template>
             <el-option
               v-for="item in flow_change_type"

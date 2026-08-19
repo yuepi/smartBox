@@ -266,7 +266,7 @@ defineExpose({ open })
 </script>
 
 <template>
-  <el-dialog v-model="visible" :title="formTitle" width="1600px" append-to-body @close="handleClose">
+  <el-dialog v-model="visible" :title="formTitle" width="1600px" top="5vh" append-to-body @close="handleClose">
     <el-row :gutter="20">
       <!-- 左侧：表单区域 -->
       <el-col :span="10">

@@ -157,7 +157,7 @@ defineExpose({ loadData });
         <el-form-item>
           <el-input
             v-model="queryParams.rechargeNo"
-            placeholder="请输入充值单号"
+            placeholder="请输入"
             clearable
             style="width: 200px"
             @keyup.enter="loadData"
@@ -167,7 +167,7 @@ defineExpose({ loadData });
         </el-form-item>
 
         <el-form-item>
-          <el-select v-model="queryParams.status" clearable style="width: 160px" placeholder="支付状态">
+          <el-select v-model="queryParams.status" clearable style="width: 160px" placeholder="请选择">
             <template #prefix><span class="text-xs text-gray-400">支付状态:</span></template>
             <el-option
               v-for="item in pay_status"
@@ -179,7 +179,7 @@ defineExpose({ loadData });
         </el-form-item>
 
         <el-form-item>
-          <el-select v-model="queryParams.refundStatus" clearable style="width: 160px" placeholder="退款状态">
+          <el-select v-model="queryParams.refundStatus" clearable style="width: 160px" placeholder="请选择">
             <template #prefix><span class="text-xs text-gray-400">退款状态:</span></template>
             <el-option
               v-for="item in refund_status"
