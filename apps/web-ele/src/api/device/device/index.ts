@@ -180,3 +180,8 @@ export function batchDownDeviceQrcodeJsonApi(deviceIds: number[]) {
     bagQrcodeFlag: 1,
   });
 }
+
+/** 12. 批量设备升级 */
+export function deviceUpgradeBatchApi(deviceIds: number[]) {
+  return requestClient.post("/merchant/device/upgrade/deviceUpgradeBatch", { deviceIds });
+}

@@ -7,6 +7,7 @@ import { Page } from "@vben/common-ui";
 
 import {
   deleteDeviceApi,
+  deviceUpgradeBatchApi,
   getDevicePageApi,
   operateDeviceApi
 } from '#/api/device/device';
@@ -59,6 +60,7 @@ const moreParams = ref(false);
 
 // 下拉选项
 const deptOptions = ref<Dept[]>([]);
+const batchUpgradeLoading = ref(false);
 
 // 查询参数
 const queryParams = reactive<DevicePageParams>({
@@ -87,6 +89,35 @@ function handleBatchQrcodeCommand(cmd: string) {
     qrCodeModalRef.value?.showBatch(ids);
   } else if (cmd === 'download') {
     qrCodeModalRef.value?.downloadBatch(ids);
+  }
+}
+
+// --- 批量升级 ---
+async function handleBatchUpgrade() {
+  if (selectedIds.value.length === 0) {
+    ElMessage.warning('请先选择要升级的设备');
+    return;
+  }
+
+  try {
+    await ElMessageBox.confirm(
+      `确定要对选中的 ${selectedIds.value.length} 台设备发起批量升级吗？`,
+      '批量升级',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    );
+    batchUpgradeLoading.value = true;
+    await deviceUpgradeBatchApi(selectedIds.value);
+    ElMessage.success(`已向 ${selectedIds.value.length} 台设备发送升级指令`);
+    selectedIds.value = [];
+    handleQuery();
+  } catch {
+    // 用户取消或接口失败
+  } finally {
+    batchUpgradeLoading.value = false;
   }
 }
 
@@ -309,6 +340,9 @@ v-model="queryParams.qrCode" placeholder="请输入" clearable style="width: 200
           新增设备
         </el-button>
         <ExportButton :module-code="ModuleCodeMap.DEVICE" :fields="visibleColumns" :find-cond="queryParams" />
+        <el-button type="warning" plain icon="Upload" :disabled="selectedIds.length === 0" @click="handleBatchUpgrade">
+          批量升级
+        </el-button>
         <el-button type="danger" plain icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete()">
           批量删除
         </el-button>
