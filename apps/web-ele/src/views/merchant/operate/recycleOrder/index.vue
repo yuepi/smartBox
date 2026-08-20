@@ -235,6 +235,7 @@ function handleRemark(row: RecycleOrder) {
 
 // --- 删除 ---
 async function handleDelete(row?: RecycleOrder) {
+  // eslint-disable-next-line no-useless-assignment
   let ids: number[] = [];
   if (row) {
     ids = [row.recycleOrderId];
@@ -330,10 +331,6 @@ v-model="queryParams.memberPhone" placeholder="请输入" clearable style="width
             </template>
           </el-input>
         </el-form-item>
-      </template>
-
-      <!-- 📥 高级筛选项 -->
-      <template #search-advanced>
         <el-form-item>
           <el-tree-select
 v-model="queryParams.deptId" :data="deptOptions" :props="{
@@ -383,6 +380,10 @@ v-model="dateRange" type="datetimerange" range-separator="至" start-placeholder
 />
         </el-form-item>
       </template>
+
+      <!-- 📥 高级筛选项 -->
+      <!-- <template #search-advanced>
+      </template> -->
 
       <!-- 📥 工具栏左侧 -->
       <template #toolbar-left>
@@ -454,15 +455,15 @@ v-for="(url, idx) in row.imageUrls.slice(0, 3)" :key="idx" :src="url"
               </template>
 
               <!-- 小区名称 - 点击快速筛选 -->
-            <template v-else-if="col.key === 'deptName'">
-              <span
+              <template v-else-if="col.key === 'deptName'">
+                <span
 v-if="row.deptName" class="table-link-text" @click="handleDeptNameClick(row)"
-                :title="row.deptName"
+                  :title="row.deptName"
 >
-                {{ row.deptName }}
-              </span>
-              <span v-else>-</span>
-            </template>
+                  {{ row.deptName }}
+                </span>
+                <span v-else>-</span>
+              </template>
               <!-- 设备名称 - 点击快速筛选 -->
               <template v-else-if="col.key === 'deviceName'">
                 <span v-if="row.deviceName" class="table-link-text" @click="handleDeviceNameClick(row.deviceName)">
@@ -490,30 +491,36 @@ v-if="row.deptName" class="table-link-text" @click="handleDeptNameClick(row)"
                 {{ (row as any)[col.key] ?? '-' }}
               </template>
             </template>
-</el-table-column>
+          </el-table-column>
 
           <!-- 操作列 -->
           <el-table-column label="操作" width="220" fixed="right" align="center">
             <template #default="{ row }">
               <div class="action-buttons">
-                <el-tooltip content="详情" placement="top" :enterable="false">
-                  <el-button link type="primary" icon="View" @click="handleView(row)" />
-                </el-tooltip>
-                <el-tooltip content="标记异常" placement="top" :enterable="false" v-if="[0, 1, 2, 3, 4, 7].includes(row.orderStatus)">
-                  <el-button link type="danger" icon="Warning" @click="handleAbnormal(row)" />
-                </el-tooltip>
-                <el-tooltip content="取消异常" placement="top" :enterable="false" v-if="row.orderStatus === 6">
-                  <el-button link type="success" icon="Close" @click="handleCancelAbnormal(row)" />
-                </el-tooltip>
-                <el-tooltip content="直接完成" placement="top" :enterable="false" v-if="[0, 1, 2, 3].includes(row.orderStatus)">
-                  <el-button link type="primary" icon="Check" @click="handleDirectComplete(row)" />
-                </el-tooltip>
-                <el-tooltip content="补重/扣重" placement="top" :enterable="false">
-                  <el-button link type="warning" icon="ScaleToOriginal" @click="handleWeight(row)" />
-                </el-tooltip>
-                <el-tooltip content="添加备注" placement="top" :enterable="false">
-                  <el-button link type="info" icon="ChatDotRound" @click="handleRemark(row)" />
-                </el-tooltip>
+                <el-button size="small" type="primary" @click="handleView(row)">
+                  详情
+                </el-button>
+                <el-button
+v-if="[0, 1, 2, 3, 4, 7].includes(row.orderStatus)" size="small" type="danger"
+                  @click="handleAbnormal(row)"
+>
+                  标记异常
+                </el-button>
+                <el-button v-if="row.orderStatus === 6" size="small" type="success" @click="handleCancelAbnormal(row)">
+                  取消异常
+                </el-button>
+                <el-button
+v-if="[0, 1, 2, 3].includes(row.orderStatus)" size="small" type="primary"
+                  @click="handleDirectComplete(row)"
+>
+                  直接完成
+                </el-button>
+                <el-button size="small" type="warning" @click="handleWeight(row)">
+                  补重/扣重
+                </el-button>
+                <el-button size="small" type="info" @click="handleRemark(row)">
+                  添加备注
+                </el-button>
               </div>
             </template>
           </el-table-column>
@@ -545,19 +552,6 @@ v-if="row.deptName" class="table-link-text" @click="handleDeptNameClick(row)"
 </template>
 
 <style scoped lang="scss">
-.action-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
-  align-items: center;
-  justify-content: center;
-
-  .el-button {
-    padding: 4px 6px;
-    margin-right: 0;
-    margin-left: 0;
-  }
-}
 
 .tree-prefix-dept :deep(.el-select__wrapper) {
   position: relative;

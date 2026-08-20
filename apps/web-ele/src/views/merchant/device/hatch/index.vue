@@ -158,13 +158,9 @@ onMounted(() => {
 <template>
   <Page auto-content-height>
     <BaseTableLayout
-      v-model:query-params="queryParams"
-      v-model:more-params="moreParams"
-      :loading="loading"
-      :total="total"
-      @search="loadData"
-      @reset="resetQuery"
-    >
+v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="loading"
+      :total="total" @search="loadData" @reset="resetQuery"
+>
       <!-- 📥 基础筛选项 -->
       <template #search-basic>
         <el-form-item>
@@ -172,13 +168,12 @@ onMounted(() => {
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">所属设备:</span>
             </template>
-            <el-option v-for="item in deviceOptions" :key="item.deviceId" :label="item.deviceName" :value="item.deviceId" />
+            <el-option
+v-for="item in deviceOptions" :key="item.deviceId" :label="item.deviceName"
+              :value="item.deviceId"
+/>
           </el-select>
         </el-form-item>
-      </template>
-
-      <!-- 📥 高级筛选项 -->
-      <template #search-advanced>
         <el-form-item>
           <el-select v-model="queryParams.hatchStatus" clearable style="width: 200px">
             <template #prefix>
@@ -200,6 +195,10 @@ onMounted(() => {
         </el-form-item>
       </template>
 
+      <!-- 📥 高级筛选项 -->
+      <template #search-advanced>
+      </template>
+
       <!-- 📥 工具栏左侧 -->
       <template #toolbar-left>
         <el-button type="primary" icon="Plus" @click="handleAdd">新增仓口</el-button>
@@ -217,33 +216,24 @@ onMounted(() => {
       <!-- 📥 工具栏右侧 -->
       <template #toolbar-right>
         <ColumnSelector
-          :storage-key="HATCH_STORAGE_KEY"
-          :default-columns="defaultHatchColumns"
+:storage-key="HATCH_STORAGE_KEY" :default-columns="defaultHatchColumns"
           @update:columns="handleColumnsUpdate"
-        />
+/>
       </template>
 
       <!-- 📥 表格 -->
       <template #table>
         <el-table
-          :data="tableData"
-          border
-          stripe
-          style="width: 100%; height: 100%"
+:data="tableData" border stripe style="width: 100%; height: 100%"
           @selection-change="handleSelectionChange"
-        >
+>
           <el-table-column type="selection" width="50" align="center" />
 
           <el-table-column
-            v-for="col in visibleColumns"
-            :key="col.key"
-            :prop="col.key"
-            :label="col.label"
-            :width="typeof col.width === 'number' ? col.width : undefined"
-            :min-width="col.minWidth"
-            :align="col.align"
+v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
+            :width="typeof col.width === 'number' ? col.width : undefined" :min-width="col.minWidth" :align="col.align"
             :show-overflow-tooltip="col.showOverflowTooltip || false"
-          >
+>
             <template #default="{ row }">
               <template v-if="col.key === 'hatchNo'">
                 {{ row.hatchNo }}
@@ -280,15 +270,17 @@ onMounted(() => {
 
           <el-table-column label="操作" width="150" fixed="right" align="center">
             <template #default="{ row }">
-              <el-tooltip content="日志" placement="top" :enterable="false">
-                <el-button link type="info" icon="DocumentCopy" @click="handleLog(row)" />
-              </el-tooltip>
-              <el-tooltip content="编辑" placement="top" :enterable="false">
-                <el-button link type="primary" icon="Edit" @click="handleEdit(row)" />
-              </el-tooltip>
-              <el-tooltip content="删除" placement="top" :enterable="false">
-                <el-button link type="danger" icon="Delete" @click="handleDelete(row)" />
-              </el-tooltip>
+              <div class="action-buttons">
+                <el-button size="small" type="info" @click="handleLog(row)">
+                  日志
+                </el-button>
+                <el-button size="small" type="primary" @click="handleEdit(row)">
+                  编辑
+                </el-button>
+                <el-button size="small" type="danger" @click="handleDelete(row)">
+                  删除
+                </el-button>
+              </div>
             </template>
           </el-table-column>
         </el-table>
@@ -299,10 +291,9 @@ onMounted(() => {
     <HatchForm ref="hatchFormRef" @success="handleQuery" />
 
     <LogDialog
-      v-model:visible="logDialogVisible"
-      :device-hatch-id="currentLogHatchId"
+v-model:visible="logDialogVisible" :device-hatch-id="currentLogHatchId"
       :device-hatch-name="currentLogHatchName"
-    />
+/>
   </Page>
 </template>
 

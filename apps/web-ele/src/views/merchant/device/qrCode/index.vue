@@ -237,10 +237,6 @@ v-model="queryParams.qrcodeCode" placeholder="请输入" clearable style="width:
             </template>
           </el-input>
         </el-form-item>
-      </template>
-
-      <!-- 📥 高级筛选项 -->
-      <template #search-advanced>
         <el-form-item>
           <el-select v-model="queryParams.qrcodeType" clearable style="width: 200px">
             <template #prefix>
@@ -268,6 +264,10 @@ v-model="queryParams.qrcodeCode" placeholder="请输入" clearable style="width:
           </el-select>
         </el-form-item>
       </template>
+
+      <!-- 📥 高级筛选项 -->
+      <!-- <template #search-advanced>
+      </template> -->
 
       <!-- 📥 工具栏左侧 -->
       <template #toolbar-left>
@@ -347,15 +347,17 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
 
           <el-table-column label="操作" width="200" fixed="right" align="center">
             <template #default="{ row }">
-              <el-tooltip content="详情" placement="top" :enterable="false">
-                <el-button link type="primary" icon="View" @click="handleView(row)" />
-              </el-tooltip>
-              <el-tooltip content="展示" placement="top" :enterable="false">
-                <el-button link type="primary" icon="Picture" @click="handleShowSingle(row)" />
-              </el-tooltip>
-              <el-tooltip content="下载" placement="top" :enterable="false">
-                <el-button link type="warning" icon="Download" @click="handleDownloadSingle(row)" />
-              </el-tooltip>
+              <div class="action-buttons">
+                <el-button size="small" type="primary" @click="handleView(row)">
+                  详情
+                </el-button>
+                <el-button size="small" type="primary" @click="handleShowSingle(row)">
+                  展示
+                </el-button>
+                <el-button size="small" type="warning" @click="handleDownloadSingle(row)">
+                  下载
+                </el-button>
+              </div>
             </template>
           </el-table-column>
         </el-table>

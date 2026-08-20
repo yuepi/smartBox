@@ -1,17 +1,18 @@
 import type { Recordable, UserInfo } from "@vben/types";
 
+import type { AuthApi } from '#/api';
+
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 
 import { LOGIN_PATH } from "@vben/constants";
-import { preferences } from "@vben/preferences";
+import { clearCache,preferences } from "@vben/preferences";
 import { resetAllStores, useAccessStore, useTabbarStore, useUserStore } from "@vben/stores";
 
 import { ElMessage, ElNotification } from "element-plus";
 import { defineStore } from "pinia";
 
 import { changeMerchantApi, getUserInfoApi, loginApi, logoutApi } from '#/api';
-import type { AuthApi } from '#/api';
 import { $t } from "#/locales";
 import { useDictStore } from '#/store/modules/dict';
 
@@ -185,7 +186,7 @@ export const useAuthStore = defineStore("auth", () => {
   async function logout(redirect: boolean = true) {
     try {
       await logoutApi();
-
+      await clearCache();
       // 清空字典缓存
       useDictStore().clearDict();
     } catch {

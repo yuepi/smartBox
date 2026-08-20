@@ -107,6 +107,7 @@ async function handleStatusChange(row: SortTask, status: number) {
 
 // --- 删除 ---
 async function handleDelete(row?: SortTask) {
+  // eslint-disable-next-line no-useless-assignment
   let ids: number[] = [];
   if (row) {
     ids = [row.sortTaskId];
@@ -199,11 +200,7 @@ onMounted(() => {
             />
           </el-select>
         </el-form-item>
-      </template>
-
-      <!-- 📥 高级筛选项 -->
-      <template #search-advanced>
-        <el-form-item>
+         <el-form-item>
           <el-select v-model="queryParams.sortStatus" clearable style="width: 200px">
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">分拣状态:</span>
@@ -217,6 +214,10 @@ onMounted(() => {
           </el-select>
         </el-form-item>
       </template>
+
+      <!-- 📥 高级筛选项 -->
+      <!-- <template #search-advanced>
+      </template> -->
 
       <!-- 📥 工具栏左侧 -->
       <template #toolbar-left>

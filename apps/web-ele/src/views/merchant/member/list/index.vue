@@ -85,6 +85,7 @@ function handleViewWallet(row: Member) {
 
 // --- 删除 ---
 async function handleDelete(row?: Member) {
+  // eslint-disable-next-line no-useless-assignment
   let ids: number[] = [];
   if (row) {
     ids = [row.memberId];
@@ -135,23 +136,16 @@ onMounted(() => {
 <template>
   <Page auto-content-height>
     <BaseTableLayout
-      v-model:query-params="queryParams"
-      v-model:more-params="moreParams"
-      :loading="loading"
-      :total="total"
-      @search="loadData"
-      @reset="resetQuery"
-    >
+v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="loading"
+      :total="total" @search="loadData" @reset="resetQuery"
+>
       <!-- 📥 基础筛选项 -->
       <template #search-basic>
         <el-form-item>
           <el-input
-            v-model="queryParams.memberId"
-            placeholder="请输入"
-            clearable
-            style="width: 200px"
+v-model="queryParams.memberId" placeholder="请输入" clearable style="width: 200px"
             @keyup.enter="handleQuery"
-          >
+>
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">会员ID:</span>
             </template>
@@ -160,12 +154,9 @@ onMounted(() => {
 
         <el-form-item>
           <el-input
-            v-model="queryParams.mobile"
-            placeholder="请输入"
-            clearable
-            style="width: 200px"
+v-model="queryParams.mobile" placeholder="请输入" clearable style="width: 200px"
             @keyup.enter="handleQuery"
-          >
+>
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">手机号:</span>
             </template>
@@ -174,32 +165,20 @@ onMounted(() => {
 
         <el-form-item>
           <el-input
-            v-model="queryParams.nickname"
-            placeholder="请输入"
-            clearable
-            style="width: 200px"
+v-model="queryParams.nickname" placeholder="请输入" clearable style="width: 200px"
             @keyup.enter="handleQuery"
-          >
+>
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">昵称:</span>
             </template>
           </el-input>
         </el-form-item>
-      </template>
-
-      <!-- 📥 高级筛选项 -->
-      <template #search-advanced>
         <el-form-item>
           <el-select v-model="queryParams.sex" clearable style="width: 200px">
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">性别:</span>
             </template>
-            <el-option
-              v-for="item in member_sex"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
+            <el-option v-for="item in member_sex" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
 
@@ -208,15 +187,14 @@ onMounted(() => {
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">状态:</span>
             </template>
-            <el-option
-              v-for="item in member_status"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
+            <el-option v-for="item in member_status" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
       </template>
+
+      <!-- 📥 高级筛选项 -->
+      <!-- <template #search-advanced>
+      </template> -->
 
       <!-- 📥 工具栏左侧 -->
       <template #toolbar-left>
@@ -235,33 +213,24 @@ onMounted(() => {
       <!-- 📥 工具栏右侧 -->
       <template #toolbar-right>
         <ColumnSelector
-          :storage-key="MEMBER_STORAGE_KEY"
-          :default-columns="defaultMemberColumns"
+:storage-key="MEMBER_STORAGE_KEY" :default-columns="defaultMemberColumns"
           @update:columns="handleColumnsUpdate"
-        />
+/>
       </template>
 
       <!-- 📥 表格 -->
       <template #table>
         <el-table
-          :data="tableData"
-          border
-          stripe
-          style="width: 100%; height: 100%"
+:data="tableData" border stripe style="width: 100%; height: 100%"
           @selection-change="handleSelectionChange"
-        >
+>
           <el-table-column type="selection" width="50" align="center" />
 
           <el-table-column
-            v-for="col in visibleColumns"
-            :key="col.key"
-            :prop="col.key"
-            :label="col.label"
-            :width="typeof col.width === 'number' ? col.width : undefined"
-            :min-width="col.minWidth"
-            :align="col.align"
+v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
+            :width="typeof col.width === 'number' ? col.width : undefined" :min-width="col.minWidth" :align="col.align"
             :show-overflow-tooltip="col.showOverflowTooltip || false"
-          >
+>
             <template #default="{ row }">
               <template v-if="col.key === 'avatar'">
                 <el-avatar :size="32" :src="row.avatar" />
@@ -280,18 +249,20 @@ onMounted(() => {
 
           <el-table-column label="操作" width="200" fixed="right" align="center">
             <template #default="{ row }">
-              <el-tooltip content="详情" placement="top" :enterable="false">
-                <el-button link type="primary" icon="View" @click="handleView(row)" />
-              </el-tooltip>
-              <el-tooltip content="钱包" placement="top" :enterable="false">
-                <el-button link type="primary" icon="Wallet" @click="handleViewWallet(row)" />
-              </el-tooltip>
-              <el-tooltip content="编辑" placement="top" :enterable="false">
-                <el-button link type="primary" icon="Edit" @click="handleEdit(row)" />
-              </el-tooltip>
-              <el-tooltip content="删除" placement="top" :enterable="false">
-                <el-button link type="danger" icon="Delete" @click="handleDelete(row)" />
-              </el-tooltip>
+              <div class="action-buttons">
+                <el-button size="small" type="primary" @click="handleView(row)">
+                  详情
+                </el-button>
+                <el-button size="small" type="primary" @click="handleViewWallet(row)">
+                  钱包
+                </el-button>
+                <el-button size="small" type="primary" @click="handleEdit(row)">
+                  编辑
+                </el-button>
+                <el-button size="small" type="danger" @click="handleDelete(row)">
+                  删除
+                </el-button>
+              </div>
             </template>
           </el-table-column>
         </el-table>

@@ -108,6 +108,7 @@ function handleViewRecentOrders(row: MemberWithdraw) {
 
 // --- 删除 ---
 async function handleDelete(row?: MemberWithdraw) {
+  // eslint-disable-next-line no-useless-assignment
   let ids: number[] = [];
   if (row) {
     ids = [row.memberWithdrawId];
@@ -160,23 +161,16 @@ onMounted(() => {
 <template>
   <Page auto-content-height>
     <BaseTableLayout
-      v-model:query-params="queryParams"
-      v-model:more-params="moreParams"
-      :loading="loading"
-      :total="total"
-      @search="loadData"
-      @reset="resetQuery"
-    >
+v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="loading"
+      :total="total" @search="loadData" @reset="resetQuery"
+>
       <!-- 📥 基础筛选项 -->
       <template #search-basic>
         <el-form-item>
           <el-input
-            v-model="queryParams.withdrawNo"
-            placeholder="请输入"
-            clearable
-            style="width: 200px"
+v-model="queryParams.withdrawNo" placeholder="请输入" clearable style="width: 200px"
             @keyup.enter="handleQuery"
-          >
+>
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">提现单号:</span>
             </template>
@@ -185,46 +179,34 @@ onMounted(() => {
 
         <el-form-item>
           <el-input
-            v-model="queryParams.memberId"
-            placeholder="请输入"
-            clearable
-            style="width: 200px"
+v-model="queryParams.memberId" placeholder="请输入" clearable style="width: 200px"
             @keyup.enter="handleQuery"
-          >
+>
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">会员ID:</span>
             </template>
           </el-input>
         </el-form-item>
-      </template>
-
-      <!-- 📥 高级筛选项 -->
-      <template #search-advanced>
         <el-form-item>
           <el-select v-model="queryParams.status" clearable style="width: 200px">
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">提现状态:</span>
             </template>
-            <el-option
-              v-for="item in withdraw_status"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
+            <el-option v-for="item in withdraw_status" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
 
         <el-form-item>
           <el-date-picker
-            v-model="dateRange"
-            type="daterange"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            style="width: 280px"
-          />
+v-model="dateRange" type="daterange" range-separator="至" start-placeholder="开始日期"
+            end-placeholder="结束日期" style="width: 280px"
+/>
         </el-form-item>
       </template>
+
+      <!-- 📥 高级筛选项 -->
+      <!-- <template #search-advanced>
+      </template> -->
 
       <!-- 📥 工具栏左侧 -->
       <template #toolbar-left>
@@ -242,33 +224,24 @@ onMounted(() => {
       <!-- 📥 工具栏右侧 -->
       <template #toolbar-right>
         <ColumnSelector
-          :storage-key="MEMBER_WITHDRAW_STORAGE_KEY"
-          :default-columns="defaultMemberWithdrawColumns"
+:storage-key="MEMBER_WITHDRAW_STORAGE_KEY" :default-columns="defaultMemberWithdrawColumns"
           @update:columns="handleColumnsUpdate"
-        />
+/>
       </template>
 
       <!-- 📥 表格 -->
       <template #table>
         <el-table
-          :data="tableData"
-          border
-          stripe
-          style="width: 100%; height: 100%"
+:data="tableData" border stripe style="width: 100%; height: 100%"
           @selection-change="handleSelectionChange"
-        >
+>
           <el-table-column type="selection" width="50" align="center" />
 
           <el-table-column
-            v-for="col in visibleColumns"
-            :key="col.key"
-            :prop="col.key"
-            :label="col.label"
-            :width="typeof col.width === 'number' ? col.width : undefined"
-            :min-width="col.minWidth"
-            :align="col.align"
+v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
+            :width="typeof col.width === 'number' ? col.width : undefined" :min-width="col.minWidth" :align="col.align"
             :show-overflow-tooltip="col.showOverflowTooltip || false"
-          >
+>
             <template #default="{ row }">
               <template v-if="col.key === 'recentOrder'">
                 <el-button type="primary" size="small" @click="handleViewRecentOrders(row)">查看订单</el-button>
@@ -293,15 +266,17 @@ onMounted(() => {
 
           <el-table-column label="操作" width="200" fixed="right" align="center">
             <template #default="{ row }">
-              <el-tooltip content="详情" placement="top" :enterable="false">
-                <el-button link type="primary" icon="View" @click="handleView(row)" />
-              </el-tooltip>
-              <el-tooltip v-if="row.status === 0" content="审核" placement="top" :enterable="false">
-                <el-button link type="success" icon="Check" @click="handleAudit(row)" />
-              </el-tooltip>
-              <el-tooltip content="删除" placement="top" :enterable="false">
-                <el-button link type="danger" icon="Delete" @click="handleDelete(row)" />
-              </el-tooltip>
+              <div class="action-buttons">
+                <el-button size="small" type="primary" @click="handleView(row)">
+                  详情
+                </el-button>
+                <el-button v-if="row.status === 0" size="small" type="success" @click="handleAudit(row)">
+                  审核
+                </el-button>
+                <el-button size="small" type="danger" @click="handleDelete(row)">
+                  删除
+                </el-button>
+              </div>
             </template>
           </el-table-column>
         </el-table>

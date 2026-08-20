@@ -297,7 +297,7 @@ v-model="queryParams.deviceName" placeholder="请输入" clearable style="width:
             @keyup.enter="handleQuery"
 >
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">设备名称:</span>
+              <span class="text-sm text-gray-400 mr-0.5">设备名称:</span>
             </template>
           </el-input>
         </el-form-item>
@@ -308,7 +308,7 @@ v-model="queryParams.deviceNo" placeholder="请输入" clearable style="width: 2
             @keyup.enter="handleQuery"
 >
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">设备编号:</span>
+              <span class="text-sm text-gray-400 mr-0.5">设备编号:</span>
             </template>
           </el-input>
         </el-form-item>
@@ -319,14 +319,14 @@ v-model="queryParams.qrCode" placeholder="请输入" clearable style="width: 200
             @keyup.enter="handleQuery"
 >
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">面贴编号:</span>
+              <span class="text-sm text-gray-400 mr-0.5">面贴编号:</span>
             </template>
           </el-input>
         </el-form-item>
         <el-form-item>
           <el-select v-model="queryParams.onlineStatus" clearable style="width: 200px">
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">在线状态:</span>
+              <span class="text-sm text-gray-400 mr-0.5">在线状态:</span>
             </template>
             <el-option v-for="item in device_online_status" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
@@ -335,7 +335,7 @@ v-model="queryParams.qrCode" placeholder="请输入" clearable style="width: 200
         <el-form-item>
           <el-select v-model="queryParams.status" clearable style="width: 200px">
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">状态:</span>
+              <span class="text-sm text-gray-400 mr-0.5">状态:</span>
             </template>
             <el-option v-for="item in device_status" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
@@ -343,8 +343,8 @@ v-model="queryParams.qrCode" placeholder="请输入" clearable style="width: 200
       </template>
 
       <!-- 📥 高级筛选项 -->
-      <template #search-advanced>
-      </template>
+      <!-- <template #search-advanced>
+      </template> -->
 
       <!-- 📥 工具栏左侧 -->
       <template #toolbar-left>
@@ -377,7 +377,7 @@ v-model="queryParams.qrCode" placeholder="请输入" clearable style="width: 200
         </el-button>
 
         <transition name="el-fade-in">
-          <span v-if="selectedIds.length > 0" class="ml-2 text-xs text-gray-400">
+          <span v-if="selectedIds.length > 0" class="ml-2 text-sm text-gray-400">
             已选
             <span class="text-red-500 font-medium">{{ selectedIds.length }}</span>
             项
@@ -499,7 +499,7 @@ v-if="row.qrCode" class="cursor-pointer text-primary hover:text-primary-dark" ti
   position: absolute;
   top: 50%;
   left: 12px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 400;
   color: #909399;
   pointer-events: none;

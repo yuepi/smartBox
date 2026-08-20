@@ -76,6 +76,7 @@ function handleBind(row: DevicePackage) {
 
 // --- 删除 ---
 async function handleDelete(row?: DevicePackage) {
+  // eslint-disable-next-line no-useless-assignment
   let ids: number[] = [];
   if (row) {
     ids = [row.devicePackageId];
@@ -128,43 +129,27 @@ onMounted(() => {
 <template>
   <Page auto-content-height>
     <BaseTableLayout
-      v-model:query-params="queryParams"
-      v-model:more-params="moreParams"
-      :loading="loading"
-      :total="total"
-      @search="loadData"
-      @reset="resetQuery"
-    >
+v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="loading"
+      :total="total" @search="loadData" @reset="resetQuery"
+>
       <!-- 📥 基础筛选项 -->
       <template #search-basic>
         <el-form-item>
           <el-input
-            v-model="queryParams.packageName"
-            placeholder="输入套餐名称"
-            clearable
-            style="width: 200px"
+v-model="queryParams.packageName" placeholder="输入套餐名称" clearable style="width: 200px"
             @keyup.enter="handleQuery"
-          >
+>
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">套餐名称:</span>
             </template>
           </el-input>
         </el-form-item>
-      </template>
-
-      <!-- 📥 高级筛选项 -->
-      <template #search-advanced>
         <el-form-item>
           <el-select v-model="queryParams.packageType" clearable style="width: 200px">
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">计费类型:</span>
             </template>
-            <el-option
-              v-for="item in package_type"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
+            <el-option v-for="item in package_type" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
 
@@ -178,6 +163,10 @@ onMounted(() => {
           </el-select>
         </el-form-item>
       </template>
+
+      <!-- 📥 高级筛选项 -->
+      <!-- <template #search-advanced>
+      </template> -->
 
       <!-- 📥 工具栏左侧 -->
       <template #toolbar-left>
@@ -196,32 +185,24 @@ onMounted(() => {
       <!-- 📥 工具栏右侧 -->
       <template #toolbar-right>
         <ColumnSelector
-          :storage-key="PACKAGE_STORAGE_KEY"
-          :default-columns="defaultPackageColumns"
+:storage-key="PACKAGE_STORAGE_KEY" :default-columns="defaultPackageColumns"
           @update:columns="handleColumnsUpdate"
-        />
+/>
       </template>
 
       <!-- 📥 表格 -->
       <template #table>
         <el-table
-          :data="tableData"
-          border
-          stripe
-          style="width: 100%; height: 100%"
+:data="tableData" border stripe style="width: 100%; height: 100%"
           @selection-change="handleSelectionChange"
-        >
+>
           <el-table-column type="selection" width="50" align="center" />
 
           <el-table-column
-            v-for="col in visibleColumns"
-            :key="col.key"
-            :prop="col.key"
-            :label="col.label"
-            :width="typeof col.width === 'number' ? col.width : undefined"
-            :min-width="col.minWidth"
+v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
+            :width="typeof col.width === 'number' ? col.width : undefined" :min-width="col.minWidth"
             :align="col.align || 'center'"
-          >
+>
             <template #default="{ row }">
               <template v-if="col.key === 'packageType'">
                 <DictTag :options="package_type" :value="row.packageType" />
@@ -241,17 +222,19 @@ onMounted(() => {
             </template>
           </el-table-column>
 
-          <el-table-column label="操作" width="150" fixed="right" align="center">
+          <el-table-column label="操作" width="200" fixed="right" align="center">
             <template #default="{ row }">
-              <el-tooltip content="编辑" placement="top" :enterable="false">
-                <el-button link type="primary" icon="Edit" @click="handleEdit(row)" />
-              </el-tooltip>
-              <el-tooltip content="绑定仓口" placement="top" :enterable="false">
-                <el-button link type="success" icon="Link" @click="handleBind(row)" />
-              </el-tooltip>
-              <el-tooltip content="删除" placement="top" :enterable="false">
-                <el-button link type="danger" icon="Delete" @click="handleDelete(row)" />
-              </el-tooltip>
+              <div class="action-buttons">
+                <el-button size="small" type="primary" @click="handleEdit(row)">
+                  编辑
+                </el-button>
+                <el-button size="small" type="success" @click="handleBind(row)">
+                  绑定仓口
+                </el-button>
+                <el-button size="small" type="danger" @click="handleDelete(row)">
+                  删除
+                </el-button>
+              </div>
             </template>
           </el-table-column>
         </el-table>

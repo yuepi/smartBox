@@ -240,6 +240,14 @@ v-model:current-page="queryParams.pageNo" v-model:page-size="queryParams.pageSiz
       display: flex;
       gap: 8px;
       align-items: center;
+
+      :deep(.el-button) {
+        margin-left: 0 !important;
+      }
+
+      :deep(.el-dropdown .el-button) {
+        margin-left: 0 !important;
+      }
     }
   }
 

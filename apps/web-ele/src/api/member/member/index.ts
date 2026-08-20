@@ -32,6 +32,7 @@ export interface MemberPageParams {
   nickname?: string;
   sex?: number;
   status?: number;
+  memberId?: number;
 }
 
 /** 1. 分页查询 */

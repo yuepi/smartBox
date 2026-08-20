@@ -66,7 +66,6 @@ async function loadData() {
 
 // 打开绑定弹窗
 function handleBindDevice(row: DeviceConfig) {
-  console.log(row);
   bindDialogRef.value?.open(row.deviceConfigId, row.configName);
 }
 
@@ -146,10 +145,6 @@ v-model="queryParams.configName" placeholder="请输入" clearable style="width:
             </template>
           </el-input>
         </el-form-item>
-      </template>
-
-      <!-- 📥 高级筛选项 -->
-      <template #search-advanced>
         <el-form-item>
           <el-select v-model="queryParams.deviceBrand" clearable style="width: 200px">
             <template #prefix>
@@ -171,6 +166,10 @@ v-for="item in [{ label: '启用', value: 0 }, { label: '禁用', value: 1 }]" :
           </el-select>
         </el-form-item>
       </template>
+
+      <!-- 📥 高级筛选项 -->
+      <!-- <template #search-advanced>
+      </template> -->
 
       <!-- 📥 工具栏左侧 -->
       <template #toolbar-left>
@@ -229,21 +228,23 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
             </template>
           </el-table-column>
 
-          <el-table-column label="操作" width="150" fixed="right" align="center">
+          <el-table-column label="操作" width="180" fixed="right" align="center">
             <template #default="{ row }">
-              <el-tooltip content="编辑" placement="top" :enterable="false">
-                <el-button link type="primary" icon="Edit" @click="handleEdit(row)" />
-              </el-tooltip>
-              <el-tooltip content="绑定设备" placement="top" :enterable="false">
-                <el-button link type="success" icon="Link" @click="handleBindDevice(row)" />
-              </el-tooltip>
-              <el-tooltip content="删除" placement="top" :enterable="false">
-                <el-button link type="danger" icon="Delete" @click="handleDelete(row)" />
-              </el-tooltip>
+              <div class="action-buttons">
+                <el-button size="small" type="primary" @click="handleEdit(row)">
+                  编辑
+                </el-button>
+                <el-button size="small" type="success" @click="handleBindDevice(row)">
+                  绑定
+                </el-button>
+                <el-button size="small" type="danger" @click="handleDelete(row)">
+                  删除
+                </el-button>
+              </div>
             </template>
           </el-table-column>
-        </el-table>
-      </template>
+      </el-table>
+</template>
     </BaseTableLayout>
 
     <!-- ===== 弹窗 ===== -->
