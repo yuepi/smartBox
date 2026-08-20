@@ -6,7 +6,7 @@ export const WAREHOUSE_STORAGE_KEY = 'warehouse_table_columns';
 
 export const defaultWarehouseColumns: TableColumnConfig[] = [
   // { key: 'warehouseId', label: '仓库ID', visible: true, width: 80, align: 'center' },
-  { key: 'warehouseName', label: '仓库名称', visible: true, minWidth: 180, align: 'left', fixed: true, showOverflowTooltip: true },
+  { key: 'warehouseName', label: '仓库名称', visible: true, minWidth: 180, align: 'start', fixed: 'left', showOverflowTooltip: true },
   { key: 'warehouseType', label: '仓库类型', visible: true, width: 120, align: 'center' },
   { key: 'contact', label: '联系人', visible: true, width: 120, align: 'center' },
   { key: 'phone', label: '联系电话', visible: true, width: 140, align: 'center' },
@@ -21,7 +21,7 @@ export const CUSTOMER_STORAGE_KEY = 'customer_table_columns';
 
 export const defaultCustomerColumns: TableColumnConfig[] = [
   // { key: 'customerId', label: '回收商ID', visible: true, width: 80, align: 'center' },
-  { key: 'customerName', label: '回收商名称', visible: true, minWidth: 180, align: 'left', fixed: true, showOverflowTooltip: true },
+  { key: 'customerName', label: '回收商名称', visible: true, minWidth: 180, align: 'start', fixed: 'left', showOverflowTooltip: true },
   { key: 'contact', label: '联系人', visible: true, width: 120, align: 'center' },
   { key: 'phone', label: '电话', visible: true, width: 140, align: 'center' },
   { key: 'address', label: '地址', visible: true, minWidth: 200, align: 'center', showOverflowTooltip: true },
@@ -34,7 +34,7 @@ export const STOCK_IN_STORAGE_KEY = 'stock_in_table_columns';
 
 export const defaultStockInColumns: TableColumnConfig[] = [
   // { key: 'stockInId', label: '入库单ID', visible: false, width: 80, align: 'center' },
-  { key: 'inNo', label: '入库单号', visible: true, minWidth: 180, align: 'left', fixed: true, showOverflowTooltip: true },
+  { key: 'inNo', label: '入库单号', visible: true, minWidth: 180, align: 'start', fixed: 'left', showOverflowTooltip: true },
   { key: 'warehouseName', label: '仓库名称', visible: true, width: 150, align: 'center' },
   { key: 'totalWeight', label: '总重量(kg)', visible: true, width: 130, align: 'center' },
   { key: 'totalCostAmount', label: '总成本(元)', visible: true, width: 130, align: 'center' },
@@ -49,7 +49,7 @@ export const STOCK_OUT_STORAGE_KEY = 'stock_out_table_columns';
 
 export const defaultStockOutColumns: TableColumnConfig[] = [
   // { key: 'stockOutId', label: '出库单ID', visible: false, width: 80, align: 'center' },
-  { key: 'outNo', label: '出库单号', visible: true, minWidth: 180, align: 'left', fixed: true, showOverflowTooltip: true },
+  { key: 'outNo', label: '出库单号', visible: true, minWidth: 180, align: 'start', fixed: 'left', showOverflowTooltip: true },
   { key: 'warehouseName', label: '仓库名称', visible: true, width: 150, align: 'center' },
   { key: 'customerName', label: '回收商名称', visible: true, width: 150, align: 'center' },
   { key: 'totalOutWeight', label: '总重量(kg)', visible: true, width: 130, align: 'center' },
@@ -79,7 +79,7 @@ export const STOCK_CHECK_STORAGE_KEY = 'stock_check_table_columns';
 
 export const defaultStockCheckColumns: TableColumnConfig[] = [
   // { key: 'stockCheckId', label: '盘点ID', visible: false, width: 80, align: 'center' },
-  { key: 'checkNo', label: '盘点单号', visible: true, minWidth: 180, align: 'left', fixed: true, showOverflowTooltip: true },
+  { key: 'checkNo', label: '盘点单号', visible: true, minWidth: 180, align: 'start', fixed: 'left', showOverflowTooltip: true },
   { key: 'warehouseName', label: '仓库名称', visible: true, width: 150, align: 'center' },
   { key: 'checkType', label: '盘点类型', visible: true, width: 120, align: 'center' },
   { key: 'checkStatus', label: '盘点状态', visible: true, width: 120, align: 'center' },

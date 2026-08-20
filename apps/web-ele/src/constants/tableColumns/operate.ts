@@ -10,7 +10,7 @@ export const defaultRecycleOrderColumns: TableColumnConfig[] = [
   // { key: 'merchantId', label: '商户ID', visible: false, width: 80, align: 'center' },
     { key: 'memberId', label: '会员ID', visible: false, width: 80, align: 'center' },
   { key: 'memberName', label: '会员名称', visible: false, width: 120, align: 'center' },
-  { key: 'memberPhone', label: '手机号', visible: true, width: 120, align: 'center',fixed: true },
+  { key: 'memberPhone', label: '手机号', visible: true, width: 120, align: 'center',fixed: 'left' },
   // { key: 'deptId', label: '小区ID', visible: false, width: 80, align: 'center' },
   { key: 'deptName', label: '小区名称', visible: true, minWidth: 150, align: 'center', showOverflowTooltip: true },
   { key: 'deviceId', label: '设备ID', visible: false, width: 80, align: 'center' },
@@ -32,7 +32,7 @@ export const defaultRecycleOrderColumns: TableColumnConfig[] = [
   { key: 'estimateAmount', label: '预估金额(元)', visible: false, width: 110, align: 'center' },
   { key: 'realAmount', label: '实际金额(元)', visible: true, width: 110, align: 'center' },
   { key: 'orderStatus', label: '订单状态', visible: true, width: 120, align: 'center' },
-  { key: 'remark', label: '备注', visible: false, minWidth: 150, align: 'left', showOverflowTooltip: true },
+  { key: 'remark', label: '备注', visible: false, minWidth: 150, align: 'start', showOverflowTooltip: true },
   { key: 'status', label: '状态', visible: false, width: 80, align: 'center' },
   { key: 'createdTime', label: '创建时间', visible: true, width: 160, align: 'center' },
 ];
@@ -42,7 +42,7 @@ export const CLEAN_TASK_STORAGE_KEY = 'clean_task_table_columns';
 
 export const defaultCleanTaskColumns: TableColumnConfig[] = [
   // { key: 'cleanTaskId', label: '任务ID', visible: true, width: 80, align: 'center' },
-  { key: 'taskNo', label: '清运单号', visible: true, minWidth: 180, align: 'center', fixed: true, showOverflowTooltip: true },
+  { key: 'taskNo', label: '清运单号', visible: true, minWidth: 180, align: 'center', fixed: 'left', showOverflowTooltip: true },
   // { key: 'merchantId', label: '商户ID', visible: false, width: 80, align: 'center' },
   // { key: 'deptId', label: '小区ID', visible: false, width: 80, align: 'center' },
   { key: 'deptName', label: '小区名称', visible: true, minWidth: 150, align: 'center', showOverflowTooltip: true },
@@ -58,7 +58,7 @@ export const defaultCleanTaskColumns: TableColumnConfig[] = [
   { key: 'taskStatus', label: '任务状态', visible: true, width: 100, align: 'center' },
   { key: 'planTime', label: '计划清运时间', visible: true, width: 160, align: 'center' },
   { key: 'finishTime', label: '完成时间', visible: false, width: 160, align: 'center' },
-  { key: 'remark', label: '备注', visible: false, minWidth: 150, align: 'left', showOverflowTooltip: true },
+  { key: 'remark', label: '备注', visible: false, minWidth: 150, align: 'start', showOverflowTooltip: true },
   { key: 'status', label: '状态', visible: false, width: 80, align: 'center' },
   { key: 'createTime', label: '创建时间', visible: true, width: 160, align: 'center' },
 ];
@@ -68,7 +68,7 @@ export const SORT_TASK_STORAGE_KEY = 'sort_task_table_columns';
 
 export const defaultSortTaskColumns: TableColumnConfig[] = [
   // { key: 'sortTaskId', label: '任务ID', visible: true, width: 80, align: 'center' },
-  { key: 'sortNo', label: '分拣单号', visible: true, minWidth: 180, align: 'center', fixed: true, showOverflowTooltip: true },
+  { key: 'sortNo', label: '分拣单号', visible: true, minWidth: 180, align: 'center', fixed: 'left', showOverflowTooltip: true },
   { key: 'merchantId', label: '商户ID', visible: false, width: 80, align: 'center' },
   { key: 'cleanTaskId', label: '清运任务ID', visible: false, width: 100, align: 'center' },
   { key: 'deviceId', label: '设备ID', visible: false, width: 80, align: 'center' },

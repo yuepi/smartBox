@@ -170,7 +170,7 @@ onMounted(() => {
         <el-form-item>
           <el-input
             v-model="queryParams.sortNo"
-            placeholder="请输入分拣单号"
+            placeholder="请输入"
             clearable
             style="width: 200px"
             @keyup.enter="handleQuery"
@@ -184,7 +184,6 @@ onMounted(() => {
         <el-form-item>
           <el-select
             v-model="queryParams.deviceId"
-            placeholder="请选择设备"
             clearable
             filterable
             style="width: 200px"

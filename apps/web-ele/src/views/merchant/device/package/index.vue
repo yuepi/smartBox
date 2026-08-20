@@ -136,7 +136,7 @@ v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="lo
       <template #search-basic>
         <el-form-item>
           <el-input
-v-model="queryParams.packageName" placeholder="输入套餐名称" clearable style="width: 200px"
+v-model="queryParams.packageName" placeholder="请输入" clearable style="width: 200px"
             @keyup.enter="handleQuery"
 >
             <template #prefix>

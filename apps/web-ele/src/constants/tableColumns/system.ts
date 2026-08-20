@@ -13,7 +13,7 @@ export const defaultLoginLogColumns: TableColumnConfig[] = [
   { key: 'loginTime', label: '登录时间', visible: true, width: 180, align: 'center' },
   { key: 'browser', label: '浏览器', visible: true, width: 120, align: 'center', showOverflowTooltip: true },
   { key: 'os', label: '操作系统', visible: true, width: 120, align: 'center', showOverflowTooltip: true },
-  { key: 'msg', label: '操作信息', visible: true, minWidth: 200, align: 'left', showOverflowTooltip: true },
+  { key: 'msg', label: '操作信息', visible: true, minWidth: 200, align: 'start', showOverflowTooltip: true },
 ];
 
 
@@ -31,10 +31,10 @@ export const defaultOperLogColumns: TableColumnConfig[] = [
   { key: 'operRequestMethod', label: '请求方式', visible: true, width: 100, align: 'center' },
   { key: 'status', label: '状态', visible: true, width: 80, align: 'center' },
   { key: 'costTime', label: '耗时', visible: true, width: 80, align: 'center' },
-  { key: 'operUrl', label: '请求URL', visible: false, minWidth: 200, align: 'left', showOverflowTooltip: true },
-  { key: 'operParam', label: '请求参数', visible: false, minWidth: 200, align: 'left', showOverflowTooltip: true },
-  { key: 'operResultData', label: '返回结果', visible: false, minWidth: 200, align: 'left', showOverflowTooltip: true },
-  { key: 'errorMsg', label: '异常信息', visible: false, minWidth: 200, align: 'left', showOverflowTooltip: true },
+  { key: 'operUrl', label: '请求URL', visible: false, minWidth: 200, align: 'start', showOverflowTooltip: true },
+  { key: 'operParam', label: '请求参数', visible: false, minWidth: 200, align: 'start', showOverflowTooltip: true },
+  { key: 'operResultData', label: '返回结果', visible: false, minWidth: 200, align: 'start', showOverflowTooltip: true },
+  { key: 'errorMsg', label: '异常信息', visible: false, minWidth: 200, align: 'start', showOverflowTooltip: true },
   { key: 'createTime', label: '操作时间', visible: false, width: 160, align: 'center' },
 ];
 
