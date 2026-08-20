@@ -34,6 +34,22 @@
   margin-bottom: 8px;
 }
 
+//表格操作按钮
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  justify-content: start;
+
+  .el-button {
+    height: 26px;
+    padding: 0 8px;
+    margin-right: 0;
+    margin-left: 0;
+  }
+}
+
 //card去除阴影
 .el-card.is-always-shadow,
 .el-card.is-hover-shadow:focus,

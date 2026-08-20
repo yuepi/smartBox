@@ -222,7 +222,7 @@ v-model:current-page="queryParams.pageNo" v-model:page-size="queryParams.pageSiz
   overflow: hidden;
   background: #fff;
   border-radius: 6px;
-  
+
   .dark & {
     background: #1e1e1e !important;
     box-shadow: none;

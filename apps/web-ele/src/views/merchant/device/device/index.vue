@@ -100,17 +100,28 @@ async function handleBatchUpgrade() {
   }
 
   try {
-    await ElMessageBox.confirm(
-      `确定要对选中的 ${selectedIds.value.length} 台设备发起批量升级吗？`,
+    const { value: ossUrl } = await ElMessageBox.prompt(
+      `请填写升级文件下载地址（将向 ${selectedIds.value.length} 台设备发送升级指令）`,
       '批量升级',
       {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
+        inputPlaceholder: '请输入升级文件下载地址',
+        inputValidator: (val) => {
+          if (!val?.trim()) {
+            return '请输入升级文件下载地址';
+          }
+          return true;
+        },
       }
     );
+
     batchUpgradeLoading.value = true;
-    await deviceUpgradeBatchApi(selectedIds.value);
+    await deviceUpgradeBatchApi({
+      deviceIds: selectedIds.value,
+      ossUrl: ossUrl.trim(),
+    });
     ElMessage.success(`已向 ${selectedIds.value.length} 台设备发送升级指令`);
     selectedIds.value = [];
     handleQuery();
@@ -212,6 +223,7 @@ function handleQuickCapture(row: Device) {
 
 // --- 删除 ---
 async function handleDelete(row?: Device) {
+  // eslint-disable-next-line no-useless-assignment
   let ids: number[] = [];
   if (row) {
     ids = [row.deviceId];
@@ -229,7 +241,7 @@ async function handleDelete(row?: Device) {
     }
     ElMessage.success(`成功删除 ${ids.length} 条设备`);
     selectedIds.value = [];
-    handleQuery();
+    loadData();
   } catch {
     // 取消删除
   }
@@ -311,10 +323,6 @@ v-model="queryParams.qrCode" placeholder="请输入" clearable style="width: 200
             </template>
           </el-input>
         </el-form-item>
-      </template>
-
-      <!-- 📥 高级筛选项 -->
-      <template #search-advanced>
         <el-form-item>
           <el-select v-model="queryParams.onlineStatus" clearable style="width: 200px">
             <template #prefix>
@@ -334,19 +342,21 @@ v-model="queryParams.qrCode" placeholder="请输入" clearable style="width: 200
         </el-form-item>
       </template>
 
+      <!-- 📥 高级筛选项 -->
+      <template #search-advanced>
+      </template>
+
       <!-- 📥 工具栏左侧 -->
       <template #toolbar-left>
         <el-button type="primary" plain icon="Plus" @click="handleAdd">
           新增设备
         </el-button>
         <ExportButton :module-code="ModuleCodeMap.DEVICE" :fields="visibleColumns" :find-cond="queryParams" />
-        <el-button type="warning" plain icon="Upload" :disabled="selectedIds.length === 0" @click="handleBatchUpgrade">
-          批量升级
-        </el-button>
+
         <el-button type="danger" plain icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete()">
           批量删除
         </el-button>
-
+        
         <el-dropdown v-if="selectedIds.length > 0" @command="handleBatchQrcodeCommand">
           <el-button type="primary" plain>
             批量二维码
@@ -361,6 +371,10 @@ v-model="queryParams.qrCode" placeholder="请输入" clearable style="width: 200
             </el-dropdown-menu>
           </template>
         </el-dropdown>
+
+         <el-button type="warning" plain icon="Upload" :disabled="selectedIds.length === 0" @click="handleBatchUpgrade">
+          批量升级
+        </el-button>
 
         <transition name="el-fade-in">
           <span v-if="selectedIds.length > 0" class="ml-2 text-xs text-gray-400">
@@ -428,21 +442,25 @@ v-if="row.qrCode" class="cursor-pointer text-primary hover:text-primary-dark" ti
           <el-table-column label="操作" width="200" fixed="right" align="center">
             <template #default="{ row }">
               <div class="action-buttons">
-                <el-tooltip content="详情" placement="top" :enterable="false">
-                  <el-button link type="primary" icon="Monitor" @click="handleView(row)" />
-                </el-tooltip>
-                <el-tooltip content="编辑" placement="top" :enterable="false">
-                  <el-button link type="primary" icon="Edit" @click="handleEdit(row)" />
-                </el-tooltip>
-                <!-- 桶内抓拍 -->
-                <el-tooltip content="桶内抓拍" placement="top" :enterable="false">
-                  <el-button link type="primary" icon="Camera" @click="handleQuickCapture(row)" />
-                </el-tooltip>
-                <el-tooltip content="删除" placement="top" :enterable="false">
-                  <el-button link type="danger" icon="Delete" @click="handleDelete(row)" />
-                </el-tooltip>
+                <el-button size="small" type="info" @click="handleView(row)">
+                  详情
+                </el-button>
+                <el-button size="small" type="primary" @click="handleEdit(row)">
+                  编辑
+                </el-button>
+                <el-button size="small" type="warning" @click="handleQuickCapture(row)">
+                  抓拍
+                </el-button>
+                <el-button size="small" type="danger" @click="handleDelete(row)">
+                  删除
+                </el-button>
                 <el-dropdown @command="(cmd: string) => handleCommand(cmd, row)">
-                  <el-button link type="primary" icon="More" />
+                  <el-button size="small" type="primary">
+                    更多
+                    <el-icon class="el-icon--right">
+                      <ArrowDown />
+                    </el-icon>
+                  </el-button>
                   <template #dropdown>
                     <el-dropdown-menu>
                       <el-dropdown-item command="restart">重启设备</el-dropdown-item>
@@ -471,17 +489,6 @@ v-if="row.qrCode" class="cursor-pointer text-primary hover:text-primary-dark" ti
 </template>
 
 <style scoped lang="scss">
-.action-buttons {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  justify-content: center;
-
-  .el-button {
-    margin-right: 0;
-    margin-left: 0;
-  }
-}
 
 .tree-prefix-dept :deep(.el-select__wrapper) {
   position: relative;

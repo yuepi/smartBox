@@ -1,4 +1,4 @@
-import { requestClient } from "#/api/request";
+import { requestClient } from '#/api/request';
 
 /** 设备主表类型定义 */
 export interface Device {
@@ -56,32 +56,32 @@ export interface DevicePageParams {
 
 /** 1. 分页查询设备 */
 export function getDevicePageApi(params: DevicePageParams) {
-  return requestClient.get("/merchant/device/page", { params });
+  return requestClient.get('/merchant/device/page', { params });
 }
 
 /** 2. 列表查询设备 */
 export function getDeviceListApi(params?: any) {
-  return requestClient.get("/merchant/device/list", { params });
+  return requestClient.get('/merchant/device/list', { params });
 }
 
 /** 3. 设备详情 */
 export function getDeviceDetailApi(deviceId: number) {
-  return requestClient.get("/merchant/device/detail", { params: { deviceId } });
+  return requestClient.get('/merchant/device/detail', { params: { deviceId } });
 }
 
 /** 4. 新增设备 */
 export function addDeviceApi(data: Partial<Device>) {
-  return requestClient.post("/merchant/device/add", data);
+  return requestClient.post('/merchant/device/add', data);
 }
 
 /** 5. 修改设备 */
 export function editDeviceApi(data: Partial<Device>) {
-  return requestClient.post("/merchant/device/edit", data);
+  return requestClient.post('/merchant/device/edit', data);
 }
 
 /** 6. 删除设备 */
 export function deleteDeviceApi(deviceId: number) {
-  return requestClient.post("/merchant/device/delete", { deviceId });
+  return requestClient.post('/merchant/device/delete', { deviceId });
 }
 
 /** 设备操作类型 */
@@ -128,23 +128,30 @@ export interface QrcodeData {
 
 /** 7. 设备操作 */
 export function operateDeviceApi(data: DeviceOperationParams) {
-  return requestClient.post("/merchant/device/operation/operationDevice", data);
+  return requestClient.post('/merchant/device/operation/operationDevice', data);
 }
 
 /** 8. 切换IP端口 */
 export function changeDeviceServerIpPortApi(data: ChangeIpPortParams) {
-  return requestClient.post("/merchant/device/operation/changeDeviceServerIpPort", data);
+  return requestClient.post(
+    '/merchant/device/operation/changeDeviceServerIpPort',
+    data,
+  );
 }
 
 /** 9. 设备升级（上传文件） */
-export function deviceUpgradeApi(deviceId: number, file: File,ossUrl: string) {
+export function deviceUpgradeApi(deviceId: number, file: File, ossUrl: string) {
   const formData = new FormData();
-  formData.append("deviceId", String(deviceId));
-  formData.append("file", file);
-  formData.append("ossUrl", ossUrl);
-  return requestClient.post("/merchant/device/upgrade/deviceUpgrade", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  formData.append('deviceId', String(deviceId));
+  formData.append('file', file);
+  formData.append('ossUrl', ossUrl);
+  return requestClient.post(
+    '/merchant/device/upgrade/deviceUpgrade',
+    formData,
+    {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    },
+  );
 }
 
 /** 10.1 下载单个设备二维码（返回文件流/Blob） */
@@ -152,7 +159,7 @@ export function downOneDeviceQrcodeFileApi(deviceId: number) {
   return requestClient.post(
     '/merchant/device/one/downOneDeviceQrcode',
     { deviceId, bagQrcodeFlag: 0 },
-    { responseType: 'blob' }
+    { responseType: 'blob' },
   );
 }
 
@@ -169,7 +176,7 @@ export function batchDownDeviceQrcodeFileApi(deviceIds: number[]) {
   return requestClient.post(
     '/merchant/device/batch/downOneDeviceQrcode',
     { deviceIds, bagQrcodeFlag: 0 },
-    { responseType: 'blob' }
+    { responseType: 'blob' },
   );
 }
 
@@ -182,6 +189,12 @@ export function batchDownDeviceQrcodeJsonApi(deviceIds: number[]) {
 }
 
 /** 12. 批量设备升级 */
-export function deviceUpgradeBatchApi(deviceIds: number[]) {
-  return requestClient.post("/merchant/device/upgrade/deviceUpgradeBatch", { deviceIds });
+export function deviceUpgradeBatchApi(data: {
+  deviceIds: number[];
+  ossUrl: string;
+}) {
+  return requestClient.post(
+    '/merchant/device/upgrade/deviceUpgradeBatch',
+    data,
+  );
 }
