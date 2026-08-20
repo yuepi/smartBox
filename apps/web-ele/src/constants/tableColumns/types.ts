@@ -5,8 +5,8 @@ export interface TableColumnConfig {
   key: string;
   label: string;
   visible: boolean;
-  fixed?: boolean;
-  width: number;
+  fixed?: 'left' | 'right'| false;
+  width?: number;
   minWidth?: number;
   align?: Alignment;
   sortable?: boolean;

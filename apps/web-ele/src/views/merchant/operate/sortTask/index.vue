@@ -176,7 +176,7 @@ onMounted(() => {
             @keyup.enter="handleQuery"
           >
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">分拣单号:</span>
+              <span class="text-sm text-gray-400 mr-0.5">分拣单号:</span>
             </template>
           </el-input>
         </el-form-item>
@@ -190,7 +190,7 @@ onMounted(() => {
             style="width: 200px"
           >
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">设备名称:</span>
+              <span class="text-sm text-gray-400 mr-0.5">设备名称:</span>
             </template>
             <el-option
               v-for="item in deviceOptions"
@@ -203,7 +203,7 @@ onMounted(() => {
          <el-form-item>
           <el-select v-model="queryParams.sortStatus" clearable style="width: 200px">
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">分拣状态:</span>
+              <span class="text-sm text-gray-400 mr-0.5">分拣状态:</span>
             </template>
             <el-option
               v-for="item in sort_status"
@@ -226,7 +226,7 @@ onMounted(() => {
           批量删除
         </el-button>
         <transition name="el-fade-in">
-          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-xs text-gray-400">
+          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-sm text-gray-400">
             已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
           </span>
         </transition>

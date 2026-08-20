@@ -17,3 +17,5 @@ export const EosSystem = createIconifyIcon('eos-icons:system-group');
 // 个人中心
 export const ProfileIcon = createIconifyIcon('mingcute:profile-line');
 export const RiDingding = createIconifyIcon('ri:dingding-fill');
+
+export const LucidePin = createIconifyIcon('ant-design:pushpin-outlined');

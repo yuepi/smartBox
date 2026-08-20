@@ -166,7 +166,7 @@ v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="lo
         <el-form-item>
           <el-select v-model="queryParams.deviceId" clearable filterable style="width: 200px" @change="handleQuery">
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">所属设备:</span>
+              <span class="text-sm text-gray-400 mr-0.5">所属设备:</span>
             </template>
             <el-option
 v-for="item in deviceOptions" :key="item.deviceId" :label="item.deviceName"
@@ -177,7 +177,7 @@ v-for="item in deviceOptions" :key="item.deviceId" :label="item.deviceName"
         <el-form-item>
           <el-select v-model="queryParams.hatchStatus" clearable style="width: 200px">
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">仓口状态:</span>
+              <span class="text-sm text-gray-400 mr-0.5">仓口状态:</span>
             </template>
             <el-option label="未满" :value="0" />
             <el-option label="已满" :value="1" />
@@ -187,7 +187,7 @@ v-for="item in deviceOptions" :key="item.deviceId" :label="item.deviceName"
         <el-form-item>
           <el-select v-model="queryParams.status" clearable style="width: 200px">
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">状态:</span>
+              <span class="text-sm text-gray-400 mr-0.5">状态:</span>
             </template>
             <el-option label="启用" :value="0" />
             <el-option label="禁用" :value="1" />
@@ -207,7 +207,7 @@ v-for="item in deviceOptions" :key="item.deviceId" :label="item.deviceName"
           批量删除
         </el-button>
         <transition name="el-fade-in">
-          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-xs text-gray-400">
+          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-sm text-gray-400">
             已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
           </span>
         </transition>
@@ -298,11 +298,6 @@ v-model:visible="logDialogVisible" :device-hatch-id="currentLogHatchId"
 </template>
 
 <style scoped>
-.text-orange-500 {
-  font-weight: 500;
-  color: #e6a23c;
-}
-
 .selected-alert-badge {
   display: inline-block;
 }

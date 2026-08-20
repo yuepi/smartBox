@@ -179,7 +179,7 @@ v-model="queryParams.deviceNo" placeholder="请输入" clearable style="width: 2
             @keyup.enter="handleQuery"
 >
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">设备编号:</span>
+              <span class="text-sm text-gray-400 mr-0.5">设备编号:</span>
             </template>
           </el-input>
         </el-form-item>
@@ -190,7 +190,7 @@ v-model="queryParams.faultCode" placeholder="请输入" clearable style="width: 
             @keyup.enter="handleQuery"
 >
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">故障编码:</span>
+              <span class="text-sm text-gray-400 mr-0.5">故障编码:</span>
             </template>
           </el-input>
         </el-form-item>
@@ -200,7 +200,7 @@ v-model="queryParams.faultName" placeholder="请输入" clearable style="width: 
             @keyup.enter="handleQuery"
 >
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">故障名称:</span>
+              <span class="text-sm text-gray-400 mr-0.5">故障名称:</span>
             </template>
           </el-input>
         </el-form-item>
@@ -208,7 +208,7 @@ v-model="queryParams.faultName" placeholder="请输入" clearable style="width: 
         <el-form-item>
           <el-select v-model="queryParams.faultStatus" clearable style="width: 200px">
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">故障状态:</span>
+              <span class="text-sm text-gray-400 mr-0.5">故障状态:</span>
             </template>
             <el-option v-for="item in faultStatusOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
@@ -233,7 +233,7 @@ v-model="dateRange" type="datetimerange" range-separator="至" start-placeholder
           批量删除
         </el-button>
         <transition name="el-fade-in">
-          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-xs text-gray-400">
+          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-sm text-gray-400">
             已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
           </span>
         </transition>

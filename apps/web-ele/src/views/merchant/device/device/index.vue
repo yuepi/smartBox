@@ -404,7 +404,7 @@ v-model="queryParams.qrCode" placeholder="请输入" clearable style="width: 200
           <el-table-column
 v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
             :width="typeof col.width === 'number' ? col.width : undefined" :min-width="col.minWidth" :align="col.align"
-            :show-overflow-tooltip="col.showOverflowTooltip || false"
+            :show-overflow-tooltip="col.showOverflowTooltip || false" :fixed="col.fixed"
 >
             <template #default="{ row }">
               <template v-if="col.key === 'deviceHatchType'">

@@ -195,6 +195,7 @@ async function handleUnbind(row: DeviceBag) {
 
 // --- 删除 ---
 async function handleDelete(row?: DeviceBag) {
+  // eslint-disable-next-line no-useless-assignment
   let ids: number[] = [];
   if (row) {
     ids = [row.deviceBagId];
@@ -254,14 +255,14 @@ v-model="queryParams.bagNo" placeholder="请输入" clearable style="width: 200p
             @keyup.enter="handleQuery"
 >
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">包袋编号:</span>
+              <span class="text-sm text-gray-400 mr-0.5">包袋编号:</span>
             </template>
           </el-input>
         </el-form-item>
          <el-form-item>
           <el-select v-model="queryParams.bagStatus" clearable style="width: 200px">
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">包袋状态:</span>
+              <span class="text-sm text-gray-400 mr-0.5">包袋状态:</span>
             </template>
             <el-option label="未绑定" :value="0" />
             <el-option label="已绑定" :value="1" />
@@ -272,7 +273,7 @@ v-model="queryParams.bagNo" placeholder="请输入" clearable style="width: 200p
         <el-form-item>
           <el-select v-model="queryParams.status" clearable style="width: 200px">
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">状态:</span>
+              <span class="text-sm text-gray-400 mr-0.5">状态:</span>
             </template>
             <el-option label="启用" :value="0" />
             <el-option label="禁用" :value="1" />
@@ -299,7 +300,7 @@ type="warning" plain icon="Download" :disabled="selectedIds.length === 0"
           批量下载
         </el-button>
         <transition name="el-fade-in">
-          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-xs text-gray-400">
+          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-sm text-gray-400">
             已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
           </span>
         </transition>

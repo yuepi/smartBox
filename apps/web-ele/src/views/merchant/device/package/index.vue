@@ -140,14 +140,14 @@ v-model="queryParams.packageName" placeholder="输入套餐名称" clearable sty
             @keyup.enter="handleQuery"
 >
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">套餐名称:</span>
+              <span class="text-sm text-gray-400 mr-0.5">套餐名称:</span>
             </template>
           </el-input>
         </el-form-item>
         <el-form-item>
           <el-select v-model="queryParams.packageType" clearable style="width: 200px">
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">计费类型:</span>
+              <span class="text-sm text-gray-400 mr-0.5">计费类型:</span>
             </template>
             <el-option v-for="item in package_type" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
@@ -156,7 +156,7 @@ v-model="queryParams.packageName" placeholder="输入套餐名称" clearable sty
         <el-form-item>
           <el-select v-model="queryParams.status" clearable style="width: 200px">
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">状态:</span>
+              <span class="text-sm text-gray-400 mr-0.5">状态:</span>
             </template>
             <el-option label="启用" :value="0" />
             <el-option label="禁用" :value="1" />
@@ -176,7 +176,7 @@ v-model="queryParams.packageName" placeholder="输入套餐名称" clearable sty
           批量删除
         </el-button>
         <transition name="el-fade-in">
-          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-xs text-gray-400">
+          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-sm text-gray-400">
             已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
           </span>
         </transition>
@@ -209,7 +209,7 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
               </template>
               <template v-else-if="col.key === 'unitPrice'">
                 <span class="font-semibold text-orange-500">¥ {{ (row.unitPrice || 0).toFixed(2) }}</span>
-                <span class="text-gray-400 text-xs ml-0.5">/kg</span>
+                <span class="text-gray-400 text-sm ml-0.5">/kg</span>
               </template>
               <template v-else-if="col.key === 'status'">
                 <el-tag :type="row.status === 0 ? 'success' : 'danger'" size="small" round effect="light">

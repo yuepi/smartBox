@@ -5,14 +5,14 @@ import type { TableColumnConfig } from './types';
 export const DEVICE_STORAGE_KEY = 'device_table_columns';
 
 export const defaultDeviceColumns: TableColumnConfig[] = [
-  // { key: 'deviceId', label: '设备ID', visible: true, width: 80, align: 'center' },
-  { key: 'deviceName', label: '设备名称', visible: true, minWidth: 180, align: 'left', fixed: true, showOverflowTooltip: true },
+  { key: 'deviceId', label: '设备ID', visible: false, width: 80, align: 'center' },
+  { key: 'deviceName', label: '设备名称', visible: true, minWidth: 180, align: 'center', fixed: 'left', showOverflowTooltip: true },
   { key: 'deviceNo', label: '设备编号', visible: true, width: 150, align: 'center' },
   { key: 'qrCode', label: '面贴编号', visible: true, width: 250, align: 'center', showOverflowTooltip: true },
   { key: 'deviceAddress', label: '设备地址', visible: false, minWidth: 200, align: 'center', showOverflowTooltip: true },
   { key: 'detailAddress', label: '详细地址', visible: true, minWidth: 200, align: 'center',showOverflowTooltip: true},
-  // { key: 'merchantId', label: '所属商户ID', visible: false, width: 100, align: 'center' },
-  // { key: 'deptId', label: '小区ID', visible: false, width: 100, align: 'center' },
+  { key: 'merchantId', label: '所属商户ID', visible: false, width: 100, align: 'center' },
+  { key: 'deptId', label: '小区ID', visible: false, width: 100, align: 'center' },
   { key: 'deviceConfigId', label: '绑定设备配置ID', visible: false, width: 120, align: 'center' },
   { key: 'provinceCode', label: '省份编码', visible: false, width: 100, align: 'center' },
   { key: 'provinceName', label: '省份名称', visible: false, width: 100, align: 'center' },
@@ -51,9 +51,9 @@ export const PACKAGE_STORAGE_KEY = 'package_table_columns';
 
 export const defaultPackageColumns: TableColumnConfig[] = [
   { key: 'devicePackageId', label: '套餐ID', visible: true, width: 80, align: 'center' },
-  { key: 'packageName', label: '套餐名称', visible: true, minWidth: 180, align: 'left',fixed: true },
+  { key: 'packageName', label: '套餐名称', visible: true, minWidth: 180, align: 'center', fixed: 'left' },
   { key: 'packageType', label: '计费类型', visible: true, width: 120, align: 'center' },
-  { key: 'unitPrice', label: '回收单价', visible: true, width: 140, align: 'right' },
+  { key: 'unitPrice', label: '回收单价', visible: true, width: 140, align: 'end' },
   { key: 'status', label: '状态', visible: true, width: 100, align: 'center' },
 ];
 
@@ -62,11 +62,11 @@ export const HATCH_STORAGE_KEY = 'hatch_table_columns';
 
 export const defaultHatchColumns: TableColumnConfig[] = [
   { key: 'deviceHatchId', label: '仓口ID', visible: true, width: 80, align: 'center' },
-  { key: 'hatchName', label: '仓口名称', visible: true, minWidth: 140, align: 'left' },
+  { key: 'hatchName', label: '仓口名称', visible: true, minWidth: 140, align: 'start' },
   { key: 'hatchNo', label: '仓口编号', visible: true, width: 200, align: 'center' },
   { key: 'deviceId', label: '所属设备', visible: true, width: 150, align: 'center', showOverflowTooltip: true },
-  { key: 'currentWeight', label: '当前重量(kg)', visible: true, width: 120, align: 'right' },
-  { key: 'weightThreshold', label: '满仓阈值(kg)', visible: true, width: 120, align: 'right' },
+  { key: 'currentWeight', label: '当前重量(kg)', visible: true, width: 120, align: 'start' },
+  { key: 'weightThreshold', label: '满仓阈值(kg)', visible: true, width: 120, align: 'start' },
   { key: 'hatchStatus', label: '仓口状态', visible: true, width: 100, align: 'center' },
   { key: 'lastCleanTime', label: '最后清运时间', visible: true, width: 160, align: 'center' },
   { key: 'status', label: '状态', visible: true, width: 100, align: 'center' },
@@ -77,10 +77,10 @@ export const FAULT_STORAGE_KEY = 'fault_table_columns';
 
 export const defaultFaultColumns: TableColumnConfig[] = [
   { key: 'deviceFaultId', label: '故障ID', visible: true, width: 80, align: 'center' },
-  { key: 'deviceNo', label: '设备编号', visible: true, minWidth: 140, align: 'left' },
+  { key: 'deviceNo', label: '设备编号', visible: true, minWidth: 140, align: 'start' },
   { key: 'faultCode', label: '故障编码', visible: true, width: 120, align: 'center' },
-  { key: 'faultName', label: '故障名称', visible: true, minWidth: 150, align: 'left' },
-  { key: 'faultRemark', label: '故障描述', visible: true, minWidth: 180, align: 'left' },
+  { key: 'faultName', label: '故障名称', visible: true, minWidth: 150, align: 'start' },
+  { key: 'faultRemark', label: '故障描述', visible: true, minWidth: 180, align: 'start' },
   { key: 'startTime', label: '发生时间', visible: true, width: 160, align: 'center' },
   { key: 'duration', label: '持续时长', visible: true, width: 100, align: 'center' },
   { key: 'faultStatus', label: '故障状态', visible: true, width: 100, align: 'center' },
@@ -93,7 +93,7 @@ export const CONFIG_STORAGE_KEY = 'device_config_table_columns';
 
 export const defaultConfigColumns: TableColumnConfig[] = [
   { key: 'deviceConfigId', label: '配置ID', visible: true, width: 80, align: 'center' },
-  { key: 'configName', label: '配置名称', visible: true, minWidth: 150, align: 'left' },
+  { key: 'configName', label: '配置名称', visible: true, minWidth: 150, align: 'start' },
   { key: 'deviceBrand', label: '设备品牌', visible: true, width: 120, align: 'center' },
   { key: 'deliverEndTimeout', label: '投递超时', visible: true, width: 100, align: 'center' },
   { key: 'recycleEndTimeout', label: '回收超时', visible: true, width: 100, align: 'center' },
@@ -115,8 +115,8 @@ export const BAG_STORAGE_KEY = 'bag_table_columns';
 
 export const defaultBagColumns: TableColumnConfig[] = [
   // { key: 'deviceBagId', label: '包袋ID', visible: true, width: 80, align: 'center' },
-  { key: 'bagNo', label: '包袋编号', visible: true, minWidth: 180, align: 'left' },
-  { key: 'bagQrCode', label: '包袋二维码唯一编号', visible: true, minWidth: 180, align: 'left' },
+  { key: 'bagNo', label: '包袋编号', visible: true, minWidth: 180, align: 'start' },
+  { key: 'bagQrCode', label: '包袋二维码唯一编号', visible: true, minWidth: 180, align: 'start' },
   { key: 'deviceId', label: '绑定设备ID', visible: true, width: 100, align: 'center' },
   { key: 'hatchNo', label: '绑定仓口', visible: true, width: 150, align: 'center' },
   { key: 'bagStatus', label: '包袋状态', visible: true, width: 100, align: 'center' },
@@ -131,7 +131,7 @@ export const QRCODE_STORAGE_KEY = 'qrcode_table_columns';
 
 export const defaultQrcodeColumns: TableColumnConfig[] = [
   { key: 'qrcodeId', label: 'ID', visible: false, width: 80, align: 'center' },
-  { key: 'qrcodeCode', label: '二维码编号', visible: true, minWidth: 180, align: 'left', showOverflowTooltip: true },
+  { key: 'qrcodeCode', label: '二维码编号', visible: true, minWidth: 180, align: 'start', showOverflowTooltip: true },
   { key: 'qrcodeType', label: '类型', visible: true, width: 120, align: 'center' },
   { key: 'bindFlag', label: '绑定状态', visible: true, width: 100, align: 'center' },
   { key: 'status', label: '状态', visible: true, width: 100, align: 'center' },

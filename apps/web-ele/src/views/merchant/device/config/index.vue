@@ -141,14 +141,14 @@ v-model="queryParams.configName" placeholder="请输入" clearable style="width:
             @keyup.enter="handleQuery"
 >
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">配置名称:</span>
+              <span class="text-sm text-gray-400 mr-0.5">配置名称:</span>
             </template>
           </el-input>
         </el-form-item>
         <el-form-item>
           <el-select v-model="queryParams.deviceBrand" clearable style="width: 200px">
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">设备品牌:</span>
+              <span class="text-sm text-gray-400 mr-0.5">设备品牌:</span>
             </template>
             <el-option v-for="item in device_brand" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
@@ -157,7 +157,7 @@ v-model="queryParams.configName" placeholder="请输入" clearable style="width:
         <el-form-item>
           <el-select v-model="queryParams.status" clearable style="width: 200px">
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">状态:</span>
+              <span class="text-sm text-gray-400 mr-0.5">状态:</span>
             </template>
             <el-option
 v-for="item in [{ label: '启用', value: 0 }, { label: '禁用', value: 1 }]" :key="item.value"
@@ -181,7 +181,7 @@ v-for="item in [{ label: '启用', value: 0 }, { label: '禁用', value: 1 }]" :
           批量删除
         </el-button>
         <transition name="el-fade-in">
-          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-xs text-gray-400">
+          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-sm text-gray-400">
             已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
           </span>
         </transition>

@@ -233,14 +233,14 @@ v-model="queryParams.qrcodeCode" placeholder="请输入" clearable style="width:
             @keyup.enter="handleQuery"
 >
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">二维码编号:</span>
+              <span class="text-sm text-gray-400 mr-0.5">二维码编号:</span>
             </template>
           </el-input>
         </el-form-item>
         <el-form-item>
           <el-select v-model="queryParams.qrcodeType" clearable style="width: 200px">
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">二维码类型:</span>
+              <span class="text-sm text-gray-400 mr-0.5">二维码类型:</span>
             </template>
             <el-option v-for="item in qrcode_type" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
@@ -249,7 +249,7 @@ v-model="queryParams.qrcodeCode" placeholder="请输入" clearable style="width:
         <el-form-item>
           <el-select v-model="queryParams.bindFlag" clearable style="width: 200px">
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">绑定状态:</span>
+              <span class="text-sm text-gray-400 mr-0.5">绑定状态:</span>
             </template>
             <el-option v-for="item in qrcode_bind_status" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
@@ -258,7 +258,7 @@ v-model="queryParams.qrcodeCode" placeholder="请输入" clearable style="width:
         <el-form-item>
           <el-select v-model="queryParams.status" clearable style="width: 200px">
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">状态:</span>
+              <span class="text-sm text-gray-400 mr-0.5">状态:</span>
             </template>
             <el-option v-for="item in qrcode_status" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
@@ -295,7 +295,7 @@ v-model="queryParams.qrcodeCode" placeholder="请输入" clearable style="width:
         </el-dropdown>
 
         <transition name="el-fade-in">
-          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-xs text-gray-400">
+          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-sm text-gray-400">
             已选
             <span class="text-red-500 font-medium">{{ selectedIds.length }}</span>
             项

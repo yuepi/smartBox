@@ -147,7 +147,7 @@ v-model="queryParams.memberId" placeholder="请输入" clearable style="width: 2
             @keyup.enter="handleQuery"
 >
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">会员ID:</span>
+              <span class="text-sm text-gray-400 mr-0.5">会员ID:</span>
             </template>
           </el-input>
         </el-form-item>
@@ -158,7 +158,7 @@ v-model="queryParams.mobile" placeholder="请输入" clearable style="width: 200
             @keyup.enter="handleQuery"
 >
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">手机号:</span>
+              <span class="text-sm text-gray-400 mr-0.5">手机号:</span>
             </template>
           </el-input>
         </el-form-item>
@@ -169,14 +169,14 @@ v-model="queryParams.nickname" placeholder="请输入" clearable style="width: 2
             @keyup.enter="handleQuery"
 >
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">昵称:</span>
+              <span class="text-sm text-gray-400 mr-0.5">昵称:</span>
             </template>
           </el-input>
         </el-form-item>
         <el-form-item>
           <el-select v-model="queryParams.sex" clearable style="width: 200px">
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">性别:</span>
+              <span class="text-sm text-gray-400 mr-0.5">性别:</span>
             </template>
             <el-option v-for="item in member_sex" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
@@ -185,7 +185,7 @@ v-model="queryParams.nickname" placeholder="请输入" clearable style="width: 2
         <el-form-item>
           <el-select v-model="queryParams.status" clearable style="width: 200px">
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">状态:</span>
+              <span class="text-sm text-gray-400 mr-0.5">状态:</span>
             </template>
             <el-option v-for="item in member_status" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
@@ -204,7 +204,7 @@ v-model="queryParams.nickname" placeholder="请输入" clearable style="width: 2
           批量删除
         </el-button>
         <transition name="el-fade-in">
-          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-xs text-gray-400">
+          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-sm text-gray-400">
             已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
           </span>
         </transition>

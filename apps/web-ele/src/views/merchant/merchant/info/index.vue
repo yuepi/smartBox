@@ -102,7 +102,7 @@ onMounted(async () => {
               <span class="text-3xl font-bold text-black">
                 {{ formatAmount(accountBalance) }}
               </span>
-              <span class="text-xs text-gray-400">可用余额</span>
+              <span class="text-sm text-gray-400">可用余额</span>
             </div>
           </div>
         </div>
