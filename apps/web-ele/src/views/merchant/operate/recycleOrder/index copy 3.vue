@@ -4,11 +4,7 @@ import type { RecycleOrder, RecycleOrderPageParams } from '#/api/operation/recyc
 import type { Dept } from '#/api/system/dept';
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
-import { computed, onMounted, reactive, ref, watch } from 'vue';
-
 import { Page } from '@vben/common-ui';
-
-import { ElMessage, ElMessageBox } from 'element-plus';
 
 import { getDeviceListApi } from '#/api/device/device';
 import {
@@ -58,34 +54,7 @@ const dateRange = ref<string[]>([]);
 const deviceOptions = ref<Device[]>([]);
 const deptOptions = ref<Dept[]>([]);
 
-// 级联选择器绑定值
-const cascaderValue = ref<Array<number | string>>([]);
-
-// 组合 [小区 -> 设备] 树形结构选项
-const cascaderOptions = computed(() => {
-  return deptOptions.value.map((dept) => {
-    // 过滤出属于当前小区的设备列表
-    const childrenDevices = deviceOptions.value
-      .filter((dev) => dev.deptId === dept.deptId)
-      .map((dev) => ({
-        label: dev.deviceName || dev.deviceNo || `设备(${dev.deviceId})`,
-        value: `dev_${dev.deviceId}`, // 加前缀避免小区与设备的 ID 冲突
-        isDevice: true,
-        deviceId: dev.deviceId,
-      }));
-
-    return {
-      label: dept.deptName,
-      value: `dept_${dept.deptId}`,
-      isDevice: false,
-      deptId: dept.deptId,
-      // 无子设备时清空 children 属性，避免级联显示空箭头
-      children: childrenDevices.length > 0 ? childrenDevices : undefined,
-    };
-  });
-});
-
-// 订单状态选项
+// 订单状态选项（写死）
 const orderStatusOptions = [
   { label: '审核中', value: 3 },
   { label: '已完成', value: 4 },
@@ -110,7 +79,7 @@ const queryParams = reactive<RecycleOrderPageParams>({
   deviceName: undefined,
 });
 
-// --- 操作弹窗 ---
+// --- 操作弹窗（异常/取消异常/直接完成 加备注） ---
 const actionDialogVisible = ref(false);
 const actionDialogTitle = ref('');
 const actionDialogLoading = ref(false);
@@ -136,38 +105,13 @@ watch(dateRange, (newVal) => {
   }
 });
 
-// --- 级联选择切换回调 ---
-function handleCascaderChange(val: any) {
-  if (!val || val.length === 0) {
-    queryParams.deptId = undefined;
-    queryParams.deviceId = undefined;
-  } else {
-    const lastSelected = val[val.length - 1];
-
-    // 如果选中的是【设备】
-    if (typeof lastSelected === 'string' && lastSelected.startsWith('dev_')) {
-      const devId = Number(lastSelected.replace('dev_', ''));
-      const parentDeptId = Number(val[0].replace('dept_', ''));
-      queryParams.deptId = parentDeptId;
-      queryParams.deviceId = devId;
-    }
-    // 如果只选了【小区】
-    else if (typeof lastSelected === 'string' && lastSelected.startsWith('dept_')) {
-      const deptId = Number(lastSelected.replace('dept_', ''));
-      queryParams.deptId = deptId;
-      queryParams.deviceId = undefined;
-    }
-  }
-  handleQuery();
-}
-
 // --- 辅助函数 ---
 function formatAmount(amount: number): string {
   if (amount === undefined || amount === null) return '¥ 0.00';
   return `¥ ${amount.toFixed(2)}`;
 }
 
-// --- 快速筛选（保持同步更新级联框显隐） ---
+// --- 快速筛选 ---
 function handleDeviceNameClick(deviceName: string) {
   queryParams.deviceName = deviceName;
   handleQuery();
@@ -187,9 +131,8 @@ function handleDeptNameClick(row: RecycleOrder) {
   const dept = deptOptions.value.find((d) => d.deptName === row.deptName);
   if (dept) {
     queryParams.deptId = dept.deptId;
-    queryParams.deviceId = undefined;
-    cascaderValue.value = [`dept_${dept.deptId}`];
   } else {
+    // 兜底：用名称搜索（如果后端支持）
     queryParams.deptName = row.deptName;
   }
   handleQuery();
@@ -262,13 +205,16 @@ async function handleActionSubmit() {
       case 'cancel': {
         await cancelOrderApi({ recycleOrderId: currentRow.value.recycleOrderId, remark: actionRemark.value });
         ElMessage.success('已取消异常');
+
         break;
       }
       case 'directComplete': {
         await directCompleteOrderApi({ recycleOrderId: currentRow.value.recycleOrderId, remark: actionRemark.value });
         ElMessage.success('直接完成成功');
+
         break;
       }
+      // No default
     }
     actionDialogVisible.value = false;
     loadData();
@@ -291,6 +237,7 @@ function handleRemark(row: RecycleOrder) {
 
 // --- 删除 ---
 async function handleDelete(row?: RecycleOrder) {
+  // eslint-disable-next-line no-useless-assignment
   let ids: number[] = [];
   if (row) {
     ids = [row.recycleOrderId];
@@ -324,7 +271,6 @@ function handleQuery() {
 }
 
 function resetQuery() {
-  cascaderValue.value = [];
   queryParams.orderNo = undefined;
   queryParams.memberId = undefined;
   queryParams.deptId = undefined;
@@ -355,7 +301,6 @@ v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="lo
 >
       <!-- 📥 基础筛选项 -->
       <template #search-basic>
-        <!-- 手机号 -->
         <el-form-item>
           <el-input
 v-model="queryParams.memberPhone" placeholder="请输入" clearable style="width: 200px"
@@ -366,31 +311,16 @@ v-model="queryParams.memberPhone" placeholder="请输入" clearable style="width
             </template>
           </el-input>
         </el-form-item>
+        <el-form-item>
+          <el-tree-select
+v-model="queryParams.deptId" :data="deptOptions" :props="{
+            value: 'deptId',
+            label: 'deptName',
+            children: 'children',
+          }" placeholder="请选择" clearable check-strictly style="width: 200px" class="tree-prefix-dept"
+/>
+        </el-form-item>
 
-        <!-- 🌟 组合级联筛选（小区 / 设备） -->
-<el-form-item>
-  <el-cascader
-    v-model="cascaderValue"
-    :options="cascaderOptions"
-    :props="{
-      checkStrictly: true,
-      expandTrigger: 'hover',
-      emitPath: true,
-    }"
-    placeholder="请选择或搜索"
-    filterable
-    clearable
-    style="width: 250px"
-    @change="handleCascaderChange"
-  >
-    <!-- 使用原生 prefix 插槽，简单又稳定 -->
-    <template #prefix>
-      <span class="text-sm text-gray-400 mr-0.5">小区/设备:</span>
-    </template>
-  </el-cascader>
-</el-form-item>
-
-        <!-- 设备编号 -->
         <el-form-item>
           <el-input
 v-model="queryParams.deviceNo" placeholder="请输入" clearable style="width: 200px"
@@ -402,7 +332,6 @@ v-model="queryParams.deviceNo" placeholder="请输入" clearable style="width: 2
           </el-input>
         </el-form-item>
 
-        <!-- 设备名称 -->
         <el-form-item>
           <el-input
 v-model="queryParams.deviceName" placeholder="请输入" clearable style="width: 200px"
@@ -414,7 +343,7 @@ v-model="queryParams.deviceName" placeholder="请输入" clearable style="width:
           </el-input>
         </el-form-item>
 
-        <!-- 订单状态 -->
+        <!-- 订单状态 - 写死选项 -->
         <el-form-item>
           <el-select v-model="queryParams.orderStatus" clearable style="width: 200px">
             <template #prefix>
@@ -424,7 +353,6 @@ v-model="queryParams.deviceName" placeholder="请输入" clearable style="width:
           </el-select>
         </el-form-item>
 
-        <!-- 日期范围 -->
         <el-form-item>
           <el-date-picker
 v-model="dateRange" type="datetimerange" range-separator="至" start-placeholder="开始时间"
@@ -488,9 +416,9 @@ v-model="queryParams.memberId" placeholder="请输入" clearable style="width: 2
           <el-table-column type="selection" width="50" align="center" />
 
           <el-table-column
-v-for="col in visibleColumns" :key="`${col.key}_${col.fixed || 'none'}`" :prop="col.key"
-            :label="col.label" :width="typeof col.width === 'number' ? col.width : undefined" :min-width="col.minWidth"
-            :align="col.align" :show-overflow-tooltip="col.showOverflowTooltip || false" :fixed="col.fixed"
+v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
+            :width="typeof col.width === 'number' ? col.width : undefined" :min-width="col.minWidth" :align="col.align"
+            :show-overflow-tooltip="col.showOverflowTooltip || false" :fixed="col.fixed"
 >
             <template #default="{ row }">
               <!-- 订单状态 -->
@@ -530,8 +458,8 @@ v-for="(url, idx) in row.imageUrls.slice(0, 3)" :key="idx" :src="url"
               <!-- 小区名称 - 点击快速筛选 -->
               <template v-else-if="col.key === 'deptName'">
                 <span
-v-if="row.deptName" class="table-link-text" :title="row.deptName"
-                  @click="handleDeptNameClick(row)"
+v-if="row.deptName" class="table-link-text" @click="handleDeptNameClick(row)"
+                  :title="row.deptName"
 >
                   {{ row.deptName }}
                 </span>
@@ -625,26 +553,22 @@ v-if="[0, 1, 2, 3].includes(row.orderStatus)" size="small" type="primary"
 </template>
 
 <style scoped lang="scss">
-// /* 提高权重并精准穿透 el-cascader 内部的 input wrapper */
-// :deep(.cascader-prefix-custom) {
-//   .el-input__wrapper {
-//     position: relative !important;
-//     padding-left: 82px !important;
+.tree-prefix-dept :deep(.el-select__wrapper) {
+  position: relative;
+  padding-left: 45px !important;
+}
 
-//     &::before {
-//       position: absolute;
-//       top: 50%;
-//       left: 12px;
-//       z-index: 2;
-//       font-size: 14px;
-//       font-weight: 400;
-//       color: #909399;
-//       pointer-events: none;
-//       content: "小区/设备:";
-//       transform: translateY(-50%);
-//     }
-//   }
-// }
+.tree-prefix-dept :deep(.el-select__wrapper)::before {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  font-size: 14px;
+  font-weight: 400;
+  color: #909399;
+  pointer-events: none;
+  content: "部门:";
+  transform: translateY(-50%);
+}
 
 .selected-alert-badge {
   display: inline-block;

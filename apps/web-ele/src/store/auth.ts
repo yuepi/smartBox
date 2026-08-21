@@ -6,7 +6,7 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 
 import { LOGIN_PATH } from "@vben/constants";
-import { clearCache,preferences } from "@vben/preferences";
+import {preferences } from "@vben/preferences";
 import { resetAllStores, useAccessStore, useTabbarStore, useUserStore } from "@vben/stores";
 
 import { ElMessage, ElNotification } from "element-plus";
@@ -56,7 +56,6 @@ export const useAuthStore = defineStore("auth", () => {
       realName: userInfo.personName || userInfo.user.nickName || "",
       avatar: userInfo.avatar || "", // 确保 avatar 是字符串
       roles: permissions,
-      homePath: "/dashboard",
       merchantId: userInfo.merchantId || 0,
       superAdminFlag: userInfo.superAdminFlag || 0,
       userMerchant: userInfo.userMerchant || [],
@@ -75,6 +74,7 @@ export const useAuthStore = defineStore("auth", () => {
    * 异步处理登录操作
    */
   async function authLogin(params: Recordable<any>, onSuccess?: () => Promise<void> | void) {
+    // eslint-disable-next-line no-useless-assignment
     let userInfo: null | UserInfo = null;
     try {
       loginLoading.value = true;
@@ -128,7 +128,7 @@ export const useAuthStore = defineStore("auth", () => {
       if (accessStore.loginExpired) {
         accessStore.setLoginExpired(false);
       } else {
-        await (onSuccess ? onSuccess() : router.push(userInfo.homePath || preferences.app.defaultHomePath));
+        await (onSuccess ? onSuccess() : router.push(preferences.app.defaultHomePath));
       }
 
       // 8. 显示欢迎通知
@@ -172,7 +172,7 @@ export const useAuthStore = defineStore("auth", () => {
       accessStore.setAccessCodes(accessCodes);
 
       window.location.reload();
-      await router.push('/workspace');
+      await router.push(preferences.app.defaultHomePath);
 
     } catch (error) {
       console.error("切换商户失败", error);
@@ -186,7 +186,6 @@ export const useAuthStore = defineStore("auth", () => {
   async function logout(redirect: boolean = true) {
     try {
       await logoutApi();
-      await clearCache();
       // 清空字典缓存
       useDictStore().clearDict();
     } catch {

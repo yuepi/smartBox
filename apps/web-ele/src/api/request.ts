@@ -108,13 +108,7 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
       doReAuthenticate,
       doRefreshToken,
       enableRefreshToken: preferences.app.enableRefreshToken,
-      formatToken,
-      isExpired: (response: any) => {
-        // response 是 axios 响应对象
-        const businessCode = response?.data?.code;
-        // 返回 true 表示已过期
-        return [10_000, 10_001, 40_101].includes(businessCode);
-      },
+      formatToken
     }),
   );
 

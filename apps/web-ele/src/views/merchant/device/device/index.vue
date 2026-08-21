@@ -287,8 +287,12 @@ v-model="queryParams.deptId" :data="deptOptions" :props="{
             value: 'deptId',
             label: 'deptName',
             children: 'children',
-          }" placeholder="请选择" clearable check-strictly style="width: 200px" class="tree-prefix-dept"
-/>
+          }" placeholder="请选择" clearable check-strictly style="width: 200px"
+>
+            <template #prefix>
+              <span class="text-sm text-gray-400 mr-0.5">部门:</span>
+            </template>
+          </el-tree-select>
         </el-form-item>
 
         <el-form-item>
@@ -356,7 +360,7 @@ v-model="queryParams.qrCode" placeholder="请输入" clearable style="width: 200
         <el-button type="danger" plain icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete()">
           批量删除
         </el-button>
-        
+
         <el-dropdown v-if="selectedIds.length > 0" @command="handleBatchQrcodeCommand">
           <el-button type="primary" plain>
             批量二维码
@@ -372,7 +376,7 @@ v-model="queryParams.qrCode" placeholder="请输入" clearable style="width: 200
           </template>
         </el-dropdown>
 
-         <el-button type="warning" plain icon="Upload" :disabled="selectedIds.length === 0" @click="handleBatchUpgrade">
+        <el-button type="warning" plain icon="Upload" :disabled="selectedIds.length === 0" @click="handleBatchUpgrade">
           批量升级
         </el-button>
 
@@ -487,23 +491,3 @@ v-if="row.qrCode" class="cursor-pointer text-primary hover:text-primary-dark" ti
     <DeviceImagePreview ref="imagePreviewRef" />
   </Page>
 </template>
-
-<style scoped lang="scss">
-
-.tree-prefix-dept :deep(.el-select__wrapper) {
-  position: relative;
-  padding-left: 45px !important;
-}
-
-.tree-prefix-dept :deep(.el-select__wrapper)::before {
-  position: absolute;
-  top: 50%;
-  left: 12px;
-  font-size: 14px;
-  font-weight: 400;
-  color: #909399;
-  pointer-events: none;
-  content: "部门:";
-  transform: translateY(-50%);
-}
-</style>
