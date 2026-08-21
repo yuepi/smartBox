@@ -23,7 +23,8 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
   VbenAvatar,
-  VbenIcon,
+  VbenButton,
+  VbenIcon
 } from '@vben-core/shadcn-ui';
 
 import { useMagicKeys, whenever } from '@vueuse/core';
@@ -214,15 +215,15 @@ if (enableShortcutKey.value) {
     <!-- 自定义底部按钮列表 -->
     <template #footer="{ close }">
       <div class="flex justify-end gap-2">
-        <el-button @click="close">
+        <VbenButton variant="outline" @click="close">
           {{ $t('common.cancel') }}
-        </el-button>
-        <el-button type="primary" @click="handleSubmitLogout(false)">
+        </VbenButton>
+        <VbenButton @click="handleSubmitLogout(false)">
           {{ $t('common.confirm') }}
-        </el-button>
-        <el-button type="danger" @click="handleSubmitLogout(true)">
+        </VbenButton>
+        <VbenButton variant="destructive" @click="handleSubmitLogout(true)">
           清除缓存并退出
-        </el-button>
+        </VbenButton>
       </div>
     </template>
   </LogoutModal>
