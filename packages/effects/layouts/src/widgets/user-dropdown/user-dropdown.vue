@@ -8,7 +8,7 @@ import { computed, useTemplateRef, watch } from 'vue';
 import { useHoverToggle } from '@vben/hooks';
 import { LockKeyhole, LogOut, Settings } from '@vben/icons';
 import { $t } from '@vben/locales';
-import { preferences, usePreferences } from '@vben/preferences';
+import { preferences, resetPreferences,usePreferences } from '@vben/preferences';
 import { useAccessStore } from '@vben/stores';
 import { isWindowsOs } from '@vben/utils';
 
@@ -83,7 +83,7 @@ const props = withDefaults(defineProps<Props>(), {
   hoverDelay: 500,
 });
 
-const emit = defineEmits<{ clearPreferencesAndLogout: []; logout: [] }>();
+const emit = defineEmits<{ clearPreferencesAndLogout: []; logout: [clearCache?: boolean] }>();
 
 const {
   globalLockScreenShortcutKey,
@@ -151,8 +151,17 @@ function handleLogout() {
   openPopover.value = false;
 }
 
-function handleSubmitLogout() {
-  emit('logout');
+function handleSubmitLogout(clearCache = false) {
+  if (clearCache) {
+    // 清除本地所有缓存和重置偏好设置
+    localStorage.clear();
+    sessionStorage.clear();
+    // 重置偏好设置
+    resetPreferences();
+
+  }
+  // 将是否清除缓存的标识抛给父组件（或者由父组件直接 handleLogout）
+  emit('logout', clearCache);
   logoutModalApi.close();
 }
 
@@ -193,8 +202,6 @@ if (enableShortcutKey.value) {
   />
 
   <LogoutModal
-    :cancel-text="$t('common.cancel')"
-    :confirm-text="$t('common.confirm')"
     :fullscreen-button="false"
     :title="$t('common.prompt')"
     centered
@@ -203,6 +210,21 @@ if (enableShortcutKey.value) {
     header-class="border-none"
   >
     {{ $t('ui.widgets.logoutTip') }}
+
+    <!-- 自定义底部按钮列表 -->
+    <template #footer="{ close }">
+      <div class="flex justify-end gap-2">
+        <el-button @click="close">
+          {{ $t('common.cancel') }}
+        </el-button>
+        <el-button type="primary" @click="handleSubmitLogout(false)">
+          {{ $t('common.confirm') }}
+        </el-button>
+        <el-button type="danger" @click="handleSubmitLogout(true)">
+          清除缓存并退出
+        </el-button>
+      </div>
+    </template>
   </LogoutModal>
 
   <Preferences
