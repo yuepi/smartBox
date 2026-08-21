@@ -368,27 +368,20 @@ v-model="queryParams.memberPhone" placeholder="请输入" clearable style="width
         </el-form-item>
 
         <!-- 🌟 组合级联筛选（小区 / 设备） -->
-<el-form-item>
-  <el-cascader
-    v-model="cascaderValue"
-    :options="cascaderOptions"
-    :props="{
-      checkStrictly: true,
-      expandTrigger: 'hover',
-      emitPath: true,
-    }"
-    placeholder="请选择或搜索"
-    filterable
-    clearable
-    style="width: 250px"
-    @change="handleCascaderChange"
-  >
-    <!-- 使用原生 prefix 插槽，简单又稳定 -->
-    <template #prefix>
-      <span class="text-sm text-gray-400 mr-0.5">小区/设备:</span>
-    </template>
-  </el-cascader>
-</el-form-item>
+        <el-form-item>
+          <el-cascader
+v-model="cascaderValue" :options="cascaderOptions" :props="{
+            checkStrictly: true,
+            expandTrigger: 'hover',
+            emitPath: true,
+          }" placeholder="请选择或搜索" filterable clearable style="width: 250px" @change="handleCascaderChange"
+>
+            <!-- 使用原生 prefix 插槽，简单又稳定 -->
+            <template #prefix>
+              <span class="text-sm text-gray-400 mr-0.5">小区/设备:</span>
+            </template>
+          </el-cascader>
+        </el-form-item>
 
         <!-- 设备编号 -->
         <el-form-item>
@@ -503,7 +496,39 @@ v-for="col in visibleColumns" :key="`${col.key}_${col.fixed || 'none'}`" :prop="
               </template>
               <!-- 实际金额 -->
               <template v-else-if="col.key === 'realAmount'">
-                <span class="font-medium text-primary">{{ formatAmount(row.realAmount) }}</span>
+                <div class="flex items-center justify-center gap-1">
+                  <span class="font-medium text-primary">{{ formatAmount(row.realAmount) }}</span>
+                  <el-tooltip placement="top" :show-after="300">
+                    <template #content>
+                      <div class="text-xs leading-relaxed">
+                        <div class="flex justify-between gap-4">
+                          <span class="text-white">原订单重量</span>
+                          <span class="text-white font-medium">{{ (row.weight || 0).toFixed(2) }} kg</span>
+                        </div>
+                        <div class="flex justify-between gap-4">
+                          <span class="text-white">原订单金额</span>
+                          <span class="text-white font-medium">{{ formatAmount(row.estimateAmount) }}</span>
+                        </div>
+                        <div class="flex justify-between gap-4">
+                          <span class="text-white">违规重量</span>
+                          <span class="text-white font-medium">{{ (row.deductWeight || 0).toFixed(2) }} kg</span>
+                        </div>
+                        <div class="flex justify-between gap-4">
+                          <span class="text-white">因违规已扣除</span>
+                          <span class="text-white font-medium">{{ formatAmount(row.deductAmount) }}</span>
+                        </div>
+                        <div class="border-t border-gray-600 my-1"></div>
+                        <div class="flex justify-between gap-4">
+                          <span class="text-white">实际结算</span>
+                          <span class="text-primary font-bold">{{ formatAmount(row.realAmount) }}</span>
+                        </div>
+                      </div>
+                    </template>
+                    <el-icon class="text-gray-400 hover:text-primary cursor-pointer text-sm">
+                      <QuestionFilled />
+                    </el-icon>
+                  </el-tooltip>
+                </div>
               </template>
               <!-- 投递前后重量 -->
               <template v-else-if="col.key === 'beforeAfterWeight'">
@@ -526,7 +551,6 @@ v-for="(url, idx) in row.imageUrls.slice(0, 3)" :key="idx" :src="url"
                   <span v-else class="text-gray-400">-</span>
                 </div>
               </template>
-
               <!-- 小区名称 - 点击快速筛选 -->
               <template v-else-if="col.key === 'deptName'">
                 <span
@@ -560,6 +584,7 @@ v-if="row.deptName" class="table-link-text" :title="row.deptName"
                 </span>
                 <span v-else>-</span>
               </template>
+
               <template v-else>
                 {{ (row as any)[col.key] ?? '-' }}
               </template>
