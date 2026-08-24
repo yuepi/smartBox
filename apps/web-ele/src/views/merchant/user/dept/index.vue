@@ -6,10 +6,11 @@ import type { TableColumnConfig } from '#/constants/tableColumns';
 import { useAccess } from '@vben/access';
 import { Page } from '@vben/common-ui';
 
-import { Delete, Edit, Folder, HomeFilled,OfficeBuilding,Plus } from "@element-plus/icons-vue";
+import { Folder, HomeFilled, OfficeBuilding, Plus } from "@element-plus/icons-vue";
 
 import { deleteMerchantDeptApi, getMerchantDeptListApi } from '#/api/system/dept';
 import ColumnSelector from '#/components/ColumnSelector/index.vue';
+import { PERMISSIONS } from '#/constants/auth';
 import { defaultDeptColumns, DEPT_STORAGE_KEY } from '#/constants/tableColumns';
 import { ModuleCodeMap } from "#/hooks/useExport";
 
@@ -99,25 +100,25 @@ const tableColumns = computed(() => {
     {
       key: 'operate',
       title: '操作',
-      width: 120, // 🌟 换成纯图标后，操作列宽度从 280 完美缩减至 120！
+      width: 200, 
       align: 'center',
       fixed: 'right' as const,
       cellRenderer: ({ rowData }: { rowData: Dept }) => (
-        <div class="flex w-full justify-center gap-1">
-          {hasAccessByCodes(['merchant:dept:add']) && (
-            <ElTooltip content="新增下级" enterable={false} placement="top">
-              <ElButton icon={Plus} link onClick={() => handleOpenModal({ parentId: rowData.deptId, deptType: 1, status: 0, sort: 0 })} type="primary" />
-            </ElTooltip>
+        <div class="action-buttons">
+          {hasAccessByCodes([PERMISSIONS.MERCHANT.USER_GROUP.DEPT.ADD]) && (
+            <ElButton onClick={() => handleOpenModal({ parentId: rowData.deptId, deptType: 1, status: 0, sort: 0 })} size="small" type="primary">
+              新增下级
+            </ElButton>
           )}
-          {hasAccessByCodes(['merchant:dept:edit']) && (
-            <ElTooltip content="修改" enterable={false} placement="top">
-              <ElButton icon={Edit} link onClick={() => handleOpenModal(rowData)} type="primary" />
-            </ElTooltip>
+          {hasAccessByCodes([PERMISSIONS.MERCHANT.USER_GROUP.DEPT.EDIT]) && (
+            <ElButton onClick={() => handleOpenModal(rowData)} size="small" type="primary">
+              修改
+            </ElButton>
           )}
-          {hasAccessByCodes(['merchant:dept:del']) && (
-            <ElTooltip content="删除" enterable={false} placement="top">
-              <ElButton icon={Delete} link onClick={() => handleDelete(rowData)} type="primary" />
-            </ElTooltip>
+          {hasAccessByCodes([PERMISSIONS.MERCHANT.USER_GROUP.DEPT.DEL]) && (
+            <ElButton onClick={() => handleDelete(rowData)} size="small" type="danger">
+              删除
+            </ElButton>
           )}
         </div>
       ),
@@ -179,46 +180,54 @@ onMounted(() => {
 <template>
   <Page auto-content-height>
     <BaseTableLayout
-      v-model:query-params="queryParams"
-      v-model:more-params="moreParams"
-      :loading="loading"
-      :is-virtual-table="true"
-      @search="loadData"
-      @reset="resetQuery"
-    >
+v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="loading"
+      :is-virtual-table="true" @search="loadData" @reset="resetQuery"
+>
       <template #search-basic>
         <el-form-item>
-          <el-input v-model="queryParams.deptName" placeholder="请输入" clearable style="width: 200px" @keyup.enter="handleQuery">
-            <template #prefix><span class="text-xs text-gray-400 mr-0.5">部门名称:</span></template>
+          <el-input
+v-model="queryParams.deptName" placeholder="请输入" clearable style="width: 200px"
+            @keyup.enter="handleQuery"
+>
+            <template #prefix><span class="text-sm text-gray-400 mr-0.5">部门名称:</span></template>
           </el-input>
         </el-form-item>
-      </template>
-
-      <template #search-advanced>
         <el-form-item>
           <el-select v-model="queryParams.deptType" clearable style="width: 200px" placeholder="请选择">
-            <template #prefix><span class="text-xs text-gray-400 mr-0.5">部门类型:</span></template>
-            <el-option v-for="item in [ { label: '顶级部门', value: 0 }, { label: '部门', value: 1 }, { label: '小区', value: 2 } ]" :key="item.value" :label="item.label" :value="item.value" />
+            <template #prefix><span class="text-sm text-gray-400 mr-0.5">部门类型:</span></template>
+            <el-option
+              v-for="item in [{ label: '顶级部门', value: 0 }, { label: '部门', value: 1 }, { label: '小区', value: 2 }]"
+              :key="item.value" :label="item.label" :value="item.value"
+/>
           </el-select>
         </el-form-item>
 
         <el-form-item>
           <el-select v-model="queryParams.status" clearable style="width: 200px" placeholder="请选择">
-            <template #prefix><span class="text-xs text-gray-400 mr-0.5">状态:</span></template>
-            <el-option v-for="item in [ { label: '启用', value: 0 }, { label: '禁用', value: 1 } ]" :key="item.value" :label="item.label" :value="item.value" />
+            <template #prefix><span class="text-sm text-gray-400 mr-0.5">状态:</span></template>
+            <el-option
+v-for="item in [{ label: '启用', value: 0 }, { label: '禁用', value: 1 }]" :key="item.value"
+              :label="item.label" :value="item.value"
+/>
           </el-select>
         </el-form-item>
       </template>
 
+      <!-- <template #search-advanced>
+      </template> -->
+
       <template #toolbar-left>
-        <el-button type="primary" plain :icon="Plus" @click="handleOpenModal()" v-access:code="['merchant:dept:add']">
+        <el-button type="primary" plain :icon="Plus" @click="handleOpenModal()" v-access:code="PERMISSIONS.MERCHANT.USER_GROUP.DEPT.ADD">
           新增部门
         </el-button>
         <ExportButton :module-code="ModuleCodeMap.DEPT" :fields="visibleColumns" :find-cond="queryParams" />
       </template>
 
       <template #toolbar-right>
-        <ColumnSelector :storage-key="DEPT_STORAGE_KEY" :default-columns="defaultDeptColumns" @update:columns="handleColumnsUpdate" />
+        <ColumnSelector
+:storage-key="DEPT_STORAGE_KEY" :default-columns="defaultDeptColumns"
+          @update:columns="handleColumnsUpdate"
+/>
       </template>
 
       <template #table>
@@ -226,15 +235,9 @@ onMounted(() => {
           <el-auto-resizer>
             <template #default="{ height, width }">
               <el-table-v2
-                :key="tableKey"
-                :columns="tableColumns"
-                :data="tableData"
-                :width="width"
-                :height="height"
-                :row-key="rowKey"
-                expand-column-key="deptName"
-                fixed
-              />
+:key="tableKey" :columns="tableColumns" :data="tableData" :width="width" :height="height"
+                :row-key="rowKey" expand-column-key="deptName" fixed
+/>
             </template>
           </el-auto-resizer>
         </div>
@@ -245,5 +248,4 @@ onMounted(() => {
   </Page>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

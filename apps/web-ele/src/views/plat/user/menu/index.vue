@@ -7,9 +7,10 @@ import type { TableColumnConfig } from '#/constants/tableColumns';
 import { useAccess } from '@vben/access';
 import { Page } from '@vben/common-ui';
 
-import { Delete, Document, Edit, Folder, Operation, Plus } from "@element-plus/icons-vue";
+import { Document, Folder, Operation } from "@element-plus/icons-vue";
 
 import { clearMenuCacheApi, deletePlatMenuApi, getPlatMenuListApi, refreshMenuCacheApi } from '#/api/system/menu';
+import { PERMISSIONS } from '#/constants/auth';
 import { defaultMenuColumns, MENU_STORAGE_KEY } from '#/constants/tableColumns';
 import { ModuleCodeMap } from "#/hooks/useExport";
 
@@ -150,28 +151,25 @@ const tableColumns = computed(() => {
     {
       key: 'operate',
       title: '操作',
-      width: 120, // 🌟 操作宽度从 300 压缩至 120！
+      width: 200,
       align: 'center',
       fixed: 'right' as const,
       cellRenderer: ({ rowData }: { rowData: Menu }) => (
-        <div class="flex w-full justify-center gap-1">
-          {/* 1. 新增子菜单按钮 */}
-          {hasAccessByCodes(['plat:menu:add']) && (
-            <ElTooltip content="新增下级" enterable={false} placement="top">
-              <ElButton icon={Plus} link onClick={() => handleOpenModal({ parentId: rowData.menuId, menuType: 0, platformType: 0, status: 0, sort: 0 })} type="primary" />
-            </ElTooltip>
+        <div class="action-buttons">
+          {hasAccessByCodes([PERMISSIONS.PLAT.USER_GROUP.MENU.ADD]) && (
+            <ElButton onClick={() => handleOpenModal({ parentId: rowData.menuId, menuType: 0, platformType: 0, status: 0, sort: 0 })} size="small" type="primary">
+              新增下级
+            </ElButton>
           )}
-          {/* 2. 修改按钮 */}
-          {hasAccessByCodes(['plat:menu:edit']) && (
-            <ElTooltip content="修改" enterable={false} placement="top">
-              <ElButton icon={Edit} link onClick={() => handleOpenModal(rowData)} type="primary" />
-            </ElTooltip>
+          {hasAccessByCodes([PERMISSIONS.PLAT.USER_GROUP.MENU.EDIT]) && (
+            <ElButton onClick={() => handleOpenModal(rowData)} size="small" type="primary">
+              修改
+            </ElButton>
           )}
-          {/* 3. 删除按钮 */}
-          {hasAccessByCodes(['plat:menu:del']) && (
-            <ElTooltip content="删除" enterable={false} placement="top">
-              <ElButton icon={Delete} link onClick={() => handleDelete(rowData)} type="primary" />
-            </ElTooltip>
+          {hasAccessByCodes([PERMISSIONS.PLAT.USER_GROUP.MENU.DEL]) && (
+            <ElButton onClick={() => handleDelete(rowData)} size="small" type="danger">
+              删除
+            </ElButton>
           )}
         </div>
       ),
@@ -267,15 +265,12 @@ v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="lo
 v-model="queryParams.menuName" placeholder="请输入" clearable style="width: 200px"
             @keyup.enter="handleQuery"
 >
-            <template #prefix><span class="text-xs text-gray-400 mr-0.5">菜单名称:</span></template>
+            <template #prefix><span class="text-sm text-gray-400 mr-0.5">菜单名称:</span></template>
           </el-input>
         </el-form-item>
-      </template>
-
-      <template #search-advanced>
         <el-form-item>
           <el-select v-model="queryParams.menuType" clearable style="width: 200px" placeholder="请选择">
-            <template #prefix><span class="text-xs text-gray-400 mr-0.5">类型:</span></template>
+            <template #prefix><span class="text-sm text-gray-400 mr-0.5">类型:</span></template>
             <el-option
 v-for="item in [
               { label: '目录', value: 0 },
@@ -288,7 +283,7 @@ v-for="item in [
 
         <el-form-item>
           <el-select v-model="queryParams.platformType" clearable style="width: 200px" placeholder="请选择">
-            <template #prefix><span class="text-xs text-gray-400 mr-0.5">归属:</span></template>
+            <template #prefix><span class="text-sm text-gray-400 mr-0.5">归属:</span></template>
             <el-option
 v-for="item in [
               { label: '平台菜单', value: 0 },
@@ -300,7 +295,7 @@ v-for="item in [
 
         <el-form-item>
           <el-select v-model="queryParams.status" clearable style="width: 200px" placeholder="请选择">
-            <template #prefix><span class="text-xs text-gray-400 mr-0.5">状态:</span></template>
+            <template #prefix><span class="text-sm text-gray-400 mr-0.5">状态:</span></template>
             <el-option
 v-for="item in [
               { label: '启用', value: 0 },
@@ -311,8 +306,14 @@ v-for="item in [
         </el-form-item>
       </template>
 
+      <!-- <template #search-advanced>
+      </template> -->
+
       <template #toolbar-left>
-        <el-button type="primary" plain icon="Plus" @click="handleOpenModal()" v-access:code="['plat:menu:add']">
+        <el-button
+type="primary" plain icon="Plus" @click="handleOpenModal()"
+          v-access:code="[PERMISSIONS.PLAT.USER_GROUP.MENU.ADD]"
+>
           新增菜单
         </el-button>
         <el-button type="warning" plain icon="Refresh" @click="handleRefreshCache">

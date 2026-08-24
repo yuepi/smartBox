@@ -5,10 +5,11 @@ import type { TableColumnConfig } from '#/constants/tableColumns';
 import { useAccess } from '@vben/access';
 import { Page } from '@vben/common-ui';
 
-import { Delete, Document, Edit, Folder, Operation, Plus } from "@element-plus/icons-vue";
+import { Document, Folder, Operation } from "@element-plus/icons-vue";
 
 import { clearMenuCacheApi, deleteMerchantMenuApi, getMerchantMenuListApi, refreshMenuCacheApi } from '#/api/system/menu';
 import ColumnSelector from '#/components/ColumnSelector/index.vue';
+import { PERMISSIONS } from '#/constants/auth';
 import { defaultMenuColumns, MENU_STORAGE_KEY } from '#/constants/tableColumns';
 import { ModuleCodeMap } from "#/hooks/useExport";
 
@@ -149,25 +150,25 @@ const tableColumns = computed(() => {
     {
       key: 'operate',
       title: '操作',
-      width: 120, // 🌟 操作宽度从 300 压缩至 120！
+      width: 200,
       align: 'center',
       fixed: 'right' as const,
       cellRenderer: ({ rowData }: { rowData: Menu }) => (
-        <div class="flex w-full justify-center gap-1">
-          {hasAccessByCodes(['merchant:menu:add']) && (
-            <ElTooltip content="新增下级" enterable={false} placement="top">
-              <ElButton icon={Plus} link onClick={() => handleOpenModal({ parentId: rowData.menuId, menuType: 0, platformType: 0, status: 0, sort: 0 })} type="primary" />
-            </ElTooltip>
+        <div class="action-buttons">
+          {hasAccessByCodes([PERMISSIONS.MERCHANT.USER_GROUP.MENU.ADD]) && (
+            <ElButton onClick={() => handleOpenModal({ parentId: rowData.menuId, menuType: 0, platformType: 0, status: 0, sort: 0 })} size="small" type="primary">
+              新增下级
+            </ElButton>
           )}
-          {hasAccessByCodes(['merchant:menu:edit']) && (
-            <ElTooltip content="修改" enterable={false} placement="top">
-              <ElButton icon={Edit} link onClick={() => handleOpenModal(rowData)} type="primary" />
-            </ElTooltip>
+          {hasAccessByCodes([PERMISSIONS.MERCHANT.USER_GROUP.MENU.EDIT]) && (
+            <ElButton onClick={() => handleOpenModal(rowData)} size="small" type="primary">
+              修改
+            </ElButton>
           )}
-          {hasAccessByCodes(['merchant:menu:del']) && (
-            <ElTooltip content="删除" enterable={false} placement="top">
-              <ElButton icon={Delete} link onClick={() => handleDelete(rowData)} type="primary" />
-            </ElTooltip>
+          {hasAccessByCodes([PERMISSIONS.MERCHANT.USER_GROUP.MENU.DEL]) && (
+            <ElButton onClick={() => handleDelete(rowData)} size="small" type="danger">
+              删除
+            </ElButton>
           )}
         </div>
       ),
@@ -263,7 +264,7 @@ v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="lo
 v-model="queryParams.menuName" placeholder="请输入" clearable style="width: 200px"
             @keyup.enter="handleQuery"
 >
-            <template #prefix><span class="text-xs text-gray-400 mr-0.5">菜单名称:</span></template>
+            <template #prefix><span class="text-sm text-gray-400 mr-0.5">菜单名称:</span></template>
           </el-input>
         </el-form-item>
       </template>
@@ -301,7 +302,7 @@ v-for="item in [{ label: '启用', value: 0 }, { label: '禁用', value: 1 }]" :
       </template>
 
       <template #toolbar-left>
-        <el-button type="primary" plain icon="Plus" @click="handleOpenModal()" v-access:code="['merchant:menu:add']">
+        <el-button type="primary" plain icon="Plus" @click="handleOpenModal()" v-access:code="[PERMISSIONS.MERCHANT.USER_GROUP.MENU.ADD]">
           新增菜单
         </el-button>
         <el-button type="warning" plain icon="Refresh" @click="handleRefreshCache">

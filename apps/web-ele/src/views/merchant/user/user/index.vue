@@ -3,12 +3,13 @@ import type { Dept } from '#/api/system/dept';
 import type { User, UserPageParams } from '#/api/system/user';
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
-import { Page } from '@vben/common-ui'; 
+import { Page } from '@vben/common-ui';
 
 import { Pane, Splitpanes } from 'splitpanes';
 
 import { getMerchantDeptListApi } from '#/api/system/dept';
 import { deleteMerchantUserApi, getMerchantUserPageApi } from '#/api/system/user';
+import { PERMISSIONS } from '#/constants/auth';
 import { defaultUserColumns, USER_STORAGE_KEY } from '#/constants/tableColumns';
 import { ModuleCodeMap } from "#/hooks/useExport";
 
@@ -163,23 +164,23 @@ v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="lo
           <template #search-basic>
             <el-form-item>
               <el-input
-v-model="queryParams.nickName" placeholder="请输入" clearable style="width: 180px"
+v-model="queryParams.nickName" placeholder="请输入" clearable style="width: 200px"
                 @keyup.enter="handleQuery"
 >
-                <template #prefix><span class="text-xs text-gray-400 mr-0.5">昵称:</span></template>
+                <template #prefix><span class="text-sm text-gray-400 mr-0.5">昵称:</span></template>
               </el-input>
             </el-form-item>
 
             <el-form-item>
-              <el-select v-model="queryParams.sex" clearable style="width: 150px" placeholder="请选择">
-                <template #prefix><span class="text-xs text-gray-400 mr-0.5">性别:</span></template>
+              <el-select v-model="queryParams.sex" clearable style="width: 200px" placeholder="请选择">
+                <template #prefix><span class="text-sm text-gray-400 mr-0.5">性别:</span></template>
                 <el-option v-for="item in member_sex" :key="item.value" :label="item.label" :value="item.value" />
               </el-select>
             </el-form-item>
 
             <el-form-item>
-              <el-select v-model="queryParams.status" clearable style="width: 150px" placeholder="请选择">
-                <template #prefix><span class="text-xs text-gray-400 mr-0.5">状态:</span></template>
+              <el-select v-model="queryParams.status" clearable style="width: 200px" placeholder="请选择">
+                <template #prefix><span class="text-sm text-gray-400 mr-0.5">状态:</span></template>
                 <el-option v-for="item in member_status" :key="item.value" :label="item.label" :value="item.value" />
               </el-select>
             </el-form-item>
@@ -197,15 +198,18 @@ v-model="queryParams.email" placeholder="请输入" clearable style="width: 180p
           </template>
 
           <template #toolbar-left>
-            <el-button type="primary" icon="Plus" @click="handleAdd" v-access:code="['merchant:user:add']">
+            <el-button
+type="primary" icon="Plus" @click="handleAdd"
+              v-access:code="[PERMISSIONS.MERCHANT.USER_GROUP.USER.ADD]"
+>
               新增用户
             </el-button>
             <ExportButton :module-code="ModuleCodeMap.USER" :fields="visibleColumns" :find-cond="queryParams" />
             <el-button
 type="danger" plain icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete()"
-              v-access:code="['merchant:user:del']"
+              v-access:code="[PERMISSIONS.MERCHANT.USER_GROUP.USER.DEL]"
 >
-              批量删除
+            批量删除
             </el-button>
 
             <transition name="el-fade-in">
@@ -253,20 +257,22 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
                 </template>
               </el-table-column>
 
-              <el-table-column label="操作" width="100" fixed="right" align="center">
+              <el-table-column label="操作" width="150" fixed="right" align="center">
                 <template #default="{ row }">
-                  <el-tooltip content="修改" placement="top" :enterable="false">
+                  <div class="action-buttons">
                     <el-button
-link type="primary" icon="Edit" @click="handleEdit(row)"
-                      v-access:code="['merchant:user:edit']"
-/>
-                  </el-tooltip>
-                  <el-tooltip content="删除" placement="top" :enterable="false">
+size="small" type="primary" @click="handleEdit(row)"
+                      v-access:code="[PERMISSIONS.MERCHANT.USER_GROUP.USER.EDIT]"
+>
+                      修改
+                    </el-button>
                     <el-button
-link type="danger" icon="Delete" @click="handleDelete(row)"
-                      v-access:code="['merchant:user:del']"
-/>
-                  </el-tooltip>
+size="small" type="danger" @click="handleDelete(row)"
+                      v-access:code="[PERMISSIONS.MERCHANT.USER_GROUP.USER.DEL]"
+>
+                      删除
+                    </el-button>
+                  </div>
                 </template>
               </el-table-column>
             </el-table>

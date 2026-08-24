@@ -6,6 +6,7 @@ import type { TableColumnConfig } from '#/constants/tableColumns';
 import { Page } from "@vben/common-ui";
 
 import { deletePlatRoleApi, getPlatRolePageApi } from '#/api/system/role';
+import { PERMISSIONS } from '#/constants/auth';
 import { defaultRoleColumns, ROLE_STORAGE_KEY } from '#/constants/tableColumns';
 import { ModuleCodeMap } from "#/hooks/useExport";
 
@@ -123,8 +124,8 @@ onMounted(() => {
 <template>
   <Page auto-content-height>
     <BaseTableLayout
-v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="loading" :total="total"
-      @search="loadData" @reset="resetQuery"
+v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="loading"
+      :total="total" @search="loadData" @reset="resetQuery"
 >
       <!-- 📥 1. 基础常驻筛选项 -->
       <template #search-basic>
@@ -134,7 +135,7 @@ v-model="queryParams.roleName" placeholder="请输入" clearable style="width: 2
             @keyup.enter="handleQuery"
 >
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">角色名称:</span>
+              <span class="text-sm text-gray-400 mr-0.5">角色名称:</span>
             </template>
           </el-input>
         </el-form-item>
@@ -145,18 +146,14 @@ v-model="queryParams.roleCode" placeholder="请输入" clearable style="width: 2
             @keyup.enter="handleQuery"
 >
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">角色编码:</span>
+              <span class="text-sm text-gray-400 mr-0.5">角色编码:</span>
             </template>
           </el-input>
         </el-form-item>
-      </template>
-
-      <!-- 📥 2. 更多高级筛选项 -->
-      <template #search-advanced>
         <el-form-item>
           <el-select v-model="queryParams.status" clearable style="width: 200px" placeholder="请选择">
             <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">状态:</span>
+              <span class="text-sm text-gray-400 mr-0.5">状态:</span>
             </template>
             <el-option
 v-for="item in [{ label: '启用', value: 0 }, { label: '禁用', value: 1 }]" :key="item.value"
@@ -166,18 +163,20 @@ v-for="item in [{ label: '启用', value: 0 }, { label: '禁用', value: 1 }]" :
         </el-form-item>
       </template>
 
+      <!-- 📥 2. 更多高级筛选项 -->
+      <!-- <template #search-advanced>
+      </template> -->
+
       <!-- 📥 3. 工具栏左侧 -->
       <template #toolbar-left>
-        <el-button type="primary" plain icon="Plus" @click="handleOpenModal()" v-access:code="['plat:role:add']">
+        <el-button type="primary" plain icon="Plus" @click="handleOpenModal()" v-access:code="[PERMISSIONS.PLAT.USER_GROUP.ROLE.EDIT]">
           新增角色
         </el-button>
         <ExportButton :module-code="ModuleCodeMap.ROLE" :fields="visibleColumns" :find-cond="queryParams" />
         <el-button
 type="danger" plain icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete()"
-          v-access:code="['plat:role:del']"
->
-          批量删除
-        </el-button>
+          v-access:code="[PERMISSIONS.PLAT.USER_GROUP.ROLE.DEL]"
+/>
 
         <transition name="el-fade-in">
           <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-xs text-gray-400">
@@ -224,21 +223,16 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
             </template>
           </el-table-column>
 
-          <el-table-column label="操作" width="100" fixed="right" align="center">
+          <el-table-column label="操作" width="150" fixed="right" align="center">
             <template #default="{ row }">
-              <el-tooltip content="修改" placement="top" :enterable="false">
-                <el-button
-link type="primary" icon="Edit" @click="handleOpenModal(row)"
-                  v-access:code="['plat:role:edit']"
-/>
-              </el-tooltip>
-
-              <el-tooltip content="删除" placement="top" :enterable="false">
-                <el-button
-link type="danger" icon="Delete" @click="handleDelete(row)"
-                  v-access:code="['plat:role:del']"
-/>
-              </el-tooltip>
+              <div class="action-buttons">
+                <el-button size="small" type="primary" @click="handleOpenModal(row)" v-access:code="[PERMISSIONS.PLAT.USER_GROUP.ROLE.EDIT]">
+                  修改
+                </el-button>
+                <el-button size="small" type="danger" @click="handleDelete(row)" v-access:code="[PERMISSIONS.PLAT.USER_GROUP.ROLE.DEL]">
+                  删除
+                </el-button>
+              </div>
             </template>
           </el-table-column>
         </el-table>
