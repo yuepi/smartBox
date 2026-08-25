@@ -67,6 +67,7 @@ function handleOpenModal(row?: Role) {
 
 // --- 删除 ---
 async function handleDelete(row?: Role) {
+  // eslint-disable-next-line no-useless-assignment
   let ids: number[] = [];
 
   if (row) {
@@ -168,14 +169,17 @@ v-for="item in [{ label: '启用', value: 0 }, { label: '禁用', value: 1 }]" :
 
       <!-- 📥 3. 工具栏左侧 -->
       <template #toolbar-left>
-        <el-button type="primary" plain icon="Plus" @click="handleOpenModal()" v-access:code="[PERMISSIONS.MERCHANT.USER_GROUP.ROLE.ADD]">
+        <el-button
+type="primary" plain icon="Plus" @click="handleOpenModal()"
+          v-access:code="[PERMISSIONS.MERCHANT.USER_GROUP.ROLE.ADD]"
+>
           新增角色
         </el-button>
         <ExportButton :module-code="ModuleCodeMap.ROLE" :fields="visibleColumns" :find-cond="queryParams" />
         <el-button
 type="danger" plain icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete()"
           v-access:code="[PERMISSIONS.MERCHANT.USER_GROUP.ROLE.DEL]"
-/>
+>
           批量删除
         </el-button>
 
@@ -233,7 +237,10 @@ size="small" type="primary" @click="handleOpenModal(row)"
 >
                   修改
                 </el-button>
-                <el-button size="small" type="danger" @click="handleDelete(row)" v-access:code="[PERMISSIONS.MERCHANT.USER_GROUP.ROLE.DEL]">
+                <el-button
+size="small" type="danger" @click="handleDelete(row)"
+                  v-access:code="[PERMISSIONS.MERCHANT.USER_GROUP.ROLE.DEL]"
+>
                   删除
                 </el-button>
               </div>

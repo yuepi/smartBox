@@ -221,6 +221,11 @@ function handleQuickCapture(row: Device) {
   imagePreviewRef.value?.open(row.deviceId, 13);
 }
 
+function handleQuickScreenshot(row: Device) {
+  // 传入设备ID和操作类型(7=截图)
+  imagePreviewRef.value?.open(row.deviceId, 7);
+}
+
 // --- 删除 ---
 async function handleDelete(row?: Device) {
   // eslint-disable-next-line no-useless-assignment
@@ -454,6 +459,9 @@ v-if="row.qrCode" class="cursor-pointer text-primary hover:text-primary-dark" ti
                 </el-button>
                 <el-button size="small" type="warning" @click="handleQuickCapture(row)">
                   抓拍
+                </el-button>
+                <el-button size="small" type="warning" @click="handleQuickScreenshot(row)">
+                  截图
                 </el-button>
                 <el-button size="small" type="danger" @click="handleDelete(row)">
                   删除
