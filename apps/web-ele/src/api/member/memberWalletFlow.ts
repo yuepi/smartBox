@@ -17,7 +17,7 @@ export interface MemberWalletFlow {
 }
 
 /** 流水类型枚举 */
-export const FlowTypeMap: Record<number, { label: string; type: string; sign: string }> = {
+export const FlowTypeMap: Record<number, { label: string; sign: string; type: string; }> = {
   0: { label: '售卖收益入账', type: 'success', sign: '+' },
   1: { label: '提现冻结', type: 'warning', sign: '-' },
   2: { label: '提现成功扣减', type: 'danger', sign: '-' },

@@ -18,7 +18,7 @@ export const defaultRecycleOrderColumns: TableColumnConfig[] = [
   { key: 'deviceName', label: '设备名称', visible: true, minWidth: 180, align: 'center', showOverflowTooltip: true },
   { key: 'hatchId', label: '仓口ID', visible: false, width: 80, align: 'center' },
   { key: 'hatchNo', label: '仓口号', visible: false, width: 180, align: 'center',showOverflowTooltip: true },
-  { key: 'imageUrls', label: '内外抓拍图片', visible: true, width: 200, align: 'center',showOverflowTooltip: true },
+  { key: 'imageUrls', label: '内外抓拍图片', visible: true, width: 240, align: 'center',showOverflowTooltip: true },
   { key: 'devicePackageId', label: '计费套餐ID', visible: false, width: 100, align: 'center' },
   { key: 'devicePackageName', label: '计费套餐名称', visible: false, width: 150, align: 'center' },
   { key: 'deviceBagId', label: '包袋ID', visible: false, width: 80, align: 'center' },

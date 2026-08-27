@@ -259,9 +259,9 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
                 <el-button size="small" type="primary" @click="handleEdit(row)">
                   编辑
                 </el-button>
-                <el-button size="small" type="danger" @click="handleDelete(row)">
+                <!-- <el-button size="small" type="danger" @click="handleDelete(row)">
                   删除
-                </el-button>
+                </el-button> -->
               </div>
             </template>
           </el-table-column>

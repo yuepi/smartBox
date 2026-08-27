@@ -23,6 +23,7 @@ import { ModuleCodeMap } from '#/hooks/useExport';
 import { getRecentDays } from '#/utils/date';
 
 import AbnormalDialog from './AbnormalDialog.vue';
+import HandleRecord from './HandleRecord.vue';
 import OrderDetail from './OrderDetail.vue';
 import OrderRemark from './OrderRemark.vue';
 import OrderWeight from './OrderWeight.vue';
@@ -45,6 +46,7 @@ const orderDetailRef = ref();
 const orderWeightRef = ref();
 const orderRemarkRef = ref();
 const abnormalDialogRef = ref();
+const handleRecordRef = ref();
 
 // --- 状态变量 ---
 const loading = ref(false);
@@ -99,6 +101,7 @@ const queryParams = reactive<RecycleOrderPageParams>({
   pageSize: 10,
   orderNo: undefined,
   deptId: undefined,
+  deptName: undefined,
   deviceId: undefined,
   orderStatus: undefined,
   payStatus: undefined,
@@ -289,8 +292,14 @@ function handleRemark(row: RecycleOrder) {
   orderRemarkRef.value?.open(row);
 }
 
+// 查看操作记录
+function handleViewRecord(row: RecycleOrder) {
+  handleRecordRef.value?.open({ recycleOrderId: row.recycleOrderId, orderNo: row.orderNo });
+}
+
 // --- 删除 ---
 async function handleDelete(row?: RecycleOrder) {
+  // eslint-disable-next-line no-useless-assignment
   let ids: number[] = [];
   if (row) {
     ids = [row.recycleOrderId];
@@ -328,6 +337,7 @@ function resetQuery() {
   queryParams.orderNo = undefined;
   queryParams.memberId = undefined;
   queryParams.deptId = undefined;
+  queryParams.deptName = undefined;
   queryParams.deviceId = undefined;
   queryParams.orderStatus = undefined;
   queryParams.payStatus = undefined;
@@ -539,13 +549,13 @@ v-for="col in visibleColumns" :key="`${col.key}_${col.fixed || 'none'}`" :prop="
                 <div class="flex items-center gap-1 justify-center">
                   <template v-if="row.imageUrls && row.imageUrls.length > 0">
                     <el-image
-v-for="(url, idx) in row.imageUrls.slice(0, 3)" :key="idx" :src="url"
-                      :preview-src-list="row.imageUrls" :initial-index="idx" fit="cover"
-                      style="width: 32px; height: 32px; cursor: pointer; border: 1px solid #dcdfe6; border-radius: 4px;"
+v-for="(url, idx) in row.imageUrls" :key="idx" :src="url"
+                      :preview-src-list="row.imageUrls" :initial-index="Number(idx)" fit="cover"
+                      style="width: 40px; height:40px; cursor: pointer; border: 1px solid #dcdfe6; border-radius: 4px;"
                       preview-teleported
 />
-                    <el-tag v-if="row.imageUrls.length > 3" size="small" type="info">
-                      +{{ row.imageUrls.length - 3 }}
+                    <el-tag v-if="row.imageUrls.length > 5" size="small" type="info">
+                      +{{ row.imageUrls.length - 5 }}
                     </el-tag>
                   </template>
                   <span v-else class="text-gray-400">-</span>
@@ -592,12 +602,13 @@ v-if="row.deptName" class="table-link-text" :title="row.deptName"
           </el-table-column>
 
           <!-- 操作列 -->
-          <el-table-column label="操作" width="220" fixed="right" align="center">
+          <el-table-column label="操作" width="250" fixed="right" align="center">
             <template #default="{ row }">
               <div class="action-buttons">
                 <el-button size="small" type="primary" @click="handleView(row)">
                   详情
                 </el-button>
+                <el-button size="small" type="info" @click="handleViewRecord(row)">操作记录</el-button>
                 <el-button
 v-if="[0, 1, 2, 3, 4, 7].includes(row.orderStatus)" size="small" type="danger"
                   @click="handleAbnormal(row)"
@@ -631,6 +642,7 @@ v-if="[0, 1, 2, 3].includes(row.orderStatus)" size="small" type="primary"
     <OrderWeight ref="orderWeightRef" @success="handleQuery" />
     <OrderRemark ref="orderRemarkRef" @success="handleQuery" />
     <AbnormalDialog ref="abnormalDialogRef" @success="handleQuery" />
+    <HandleRecord ref="handleRecordRef" />
 
     <!-- 操作弹窗（异常/取消异常/直接完成） -->
     <el-dialog v-model="actionDialogVisible" :title="actionDialogTitle" width="450px" append-to-body>
@@ -650,27 +662,6 @@ v-if="[0, 1, 2, 3].includes(row.orderStatus)" size="small" type="primary"
 </template>
 
 <style scoped lang="scss">
-// /* 提高权重并精准穿透 el-cascader 内部的 input wrapper */
-// :deep(.cascader-prefix-custom) {
-//   .el-input__wrapper {
-//     position: relative !important;
-//     padding-left: 82px !important;
-
-//     &::before {
-//       position: absolute;
-//       top: 50%;
-//       left: 12px;
-//       z-index: 2;
-//       font-size: 14px;
-//       font-weight: 400;
-//       color: #909399;
-//       pointer-events: none;
-//       content: "小区/设备:";
-//       transform: translateY(-50%);
-//     }
-//   }
-// }
-
 .selected-alert-badge {
   display: inline-block;
 }

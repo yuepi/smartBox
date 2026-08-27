@@ -56,6 +56,7 @@ export interface RecycleOrderPageParams {
   orderNo?: string;
   memberName?: string;
   deptId?: number;
+  deptName?: string;
   deviceId?: number;
   orderStatus?: number;
   payStatus?: number;
@@ -156,4 +157,9 @@ export function getImageUrlsByRecycleOrderId(recycleOrderId: number) {
   return requestClient.get('/merchant/recycleOrderImage/queryImageUrlsByRecycleOrderId', { params: { recycleOrderId } });
 }
 
-
+/** 10.查询订单处理记录 */
+export function getHandleRecordListApi(recycleOrderId: number) {
+  return requestClient.get('/merchant/recycleOrder/handleRecord/list', {
+    params: { recycleOrderId },
+  });
+}

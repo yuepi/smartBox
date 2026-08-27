@@ -11,7 +11,7 @@ export interface SortItem {
 }
 
 /** 分类类型枚举 */
-export const PackageTypeMap: Record<number, { label: string; color: string }> = {
+export const PackageTypeMap: Record<number, { color: string; label: string; }> = {
   0: { label: '混合', color: 'info' },
   1: { label: '织物', color: 'primary' },
   2: { label: '金属', color: 'warning' },

@@ -8,7 +8,8 @@ export const defaultMemberColumns: TableColumnConfig[] = [
   { key: 'avatar', label: '头像', visible: true, width: 100, align: 'center' },
   { key: 'nickname', label: '昵称', visible: true, minWidth: 120, align: 'start', showOverflowTooltip: true },
   { key: 'mobile', label: '手机号', visible: true, minWidth: 130, align: 'center' },
-  { key: 'sex', label: '性别', visible: true, width: 80, align: 'center' },
+  { key: 'balance', label: '余额', visible: true, width: 150, align: 'center' },
+  { key: 'sex', label: '性别', visible: true, width: 100, align: 'center' },
   { key: 'status', label: '状态', visible: true, width: 100, align: 'center' },
   { key: 'createTime', label: '注册时间', visible: false, width: 160, align: 'center' },
 ];
