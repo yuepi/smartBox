@@ -5,6 +5,7 @@ import type { Dept } from '#/api/system/dept';
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 
 import { Page } from '@vben/common-ui';
 
@@ -27,6 +28,21 @@ import HandleRecord from './HandleRecord.vue';
 import OrderDetail from './OrderDetail.vue';
 import OrderRemark from './OrderRemark.vue';
 import OrderWeight from './OrderWeight.vue';
+
+const route = useRoute();
+
+// 1. 初始化时检查 Query 参数
+function initQueryParamsFromRoute() {
+  const { cleanTaskId } = route.query;
+  if (cleanTaskId) {
+    // 将清运任务ID带入查询参数
+    queryParams.cleanTaskId = Number(cleanTaskId);
+    // 可选：如果是通过任务跳转过来的，将默认的7天时间范围清空，避免因为时间不匹配查不到订单
+    dateRange.value = [];
+    queryParams.startTime = undefined;
+    queryParams.endTime = undefined;
+  }
+}
 
 const { order_status } = useDicts(['order_status']);
 
@@ -111,6 +127,7 @@ const queryParams = reactive<RecycleOrderPageParams>({
   endTime: undefined,
   deviceNo: undefined,
   deviceName: undefined,
+  cleanTaskId: undefined,
 });
 
 // --- 操作弹窗 ---
@@ -346,12 +363,14 @@ function resetQuery() {
   queryParams.endTime = undefined;
   queryParams.deviceNo = undefined;
   queryParams.deviceName = undefined;
+  queryParams.cleanTaskId = undefined;
   queryParams.pageNo = 1;
   loadData();
 }
 
 onMounted(() => {
   initDateRange();
+  initQueryParamsFromRoute();
   loadOptions();
   loadData();
 });

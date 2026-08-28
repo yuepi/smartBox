@@ -2,6 +2,8 @@
 import type { CleanTask, CleanTaskPageParams } from '#/api/operation/cleanTask';
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
+import { useRouter } from 'vue-router';
+
 import { Page } from '@vben/common-ui';
 
 import {
@@ -14,6 +16,8 @@ import { ModuleCodeMap } from '#/hooks/useExport';
 
 import TaskDetail from './TaskDetail.vue';
 import TaskForm from './TaskForm.vue';
+
+const router = useRouter();
 
 const { task_status } = useDicts(['task_status']);
 
@@ -51,6 +55,16 @@ const queryParams = reactive<CleanTaskPageParams>({
   deviceId: undefined,
   taskStatus: undefined,
 });
+
+function handleViewOrders(row: CleanTask) {
+  router.push({
+    path: '/recycleOrder', // 回收订单的路由地址
+    query: {
+      cleanTaskId: row.cleanTaskId,
+      taskNo: row.taskNo // 可选：用于页面顶部提示或展示
+    }
+  });
+}
 
 // --- 加载选项 ---
 async function loadOptions() {
@@ -241,9 +255,12 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
                 <el-button size="small" type="primary" @click="handleEdit(row)">
                   编辑
                 </el-button>
-                <el-button size="small" type="danger" @click="handleDelete(row)">
-                  删除
+                <el-button size="small" type="primary" @click="handleViewOrders(row)">
+                  查看订单
                 </el-button>
+                <!-- <el-button size="small" type="danger" @click="handleDelete(row)">
+                  删除
+                </el-button> -->
               </div>
             </template>
           </el-table-column>

@@ -66,6 +66,7 @@ export interface RecycleOrderPageParams {
   endTime?: string;
   deviceNo?: string;
   deviceName?: string;
+  cleanTaskId?: number;
 }
 
 /** 1. 分页查询 */
