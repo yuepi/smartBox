@@ -10,7 +10,7 @@ export const defaultRecycleOrderColumns: TableColumnConfig[] = [
   { key: 'merchantId', label: '商户ID', visible: false, width: 80, align: 'center' },
     { key: 'memberId', label: '会员ID', visible: false, width: 80, align: 'center' },
   { key: 'memberName', label: '会员名称', visible: false, width: 120, align: 'center' },
-  { key: 'memberPhone', label: '手机号', visible: true, width: 120, align: 'center',fixed: 'left' },
+  { key: 'memberPhone', label: '手机号', visible: true, width: 150, align: 'center',fixed: 'left' },
   { key: 'deptId', label: '小区ID', visible: false, width: 80, align: 'center' },
   { key: 'deptName', label: '小区名称', visible: true, minWidth: 150, align: 'center', showOverflowTooltip: true },
   { key: 'deviceId', label: '设备ID', visible: false, width: 80, align: 'center' },

@@ -2,6 +2,8 @@
 import type { Member, MemberPageParams } from '#/api/member/member';
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
+import { useRoute } from 'vue-router';
+
 import { Page } from '@vben/common-ui';
 
 import { deleteMemberApi, getMemberPageApi } from '#/api/member/member';
@@ -13,6 +15,7 @@ import MemberForm from './MemberForm.vue';
 import MemberWallet from './MemberWallet.vue';
 
 const { member_status, member_sex } = useDicts(['member_status', 'member_sex']);
+const route = useRoute();
 
 // --- 表格列配置 ---
 const columnConfig = ref<TableColumnConfig[]>([...defaultMemberColumns]);
@@ -128,7 +131,16 @@ function resetQuery() {
   loadData();
 }
 
+// 初始化时检查 Query 参数
+function initQueryParamsFromRoute() {
+  const { mobile } = route.query;
+  if (mobile) {
+    queryParams.mobile = Number(mobile);
+  }
+}
+
 onMounted(() => {
+  initQueryParamsFromRoute();
   loadData();
 });
 </script>

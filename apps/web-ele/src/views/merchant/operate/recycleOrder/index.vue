@@ -5,7 +5,7 @@ import type { Dept } from '#/api/system/dept';
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
 import { computed, onMounted, reactive, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import { Page } from '@vben/common-ui';
 
@@ -30,19 +30,7 @@ import OrderRemark from './OrderRemark.vue';
 import OrderWeight from './OrderWeight.vue';
 
 const route = useRoute();
-
-// 1. 初始化时检查 Query 参数
-function initQueryParamsFromRoute() {
-  const { cleanTaskId } = route.query;
-  if (cleanTaskId) {
-    // 将清运任务ID带入查询参数
-    queryParams.cleanTaskId = Number(cleanTaskId);
-    // 可选：如果是通过任务跳转过来的，将默认的7天时间范围清空，避免因为时间不匹配查不到订单
-    dateRange.value = [];
-    queryParams.startTime = undefined;
-    queryParams.endTime = undefined;
-  }
-}
+const router = useRouter();
 
 const { order_status } = useDicts(['order_status']);
 
@@ -181,6 +169,19 @@ function handleCascaderChange(val: any) {
   handleQuery();
 }
 
+// 初始化时检查 Query 参数
+function initQueryParamsFromRoute() {
+  const { cleanTaskId } = route.query;
+  if (cleanTaskId) {
+    // 将清运任务ID带入查询参数
+    queryParams.cleanTaskId = Number(cleanTaskId);
+    // 可选：如果是通过任务跳转过来的，将默认的7天时间范围清空，避免因为时间不匹配查不到订单
+    dateRange.value = [];
+    queryParams.startTime = undefined;
+    queryParams.endTime = undefined;
+  }
+}
+
 // --- 辅助函数 ---
 function formatAmount(amount: number): string {
   if (amount === undefined || amount === null) return '¥ 0.00';
@@ -314,6 +315,16 @@ function handleViewRecord(row: RecycleOrder) {
   handleRecordRef.value?.open({ recycleOrderId: row.recycleOrderId, orderNo: row.orderNo });
 }
 
+// --- 跳转到会员详情 ---
+function handleViewMember(phone: string) {
+  if (!phone) return;
+  // 跳转到会员列表页，携带手机号参数
+  router.push({
+    path: '/member',
+    query: { mobile: phone },
+  });
+}
+
 // --- 删除 ---
 async function handleDelete(row?: RecycleOrder) {
   // eslint-disable-next-line no-useless-assignment
@@ -405,7 +416,6 @@ v-model="cascaderValue" :options="cascaderOptions" :props="{
             emitPath: true,
           }" placeholder="请选择或搜索" filterable clearable style="width: 250px" @change="handleCascaderChange"
 >
-            <!-- 使用原生 prefix 插槽，简单又稳定 -->
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">小区/设备:</span>
             </template>
@@ -608,10 +618,18 @@ v-if="row.deptName" class="table-link-text" :title="row.deptName"
 
               <!-- 手机号 - 点击快速筛选 -->
               <template v-else-if="col.key === 'memberPhone'">
-                <span v-if="row.memberPhone" class="table-link-text" @click="handleMemberPhoneClick(row.memberPhone)">
-                  {{ row.memberPhone }}
-                </span>
-                <span v-else>-</span>
+                <div class="flex items-center justify-center gap-1">
+                  <span v-if="row.memberPhone" class="table-link-text" @click="handleMemberPhoneClick(row.memberPhone)">
+                    {{ row.memberPhone }}
+                  </span>
+                  <span v-else>-</span>
+                  <el-button
+v-if="row.memberPhone" link type="primary" size="small" class="!p-0 !h-auto text-xs"
+                    @click="handleViewMember(row.memberPhone)"
+>
+                    查看
+                  </el-button>
+                </div>
               </template>
 
               <template v-else>
@@ -658,9 +676,9 @@ v-if="[0, 1, 2, 3].includes(row.orderStatus)" size="small" type="primary"
 
     <!-- ===== 弹窗 ===== -->
     <OrderDetail ref="orderDetailRef" />
-    <OrderWeight ref="orderWeightRef" @success="handleQuery" />
-    <OrderRemark ref="orderRemarkRef" @success="handleQuery" />
-    <AbnormalDialog ref="abnormalDialogRef" @success="handleQuery" />
+    <OrderWeight ref="orderWeightRef" @success="loadData" />
+    <OrderRemark ref="orderRemarkRef" @success="loadData" />
+    <AbnormalDialog ref="abnormalDialogRef" @success="loadData" />
     <HandleRecord ref="handleRecordRef" />
 
     <!-- 操作弹窗（异常/取消异常/直接完成） -->

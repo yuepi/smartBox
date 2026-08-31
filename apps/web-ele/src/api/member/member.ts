@@ -28,7 +28,7 @@ export const SexMap: Record<number, string> = {
 export interface MemberPageParams {
   pageNo: number;
   pageSize: number;
-  mobile?: string;
+  mobile?: number;
   nickname?: string;
   sex?: number;
   status?: number;

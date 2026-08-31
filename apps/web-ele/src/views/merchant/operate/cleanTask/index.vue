@@ -288,7 +288,7 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
   position: absolute;
   top: 50%;
   left: 12px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 400;
   color: #909399;
   pointer-events: none;
