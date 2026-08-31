@@ -240,6 +240,6 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
     </BaseTableLayout>
 
     <!-- 🌟 引入独立拆分出去的弹窗 -->
-    <RoleModal ref="roleModalRef" @success="handleQuery" />
+    <RoleModal ref="roleModalRef" @success="loadData" />
   </Page>
 </template>

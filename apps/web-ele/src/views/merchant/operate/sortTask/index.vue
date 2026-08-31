@@ -157,13 +157,17 @@ onMounted(() => {
 
 <template>
   <Page auto-content-height>
-    <BaseTableLayout v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="loading"
-      :total="total" @search="loadData" @reset="resetQuery">
+    <BaseTableLayout
+v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="loading"
+      :total="total" @search="loadData" @reset="resetQuery"
+>
       <!-- 📥 基础筛选项 -->
       <template #search-basic>
         <el-form-item>
-          <el-input v-model="queryParams.sortNo" placeholder="请输入" clearable style="width: 200px"
-            @keyup.enter="handleQuery">
+          <el-input
+v-model="queryParams.sortNo" placeholder="请输入" clearable style="width: 200px"
+            @keyup.enter="handleQuery"
+>
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">分拣单号:</span>
             </template>
@@ -175,8 +179,10 @@ onMounted(() => {
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">设备名称:</span>
             </template>
-            <el-option v-for="item in deviceOptions" :key="item.deviceId" :label="item.deviceName"
-              :value="item.deviceId" />
+            <el-option
+v-for="item in deviceOptions" :key="item.deviceId" :label="item.deviceName"
+              :value="item.deviceId"
+/>
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -208,19 +214,25 @@ onMounted(() => {
 
       <!-- 📥 工具栏右侧 -->
       <template #toolbar-right>
-        <ColumnSelector :storage-key="SORT_TASK_STORAGE_KEY" :default-columns="defaultSortTaskColumns"
-          @update:columns="handleColumnsUpdate" />
+        <ColumnSelector
+:storage-key="SORT_TASK_STORAGE_KEY" :default-columns="defaultSortTaskColumns"
+          @update:columns="handleColumnsUpdate"
+/>
       </template>
 
       <!-- 📥 表格 -->
       <template #table>
-        <el-table :data="tableData" border stripe style="width: 100%; height: 100%"
-          @selection-change="handleSelectionChange">
+        <el-table
+:data="tableData" border stripe style="width: 100%; height: 100%"
+          @selection-change="handleSelectionChange"
+>
           <el-table-column type="selection" width="55" align="center" />
 
-          <el-table-column v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
+          <el-table-column
+v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
             :width="typeof col.width === 'number' ? col.width : undefined" :min-width="col.minWidth" :align="col.align"
-            :show-overflow-tooltip="col.showOverflowTooltip || false">
+            :show-overflow-tooltip="col.showOverflowTooltip || false"
+>
             <template #default="{ row }">
               <template v-if="col.key === 'sortStatus'">
                 <DictTag :options="sort_status" :value="row.sortStatus" />
@@ -261,7 +273,7 @@ onMounted(() => {
 
     <!-- ===== 弹窗们 ===== -->
     <SortTaskDetail ref="detailRef" />
-    <SortItemDialog ref="itemDialogRef" @success="handleQuery" />
+    <SortItemDialog ref="itemDialogRef" @success="loadData" />
   </Page>
 </template>
 

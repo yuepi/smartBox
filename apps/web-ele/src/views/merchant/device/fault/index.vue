@@ -295,7 +295,7 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
 
     <!-- ===== 弹窗们 ===== -->
     <FaultDetail ref="faultDetailRef" />
-    <FaultEdit ref="faultEditRef" @success="handleQuery" />
+    <FaultEdit ref="faultEditRef" @success="loadData" />
   </Page>
 </template>
 

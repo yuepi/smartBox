@@ -281,6 +281,6 @@ size="small" type="danger" @click="handleDelete(row)"
       </Pane>
     </Splitpanes>
 
-    <UserModal ref="userModalRef" @success="handleQuery" />
+    <UserModal ref="userModalRef" @success="loadData" />
   </Page>
 </template>

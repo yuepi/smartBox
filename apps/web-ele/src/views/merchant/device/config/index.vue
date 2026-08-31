@@ -248,10 +248,10 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
     </BaseTableLayout>
 
     <!-- ===== 弹窗 ===== -->
-    <ConfigForm ref="configFormRef" @success="handleQuery" />
+    <ConfigForm ref="configFormRef" @success="loadData" />
 
     <!-- ===== 绑定设备弹窗 ===== -->
-    <BindDeviceDialog ref="bindDialogRef" @success="handleQuery" />
+    <BindDeviceDialog ref="bindDialogRef" @success="loadData" />
   </Page>
 </template>
 

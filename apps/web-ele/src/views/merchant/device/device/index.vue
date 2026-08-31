@@ -490,7 +490,7 @@ v-if="row.qrCode" class="cursor-pointer text-primary hover:text-primary-dark" ti
     </BaseTableLayout>
 
     <!-- ===== 弹窗 ===== -->
-    <EditModal ref="editModalRef" @success="handleQuery" />
+    <EditModal ref="editModalRef" @success="loadData" />
     <DetailModal ref="detailModalRef" />
     <UpgradeModal ref="upgradeModalRef" />
     <IpPortModal ref="ipPortModalRef" />

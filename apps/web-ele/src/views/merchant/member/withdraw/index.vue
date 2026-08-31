@@ -285,7 +285,7 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
 
     <!-- ===== 弹窗们 ===== -->
     <WithdrawDetail ref="detailRef" />
-    <WithdrawAudit ref="auditRef" @success="handleQuery" />
+    <WithdrawAudit ref="auditRef" @success="loadData" />
     <RecentOrders ref="recentOrdersRef" />
   </Page>
 </template>

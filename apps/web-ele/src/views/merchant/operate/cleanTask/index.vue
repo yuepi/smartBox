@@ -44,7 +44,7 @@ const selectedIds = ref<number[]>([]);
 const moreParams = ref(false);
 
 // 下拉选项
-const deptOptions = ref<Dept[]>([]);
+const deptOptions = ref<any[]>([]);
 
 // 查询参数
 const queryParams = reactive<CleanTaskPageParams>({
@@ -269,7 +269,7 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
     </BaseTableLayout>
 
     <!-- ===== 弹窗们 ===== -->
-    <TaskForm ref="taskFormRef" @success="handleQuery" />
+    <TaskForm ref="taskFormRef" @success="loadData" />
     <TaskDetail ref="taskDetailRef" />
   </Page>
 </template>

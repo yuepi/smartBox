@@ -242,8 +242,8 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
     </BaseTableLayout>
 
     <!-- ===== 弹窗们 ===== -->
-    <PackageForm ref="packageFormRef" @success="handleQuery" />
-    <BindDialog ref="bindDialogRef" @success="handleQuery" />
+    <PackageForm ref="packageFormRef" @success="loadData" />
+    <BindDialog ref="bindDialogRef" @success="loadData" />
   </Page>
 </template>
 

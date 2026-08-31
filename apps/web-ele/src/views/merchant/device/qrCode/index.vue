@@ -365,7 +365,7 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
     </BaseTableLayout>
 
     <!-- ===== 弹窗们 ===== -->
-    <GenerateDialog ref="generateDialogRef" @success="handleQuery" />
+    <GenerateDialog ref="generateDialogRef" @success="loadData" />
     <DetailDialog ref="detailDialogRef" />
     <ShowDialog ref="showDialogRef" @download="handleDownloadSingle" />
   </Page>

@@ -288,7 +288,7 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
     </BaseTableLayout>
 
     <!-- ===== 弹窗们 ===== -->
-    <HatchForm ref="hatchFormRef" @success="handleQuery" />
+    <HatchForm ref="hatchFormRef" @success="loadData" />
 
     <LogDialog
 v-model:visible="logDialogVisible" :device-hatch-id="currentLogHatchId"

@@ -282,7 +282,7 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
     </BaseTableLayout>
 
     <!-- ===== 弹窗们 ===== -->
-    <MemberForm ref="memberFormRef" @success="handleQuery" />
+    <MemberForm ref="memberFormRef" @success="loadData" />
     <MemberDetail ref="memberDetailRef" />
     <MemberWallet ref="memberWalletRef" />
   </Page>

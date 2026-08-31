@@ -372,10 +372,10 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
     </BaseTableLayout>
 
     <!-- ===== 弹窗们 ===== -->
-    <BagForm ref="bagFormRef" @success="handleQuery" />
-    <GenerateDialog ref="generateDialogRef" @success="handleQuery" />
+    <BagForm ref="bagFormRef" @success="loadData" />
+    <GenerateDialog ref="generateDialogRef" @success="loadData" />
     <QrcodeDialog ref="qrcodeDialogRef" />
-    <BindDialog ref="bindDialogRef" @success="handleQuery" />
+    <BindDialog ref="bindDialogRef" @success="loadData" />
   </Page>
 </template>
 
