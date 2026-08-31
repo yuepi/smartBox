@@ -304,8 +304,8 @@ v-model="queryParams.taskNo" placeholder="请输入" clearable style="width: 200
       <!-- 📥 工具栏左侧 -->
       <template #toolbar-left>
         <el-button type="primary" plain icon="Plus" @click="handleAdd">
-新增任务
-</el-button>
+          新增任务
+        </el-button>
         <ExportButton
           :module-code="ModuleCodeMap.CLEAN_TASK"
           :fields="visibleColumns"
@@ -371,16 +371,30 @@ v-model="queryParams.taskNo" placeholder="请输入" clearable style="width: 200
               <template v-else-if="col.key === 'fullWeight'">
                 {{ row.fullWeight?.toFixed(2) || 0 }} kg
               </template>
-                <template v-else-if="col.key === 'images'">
+              <template v-else-if="col.key === 'images'">
                 <div class="flex items-center gap-1 justify-center">
                   <template v-if="row.images && row.images.length > 0">
                     <el-image
-v-for="(url, idx) in row.images" :key="idx" :src="url.url"
-                      :preview-src-list="row.images.map(item => item.url)" :initial-index="Number(idx)" fit="cover"
-                      style="width: 40px; height:40px; cursor: pointer; border: 1px solid #dcdfe6; border-radius: 4px;"
+                      v-for="(url, idx) in row.images.slice(0, 5)"
+                      :key="idx"
+                      :src="url.url"
+                      :preview-src-list="row.images.map((item) => item.url)"
+                      :initial-index="Number(idx)"
+                      fit="cover"
+                      style="
+                        width: 40px;
+                        height: 40px;
+                        cursor: pointer;
+                        border: 1px solid #dcdfe6;
+                        border-radius: 4px;
+                      "
                       preview-teleported
-/>
-                    <el-tag v-if="row.images.length > 5" size="small" type="info">
+                    />
+                    <el-tag
+                      v-if="row.images.length > 5"
+                      size="small"
+                      type="info"
+                    >
                       +{{ row.images.length - 5 }}
                     </el-tag>
                   </template>
