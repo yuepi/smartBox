@@ -151,7 +151,10 @@ defineExpose({ open });
         </el-select>
       </el-form-item>
       <el-form-item label="清运人员">
-        <el-input v-model="formData.cleanUserName" placeholder="请输入清运人员姓名" />
+        <el-input
+          v-model="formData.cleanUserName"
+          placeholder="请输入清运人员姓名"
+        />
       </el-form-item>
       <el-form-item label="计划时间">
         <el-date-picker
@@ -162,12 +165,19 @@ defineExpose({ open });
         />
       </el-form-item>
       <el-form-item label="备注">
-        <el-input v-model="formData.remark" type="textarea" :rows="2" placeholder="请输入备注" />
+        <el-input
+          v-model="formData.remark"
+          type="textarea"
+          :rows="2"
+          placeholder="请输入备注"
+        />
       </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :loading="loading" @click="handleSubmit">确定</el-button>
+      <el-button type="primary" :loading="loading" @click="handleSubmit">
+确定
+</el-button>
     </template>
   </el-dialog>
 </template>

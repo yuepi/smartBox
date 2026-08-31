@@ -59,36 +59,36 @@ export const defaultCleanTaskColumns: TableColumnConfig[] = [
   // 仓口
   { key: 'hatchId', label: '仓口ID', visible: false, width: 80, align: 'center' },
   { key: 'hatchNo', label: '仓口号', visible: true, width: 180, align: 'center' },
-  { key: 'hatchName', label: '仓口名称', visible: false, minWidth: 150, align: 'center', showOverflowTooltip: true }, // 🌟 新增
-
+  { key: 'hatchName', label: '仓口名称', visible: false, minWidth: 150, align: 'center', showOverflowTooltip: true }, 
+  { key: 'images', label: '图片', visible: true, width: 250, align: 'center' }, 
   // 包袋
   { key: 'deviceBagId', label: '包袋ID', visible: false, width: 80, align: 'center' },
-  { key: 'bagNo', label: '包袋编号', visible: false, width: 120, align: 'center' }, // 🌟 新增
+  { key: 'bagNo', label: '包袋编号', visible: false, width: 120, align: 'center' }, 
+  { key: 'bagQrCode', label: '包袋二维码', visible: true, width: 220, align: 'center', showOverflowTooltip: true }, 
 
   // 重量相关
   { key: 'fullWeight', label: '满仓重量(kg)', visible: true, width: 120, align: 'center' },
-  { key: 'beforeWeight', label: '清运前重量(kg)', visible: false, width: 130, align: 'center' }, // 🌟 新增
-  { key: 'afterWeight', label: '清运后重量(kg)', visible: false, width: 130, align: 'center' }, // 🌟 新增
-  { key: 'weight', label: '清运重量(kg)', visible: true, width: 120, align: 'center' }, // 🌟 新增
-  { key: 'realWeight', label: '实际清运重量(kg)', visible: false, width: 140, align: 'center' }, // 🌟 新增
+  { key: 'beforeWeight', label: '清运前重量(kg)', visible: false, width: 130, align: 'center' }, 
+  { key: 'afterWeight', label: '清运后重量(kg)', visible: false, width: 130, align: 'center' }, 
+  { key: 'weight', label: '清运重量(kg)', visible: true, width: 120, align: 'center' }, 
+  { key: 'realWeight', label: '实际清运重量(kg)', visible: false, width: 140, align: 'center' }, 
 
   // 人员
   { key: 'cleanUserId', label: '清运人员ID', visible: false, width: 100, align: 'center' },
   { key: 'cleanUserName', label: '清运人员', visible: true, width: 120, align: 'center', showOverflowTooltip: true },
-  { key: 'contractorId', label: '承包商ID', visible: false, width: 100, align: 'center' }, // 🌟 新增
+  { key: 'contractorId', label: '承包商ID', visible: false, width: 100, align: 'center' }, 
 
   // 状态/时间
   { key: 'taskStatus', label: '任务状态', visible: true, width: 100, align: 'center' },
   { key: 'planTime', label: '计划清运时间', visible: true, width: 160, align: 'center' },
-  { key: 'cleanTime', label: '清运时间', visible: false, width: 160, align: 'center' }, // 🌟 新增
+  { key: 'cleanTime', label: '清运时间', visible: false, width: 160, align: 'center' }, 
   { key: 'finishTime', label: '完成时间', visible: true, width: 160, align: 'center' },
 
   // 其他
   { key: 'remark', label: '备注', visible: false, minWidth: 150, align: 'start', showOverflowTooltip: true },
-  { key: 'images', label: '图片', visible: false, width: 100, align: 'center' }, // 🌟 新增
   { key: 'status', label: '状态', visible: false, width: 80, align: 'center' },
   { key: 'createdTime', label: '创建时间', visible: true, width: 160, align: 'center' },
-  { key: 'updatedTime', label: '更新时间', visible: false, width: 160, align: 'center' }, // 🌟 新增
+  { key: 'updatedTime', label: '更新时间', visible: false, width: 160, align: 'center' }, 
 ];
 
 // ========== 分拣任务 ==========
