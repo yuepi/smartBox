@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import type { Device } from '#/api/device/device';
 import type { CleanTask, CleanTaskPageParams } from '#/api/operation/cleanTask';
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
@@ -6,6 +7,7 @@ import { useRouter } from 'vue-router';
 
 import { Page } from '@vben/common-ui';
 
+import { getDeviceListApi } from '#/api/device/device';
 import {
   deleteCleanTaskApi,
   getCleanTaskPageApi,
@@ -20,6 +22,32 @@ import TaskForm from './TaskForm.vue';
 const router = useRouter();
 
 const { task_status } = useDicts(['task_status']);
+const deviceOptions = ref<Device[]>([]);
+
+// 级联选择器绑定值
+const cascaderValue = ref<Array<number | string>>([]);
+
+// 组合 [小区 -> 设备] 树形结构选项
+const cascaderOptions = computed(() => {
+  return deptOptions.value.map((dept) => {
+    const childrenDevices = deviceOptions.value
+      .filter((dev) => dev.deptId === dept.deptId)
+      .map((dev) => ({
+        label: dev.deviceName || dev.deviceNo || `设备(${dev.deviceId})`,
+        value: `dev_${dev.deviceId}`,
+        isDevice: true,
+        deviceId: dev.deviceId,
+      }));
+
+    return {
+      label: dept.deptName,
+      value: `dept_${dept.deptId}`,
+      isDevice: false,
+      deptId: dept.deptId,
+      children: childrenDevices.length > 0 ? childrenDevices : undefined,
+    };
+  });
+});
 
 // --- 表格列配置 ---
 const columnConfig = ref<TableColumnConfig[]>([...defaultCleanTaskColumns]);
@@ -54,7 +82,30 @@ const queryParams = reactive<CleanTaskPageParams>({
   deptId: undefined,
   deviceId: undefined,
   taskStatus: undefined,
+  bagQrCode: undefined,
 });
+
+// --- 级联选择切换回调 ---
+function handleCascaderChange(val: any) {
+  if (!val || val.length === 0) {
+    queryParams.deptId = undefined;
+    queryParams.deviceId = undefined;
+  } else {
+    const lastSelected = val[val.length - 1];
+
+    if (typeof lastSelected === 'string' && lastSelected.startsWith('dev_')) {
+      const devId = Number(lastSelected.replace('dev_', ''));
+      const parentDeptId = Number(val[0].replace('dept_', ''));
+      queryParams.deptId = parentDeptId;
+      queryParams.deviceId = devId;
+    } else if (typeof lastSelected === 'string' && lastSelected.startsWith('dept_')) {
+      const deptId = Number(lastSelected.replace('dept_', ''));
+      queryParams.deptId = deptId;
+      queryParams.deviceId = undefined;
+    }
+  }
+  handleQuery();
+}
 
 function handleViewOrders(row: CleanTask) {
   router.push({
@@ -69,8 +120,12 @@ function handleViewOrders(row: CleanTask) {
 // --- 加载选项 ---
 async function loadOptions() {
   try {
-    const deptRes = await getMerchantDeptListApi({ status: 0 });
+    const [deptRes, deviceRes] = await Promise.all([
+      getMerchantDeptListApi({ status: 0 }),
+      getDeviceListApi({ status: 0 }),
+    ]);
     deptOptions.value = deptRes || [];
+    deviceOptions.value = deviceRes || [];
   } catch (error) {
     console.error(error);
   }
@@ -146,6 +201,7 @@ function resetQuery() {
   queryParams.deptId = undefined;
   queryParams.deviceId = undefined;
   queryParams.taskStatus = undefined;
+  queryParams.bagQrCode = undefined;
   queryParams.pageNo = 1;
   loadData();
 }
@@ -164,7 +220,7 @@ v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="lo
 >
       <!-- 📥 基础筛选项 -->
       <template #search-basic>
-        <el-form-item>
+        <!-- <el-form-item>
           <el-input
 v-model="queryParams.taskNo" placeholder="请输入" clearable style="width: 200px"
             @keyup.enter="handleQuery"
@@ -172,16 +228,30 @@ v-model="queryParams.taskNo" placeholder="请输入" clearable style="width: 200
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">任务单号:</span>
             </template>
+</el-input>
+</el-form-item> -->
+        <el-form-item>
+          <el-input
+v-model="queryParams.bagQrCode" clearable style="width: 220px"
+            placeholder="请输入后四位" @keyup.enter="handleQuery"
+>
+            <template #prefix>
+              <span class="text-sm text-gray-400 mr-0.5">包袋二维码:</span>
+            </template>
           </el-input>
         </el-form-item>
         <el-form-item>
-          <el-tree-select
-v-model="queryParams.deptId" :data="deptOptions" :props="{
-            value: 'deptId',
-            label: 'deptName',
-            children: 'children',
-          }" placeholder="请选择" clearable check-strictly style="width: 200px" class="tree-prefix-dept"
-/>
+          <el-cascader
+v-model="cascaderValue" :options="cascaderOptions" :props="{
+            checkStrictly: true,
+            expandTrigger: 'hover',
+            emitPath: true,
+          }" placeholder="请选择或搜索" filterable clearable style="width: 250px" @change="handleCascaderChange"
+>
+            <template #prefix>
+              <span class="text-sm text-gray-400 mr-0.5">小区/设备:</span>
+            </template>
+          </el-cascader>
         </el-form-item>
 
         <el-form-item>
@@ -277,22 +347,5 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
 <style scoped>
 .selected-alert-badge {
   display: inline-block;
-}
-
-.tree-prefix-dept :deep(.el-select__wrapper) {
-  position: relative;
-  padding-left: 45px !important;
-}
-
-.tree-prefix-dept :deep(.el-select__wrapper)::before {
-  position: absolute;
-  top: 50%;
-  left: 12px;
-  font-size: 14px;
-  font-weight: 400;
-  color: #909399;
-  pointer-events: none;
-  content: "部门:";
-  transform: translateY(-50%);
 }
 </style>

@@ -36,6 +36,7 @@ export interface CleanTaskPageParams {
   deptId?: number;
   deviceId?: number;
   taskStatus?: number;
+  bagQrCode?: string;
   planTimeStart?: string;
   planTimeEnd?: string;
 }
