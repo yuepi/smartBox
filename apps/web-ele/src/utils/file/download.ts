@@ -3,7 +3,7 @@ import type { VbenFormProps } from '#/adapter/form';
 import { $t } from '@vben/locales';
 import { cloneDeep, formatDate } from '@vben/utils';
 
-import { ElLoading } from 'element-plus'
+import { ElLoading } from 'element-plus';
 import { isFunction } from 'lodash-es';
 
 import { dataURLtoBlob, urlToBase64 } from './base64Conver';
@@ -30,7 +30,7 @@ export async function downloadExcel(
     lock: true,
     text: $t('pages.common.downloadLoading'),
     spinner: 'el-icon-loading',
-    background: 'rgba(0, 0, 0, 0.7)'
+    background: 'rgba(0, 0, 0, 0.7)',
   });
   try {
     const data = await func(requestData);
@@ -123,7 +123,7 @@ export async function commonDownloadExcel(
     lock: true,
     text: $t('pages.common.downloadLoading'),
     spinner: 'el-icon-loading',
-    background: 'rgba(0, 0, 0, 0.7)'
+    background: 'rgba(0, 0, 0, 0.7)',
   });
   try {
     const { withRandomName = true, fieldMappingTime } = options;

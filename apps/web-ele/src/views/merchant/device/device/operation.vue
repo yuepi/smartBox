@@ -72,10 +72,7 @@ async function handleSubmit() {
   const isImageOp = opType === 7 || opType === 13;
   if (isImageOp) {
     visible.value = false;
-    imagePreviewRef.value?.open(
-      deviceId.value,
-      opType,
-    );
+    imagePreviewRef.value?.open(deviceId.value, opType);
     return;
   }
   const params: any = {
@@ -83,13 +80,17 @@ async function handleSubmit() {
     deviceId: deviceId.value,
   };
 
-  const needHatch = operationTypeOptions.find((o) => o.value === opType)?.needHatch;
+  const needHatch = operationTypeOptions.find(
+    (o) => o.value === opType,
+  )?.needHatch;
   if (needHatch && !deviceHatchId.value) {
     ElMessage.warning('请选择仓口');
     return;
   }
 
-  const needVolume = operationTypeOptions.find((o) => o.value === opType)?.needVolume;
+  const needVolume = operationTypeOptions.find(
+    (o) => o.value === opType,
+  )?.needVolume;
   if (needVolume) {
     params.volume = volumeValue.value;
   }
@@ -120,28 +121,72 @@ defineExpose({ open });
 </script>
 
 <template>
-  <el-dialog v-model="visible" title="设备操作" width="500px" append-to-body @close="handleClose">
+  <el-dialog
+    v-model="visible"
+    title="设备操作"
+    width="500px"
+    append-to-body
+    @close="handleClose"
+  >
     <el-form label-width="100px">
       <el-form-item label="操作类型">
-        <el-select v-model="operationType" placeholder="请选择" style="width: 100%">
-          <el-option v-for="item in operationTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
+        <el-select
+          v-model="operationType"
+          placeholder="请选择"
+          style="width: 100%"
+        >
+          <el-option
+            v-for="item in operationTypeOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
         </el-select>
       </el-form-item>
-      <el-form-item v-if="operationTypeOptions.find((o) => o.value === operationType)?.needHatch" label="仓口">
-        <el-select v-model="deviceHatchId" placeholder="请选择" style="width: 100%">
-          <el-option v-for="item in hatchOptions" :key="item.id" :label="item.name" :value="item.id" />
+      <el-form-item
+        v-if="
+          operationTypeOptions.find((o) => o.value === operationType)?.needHatch
+        "
+        label="仓口"
+      >
+        <el-select
+          v-model="deviceHatchId"
+          placeholder="请选择"
+          style="width: 100%"
+        >
+          <el-option
+            v-for="item in hatchOptions"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
         </el-select>
       </el-form-item>
-      <el-form-item v-if="operationTypeOptions.find((o) => o.value === operationType)?.needVolume" label="音量">
+      <el-form-item
+        v-if="
+          operationTypeOptions.find((o) => o.value === operationType)
+            ?.needVolume
+        "
+        label="音量"
+      >
         <el-slider v-model="volumeValue" :min="0" :max="100" show-stops />
       </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="handleClose">取消</el-button>
-      <el-button type="primary" :loading="loading" @click="handleSubmit">确定</el-button>
+      <el-button type="primary" :loading="loading" @click="handleSubmit"
+        >确定</el-button
+      >
     </template>
   </el-dialog>
 
   <!-- 图片预览弹窗 -->
-  <DeviceImagePreview ref="imagePreviewRef" @success="() => { /* 刷新列表等 */ }" />
+  <DeviceImagePreview
+    ref="imagePreviewRef"
+    @success="
+      () => {
+        /* 刷新列表等 */
+      }
+    "
+  />
 </template>

@@ -6,16 +6,17 @@ export interface Member {
   mobile: string;
   nickname: string;
   avatar: string;
-  sex: number;        // 0=未知,1=男,2=女
-  status: number;     // 0=启用,1=禁用,2=黑名单
+  sex: number; // 0=未知,1=男,2=女
+  status: number; // 0=启用,1=禁用,2=黑名单
 }
 
 /** 会员状态枚举 */
-export const MemberStatusMap: Record<number, { label: string; type: string }> = {
-  0: { label: '启用', type: 'success' },
-  1: { label: '禁用', type: 'danger' },
-  2: { label: '黑名单', type: 'danger' },
-};
+export const MemberStatusMap: Record<number, { label: string; type: string }> =
+  {
+    0: { label: '启用', type: 'success' },
+    1: { label: '禁用', type: 'danger' },
+    2: { label: '黑名单', type: 'danger' },
+  };
 
 /** 性别枚举 */
 export const SexMap: Record<number, string> = {

@@ -10,12 +10,12 @@ export interface CleanTask {
   hatchId: number;
   hatchNo: number;
   deviceBagId: number;
-  fullWeight: number;       // 满仓重量
+  fullWeight: number; // 满仓重量
   cleanUserId: number;
   cleanUserName: string;
-  taskStatus: number;       // 0=待清运,1=清运中,2=已完成,3=已取消
-  planTime: string;         // 计划清运日期
-  finishTime: string;       // 实际完成时间
+  taskStatus: number; // 0=待清运,1=清运中,2=已完成,3=已取消
+  planTime: string; // 计划清运日期
+  finishTime: string; // 实际完成时间
   remark: string;
   status: number;
 }
@@ -53,7 +53,9 @@ export function getCleanTaskListApi(params?: any) {
 
 /** 3. 详情查询 */
 export function getCleanTaskDetailApi(cleanTaskId: number) {
-  return requestClient.get('/merchant/cleanTask/detail', { params: { cleanTaskId } });
+  return requestClient.get('/merchant/cleanTask/detail', {
+    params: { cleanTaskId },
+  });
 }
 
 /** 4. 新增任务 */

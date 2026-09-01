@@ -24,10 +24,10 @@ const routes: RouteRecordRaw[] = [
           title: $t('page.merchant.merchant') || '商户管理',
           authority: [PERMISSIONS.PLAT.MERCHANT.MERCHANT.ROUTE],
         },
-      }
+      },
     ],
   },
-   {
+  {
     name: 'MerchantHome',
     path: '/merchant',
     redirect: '/info',

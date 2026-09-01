@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from 'vue';
 
-import { Page } from "@vben/common-ui";
+import { Page } from '@vben/common-ui';
 
 import {
   Delete,
@@ -10,8 +10,8 @@ import {
   Search,
   View,
   Wallet,
-} from "@element-plus/icons-vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+} from '@element-plus/icons-vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
 import {
   addMemberApi,
@@ -23,31 +23,31 @@ import {
   type MemberPageParams,
   MemberStatusMap,
   SexMap,
-} from "#/api/member/member";
+} from '#/api/member/member';
 import {
   getMemberWalletDetailApi,
   updateWalletStatusApi,
   WalletStatusMap,
-} from "#/api/member/memberWallet";
+} from '#/api/member/memberWallet';
 import {
   FlowTypeMap,
   getMemberWalletFlowPageApi,
   type MemberWalletFlow,
   type MemberWalletFlowPageParams,
-} from "#/api/member/memberWalletFlow";
-import ColumnSelector from "#/components/ColumnSelector/index.vue";
-import ExportFieldSelector from "#/components/ExportFieldSelector/index.vue";
+} from '#/api/member/memberWalletFlow';
+import ColumnSelector from '#/components/ColumnSelector/index.vue';
+import ExportFieldSelector from '#/components/ExportFieldSelector/index.vue';
 import {
   defaultMemberColumns,
   MEMBER_STORAGE_KEY,
   type TableColumnConfig,
-} from "#/constants/tableColumns";
-import { useDicts } from "#/hooks/useDict";
-import { ModuleCodeMap, useExport } from "#/hooks/useExport";
+} from '#/constants/tableColumns';
+import { useDicts } from '#/hooks/useDict';
+import { ModuleCodeMap, useExport } from '#/hooks/useExport';
 
-import AuthList from "./AuthList.vue";
+import AuthList from './AuthList.vue';
 
-const { member_status, member_sex } = useDicts(["member_status", "member_sex"]);
+const { member_status, member_sex } = useDicts(['member_status', 'member_sex']);
 const { exporting, exportData } = useExport(ModuleCodeMap.MEMBER);
 
 // 表格列配置
@@ -85,11 +85,11 @@ const loading = ref(false);
 const tableData = ref<Member[]>([]);
 const total = ref(0);
 const selectedIds = ref<number[]>([]);
-const activeTab = ref("basic");
+const activeTab = ref('basic');
 
 // 表单弹窗
 const formVisible = ref(false);
-const formTitle = ref("");
+const formTitle = ref('');
 const formData = ref<Partial<Member>>({});
 const formSubmitting = ref(false);
 
@@ -99,7 +99,7 @@ const detailData = ref<Member | null>(null);
 
 // 钱包弹窗
 const walletVisible = ref(false);
-const walletActiveTab = ref("info");
+const walletActiveTab = ref('info');
 const currentMember = ref<Member | null>(null);
 const walletInfo = ref<any>(null);
 const walletLoading = ref(false);
@@ -120,26 +120,26 @@ const flowDateRange = ref<string[]>([]);
 
 // 流水类型选项
 const flowTypeOptions = [
-  { label: "全部", value: undefined },
-  { label: "售卖收益入账", value: 0 },
-  { label: "提现冻结", value: 1 },
-  { label: "提现成功扣减", value: 2 },
-  { label: "提现失败解冻退回", value: 3 },
+  { label: '全部', value: undefined },
+  { label: '售卖收益入账', value: 0 },
+  { label: '提现冻结', value: 1 },
+  { label: '提现成功扣减', value: 2 },
+  { label: '提现失败解冻退回', value: 3 },
 ];
 
 // 状态选项
 const statusOptions = [
-  { label: "全部", value: undefined },
-  { label: "启用", value: 0 },
-  { label: "禁用", value: 1 },
-  { label: "黑名单", value: 2 },
+  { label: '全部', value: undefined },
+  { label: '启用', value: 0 },
+  { label: '禁用', value: 1 },
+  { label: '黑名单', value: 2 },
 ];
 
 const sexOptions = [
-  { label: "全部", value: undefined },
-  { label: "未知", value: 0 },
-  { label: "男", value: 1 },
-  { label: "女", value: 2 },
+  { label: '全部', value: undefined },
+  { label: '未知', value: 0 },
+  { label: '男', value: 1 },
+  { label: '女', value: 2 },
 ];
 
 // 查询参数
@@ -155,23 +155,23 @@ const queryParams = reactive<MemberPageParams>({
 
 // --- 辅助函数 ---
 function getStatusText(status: number): string {
-  return MemberStatusMap[status]?.label || "未知";
+  return MemberStatusMap[status]?.label || '未知';
 }
 
 function getStatusType(status: number): string {
-  return MemberStatusMap[status]?.type || "info";
+  return MemberStatusMap[status]?.type || 'info';
 }
 
 function getSexText(sex: number): string {
-  return SexMap[sex] || "未知";
+  return SexMap[sex] || '未知';
 }
 
 function getWalletStatusText(status: number): string {
-  return WalletStatusMap[status]?.label || "未知";
+  return WalletStatusMap[status]?.label || '未知';
 }
 
 function getWalletStatusType(status: number): string {
-  return WalletStatusMap[status]?.type || "info";
+  return WalletStatusMap[status]?.type || 'info';
 }
 
 function formatBalance(balance: number): string {
@@ -179,21 +179,21 @@ function formatBalance(balance: number): string {
 }
 
 function getFlowTypeText(type: number): string {
-  return FlowTypeMap[type]?.label || "未知";
+  return FlowTypeMap[type]?.label || '未知';
 }
 
 function getFlowTypeType(type: number): string {
-  return FlowTypeMap[type]?.type || "info";
+  return FlowTypeMap[type]?.type || 'info';
 }
 
 function getFlowSign(type: number): string {
-  return FlowTypeMap[type]?.sign || "";
+  return FlowTypeMap[type]?.sign || '';
 }
 
 function formatChangeAmount(amount: number, type: number): string {
   const sign = getFlowSign(type);
   const formatted = formatBalance(Math.abs(amount || 0));
-  return sign === "+" ? `+${formatted}` : `-${formatted}`;
+  return sign === '+' ? `+${formatted}` : `-${formatted}`;
 }
 
 // --- 数据加载 ---
@@ -205,7 +205,7 @@ async function loadData() {
     total.value = res.total || 0;
   } catch (error) {
     console.error(error);
-    ElMessage.error("加载数据失败");
+    ElMessage.error('加载数据失败');
   } finally {
     loading.value = false;
   }
@@ -218,14 +218,14 @@ async function handleView(row: Member) {
     detailData.value = res;
     detailVisible.value = true;
   } catch {
-    ElMessage.error("获取详情失败");
+    ElMessage.error('获取详情失败');
   }
 }
 
 // --- 查看钱包 ---
 async function handleViewWallet(row: Member) {
   currentMember.value = row;
-  walletActiveTab.value = "info";
+  walletActiveTab.value = 'info';
   walletVisible.value = true;
 
   // 加载钱包信息
@@ -241,7 +241,7 @@ async function loadWalletInfo(memberId: number) {
     const res = await getMemberWalletDetailApi(memberId);
     walletInfo.value = res;
   } catch {
-    ElMessage.error("获取钱包信息失败");
+    ElMessage.error('获取钱包信息失败');
   } finally {
     walletLoading.value = false;
   }
@@ -266,7 +266,7 @@ async function loadFlowData(memberId: number) {
     flowTotal.value = res.total || 0;
   } catch (error) {
     console.error(error);
-    ElMessage.error("加载流水记录失败");
+    ElMessage.error('加载流水记录失败');
   } finally {
     flowLoading.value = false;
   }
@@ -277,11 +277,11 @@ async function handleWalletStatusToggle() {
   if (!walletInfo.value) return;
 
   const newStatus = walletInfo.value.status === 0 ? 1 : 0;
-  const action = newStatus === 0 ? "解冻" : "冻结";
+  const action = newStatus === 0 ? '解冻' : '冻结';
 
   try {
-    await ElMessageBox.confirm(`确定要${action}该会员钱包吗？`, "提示", {
-      type: "warning",
+    await ElMessageBox.confirm(`确定要${action}该会员钱包吗？`, '提示', {
+      type: 'warning',
     });
     await updateWalletStatusApi(walletInfo.value.memberWalletId, newStatus);
     ElMessage.success(`${action}成功`);
@@ -319,7 +319,7 @@ function handleFlowPageChange() {
 
 // --- 新增/编辑 ---
 function handleAdd() {
-  formTitle.value = "新增会员";
+  formTitle.value = '新增会员';
   formData.value = {
     sex: 0,
     status: 0,
@@ -329,18 +329,18 @@ function handleAdd() {
 
 async function handleEdit(row: Member) {
   try {
-    formTitle.value = "编辑会员";
+    formTitle.value = '编辑会员';
     const res = await getMemberDetailApi(row.memberId);
     formData.value = res || {};
     formVisible.value = true;
   } catch {
-    ElMessage.error("获取会员信息失败");
+    ElMessage.error('获取会员信息失败');
   }
 }
 
 async function handleSubmit() {
   if (!formData.value.mobile?.trim()) {
-    ElMessage.warning("请输入手机号");
+    ElMessage.warning('请输入手机号');
     return;
   }
 
@@ -348,11 +348,11 @@ async function handleSubmit() {
   try {
     const api = formData.value.memberId ? editMemberApi : addMemberApi;
     await api(formData.value);
-    ElMessage.success(formData.value.memberId ? "修改成功" : "新增成功");
+    ElMessage.success(formData.value.memberId ? '修改成功' : '新增成功');
     formVisible.value = false;
     handleQuery();
   } catch {
-    ElMessage.error("操作失败");
+    ElMessage.error('操作失败');
   } finally {
     formSubmitting.value = false;
   }
@@ -366,7 +366,7 @@ async function handleDelete(row?: Member) {
     ids = [row.memberId];
   } else {
     if (selectedIds.value.length === 0) {
-      ElMessage.warning("请选择要删除的记录");
+      ElMessage.warning('请选择要删除的记录');
       return;
     }
     ids = selectedIds.value;
@@ -375,8 +375,8 @@ async function handleDelete(row?: Member) {
   try {
     await ElMessageBox.confirm(
       `确定要删除选中的 ${ids.length} 条会员吗？`,
-      "提示",
-      { type: "warning" }
+      '提示',
+      { type: 'warning' },
     );
 
     for (const id of ids) {
@@ -418,7 +418,7 @@ onMounted(() => {
 <template>
   <Page auto-content-height>
     <div class="p-0">
-<!-- 查询表单 -->
+      <!-- 查询表单 -->
       <el-card shadow="never" class="border-none mb-4 !p-2">
         <el-form
           :inline="true"
@@ -468,11 +468,7 @@ onMounted(() => {
           </el-form-item>
 
           <el-form-item class="!mb-0 !mr-2">
-            <el-select
-              v-model="queryParams.sex"
-              clearable
-              style="width: 200px"
-            >
+            <el-select v-model="queryParams.sex" clearable style="width: 200px">
               <template #prefix>
                 <span class="text-xs text-gray-400 mr-0.5">性别:</span>
               </template>
@@ -505,7 +501,12 @@ onMounted(() => {
 
           <el-form-item class="!mb-0 !mr-0 md:ml-auto flex items-center gap-1">
             <el-tooltip content="查询" placement="top">
-              <el-button type="primary" :icon="Search" circle @click="handleQuery" />
+              <el-button
+                type="primary"
+                :icon="Search"
+                circle
+                @click="handleQuery"
+              />
             </el-tooltip>
             <el-tooltip content="重置" placement="top">
               <el-button :icon="Refresh" circle @click="resetQuery" />
@@ -521,8 +522,15 @@ onMounted(() => {
             <el-button :loading="exporting" @click="openExportSelector">
               导出
             </el-button>
-            <span v-if="selectedIds.length > 0" class="text-xs text-gray-400 ml-2">
-              已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
+            <span
+              v-if="selectedIds.length > 0"
+              class="text-xs text-gray-400 ml-2"
+            >
+              已选
+              <span class="text-red-500 font-medium">{{
+                selectedIds.length
+              }}</span>
+              项
             </span>
           </div>
 
@@ -572,11 +580,11 @@ onMounted(() => {
               </template>
               <!-- 昵称 -->
               <template v-else-if="col.key === 'nickname'">
-                {{ row.nickname || "-" }}
+                {{ row.nickname || '-' }}
               </template>
               <!-- 手机号 -->
               <template v-else-if="col.key === 'mobile'">
-                {{ row.mobile || "-" }}
+                {{ row.mobile || '-' }}
               </template>
               <!-- 会员ID -->
               <template v-else-if="col.key === 'memberId'">
@@ -590,18 +598,43 @@ onMounted(() => {
           </el-table-column>
 
           <!-- 操作列固定写死 -->
-          <el-table-column label="操作" width="280" fixed="right" align="center">
+          <el-table-column
+            label="操作"
+            width="280"
+            fixed="right"
+            align="center"
+          >
             <template #default="{ row }">
-              <el-button link type="primary" :icon="View" @click="handleView(row)">
+              <el-button
+                link
+                type="primary"
+                :icon="View"
+                @click="handleView(row)"
+              >
                 详情
               </el-button>
-              <el-button link type="primary" :icon="Wallet" @click="handleViewWallet(row)">
+              <el-button
+                link
+                type="primary"
+                :icon="Wallet"
+                @click="handleViewWallet(row)"
+              >
                 钱包
               </el-button>
-              <el-button link type="primary" :icon="Edit" @click="handleEdit(row)">
+              <el-button
+                link
+                type="primary"
+                :icon="Edit"
+                @click="handleEdit(row)"
+              >
                 编辑
               </el-button>
-              <el-button link type="danger" :icon="Delete" @click="handleDelete(row)">
+              <el-button
+                link
+                type="danger"
+                :icon="Delete"
+                @click="handleDelete(row)"
+              >
                 删除
               </el-button>
             </template>
@@ -623,7 +656,6 @@ onMounted(() => {
         </div>
       </el-card>
     </div>
-
 
     <ExportFieldSelector
       v-model:visible="exportFieldVisible"
@@ -693,7 +725,7 @@ onMounted(() => {
               {{ detailData.mobile }}
             </el-descriptions-item>
             <el-descriptions-item label="昵称">
-              {{ detailData.nickname || "-" }}
+              {{ detailData.nickname || '-' }}
             </el-descriptions-item>
             <el-descriptions-item label="性别">
               {{ getSexText(detailData.sex) }}

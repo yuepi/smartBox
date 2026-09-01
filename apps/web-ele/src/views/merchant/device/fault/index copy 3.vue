@@ -1,18 +1,29 @@
 <script lang="ts" setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 
-import { Page } from "@vben/common-ui";
+import { Page } from '@vben/common-ui';
 
-import { Edit, Refresh, Search, View } from "@element-plus/icons-vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+import { Edit, Refresh, Search, View } from '@element-plus/icons-vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
-import { deleteDeviceFaultApi, editDeviceFaultApi, getDeviceFaultDetailApi, getDeviceFaultPageApi } from '#/api/device/deviceFault';
-import type { DeviceFault, DeviceFaultPageParams } from '#/api/device/deviceFault';
-import ColumnSelector from "#/components/ColumnSelector/index.vue";
-import ExportFieldSelector from "#/components/ExportFieldSelector/index.vue";
-import { defaultFaultColumns, FAULT_STORAGE_KEY } from '#/constants/tableColumns';
+import {
+  deleteDeviceFaultApi,
+  editDeviceFaultApi,
+  getDeviceFaultDetailApi,
+  getDeviceFaultPageApi,
+} from '#/api/device/deviceFault';
+import type {
+  DeviceFault,
+  DeviceFaultPageParams,
+} from '#/api/device/deviceFault';
+import ColumnSelector from '#/components/ColumnSelector/index.vue';
+import ExportFieldSelector from '#/components/ExportFieldSelector/index.vue';
+import {
+  defaultFaultColumns,
+  FAULT_STORAGE_KEY,
+} from '#/constants/tableColumns';
 import type { TableColumnConfig } from '#/constants/tableColumns';
-import { ModuleCodeMap, useExport } from "#/hooks/useExport";
+import { ModuleCodeMap, useExport } from '#/hooks/useExport';
 
 const { exporting, exportData } = useExport(ModuleCodeMap.FAULT);
 
@@ -66,7 +77,7 @@ const editSubmitting = ref(false);
 const editForm = reactive({
   deviceFaultId: 0,
   faultStatus: 1,
-  dealRemark: "",
+  dealRemark: '',
 });
 
 // 时间范围
@@ -74,10 +85,10 @@ const dateRange = ref<string[]>([]);
 
 // 故障状态选项
 const faultStatusOptions = [
-  { label: "全部", value: undefined },
-  { label: "故障中", value: 0 },
-  { label: "已恢复", value: 1 },
-  { label: "已处理", value: 2 },
+  { label: '全部', value: undefined },
+  { label: '故障中', value: 0 },
+  { label: '已恢复', value: 1 },
+  { label: '已处理', value: 2 },
 ];
 
 // 查询参数
@@ -114,21 +125,21 @@ watch(dateRange, (newVal) => {
 
 // --- 辅助函数 ---
 function getFaultStatusText(status: number): string {
-  const map: Record<number, string> = { 0: "故障中", 1: "已恢复", 2: "已处理" };
-  return map[status] || "未知";
+  const map: Record<number, string> = { 0: '故障中', 1: '已恢复', 2: '已处理' };
+  return map[status] || '未知';
 }
 
 function getFaultStatusType(status: number): string {
   const map: Record<number, string> = {
-    0: "danger",
-    1: "warning",
-    2: "success",
+    0: 'danger',
+    1: 'warning',
+    2: 'success',
   };
-  return map[status] || "info";
+  return map[status] || 'info';
 }
 
 function formatDuration(seconds: number): string {
-  if (!seconds && seconds !== 0) return "-";
+  if (!seconds && seconds !== 0) return '-';
   if (seconds < 60) return `${seconds}秒`;
   if (seconds < 3600) return `${Math.floor(seconds / 60)}分钟${seconds % 60}秒`;
   const hours = Math.floor(seconds / 3600);
@@ -145,7 +156,7 @@ async function loadData() {
     total.value = res.total || 0;
   } catch (error) {
     console.error(error);
-    ElMessage.error("加载数据失败");
+    ElMessage.error('加载数据失败');
   } finally {
     loading.value = false;
   }
@@ -158,7 +169,7 @@ async function handleView(row: DeviceFault) {
     detailData.value = res;
     detailVisible.value = true;
   } catch {
-    ElMessage.error("获取详情失败");
+    ElMessage.error('获取详情失败');
   }
 }
 
@@ -166,7 +177,7 @@ async function handleView(row: DeviceFault) {
 async function handleEdit(row: DeviceFault) {
   editForm.deviceFaultId = row.deviceFaultId;
   editForm.faultStatus = 1;
-  editForm.dealRemark = "";
+  editForm.dealRemark = '';
   editVisible.value = true;
 }
 
@@ -178,11 +189,11 @@ async function submitEdit() {
       faultStatus: editForm.faultStatus,
       dealRemark: editForm.dealRemark,
     });
-    ElMessage.success("处理成功");
+    ElMessage.success('处理成功');
     editVisible.value = false;
     handleQuery();
   } catch {
-    ElMessage.error("处理失败");
+    ElMessage.error('处理失败');
   } finally {
     editSubmitting.value = false;
   }
@@ -196,7 +207,7 @@ async function handleDelete(row?: DeviceFault) {
     ids = [row.deviceFaultId];
   } else {
     if (selectedIds.value.length === 0) {
-      ElMessage.warning("请选择要删除的记录");
+      ElMessage.warning('请选择要删除的记录');
       return;
     }
     ids = selectedIds.value;
@@ -205,8 +216,8 @@ async function handleDelete(row?: DeviceFault) {
   try {
     await ElMessageBox.confirm(
       `确定要删除选中的 ${ids.length} 条故障记录吗？`,
-      "提示",
-      { type: "warning" }
+      '提示',
+      { type: 'warning' },
     );
 
     for (const id of ids) {
@@ -331,7 +342,12 @@ onMounted(() => {
 
           <el-form-item class="!mb-0 !mr-0 md:ml-auto flex items-center gap-1">
             <el-tooltip content="查询" placement="top">
-              <el-button type="primary" :icon="Search" circle @click="handleQuery" />
+              <el-button
+                type="primary"
+                :icon="Search"
+                circle
+                @click="handleQuery"
+              />
             </el-tooltip>
             <el-tooltip content="重置" placement="top">
               <el-button :icon="Refresh" circle @click="resetQuery" />
@@ -347,8 +363,15 @@ onMounted(() => {
             <el-button :loading="exporting" @click="openExportSelector">
               导出
             </el-button>
-            <span v-if="selectedIds.length > 0" class="text-xs text-gray-400 ml-2">
-              已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
+            <span
+              v-if="selectedIds.length > 0"
+              class="text-xs text-gray-400 ml-2"
+            >
+              已选
+              <span class="text-red-500 font-medium">{{
+                selectedIds.length
+              }}</span>
+              项
             </span>
           </div>
 
@@ -400,15 +423,15 @@ onMounted(() => {
               </template>
               <!-- 处理人 -->
               <template v-else-if="col.key === 'dealUserName'">
-                {{ row.dealUserName || "-" }}
+                {{ row.dealUserName || '-' }}
               </template>
               <!-- 故障描述 -->
               <template v-else-if="col.key === 'faultRemark'">
-                {{ row.faultRemark || "-" }}
+                {{ row.faultRemark || '-' }}
               </template>
               <!-- 故障名称 -->
               <template v-else-if="col.key === 'faultName'">
-                {{ row.faultName || "-" }}
+                {{ row.faultName || '-' }}
               </template>
               <!-- 普通字段 -->
               <template v-else>
@@ -418,9 +441,19 @@ onMounted(() => {
           </el-table-column>
 
           <!-- 操作列固定写死 -->
-          <el-table-column label="操作" width="180" fixed="right" align="center">
+          <el-table-column
+            label="操作"
+            width="180"
+            fixed="right"
+            align="center"
+          >
             <template #default="{ row }">
-              <el-button link type="primary" :icon="View" @click="handleView(row)">
+              <el-button
+                link
+                type="primary"
+                :icon="View"
+                @click="handleView(row)"
+              >
                 详情
               </el-button>
               <el-button
@@ -469,28 +502,20 @@ onMounted(() => {
     >
       <el-descriptions :column="2" border v-if="detailData">
         <el-descriptions-item label="故障ID">
-{{
-          detailData.deviceFaultId
-        }}
-</el-descriptions-item>
+          {{ detailData.deviceFaultId }}
+        </el-descriptions-item>
         <el-descriptions-item label="设备编号">
-{{
-          detailData.deviceNo
-        }}
-</el-descriptions-item>
+          {{ detailData.deviceNo }}
+        </el-descriptions-item>
         <el-descriptions-item label="仓口编号">
-{{ detailData.hatchNo || "-" }}号仓
-</el-descriptions-item>
+          {{ detailData.hatchNo || '-' }}号仓
+        </el-descriptions-item>
         <el-descriptions-item label="故障编码">
-{{
-          detailData.faultCode
-        }}
-</el-descriptions-item>
+          {{ detailData.faultCode }}
+        </el-descriptions-item>
         <el-descriptions-item label="故障名称">
-{{
-          detailData.faultName
-        }}
-</el-descriptions-item>
+          {{ detailData.faultName }}
+        </el-descriptions-item>
         <el-descriptions-item label="故障状态">
           <el-tag
             :type="getFaultStatusType(detailData.faultStatus)"
@@ -500,35 +525,23 @@ onMounted(() => {
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="发生时间">
-{{
-          detailData.startTime
-        }}
-</el-descriptions-item>
+          {{ detailData.startTime }}
+        </el-descriptions-item>
         <el-descriptions-item label="处理时间">
-{{
-          detailData.endTime || "-"
-        }}
-</el-descriptions-item>
+          {{ detailData.endTime || '-' }}
+        </el-descriptions-item>
         <el-descriptions-item label="持续时长">
-{{
-          formatDuration(detailData.duration)
-        }}
-</el-descriptions-item>
+          {{ formatDuration(detailData.duration) }}
+        </el-descriptions-item>
         <el-descriptions-item label="处理人">
-{{
-          detailData.dealUserName || "-"
-        }}
-</el-descriptions-item>
+          {{ detailData.dealUserName || '-' }}
+        </el-descriptions-item>
         <el-descriptions-item label="故障描述" :span="2">
-{{
-          detailData.faultRemark || "-"
-        }}
-</el-descriptions-item>
+          {{ detailData.faultRemark || '-' }}
+        </el-descriptions-item>
         <el-descriptions-item label="处理备注" :span="2">
-{{
-          detailData.dealRemark || "-"
-        }}
-</el-descriptions-item>
+          {{ detailData.dealRemark || '-' }}
+        </el-descriptions-item>
       </el-descriptions>
       <template #footer>
         <el-button @click="detailVisible = false">关闭</el-button>
@@ -561,11 +574,9 @@ onMounted(() => {
       <template #footer>
         <el-button @click="editVisible = false">取消</el-button>
         <el-button type="primary" :loading="editSubmitting" @click="submitEdit">
-确定
-</el-button>
+          确定
+        </el-button>
       </template>
     </el-dialog>
   </Page>
 </template>
-
-

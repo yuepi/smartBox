@@ -1,9 +1,12 @@
 <script lang="ts" setup>
+import type { Dict } from '#/api/system/dict/dict';
+
 import { onMounted, reactive, ref } from 'vue';
+
 import { Delete, Edit, Plus } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { getDictPageApi, deleteDictApi } from '#/api/system/dict/dict';
-import type { Dict } from '#/api/system/dict/dict';
+
+import { deleteDictApi, getDictPageApi } from '#/api/system/dict/dict';
 
 import EditModal from './edit.vue';
 
@@ -37,11 +40,15 @@ async function loadData() {
 
 async function handleDelete(row: Dict) {
   try {
-    await ElMessageBox.confirm(`确定要删除字典 "${row.dictName}" 吗？`, '提示', { type: 'warning' });
+    await ElMessageBox.confirm(
+      `确定要删除字典 "${row.dictName}" 吗？`,
+      '提示',
+      { type: 'warning' },
+    );
     await deleteDictApi(row.dictId);
     ElMessage.success('删除成功');
     loadData();
-  } catch { }
+  } catch {}
 }
 
 function handleQuery() {
@@ -61,46 +68,96 @@ onMounted(loadData);
 
 <template>
   <div>
-    <BaseTableLayout v-model:queryParams="queryParams" :loading="loading" :total="total"
-      v-model:more-params="moreParams" @search="loadData" @reset="resetQuery">
+    <BaseTableLayout
+      v-model:query-params="queryParams"
+      :loading="loading"
+      :total="total"
+      v-model:more-params="moreParams"
+      @search="loadData"
+      @reset="resetQuery"
+    >
       <template #title>
-        <span class="font-medium text-gray-800 dark:text-gray-200">字典列表</span>
+        <span class="font-medium text-gray-800 dark:text-gray-200"
+          >字典列表</span
+        >
       </template>
 
       <template #toolbar-left>
-        <el-button type="primary" :icon="Plus" @click="editModalRef.open()">新增</el-button>
+        <el-button type="primary" :icon="Plus" @click="editModalRef.open()">
+          新增
+        </el-button>
       </template>
 
       <template #search-basic>
         <el-form-item>
-          <el-input v-model="queryParams.dictName" placeholder="请输入" clearable style="width: 180px">
-            <template #prefix><span class="text-xs text-gray-400">字典名称:</span></template>
+          <el-input
+            v-model="queryParams.dictName"
+            placeholder="请输入"
+            clearable
+            style="width: 180px"
+          >
+            <template #prefix>
+              <span class="text-xs text-gray-400">字典名称:</span>
+            </template>
           </el-input>
         </el-form-item>
       </template>
 
       <template #search-advanced>
         <el-form-item>
-          <el-input v-model="queryParams.dictCode" placeholder="请输入" clearable style="width: 180px"
-            @keyup.enter="loadData">
-            <template #prefix><span class="text-xs text-gray-400 mr-0.5">字典编码:</span></template>
+          <el-input
+            v-model="queryParams.dictCode"
+            placeholder="请输入"
+            clearable
+            style="width: 180px"
+            @keyup.enter="loadData"
+          >
+            <template #prefix>
+              <span class="text-xs text-gray-400 mr-0.5">字典编码:</span>
+            </template>
           </el-input>
         </el-form-item>
       </template>
 
       <template #table>
-        <el-table v-loading="loading" :data="tableData" border size="small" highlight-current-row
-          @row-click="(row) => emit('rowClick', row.dictId)">
-          <el-table-column prop="dictName" label="字典名称" min-width="110" show-overflow-tooltip />
-          <el-table-column prop="dictCode" label="字典编码" min-width="110" show-overflow-tooltip />
+        <el-table
+          v-loading="loading"
+          :data="tableData"
+          border
+          size="small"
+          highlight-current-row
+          @row-click="(row) => emit('rowClick', row.dictId)"
+        >
+          <el-table-column
+            prop="dictName"
+            label="字典名称"
+            min-width="110"
+            show-overflow-tooltip
+          />
+          <el-table-column
+            prop="dictCode"
+            label="字典编码"
+            min-width="110"
+            show-overflow-tooltip
+          />
           <el-table-column label="操作" width="70" align="center" fixed="right">
             <template #default="{ row }">
               <div class="flex justify-center gap-1">
                 <el-tooltip content="修改" placement="top" :enterable="false">
-                  <el-button :icon="Edit" link type="primary" @click.stop="editModalRef.open(row)" />
+                  <el-button
+                    :icon="Edit"
+                    link
+                    type="primary"
+                    @click.stop="editModalRef.open(row)"
+                  />
                 </el-tooltip>
                 <el-tooltip content="删除" placement="top" :enterable="false">
-                  <el-button :icon="Delete" link type="danger" @click.stop="handleDelete(row)" />
+                  <el-button
+                    :icon="Delete"
+                    link
+                    type="danger"
+                    @click.stop="handleDelete(row)"
+                  />
                 </el-tooltip>
               </div>
             </template>
@@ -111,5 +168,4 @@ onMounted(loadData);
 
     <EditModal ref="editModalRef" @success="loadData" />
   </div>
-
 </template>

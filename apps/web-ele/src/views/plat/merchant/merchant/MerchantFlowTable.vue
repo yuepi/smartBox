@@ -1,18 +1,24 @@
 <!-- components/MerchantFlowTable.vue -->
 <script setup lang="ts">
-import type { MerchantAccountFlow, MerchantAccountFlowPageParams } from '#/api/system/merchant';
+import type {
+  MerchantAccountFlow,
+  MerchantAccountFlowPageParams,
+} from '#/api/system/merchant';
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
 import { getPlatMerchantAccountFlowPageApi } from '#/api/system/merchant';
-import { defaultMerchantFlowColumns, MERCHANT_FLOW_STORAGE_KEY } from '#/constants/tableColumns';
-import { ModuleCodeMap } from "#/hooks/useExport";
+import {
+  defaultMerchantFlowColumns,
+  MERCHANT_FLOW_STORAGE_KEY,
+} from '#/constants/tableColumns';
+import { ModuleCodeMap } from '#/hooks/useExport';
 
 const props = defineProps<{ merchantId: number }>();
 
 // 表格列配置
 const columnConfig = ref<TableColumnConfig[]>([...defaultMerchantFlowColumns]);
 const visibleColumns = computed(() =>
-  columnConfig.value.filter((col) => col.visible)
+  columnConfig.value.filter((col) => col.visible),
 );
 function handleColumnsUpdate(newColumns: TableColumnConfig[]) {
   columnConfig.value = newColumns;
@@ -34,9 +40,9 @@ const tableData = ref<MerchantAccountFlow[]>([]);
 const total = ref(0);
 
 const changeTypeOptions = [
-  { label: "充值到账", value: 0, type: "success" },
-  { label: "平台服务费扣减", value: 1, type: "danger" },
-  { label: "会员提现扣款", value: 2, type: "warning" },
+  { label: '充值到账', value: 0, type: 'success' },
+  { label: '平台服务费扣减', value: 1, type: 'danger' },
+  { label: '会员提现扣款', value: 2, type: 'warning' },
 ];
 
 watch(dateRange, (newVal) => {
@@ -54,7 +60,7 @@ watch(
   (newId) => {
     queryParams.merchantId = newId;
     loadData();
-  }
+  },
 );
 
 function formatAmount(amount: number): string {
@@ -63,20 +69,20 @@ function formatAmount(amount: number): string {
 
 function getChangeTypeText(type: number): string {
   const map: Record<number, string> = {
-    0: "充值到账",
-    1: "平台服务费扣减",
-    2: "会员提现扣款",
+    0: '充值到账',
+    1: '平台服务费扣减',
+    2: '会员提现扣款',
   };
-  return map[type] || "未知";
+  return map[type] || '未知';
 }
 
 function getChangeTypeType(type: number): string {
   const map: Record<number, string> = {
-    0: "success",
-    1: "danger",
-    2: "warning",
+    0: 'success',
+    1: 'danger',
+    2: 'warning',
   };
-  return map[type] || "info";
+  return map[type] || 'info';
 }
 
 async function loadData() {
@@ -86,7 +92,7 @@ async function loadData() {
     tableData.value = res.records || [];
     total.value = res.total || 0;
   } catch {
-    ElMessage.error("加载资金流水失败");
+    ElMessage.error('加载资金流水失败');
   } finally {
     loading.value = false;
   }
@@ -124,8 +130,8 @@ defineExpose({ loadData });
             style="width: 200px"
           >
             <template #prefix>
-<span class="text-xs text-gray-400 mr-0.5">变动类型:</span>
-</template>
+              <span class="text-xs text-gray-400 mr-0.5">变动类型:</span>
+            </template>
             <el-option
               v-for="item in changeTypeOptions"
               :key="item.value"
@@ -209,7 +215,7 @@ defineExpose({ loadData });
             <span
               :class="row.changeAmount > 0 ? 'text-success' : 'text-danger'"
             >
-              {{ row.changeAmount > 0 ? "+" : ""
+              {{ row.changeAmount > 0 ? '+' : ''
               }}{{ formatAmount(row.changeAmount) }}
             </span>
           </template>

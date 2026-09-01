@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
+
 import { Page } from '@vben/common-ui';
 
-import DictMainPanel from './main.vue';
 import DictDataPanel from './data.vue';
+import DictMainPanel from './main.vue';
 
 // 维护一个核心纽带：当前选中的字典 ID
 const currentDictId = ref<number | undefined>(undefined);
@@ -17,8 +18,18 @@ function handleDictRowClick(dictId: number) {
 </script>
 
 <template>
-  <Page :auto-content-height="true" content-class="flex flex-col lg:flex-row gap-2">
-    <DictMainPanel class="flex-1 overflow-hidden" @row-click="handleDictRowClick" />
-    <DictDataPanel ref="dataPanelRef" :dict-id="currentDictId" class="flex-1 overflow-hidden" />
+  <Page
+    :auto-content-height="true"
+    content-class="flex flex-col lg:flex-row gap-2"
+  >
+    <DictMainPanel
+      class="flex-1 overflow-hidden"
+      @row-click="handleDictRowClick"
+    />
+    <DictDataPanel
+      ref="dataPanelRef"
+      :dict-id="currentDictId"
+      class="flex-1 overflow-hidden"
+    />
   </Page>
 </template>

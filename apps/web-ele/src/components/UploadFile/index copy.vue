@@ -27,7 +27,18 @@ const props = withDefaults(defineProps<Props>(), {
   modelValue: () => [],
   limit: 5,
   fileSize: 10,
-  fileType: () => ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'zip', 'rar'],
+  fileType: () => [
+    'pdf',
+    'doc',
+    'docx',
+    'xls',
+    'xlsx',
+    'ppt',
+    'pptx',
+    'txt',
+    'zip',
+    'rar',
+  ],
   isShowTip: true,
   action: '/common/upload/uploadFile',
   disabled: false,
@@ -47,7 +58,7 @@ const customUpload = async (options: any) => {
   } catch (error) {
     handleUploadError(error);
     onError(error);
-  } 
+  }
 };
 
 const baseUrl = import.meta.env.VITE_GLOB_API_URL;
@@ -64,8 +75,12 @@ const uploadRef = ref();
 // 💡 新增：防止父子双向绑定导致的数据二次解析死循环标记
 const isInnerChange = ref(false);
 
-const fileAccept = computed(() => props.fileType.map(type => `.${type}`).join(','));
-const showTip = computed(() => props.isShowTip && (props.fileType.length || props.fileSize));
+const fileAccept = computed(() =>
+  props.fileType.map((type) => `.${type}`).join(','),
+);
+const showTip = computed(
+  () => props.isShowTip && (props.fileType.length || props.fileSize),
+);
 
 // 监听外部值变化
 watch(
@@ -144,7 +159,11 @@ const handleBeforeUpload = (file: File) => {
   }
 
   // 校验全部通过后才开启 Loading
-  ElLoading.service({ lock: true, text: '正在上传...', background: 'rgba(0,0,0,0.7)' });
+  ElLoading.service({
+    lock: true,
+    text: '正在上传...',
+    background: 'rgba(0,0,0,0.7)',
+  });
   return true;
 };
 
@@ -154,9 +173,10 @@ const handleUploadSuccess = (res: any, file: any) => {
 
   if (res.code === 200) {
     // 💡 核心修改：兼容后端 data 直接返回字符串 URL 的情况
-    const actualUrl = typeof res.data === 'string' 
-      ? res.data 
-      : (res.data?.url || res.data?.fileUrl);
+    const actualUrl =
+      typeof res.data === 'string'
+        ? res.data
+        : res.data?.url || res.data?.fileUrl;
 
     const newFile: UploadFile = {
       name: file.name,
@@ -187,7 +207,7 @@ const handleRemove = (index: number) => {
 
 // 发送数据给父组件
 const emitValue = () => {
-  const urls = fileList.value.map(f => f.url).filter(Boolean);
+  const urls = fileList.value.map((f) => f.url).filter(Boolean);
   isInnerChange.value = true; // 锁定：告诉 watch 这是我自己改的，不要瞎洗我的数据
   emit('update:modelValue', urls);
 };
@@ -209,9 +229,9 @@ const emitValue = () => {
       :show-file-list="false"
       :disabled="fileList.length >= limit"
     >
-      <el-button 
-        type="primary" 
-        :icon="Upload" 
+      <el-button
+        type="primary"
+        :icon="Upload"
         :disabled="fileList.length >= limit"
       >
         上传文件
@@ -219,15 +239,12 @@ const emitValue = () => {
     </el-upload>
 
     <div v-if="showTip && !disabled" class="upload-tip">
-      支持 {{ fileType.join('/') }} 格式，单个文件不超过 {{ fileSize }}MB，最多 {{ limit }} 个
+      支持 {{ fileType.join('/') }} 格式，单个文件不超过 {{ fileSize }}MB，最多
+      {{ limit }} 个
     </div>
 
     <div v-if="fileList.length > 0" class="file-list">
-      <div
-        v-for="(file, index) in fileList"
-        :key="index"
-        class="file-item"
-      >
+      <div v-for="(file, index) in fileList" :key="index" class="file-item">
         <el-link :href="file.url" target="_blank" :underline="false">
           <span class="file-name">{{ file.name }}</span>
         </el-link>

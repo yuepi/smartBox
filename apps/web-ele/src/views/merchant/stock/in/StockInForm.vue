@@ -41,7 +41,10 @@ async function loadWarehouseOptions() {
 // 计算明细金额
 function calcItemAmount(index: number) {
   const item = itemRows.value[index];
-  item.costAmount = item && item.inWeight && item.costUnitPrice ? Number((item.inWeight * item.costUnitPrice).toFixed(2)) : 0;
+  item.costAmount =
+    item && item.inWeight && item.costUnitPrice
+      ? Number((item.inWeight * item.costUnitPrice).toFixed(2))
+      : 0;
 }
 
 // 添加明细行
@@ -74,7 +77,9 @@ function open(row?: StockIn) {
   } else {
     title.value = '新增入库单';
     formData.value = { inStatus: 0 };
-    itemRows.value = [{ packageType: 0, inWeight: 0, costUnitPrice: 0, costAmount: 0 }];
+    itemRows.value = [
+      { packageType: 0, inWeight: 0, costUnitPrice: 0, costAmount: 0 },
+    ];
   }
   loadWarehouseOptions();
   visible.value = true;
@@ -88,7 +93,7 @@ async function handleSubmit() {
 
   // 组装明细数据
   formData.value.items = itemRows.value.filter(
-    (item) => item.inWeight && item.inWeight > 0
+    (item) => item.inWeight && item.inWeight > 0,
   );
 
   if (formData.value.items.length === 0) {
@@ -117,7 +122,11 @@ defineExpose({ open });
   <el-dialog v-model="visible" :title="title" width="800px" append-to-body>
     <el-form :model="formData" label-width="100px">
       <el-form-item label="仓库" required>
-        <el-select v-model="formData.warehouseId" placeholder="请选择" style="width: 100%">
+        <el-select
+          v-model="formData.warehouseId"
+          placeholder="请选择"
+          style="width: 100%"
+        >
           <el-option
             v-for="item in warehouseOptions"
             :key="item.value"
@@ -128,19 +137,35 @@ defineExpose({ open });
       </el-form-item>
 
       <el-form-item label="备注">
-        <el-input v-model="formData.remark" type="textarea" :rows="2" placeholder="请输入备注" />
+        <el-input
+          v-model="formData.remark"
+          type="textarea"
+          :rows="2"
+          placeholder="请输入备注"
+        />
       </el-form-item>
 
       <!-- 明细表格 -->
       <div class="mb-2">
         <span class="text-sm font-medium">入库明细</span>
-        <el-button type="primary" plain size="small" class="ml-2" @click="addItemRow">添加行</el-button>
+        <el-button
+          type="primary"
+          plain
+          size="small"
+          class="ml-2"
+          @click="addItemRow"
+          >添加行</el-button
+        >
       </div>
 
       <el-table :data="itemRows" border stripe style="width: 100%">
         <el-table-column label="品类" width="130" align="center">
           <template #default="{ row, $index }">
-            <el-select v-model="row.packageType" placeholder="请选择" size="small">
+            <el-select
+              v-model="row.packageType"
+              placeholder="请选择"
+              size="small"
+            >
               <el-option
                 v-for="item in stock_package_type"
                 :key="item.value"
@@ -183,7 +208,13 @@ defineExpose({ open });
         </el-table-column>
         <el-table-column label="操作" width="80" align="center">
           <template #default="{ $index }">
-            <el-button link type="danger" icon="Delete" size="small" @click="removeItemRow($index)" />
+            <el-button
+              link
+              type="danger"
+              icon="Delete"
+              size="small"
+              @click="removeItemRow($index)"
+            />
           </template>
         </el-table-column>
       </el-table>
@@ -191,7 +222,9 @@ defineExpose({ open });
 
     <template #footer>
       <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :loading="loading" @click="handleSubmit">确定</el-button>
+      <el-button type="primary" :loading="loading" @click="handleSubmit"
+        >确定</el-button
+      >
     </template>
   </el-dialog>
 </template>

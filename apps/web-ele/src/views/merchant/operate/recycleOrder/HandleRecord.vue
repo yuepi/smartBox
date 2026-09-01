@@ -1,6 +1,5 @@
 <!-- src/views/merchant/operate/recycleOrder/HandleRecord.vue -->
 <script lang="ts" setup>
-
 import { getHandleRecordListApi } from '#/api/operation/recycleOrder';
 
 const visible = ref(false);
@@ -27,7 +26,7 @@ function getOperateTypeTag(type: string): string {
   return operateTypeMap[type]?.type || 'info';
 }
 
-async function open(row: { orderNo: string; recycleOrderId: number; }) {
+async function open(row: { orderNo: string; recycleOrderId: number }) {
   orderNo.value = row.orderNo;
   visible.value = true;
   loading.value = true;
@@ -46,22 +45,60 @@ defineExpose({ open });
 </script>
 
 <template>
-  <el-dialog v-model="visible" :title="`操作记录 - ${orderNo}`" width="700px" append-to-body>
+  <el-dialog
+    v-model="visible"
+    :title="`操作记录 - ${orderNo}`"
+    width="700px"
+    append-to-body
+  >
     <div v-loading="loading">
       <el-table :data="recordList" border stripe style="width: 100%">
-        <el-table-column prop="operateType" label="操作类型" width="120" align="center">
+        <el-table-column
+          prop="operateType"
+          label="操作类型"
+          width="120"
+          align="center"
+        >
           <template #default="{ row }">
-            <el-tag :type="getOperateTypeTag(row.operateType)" size="small" round effect="light">
+            <el-tag
+              :type="getOperateTypeTag(row.operateType)"
+              size="small"
+              round
+              effect="light"
+            >
               {{ getOperateTypeLabel(row.operateType) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="operateDesc" label="操作描述" min-width="180" show-overflow-tooltip />
-        <el-table-column prop="operatorName" label="操作人" width="120" align="center" />
-        <el-table-column prop="operatorRole" label="角色" width="120" align="center" />
-        <el-table-column prop="createdTime" label="操作时间" width="170" align="center" />
+        <el-table-column
+          prop="operateDesc"
+          label="操作描述"
+          min-width="180"
+          show-overflow-tooltip
+        />
+        <el-table-column
+          prop="operatorName"
+          label="操作人"
+          width="120"
+          align="center"
+        />
+        <el-table-column
+          prop="operatorRole"
+          label="角色"
+          width="120"
+          align="center"
+        />
+        <el-table-column
+          prop="createdTime"
+          label="操作时间"
+          width="170"
+          align="center"
+        />
       </el-table>
-      <el-empty v-if="!loading && recordList.length === 0" description="暂无操作记录" />
+      <el-empty
+        v-if="!loading && recordList.length === 0"
+        description="暂无操作记录"
+      />
     </div>
 
     <template #footer>

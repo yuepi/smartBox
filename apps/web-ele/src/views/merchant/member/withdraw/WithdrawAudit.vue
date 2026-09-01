@@ -1,7 +1,10 @@
 <script lang="ts" setup>
 import type { MemberWithdraw } from '#/api/member/memberWithdraw';
 
-import { auditMemberWithdrawPassApi, auditMemberWithdrawRefuseApi } from '#/api/member/memberWithdraw';
+import {
+  auditMemberWithdrawPassApi,
+  auditMemberWithdrawRefuseApi,
+} from '#/api/member/memberWithdraw';
 
 const emit = defineEmits<{
   (e: 'success'): void;
@@ -40,7 +43,9 @@ async function handleSubmit() {
   loading.value = true;
   try {
     if (form.status === 1) {
-      await auditMemberWithdrawPassApi({ memberWithdrawId: auditData.value.memberWithdrawId });
+      await auditMemberWithdrawPassApi({
+        memberWithdrawId: auditData.value.memberWithdrawId,
+      });
       ElMessage.success('审核通过');
     } else {
       await auditMemberWithdrawRefuseApi({
@@ -68,7 +73,9 @@ defineExpose({ open });
         <span>{{ auditData?.withdrawNo }}</span>
       </el-form-item>
       <el-form-item label="申请金额">
-        <span class="font-bold text-primary">{{ formatAmount(auditData?.applyAmount || 0) }}</span>
+        <span class="font-bold text-primary">{{
+          formatAmount(auditData?.applyAmount || 0)
+        }}</span>
       </el-form-item>
       <el-form-item label="审核结果" required>
         <el-radio-group v-model="form.status">
@@ -77,12 +84,19 @@ defineExpose({ open });
         </el-radio-group>
       </el-form-item>
       <el-form-item v-if="form.status === 4" label="驳回原因" required>
-        <el-input v-model="form.auditReason" type="textarea" :rows="3" placeholder="请输入驳回原因" />
+        <el-input
+          v-model="form.auditReason"
+          type="textarea"
+          :rows="3"
+          placeholder="请输入驳回原因"
+        />
       </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :loading="loading" @click="handleSubmit">确定</el-button>
+      <el-button type="primary" :loading="loading" @click="handleSubmit"
+        >确定</el-button
+      >
     </template>
   </el-dialog>
 </template>

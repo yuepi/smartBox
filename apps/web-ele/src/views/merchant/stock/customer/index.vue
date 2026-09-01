@@ -2,10 +2,15 @@
 import type { Customer, CustomerPageParams } from '#/api/stock/customer';
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
+import { computed, onMounted, reactive, ref } from 'vue';
+
 import { Page } from '@vben/common-ui';
 
 import { deleteCustomerApi, getCustomerPageApi } from '#/api/stock/customer';
-import { CUSTOMER_STORAGE_KEY, defaultCustomerColumns } from '#/constants/tableColumns';
+import {
+  CUSTOMER_STORAGE_KEY,
+  defaultCustomerColumns,
+} from '#/constants/tableColumns';
 import { ModuleCodeMap } from '#/hooks/useExport';
 
 import CustomerForm from './CustomerForm.vue';
@@ -82,7 +87,11 @@ async function handleDelete(row?: Customer) {
   }
 
   try {
-    await ElMessageBox.confirm(`确定要删除选中的 ${ids.length} 条回收商吗？`, '提示', { type: 'warning' });
+    await ElMessageBox.confirm(
+      `确定要删除选中的 ${ids.length} 条回收商吗？`,
+      '提示',
+      { type: 'warning' },
+    );
     for (const id of ids) {
       await deleteCustomerApi(id);
     }
@@ -175,7 +184,11 @@ onMounted(() => {
       <!-- 📥 高级筛选项 -->
       <template #search-advanced>
         <el-form-item>
-          <el-select v-model="queryParams.status" clearable style="width: 200px">
+          <el-select
+            v-model="queryParams.status"
+            clearable
+            style="width: 200px"
+          >
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">状态:</span>
             </template>
@@ -191,14 +204,33 @@ onMounted(() => {
 
       <!-- 📥 工具栏左侧 -->
       <template #toolbar-left>
-        <el-button type="primary" plain icon="Plus" @click="handleAdd">新增回收商</el-button>
-        <ExportButton :module-code="ModuleCodeMap.CUSTOMER" :fields="visibleColumns" :find-cond="queryParams" />
-        <el-button type="danger" plain icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete()">
+        <el-button type="primary" plain icon="Plus" @click="handleAdd">
+          新增回收商
+        </el-button>
+        <ExportButton
+          :module-code="ModuleCodeMap.CUSTOMER"
+          :fields="visibleColumns"
+          :find-cond="queryParams"
+        />
+        <el-button
+          type="danger"
+          plain
+          icon="Delete"
+          :disabled="selectedIds.length === 0"
+          @click="handleDelete()"
+        >
           批量删除
         </el-button>
         <transition name="el-fade-in">
-          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-xs text-gray-400">
-            已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
+          <span
+            v-if="selectedIds.length > 0"
+            class="selected-alert-badge ml-2 text-xs text-gray-400"
+          >
+            已选
+            <span class="text-red-500 font-medium">{{
+              selectedIds.length
+            }}</span>
+            项
           </span>
         </transition>
       </template>
@@ -243,13 +275,28 @@ onMounted(() => {
             </template>
           </el-table-column>
 
-          <el-table-column label="操作" width="150" fixed="right" align="center">
+          <el-table-column
+            label="操作"
+            width="150"
+            fixed="right"
+            align="center"
+          >
             <template #default="{ row }">
               <el-tooltip content="编辑" placement="top" :enterable="false">
-                <el-button link type="primary" icon="Edit" @click="handleEdit(row)" />
+                <el-button
+                  link
+                  type="primary"
+                  icon="Edit"
+                  @click="handleEdit(row)"
+                />
               </el-tooltip>
               <el-tooltip content="删除" placement="top" :enterable="false">
-                <el-button link type="danger" icon="Delete" @click="handleDelete(row)" />
+                <el-button
+                  link
+                  type="danger"
+                  icon="Delete"
+                  @click="handleDelete(row)"
+                />
               </el-tooltip>
             </template>
           </el-table-column>

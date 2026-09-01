@@ -1,6 +1,11 @@
 <script lang="ts" setup>
-import type { DeviceFault, DeviceFaultPageParams } from '#/api/device/deviceFault';
+import type {
+  DeviceFault,
+  DeviceFaultPageParams,
+} from '#/api/device/deviceFault';
 import type { TableColumnConfig } from '#/constants/tableColumns';
+
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 
 import { Page } from '@vben/common-ui';
 
@@ -8,7 +13,10 @@ import {
   deleteDeviceFaultApi,
   getDeviceFaultPageApi,
 } from '#/api/device/deviceFault';
-import { defaultFaultColumns, FAULT_STORAGE_KEY } from '#/constants/tableColumns';
+import {
+  defaultFaultColumns,
+  FAULT_STORAGE_KEY,
+} from '#/constants/tableColumns';
 import { ModuleCodeMap } from '#/hooks/useExport';
 
 import FaultDetail from './FaultDetail.vue';
@@ -75,7 +83,11 @@ function getFaultStatusText(status: number): string {
 }
 
 function getFaultStatusType(status: number): string {
-  const map: Record<number, string> = { 0: 'danger', 1: 'warning', 2: 'success' };
+  const map: Record<number, string> = {
+    0: 'danger',
+    1: 'warning',
+    2: 'success',
+  };
   return map[status] || 'info';
 }
 
@@ -127,7 +139,11 @@ async function handleDelete(row?: DeviceFault) {
     ids = selectedIds.value;
   }
   try {
-    await ElMessageBox.confirm(`确定要删除选中的 ${ids.length} 条故障记录吗？`, '提示', { type: 'warning' });
+    await ElMessageBox.confirm(
+      `确定要删除选中的 ${ids.length} 条故障记录吗？`,
+      '提示',
+      { type: 'warning' },
+    );
     for (const id of ids) {
       await deleteDeviceFaultApi(id);
     }
@@ -168,16 +184,23 @@ onMounted(() => {
 <template>
   <Page auto-content-height>
     <BaseTableLayout
-v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="loading"
-      :total="total" @search="loadData" @reset="resetQuery"
->
+      v-model:query-params="queryParams"
+      v-model:more-params="moreParams"
+      :loading="loading"
+      :total="total"
+      @search="loadData"
+      @reset="resetQuery"
+    >
       <!-- 📥 基础筛选项 -->
       <template #search-basic>
         <el-form-item>
           <el-input
-v-model="queryParams.deviceNo" placeholder="请输入" clearable style="width: 200px"
+            v-model="queryParams.deviceNo"
+            placeholder="请输入"
+            clearable
+            style="width: 200px"
             @keyup.enter="handleQuery"
->
+          >
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">设备编号:</span>
             </template>
@@ -186,9 +209,12 @@ v-model="queryParams.deviceNo" placeholder="请输入" clearable style="width: 2
 
         <el-form-item>
           <el-input
-v-model="queryParams.faultCode" placeholder="请输入" clearable style="width: 200px"
+            v-model="queryParams.faultCode"
+            placeholder="请输入"
+            clearable
+            style="width: 200px"
             @keyup.enter="handleQuery"
->
+          >
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">故障编码:</span>
             </template>
@@ -196,9 +222,12 @@ v-model="queryParams.faultCode" placeholder="请输入" clearable style="width: 
         </el-form-item>
         <el-form-item>
           <el-input
-v-model="queryParams.faultName" placeholder="请输入" clearable style="width: 200px"
+            v-model="queryParams.faultName"
+            placeholder="请输入"
+            clearable
+            style="width: 200px"
             @keyup.enter="handleQuery"
->
+          >
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">故障名称:</span>
             </template>
@@ -206,19 +235,33 @@ v-model="queryParams.faultName" placeholder="请输入" clearable style="width: 
         </el-form-item>
 
         <el-form-item>
-          <el-select v-model="queryParams.faultStatus" clearable style="width: 200px">
+          <el-select
+            v-model="queryParams.faultStatus"
+            clearable
+            style="width: 200px"
+          >
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">故障状态:</span>
             </template>
-            <el-option v-for="item in faultStatusOptions" :key="item.value" :label="item.label" :value="item.value" />
+            <el-option
+              v-for="item in faultStatusOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
 
         <el-form-item>
           <el-date-picker
-v-model="dateRange" type="datetimerange" range-separator="至" start-placeholder="开始时间"
-            end-placeholder="结束时间" value-format="YYYY-MM-DD HH:mm:ss" style="width: 350px"
-/>
+            v-model="dateRange"
+            type="datetimerange"
+            range-separator="至"
+            start-placeholder="开始时间"
+            end-placeholder="结束时间"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            style="width: 350px"
+          />
         </el-form-item>
       </template>
 
@@ -228,13 +271,30 @@ v-model="dateRange" type="datetimerange" range-separator="至" start-placeholder
 
       <!-- 📥 工具栏左侧 -->
       <template #toolbar-left>
-        <ExportButton :module-code="ModuleCodeMap.FAULT" :fields="visibleColumns" :find-cond="queryParams" />
-        <el-button type="danger" plain icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete()">
+        <ExportButton
+          :module-code="ModuleCodeMap.FAULT"
+          :fields="visibleColumns"
+          :find-cond="queryParams"
+        />
+        <el-button
+          type="danger"
+          plain
+          icon="Delete"
+          :disabled="selectedIds.length === 0"
+          @click="handleDelete()"
+        >
           批量删除
         </el-button>
         <transition name="el-fade-in">
-          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-sm text-gray-400">
-            已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
+          <span
+            v-if="selectedIds.length > 0"
+            class="selected-alert-badge ml-2 text-sm text-gray-400"
+          >
+            已选
+            <span class="text-red-500 font-medium">{{
+              selectedIds.length
+            }}</span>
+            项
           </span>
         </transition>
       </template>
@@ -242,29 +302,43 @@ v-model="dateRange" type="datetimerange" range-separator="至" start-placeholder
       <!-- 📥 工具栏右侧 -->
       <template #toolbar-right>
         <ColumnSelector
-:storage-key="FAULT_STORAGE_KEY" :default-columns="defaultFaultColumns"
+          :storage-key="FAULT_STORAGE_KEY"
+          :default-columns="defaultFaultColumns"
           @update:columns="handleColumnsUpdate"
-/>
+        />
       </template>
 
       <!-- 📥 表格 -->
       <template #table>
         <el-table
-:data="tableData" border stripe style="width: 100%; height: 100%"
+          :data="tableData"
+          border
+          stripe
+          style="width: 100%; height: 100%"
           @selection-change="handleSelectionChange"
->
+        >
           <el-table-column type="selection" width="50" align="center" />
 
           <el-table-column
-v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
-            :width="typeof col.width === 'number' ? col.width : undefined" :min-width="col.minWidth" :align="col.align"
->
+            v-for="col in visibleColumns"
+            :key="col.key"
+            :prop="col.key"
+            :label="col.label"
+            :width="typeof col.width === 'number' ? col.width : undefined"
+            :min-width="col.minWidth"
+            :align="col.align"
+          >
             <template #default="{ row }">
               <template v-if="col.key === 'duration'">
                 {{ formatDuration(row.duration) }}
               </template>
               <template v-else-if="col.key === 'faultStatus'">
-                <el-tag :type="getFaultStatusType(row.faultStatus)" size="small" round effect="light">
+                <el-tag
+                  :type="getFaultStatusType(row.faultStatus)"
+                  size="small"
+                  round
+                  effect="light"
+                >
                   {{ getFaultStatusText(row.faultStatus) }}
                 </el-tag>
               </template>
@@ -274,16 +348,30 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
             </template>
           </el-table-column>
 
-          <el-table-column label="操作" width="200" fixed="right" align="center">
+          <el-table-column
+            label="操作"
+            width="200"
+            fixed="right"
+            align="center"
+          >
             <template #default="{ row }">
               <div class="action-buttons">
                 <el-button size="small" type="primary" @click="handleView(row)">
                   详情
                 </el-button>
-                <el-button v-if="row.faultStatus !== 2" size="small" type="success" @click="handleEdit(row)">
+                <el-button
+                  v-if="row.faultStatus !== 2"
+                  size="small"
+                  type="success"
+                  @click="handleEdit(row)"
+                >
                   处理
                 </el-button>
-                <el-button size="small" type="danger" @click="handleDelete(row)">
+                <el-button
+                  size="small"
+                  type="danger"
+                  @click="handleDelete(row)"
+                >
                   删除
                 </el-button>
               </div>

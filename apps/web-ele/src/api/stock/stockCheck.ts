@@ -82,13 +82,15 @@ export interface StockCheckConfirmParams {
 export function getStockCheckPageApi(params: StockCheckPageParams) {
   return requestClient.get<{ records: StockCheck[]; total: number }>(
     '/merchant/stockCheck/page',
-    { params }
+    { params },
   );
 }
 
 /** 列表查询盘点单 */
 export function getStockCheckListApi(params?: Partial<StockCheckPageParams>) {
-  return requestClient.get<StockCheck[]>('/merchant/stockCheck/list', { params });
+  return requestClient.get<StockCheck[]>('/merchant/stockCheck/list', {
+    params,
+  });
 }
 
 /** 新增盘点单（创建盘点单） */
@@ -98,7 +100,10 @@ export function addStockCheckApi(data: Partial<StockCheck>) {
 
 /** 创建盘点单（自动生成盘点明细） */
 export function createStockCheckOrderApi(data: StockCheckCreateParams) {
-  return requestClient.post<boolean>('/merchant/stockCheck/createCheckOrder', data);
+  return requestClient.post<boolean>(
+    '/merchant/stockCheck/createCheckOrder',
+    data,
+  );
 }
 
 /** 执行盘点（录入实际重量） */
@@ -125,5 +130,7 @@ export function getStockCheckDetailApi(stockCheckId: number) {
 
 /** 删除盘点单 */
 export function deleteStockCheckApi(stockCheckId: number) {
-  return requestClient.post<boolean>('/merchant/stockCheck/delete', { stockCheckId });
+  return requestClient.post<boolean>('/merchant/stockCheck/delete', {
+    stockCheckId,
+  });
 }

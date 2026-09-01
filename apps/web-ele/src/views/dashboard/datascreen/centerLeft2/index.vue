@@ -1,11 +1,11 @@
-<script lang='ts'>
-import { defineComponent } from 'vue'
-import Chart from './chart/index'
+<script lang="ts">
+import { defineComponent } from 'vue';
+import Chart from './chart/index';
 export default defineComponent({
   components: {
-    Chart
-  }
-})
+    Chart,
+  },
+});
 </script>
 
 <template>

@@ -1,8 +1,13 @@
 <script lang="ts" setup>
+import { onMounted, ref, watch } from 'vue';
+
 import { Page } from '@vben/common-ui';
 import { useUserStore } from '@vben/stores';
 
-import { editMerchantConfigApi, getMerchantConfigDetailApi } from '#/api/system/merchant';
+import {
+  editMerchantConfigApi,
+  getMerchantConfigDetailApi,
+} from '#/api/system/merchant';
 
 import MerchantAccountInfo from './MerchantAccountInfo.vue';
 import MerchantBasicInfo from './MerchantBasicInfo.vue';
@@ -65,7 +70,7 @@ async function initMerchantInfo() {
             resolve(null);
           }
         },
-        { immediate: true }
+        { immediate: true },
       );
     });
   }
@@ -87,10 +92,12 @@ onMounted(async () => {
       <!-- 顶部余额卡片 -->
       <div
         class="flex flex-wrap items-center justify-between gap-4 mb-4 p-4 bg-white rounded-xl border border-blue-100/50 dark:border-blue-800/30"
->
+      >
         <div class="flex items-center gap-6">
           <!-- 余额图标 -->
-          <div class="hidden sm:flex items-center justify-center w-12 h-12 rounded-full bg-gray-100">
+          <div
+            class="hidden sm:flex items-center justify-center w-12 h-12 rounded-full bg-gray-100"
+          >
             <el-icon :size="28">
               <Wallet />
             </el-icon>
@@ -109,13 +116,23 @@ onMounted(async () => {
 
         <!-- 右侧操作 -->
         <div class="flex items-center gap-2">
-          <el-button type="primary" size="default" :loading="balanceLoading" @click="loadAccountBalance">
+          <el-button
+            type="primary"
+            size="default"
+            :loading="balanceLoading"
+            @click="loadAccountBalance"
+          >
             <el-icon>
               <Refresh />
             </el-icon>
             刷新
           </el-button>
-          <el-button type="success" size="default" plain @click="activeTab = 'account'">
+          <el-button
+            type="success"
+            size="default"
+            plain
+            @click="activeTab = 'account'"
+          >
             <el-icon>
               <Plus />
             </el-icon>
@@ -131,11 +148,17 @@ onMounted(async () => {
           </el-tab-pane>
 
           <el-tab-pane label="账户信息" name="account">
-            <MerchantAccountInfo :merchant-id="merchantId" @refresh-balance="loadAccountBalance" />
+            <MerchantAccountInfo
+              :merchant-id="merchantId"
+              @refresh-balance="loadAccountBalance"
+            />
           </el-tab-pane>
 
           <el-tab-pane label="充值订单" name="recharge">
-            <MerchantRechargeTable ref="rechargeTableRef" :merchant-id="merchantId" />
+            <MerchantRechargeTable
+              ref="rechargeTableRef"
+              :merchant-id="merchantId"
+            />
           </el-tab-pane>
 
           <el-tab-pane label="资金流水" name="flow">
@@ -144,10 +167,10 @@ onMounted(async () => {
 
           <el-tab-pane label="商户配置" name="config">
             <MerchantConfigForm
-  :merchant-id="merchantId"
-  :get-config-api="getMerchantConfigDetailApi"
-  :save-config-api="editMerchantConfigApi"
-/>
+              :merchant-id="merchantId"
+              :get-config-api="getMerchantConfigDetailApi"
+              :save-config-api="editMerchantConfigApi"
+            />
           </el-tab-pane>
         </el-tabs>
       </el-card>

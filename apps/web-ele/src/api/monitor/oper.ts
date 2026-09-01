@@ -65,14 +65,19 @@ export interface ApiResponse<T> {
  * 商户分页查询操作日志
  */
 export function getMerchantOperLogPageApi(params: OperLogPageParams) {
-  return requestClient.get<ApiResponse<OperLogPageResult>>('merchant/operLog/page', { params });
+  return requestClient.get<ApiResponse<OperLogPageResult>>(
+    'merchant/operLog/page',
+    { params },
+  );
 }
 
 /**
  * 列表查询操作日志
  */
 export function getMerchantOperLogListApi(params: OperLogPageParams) {
-  return requestClient.get<ApiResponse<OperLog[]>>('merchant/operLog/list', { params });
+  return requestClient.get<ApiResponse<OperLog[]>>('merchant/operLog/list', {
+    params,
+  });
 }
 
 /**
@@ -95,31 +100,38 @@ export function addMerchantOperLogApi(data: Partial<OperLog>) {
  * 修改操作日志
  */
 export function editMerchantOperLogApi(data: Partial<OperLog>) {
-  return requestClient.post<ApiResponse<boolean>>('merchant/operLog/edit', data);
+  return requestClient.post<ApiResponse<boolean>>(
+    'merchant/operLog/edit',
+    data,
+  );
 }
 
 /**
  * 逻辑删除操作日志
  */
 export function deleteMerchantOperLogApi(operLogId: number | string) {
-  return requestClient.post<ApiResponse<boolean>>('merchant/operLog/delete', { operLogId });
+  return requestClient.post<ApiResponse<boolean>>('merchant/operLog/delete', {
+    operLogId,
+  });
 }
-
-
-
 
 /**
  * 平台分页查询操作日志
  */
 export function getPlatOperLogPageApi(params: OperLogPageParams) {
-  return requestClient.get<ApiResponse<OperLogPageResult>>('plat/operLog/page', { params });
+  return requestClient.get<ApiResponse<OperLogPageResult>>(
+    'plat/operLog/page',
+    { params },
+  );
 }
 
 /**
  * 列表查询操作日志
  */
 export function getPlatOperLogListApi(params: OperLogPageParams) {
-  return requestClient.get<ApiResponse<OperLog[]>>('plat/operLog/list', { params });
+  return requestClient.get<ApiResponse<OperLog[]>>('plat/operLog/list', {
+    params,
+  });
 }
 
 /**
@@ -149,5 +161,7 @@ export function editPlatOperLogApi(data: Partial<OperLog>) {
  * 逻辑删除操作日志
  */
 export function deletePlatOperLogApi(operLogId: number | string) {
-  return requestClient.post<ApiResponse<boolean>>('plat/operLog/delete', { operLogId });
+  return requestClient.post<ApiResponse<boolean>>('plat/operLog/delete', {
+    operLogId,
+  });
 }

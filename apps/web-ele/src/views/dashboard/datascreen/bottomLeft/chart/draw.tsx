@@ -1,19 +1,19 @@
-import { defineComponent, ref, watch } from 'vue'
+import { defineComponent, ref, watch } from 'vue';
 
-import * as echarts from 'echarts'
+import * as echarts from 'echarts';
 
 const PropsType = {
   cdata: {
     type: Object,
     require: true,
   },
-} as const
+} as const;
 
 export default defineComponent({
   props: PropsType,
   setup(props) {
-    const chartRef = ref()
-    let options = {}
+    const chartRef = ref();
+    let options = {};
 
     watch(
       () => props.cdata,
@@ -48,7 +48,10 @@ export default defineComponent({
             {
               name: '投递/回收量',
               nameTextStyle: { color: '#9ca3af' },
-              splitLine: { show: true, lineStyle: { color: '#374151', type: 'dashed' } },
+              splitLine: {
+                show: true,
+                lineStyle: { color: '#374151', type: 'dashed' },
+              },
               axisLine: {
                 lineStyle: { color: '#6b7280' },
               },
@@ -116,31 +119,32 @@ export default defineComponent({
               data: val.rateData,
               label: {
                 show: true,
-                formatter: (params: any) => `${(params.value * 100).toFixed(0)}%`,
+                formatter: (params: any) =>
+                  `${(params.value * 100).toFixed(0)}%`,
                 color: '#fbbf24',
                 fontSize: 10,
                 position: 'top',
               },
             },
           ],
-        }
+        };
 
         if (chartRef.value) {
-          chartRef.value.initChart(options)
+          chartRef.value.initChart(options);
         }
       },
       {
         immediate: true,
         deep: true,
-      }
-    )
+      },
+    );
 
     return () => {
       return (
         <div>
           <echart height="360px" ref={chartRef} width="100%" />
         </div>
-      )
-    }
+      );
+    };
   },
-})
+});

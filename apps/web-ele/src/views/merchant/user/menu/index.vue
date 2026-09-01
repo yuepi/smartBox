@@ -2,6 +2,8 @@
 import type { Menu } from '#/api/system/menu';
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
+import { computed, onMounted, reactive, ref, watch } from 'vue';
+
 import { useAccess } from '@vben/access';
 import { Page } from '@vben/common-ui';
 
@@ -255,73 +257,133 @@ onMounted(() => {
 <template>
   <Page auto-content-height>
     <BaseTableLayout
-v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="loading"
-      :is-virtual-table="true" @search="loadData" @reset="resetQuery"
->
+      v-model:query-params="queryParams"
+      v-model:more-params="moreParams"
+      :loading="loading"
+      :is-virtual-table="true"
+      @search="loadData"
+      @reset="resetQuery"
+    >
       <template #search-basic>
         <el-form-item>
           <el-input
-v-model="queryParams.menuName" placeholder="请输入" clearable style="width: 200px"
+            v-model="queryParams.menuName"
+            placeholder="请输入"
+            clearable
+            style="width: 200px"
             @keyup.enter="handleQuery"
->
-            <template #prefix><span class="text-sm text-gray-400 mr-0.5">菜单名称:</span></template>
+          >
+            <template #prefix>
+              <span class="text-sm text-gray-400 mr-0.5">菜单名称:</span>
+            </template>
           </el-input>
         </el-form-item>
       </template>
 
       <template #search-advanced>
         <el-form-item>
-          <el-select v-model="queryParams.menuType" clearable style="width: 200px" placeholder="请选择">
-            <template #prefix><span class="text-xs text-gray-400 mr-0.5">类型:</span></template>
+          <el-select
+            v-model="queryParams.menuType"
+            clearable
+            style="width: 200px"
+            placeholder="请选择"
+          >
+            <template #prefix>
+              <span class="text-xs text-gray-400 mr-0.5">类型:</span>
+            </template>
             <el-option
-v-for="item in [{ label: '目录', value: 0 }, { label: '菜单', value: 1 }, { label: '按钮', value: 2 }]"
-              :key="item.value" :label="item.label" :value="item.value"
-/>
+              v-for="item in [
+                { label: '目录', value: 0 },
+                { label: '菜单', value: 1 },
+                { label: '按钮', value: 2 },
+              ]"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
 
         <el-form-item>
-          <el-select v-model="queryParams.platformType" clearable style="width: 200px" placeholder="请选择">
-            <template #prefix><span class="text-xs text-gray-400 mr-0.5">归属:</span></template>
+          <el-select
+            v-model="queryParams.platformType"
+            clearable
+            style="width: 200px"
+            placeholder="请选择"
+          >
+            <template #prefix>
+              <span class="text-xs text-gray-400 mr-0.5">归属:</span>
+            </template>
             <el-option
-v-for="item in [{ label: '平台菜单', value: 0 }, { label: '商户菜单', value: 1 }]" :key="item.value"
-              :label="item.label" :value="item.value"
-/>
+              v-for="item in [
+                { label: '平台菜单', value: 0 },
+                { label: '商户菜单', value: 1 },
+              ]"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
 
         <el-form-item>
-          <el-select v-model="queryParams.status" clearable style="width: 200px" placeholder="请选择">
-            <template #prefix><span class="text-xs text-gray-400 mr-0.5">状态:</span></template>
+          <el-select
+            v-model="queryParams.status"
+            clearable
+            style="width: 200px"
+            placeholder="请选择"
+          >
+            <template #prefix>
+              <span class="text-xs text-gray-400 mr-0.5">状态:</span>
+            </template>
             <el-option
-v-for="item in [{ label: '启用', value: 0 }, { label: '禁用', value: 1 }]" :key="item.value"
-              :label="item.label" :value="item.value"
-/>
+              v-for="item in [
+                { label: '启用', value: 0 },
+                { label: '禁用', value: 1 },
+              ]"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
       </template>
 
       <template #toolbar-left>
-        <el-button type="primary" plain icon="Plus" @click="handleOpenModal()" v-access:code="[PERMISSIONS.MERCHANT.USER_GROUP.MENU.ADD]">
+        <el-button
+          type="primary"
+          plain
+          icon="Plus"
+          @click="handleOpenModal()"
+          v-access:code="[PERMISSIONS.MERCHANT.USER_GROUP.MENU.ADD]"
+        >
           新增菜单
         </el-button>
-        <el-button type="warning" plain icon="Refresh" @click="handleRefreshCache">
+        <el-button
+          type="warning"
+          plain
+          icon="Refresh"
+          @click="handleRefreshCache"
+        >
           刷新缓存
         </el-button>
         <el-button type="danger" plain icon="Delete" @click="handleClearCache">
           清除缓存
         </el-button>
         <ExportButton
-:module-code="ModuleCodeMap.MENU" :fields="visibleColumns" :find-cond="queryParams"
+          :module-code="ModuleCodeMap.MENU"
+          :fields="visibleColumns"
+          :find-cond="queryParams"
           v-access:code="['merchant:menu:export']"
-/>
+        />
       </template>
 
       <template #toolbar-right>
         <ColumnSelector
-:storage-key="MENU_STORAGE_KEY" :default-columns="defaultMenuColumns"
+          :storage-key="MENU_STORAGE_KEY"
+          :default-columns="defaultMenuColumns"
           @update:columns="handleColumnsUpdate"
-/>
+        />
       </template>
 
       <template #table>
@@ -329,9 +391,16 @@ v-for="item in [{ label: '启用', value: 0 }, { label: '禁用', value: 1 }]" :
           <el-auto-resizer>
             <template #default="{ height, width } = {}">
               <el-table-v2
-v-if="height && width" :key="tableKey" :columns="tableColumns" :data="tableData"
-                :width="width" :height="height" :row-key="rowKey" expand-column-key="menuName" fixed
-/>
+                v-if="height && width"
+                :key="tableKey"
+                :columns="tableColumns"
+                :data="tableData"
+                :width="width"
+                :height="height"
+                :row-key="rowKey"
+                expand-column-key="menuName"
+                fixed
+              />
             </template>
           </el-auto-resizer>
         </div>

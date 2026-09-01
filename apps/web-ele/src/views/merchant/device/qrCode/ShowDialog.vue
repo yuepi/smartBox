@@ -35,20 +35,31 @@ defineExpose({ open });
 </script>
 
 <template>
-  <el-dialog v-model="visible" :title="title" width="900px" append-to-body class="rounded-xl">
+  <el-dialog
+    v-model="visible"
+    :title="title"
+    width="900px"
+    append-to-body
+    class="rounded-xl"
+  >
     <div v-loading="loading" class="min-height-[400px]">
       <el-scrollbar max-height="550px" always>
         <div v-if="qrcodeList.length === 0 && !loading" class="py-12">
           <el-empty description="暂无二维码数据" />
         </div>
-        <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-2">
+        <div
+          v-else
+          class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-2"
+        >
           <div
             v-for="(item, index) in qrcodeList"
             :key="item.qrcodeId || index"
             class="group relative bg-gray-50 dark:bg-zinc-800/50 rounded-lg p-3 border border-gray-100 dark:border-zinc-700 transition-all hover:shadow-md hover:border-primary/30"
           >
             <div class="mb-2">
-              <div class="text-[11px] text-gray-400 uppercase tracking-wider mb-1">
+              <div
+                class="text-[11px] text-gray-400 uppercase tracking-wider mb-1"
+              >
                 QR Code No.
               </div>
               <div
@@ -65,12 +76,16 @@ defineExpose({ open });
                 :src="item.base64QrCode || item.qrcodeUrl"
                 fit="contain"
                 class="w-full h-full p-2"
-                :preview-src-list="qrcodeList.map((i) => i.base64QrCode || i.qrcodeUrl)"
+                :preview-src-list="
+                  qrcodeList.map((i) => i.base64QrCode || i.qrcodeUrl)
+                "
                 :initial-index="index"
                 preview-teleported
               >
                 <template #placeholder>
-                  <div class="flex items-center justify-center h-full bg-gray-50 text-gray-400">
+                  <div
+                    class="flex items-center justify-center h-full bg-gray-50 text-gray-400"
+                  >
                     <el-icon class="is-loading"><Loading /></el-icon>
                   </div>
                 </template>
@@ -99,7 +114,9 @@ defineExpose({ open });
     </div>
     <template #footer>
       <div class="flex justify-between items-center px-2">
-        <span class="text-xs text-gray-400">提示：点击图片可查看高清大图并轮播</span>
+        <span class="text-xs text-gray-400"
+          >提示：点击图片可查看高清大图并轮播</span
+        >
         <el-button @click="visible = false" class="!rounded-md">关闭</el-button>
       </div>
     </template>

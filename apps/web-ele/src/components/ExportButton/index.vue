@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref } from 'vue';
 
-import { Download, InfoFilled } from "@element-plus/icons-vue";
-import { ElMessage } from "element-plus";
+import { Download, InfoFilled } from '@element-plus/icons-vue';
+import { ElMessage } from 'element-plus';
 
-import { useExport } from "#/hooks/useExport";
+import { useExport } from '#/hooks/useExport';
 
 // 统一对齐系统的表格列配置结构
 interface FieldConfig {
@@ -20,11 +20,10 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  btnText: "导出",
+  btnText: '导出',
 });
 
 const dialogVisible = ref(false);
-// 核心修复：存储选中的 key 数组
 const selectedFields = ref<string[]>([]);
 
 // 全选状态计算
@@ -69,11 +68,9 @@ const { exporting, exportData } = useExport(props.moduleCode);
 // 开始导出
 async function handleStartExport() {
   if (selectedFields.value.length === 0) {
-    ElMessage.warning("请至少选择一个导出字段");
+    ElMessage.warning('请至少选择一个导出字段');
     return;
   }
-
-  // 核心对齐：把选中的 key 数组封装进 exportCond 发送
   const exportCond = [...selectedFields.value];
 
   await exportData(props.findCond, exportCond);
@@ -93,11 +90,17 @@ async function handleStartExport() {
     </el-button>
 
     <el-dialog
-v-model="dialogVisible" title="导出数据配置" width="520px" append-to-body draggable
+      v-model="dialogVisible"
+      title="导出数据配置"
+      width="520px"
+      append-to-body
+      draggable
       class="rounded-xl overflow-hidden"
->
+    >
       <div class="px-2">
-        <div class="flex items-center gap-2 mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+        <div
+          class="flex items-center gap-2 mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg"
+        >
           <el-icon class="!text-blue-500">
             <InfoFilled />
           </el-icon>
@@ -106,12 +109,18 @@ v-model="dialogVisible" title="导出数据配置" width="520px" append-to-body 
           </span>
         </div>
 
-        <div class="flex items-center justify-between px-2 py-2 mb-2 bg-gray-50 dark:bg-zinc-800/50 rounded-md">
+        <div
+          class="flex items-center justify-between px-2 py-2 mb-2 bg-gray-50 dark:bg-zinc-800/50 rounded-md"
+        >
           <el-checkbox
-:model-value="isAllChecked" :indeterminate="isIndeterminate" @change="handleCheckAllChange"
+            :model-value="isAllChecked"
+            :indeterminate="isIndeterminate"
+            @change="(val) => handleCheckAllChange(val as boolean)"
             class="!h-auto"
->
-            <span class="text-sm font-bold text-gray-700 dark:text-gray-200">全选所有字段</span>
+          >
+            <span class="text-sm font-bold text-gray-700 dark:text-gray-200"
+              >全选所有字段</span
+            >
           </el-checkbox>
           <span class="text-xs text-gray-400">
             已选择 {{ selectedFields.length }} / {{ fields.length }}
@@ -121,21 +130,38 @@ v-model="dialogVisible" title="导出数据配置" width="520px" append-to-body 
         <el-scrollbar max-height="360px">
           <div class="grid grid-cols-2 gap-2 p-1">
             <div
-v-for="field in fields" :key="field.key"
+              v-for="field in fields"
+              :key="field.key"
               class="flex items-center px-3 py-2 rounded-md border border-transparent transition-all cursor-pointer"
               :class="[
                 selectedFields.includes(field.key)
                   ? 'bg-primary/5 border-primary/20 shadow-sm'
                   : 'bg-white dark:bg-zinc-900 hover:bg-gray-50 border-gray-100 dark:border-zinc-800',
               ]"
->
-              <el-checkbox v-model="selectedFields" :label="field.key" class="w-full !mr-0">
+            >
+              <el-checkbox
+                :model-value="selectedFields.includes(field.key)"
+                @update:model-value="
+                  (val) => {
+                    if (val) {
+                      selectedFields.push(field.key);
+                    } else {
+                      const index = selectedFields.indexOf(field.key);
+                      if (index > -1) selectedFields.splice(index, 1);
+                    }
+                  }
+                "
+                :label="field.key"
+                class="w-full !mr-0"
+              >
                 <span
-class="text-sm transition-colors" :class="selectedFields.includes(field.key)
-                    ? 'text-primary font-medium'
-                    : 'text-gray-600'
+                  class="text-sm transition-colors"
+                  :class="
+                    selectedFields.includes(field.key)
+                      ? 'text-primary font-medium'
+                      : 'text-gray-600'
                   "
->
+                >
                   {{ field.label }}
                 </span>
               </el-checkbox>
@@ -150,9 +176,11 @@ class="text-sm transition-colors" :class="selectedFields.includes(field.key)
             取消
           </el-button>
           <el-button
-type="primary" :loading="exporting" class="!rounded-md !px-6 shadow-lg shadow-primary/20"
+            type="primary"
+            :loading="exporting"
+            class="!rounded-md !px-6 shadow-lg shadow-primary/20"
             @click="handleStartExport"
->
+          >
             <template #icon>
               <el-icon v-if="!exporting">
                 <Download />

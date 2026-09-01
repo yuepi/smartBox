@@ -321,30 +321,75 @@ onMounted(() => {
     <div class="p-0">
       <!-- 查询表单 -->
       <el-card shadow="never" class="border-none mb-4 !p-2">
-        <el-form :inline="true" :model="queryParams" class="flex flex-wrap gap-x-2 gap-y-2 items-center">
+        <el-form
+          :inline="true"
+          :model="queryParams"
+          class="flex flex-wrap gap-x-2 gap-y-2 items-center"
+        >
           <el-form-item class="!mb-0 !mr-2">
-            <el-input v-model="queryParams.deptName" placeholder="请输入" clearable style="width: 200px" @keyup.enter="handleQuery">
-              <template #prefix><span class="text-xs text-gray-400 mr-0.5">部门名称:</span></template>
+            <el-input
+              v-model="queryParams.deptName"
+              placeholder="请输入"
+              clearable
+              style="width: 200px"
+              @keyup.enter="handleQuery"
+            >
+              <template #prefix
+                ><span class="text-xs text-gray-400 mr-0.5"
+                  >部门名称:</span
+                ></template
+              >
             </el-input>
           </el-form-item>
 
           <el-form-item class="!mb-0 !mr-2">
-            <el-select v-model="queryParams.deptType" clearable style="width: 200px">
-              <template #prefix><span class="text-xs text-gray-400 mr-0.5">部门类型:</span></template>
-              <el-option v-for="item in deptTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
+            <el-select
+              v-model="queryParams.deptType"
+              clearable
+              style="width: 200px"
+            >
+              <template #prefix
+                ><span class="text-xs text-gray-400 mr-0.5"
+                  >部门类型:</span
+                ></template
+              >
+              <el-option
+                v-for="item in deptTypeOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
             </el-select>
           </el-form-item>
 
           <el-form-item class="!mb-0 !mr-2">
-            <el-select v-model="queryParams.status" clearable style="width: 200px">
-              <template #prefix><span class="text-xs text-gray-400 mr-0.5">状态:</span></template>
-              <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
+            <el-select
+              v-model="queryParams.status"
+              clearable
+              style="width: 200px"
+            >
+              <template #prefix
+                ><span class="text-xs text-gray-400 mr-0.5"
+                  >状态:</span
+                ></template
+              >
+              <el-option
+                v-for="item in statusOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
             </el-select>
           </el-form-item>
 
           <el-form-item class="!mb-0 !mr-0 md:ml-auto flex items-center gap-1">
             <el-tooltip content="查询" placement="top">
-              <el-button type="primary" :icon="Search" circle @click="handleQuery" />
+              <el-button
+                type="primary"
+                :icon="Search"
+                circle
+                @click="handleQuery"
+              />
             </el-tooltip>
             <el-tooltip content="重置" placement="top">
               <el-button :icon="Refresh" circle @click="resetQuery" />
@@ -357,13 +402,27 @@ onMounted(() => {
       <el-card shadow="never">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-2">
-            <el-button type="primary" plain :icon="Plus" @click="handleAdd()" v-access:code="['plat:dept:add']">
+            <el-button
+              type="primary"
+              plain
+              :icon="Plus"
+              @click="handleAdd()"
+              v-access:code="['plat:dept:add']"
+            >
               新增部门
             </el-button>
-            <ExportButton :module-code="ModuleCodeMap.DEPT" :fields="visibleColumns" :find-cond="queryParams" />
+            <ExportButton
+              :module-code="ModuleCodeMap.DEPT"
+              :fields="visibleColumns"
+              :find-cond="queryParams"
+            />
           </div>
           <div class="flex items-center">
-            <ColumnSelector :storage-key="DEPT_STORAGE_KEY" :default-columns="defaultDeptColumns" @update:columns="handleColumnsUpdate" />
+            <ColumnSelector
+              :storage-key="DEPT_STORAGE_KEY"
+              :default-columns="defaultDeptColumns"
+              @update:columns="handleColumnsUpdate"
+            />
           </div>
         </div>
         <div class="table-container">
@@ -387,11 +446,26 @@ onMounted(() => {
     </div>
 
     <!-- 新增/编辑弹窗 -->
-    <el-dialog v-model="formVisible" :title="formTitle" width="500px" append-to-body>
+    <el-dialog
+      v-model="formVisible"
+      :title="formTitle"
+      width="500px"
+      append-to-body
+    >
       <el-form :model="formData" label-width="100px">
         <el-form-item label="上级部门">
-          <el-select v-model="formData.parentId" placeholder="请选择上级部门" clearable style="width: 100%">
-            <el-option v-for="item in parentDeptOptions" :key="item.deptId" :label="item.deptName" :value="item.deptId" />
+          <el-select
+            v-model="formData.parentId"
+            placeholder="请选择上级部门"
+            clearable
+            style="width: 100%"
+          >
+            <el-option
+              v-for="item in parentDeptOptions"
+              :key="item.deptId"
+              :label="item.deptName"
+              :value="item.deptId"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="部门名称" required>
@@ -399,7 +473,11 @@ onMounted(() => {
         </el-form-item>
         <el-form-item label="部门类型">
           <el-radio-group v-model="formData.deptType">
-            <el-radio v-for="item in deptTypeOptions" :key="item.value" :value="item.value">
+            <el-radio
+              v-for="item in deptTypeOptions"
+              :key="item.value"
+              :value="item.value"
+            >
               {{ item.label }}
             </el-radio>
           </el-radio-group>
@@ -416,7 +494,12 @@ onMounted(() => {
       </el-form>
       <template #footer>
         <el-button @click="formVisible = false">取消</el-button>
-        <el-button type="primary" :loading="formSubmitting" @click="handleSubmit">确定</el-button>
+        <el-button
+          type="primary"
+          :loading="formSubmitting"
+          @click="handleSubmit"
+          >确定</el-button
+        >
       </template>
     </el-dialog>
   </Page>

@@ -1,7 +1,12 @@
 <script lang="ts" setup>
 import type { Menu } from '#/api/system/menu';
 
-import { addMerchantMenuApi, editMerchantMenuApi, getMerchantMenuDetailApi, getMerchantMenuListApi } from '#/api/system/menu';
+import {
+  addMerchantMenuApi,
+  editMerchantMenuApi,
+  getMerchantMenuDetailApi,
+  getMerchantMenuListApi,
+} from '#/api/system/menu';
 
 const emit = defineEmits(['success']);
 
@@ -50,7 +55,7 @@ function buildTree(menus: Menu[]): Menu[] {
 
   const sortTree = (nodes: Menu[]) => {
     nodes.sort((a, b) => (a.sort || 0) - (b.sort || 0));
-    nodes.forEach(node => {
+    nodes.forEach((node) => {
       if (node.children && node.children.length > 0) {
         sortTree(node.children);
       }
@@ -70,8 +75,8 @@ async function loadParentMenuOptions() {
       {
         menuId: 0,
         menuName: '顶级菜单',
-        children: treeMenus
-      }
+        children: treeMenus,
+      },
     ];
   } catch (error) {
     console.error(error);
@@ -84,7 +89,13 @@ async function open(row?: Menu | Partial<Menu>) {
 
   if (!row) {
     formTitle.value = '新增菜单';
-    formData.value = { parentId: 0, menuType: 0, platformType: 0, status: 0, sort: 0 };
+    formData.value = {
+      parentId: 0,
+      menuType: 0,
+      platformType: 0,
+      status: 0,
+      sort: 0,
+    };
     await loadParentMenuOptions();
   } else if (row.menuId) {
     try {
@@ -112,14 +123,19 @@ async function handleSubmit() {
     return;
   }
 
-  if (formData.value.menuId && formData.value.parentId === formData.value.menuId) {
+  if (
+    formData.value.menuId &&
+    formData.value.parentId === formData.value.menuId
+  ) {
     ElMessage.warning('上级菜单不能选择自身');
     return;
   }
 
   formSubmitting.value = true;
   try {
-    const api = formData.value.menuId ? editMerchantMenuApi : addMerchantMenuApi;
+    const api = formData.value.menuId
+      ? editMerchantMenuApi
+      : addMerchantMenuApi;
     await api(formData.value);
     ElMessage.success(formData.value.menuId ? '修改成功' : '新增成功');
     formVisible.value = false;
@@ -133,14 +149,26 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <el-dialog v-model="formVisible" :title="formTitle" width="540px" append-to-body>
+  <el-dialog
+    v-model="formVisible"
+    :title="formTitle"
+    width="540px"
+    append-to-body
+  >
     <el-form :model="formData" label-position="top">
       <el-form-item label="上级菜单">
         <el-tree-select
-v-model="formData.parentId" :data="parentMenuOptions"
-          :props="{ value: 'menuId', label: 'menuName', children: 'children' }" value-key="menuId" placeholder="请选择上级菜单"
-          check-strictly filterable default-expand-all clearable style="width: 100%"
-/>
+          v-model="formData.parentId"
+          :data="parentMenuOptions"
+          :props="{ value: 'menuId', label: 'menuName', children: 'children' }"
+          value-key="menuId"
+          placeholder="请选择上级菜单"
+          check-strictly
+          filterable
+          default-expand-all
+          clearable
+          style="width: 100%"
+        />
       </el-form-item>
 
       <el-form-item label="菜单名称" required>
@@ -150,13 +178,23 @@ v-model="formData.parentId" :data="parentMenuOptions"
       <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4">
         <el-form-item label="菜单类型" required>
           <el-select v-model="formData.menuType" placeholder="请选择菜单类型">
-            <el-option v-for="item in menuTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
+            <el-option
+              v-for="item in menuTypeOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
 
         <el-form-item label="菜单归属">
           <el-select v-model="formData.platformType" placeholder="请选择归属">
-            <el-option v-for="item in platformTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
+            <el-option
+              v-for="item in platformTypeOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
       </div>
@@ -175,24 +213,40 @@ v-model="formData.parentId" :data="parentMenuOptions"
         </el-form-item>
 
         <el-form-item label="排序">
-          <el-input-number v-model="formData.sort" :min="0" :max="999" controls-position="right" />
+          <el-input-number
+            v-model="formData.sort"
+            :min="0"
+            :max="999"
+            controls-position="right"
+          />
         </el-form-item>
       </div>
 
       <el-form-item label="状态">
         <div class="h-10 flex items-center">
           <el-switch
-v-model="formData.status" :active-value="0" :inactive-value="1" active-text="启用" inactive-text="禁用"
+            v-model="formData.status"
+            :active-value="0"
+            :inactive-value="1"
+            active-text="启用"
+            inactive-text="禁用"
             inline-prompt
-/>
+          />
         </div>
       </el-form-item>
     </el-form>
 
     <template #footer>
-      <div class="flex justify-end gap-2 px-2 pt-2 border-t border-gray-100 dark:border-zinc-800">
+      <div
+        class="flex justify-end gap-2 px-2 pt-2 border-t border-gray-100 dark:border-zinc-800"
+      >
         <el-button @click="formVisible = false">取消</el-button>
-        <el-button type="primary" :loading="formSubmitting" @click="handleSubmit">确定</el-button>
+        <el-button
+          type="primary"
+          :loading="formSubmitting"
+          @click="handleSubmit"
+          >确定</el-button
+        >
       </div>
     </template>
   </el-dialog>

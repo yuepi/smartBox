@@ -7,7 +7,7 @@ import { initStores } from '@vben/stores';
 import '@vben/styles';
 import '@vben/styles/ele';
 
-import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+import * as ElementPlusIconsVue from '@element-plus/icons-vue';
 import DataV from '@kjgl77/datav-vue3';
 import { useTitle } from '@vueuse/core';
 import { ElLoading } from 'element-plus';
@@ -28,7 +28,7 @@ import { router } from './router';
 // 引入全局css
 import './assets/scss/style.scss';
 // 引入图表（所有图标见 icon 目录下的 demo_index.html）
-import './assets/icon/iconfont.css'
+import './assets/icon/iconfont.css';
 import 'element-plus/dist/index.css';
 import './app.scss';
 

@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import { defineComponent, reactive } from 'vue'
+import { defineComponent, reactive } from 'vue';
 export default defineComponent({
   setup() {
     const config = reactive({
@@ -32,7 +32,7 @@ export default defineComponent({
         ['组件7', 'fix-4', "<span  class='colorGrass'>↑84%</span>"],
         ['组件8', 'fix-7', "<span  class='colorRed'>↓46%</span>"],
         ['组件9', 'dev-2', "<span  class='colorRed'>↓13%</span>"],
-        ['组件10', 'dev-9', "<span  class='colorGrass'>↑76%</span>"]
+        ['组件10', 'dev-9', "<span  class='colorGrass'>↑76%</span>"],
       ],
       rowNum: 7, //表格行数
       headerHeight: 35,
@@ -41,11 +41,11 @@ export default defineComponent({
       evenRowBGC: '#171c33', //偶数行
       index: true,
       columnWidth: [50],
-      align: ['center']
-    })
-    return { config }
-  }
-})
+      align: ['center'],
+    });
+    return { config };
+  },
+});
 </script>
 
 <style lang="scss" scoped>

@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from 'vue';
 
-import { Page } from "@vben/common-ui";
+import { Page } from '@vben/common-ui';
 
-import { Delete, Edit, Plus, Refresh, Search } from "@element-plus/icons-vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+import { Delete, Edit, Plus, Refresh, Search } from '@element-plus/icons-vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
 import {
   addDeviceConfigApi,
@@ -14,18 +14,18 @@ import {
   editDeviceConfigApi,
   getDeviceConfigDetailApi,
   getDeviceConfigPageApi,
-} from "#/api/device/deviceConfig";
-import { ModuleCodeMap, useExport } from "#/hooks/useExport";
+} from '#/api/device/deviceConfig';
+import { ModuleCodeMap, useExport } from '#/hooks/useExport';
 const { exporting, exportData } = useExport(ModuleCodeMap.DEVICE);
-import ColumnSelector from "#/components/ColumnSelector/index.vue";
-import ExportFieldSelector from "#/components/ExportFieldSelector/index.vue";
+import ColumnSelector from '#/components/ColumnSelector/index.vue';
+import ExportFieldSelector from '#/components/ExportFieldSelector/index.vue';
 import {
   CONFIG_STORAGE_KEY,
   defaultConfigColumns,
   type TableColumnConfig,
-} from "#/constants/tableColumns";
-import { useDicts } from "#/hooks/useDict";
-const { device_brand } = useDicts(["device_brand"]);
+} from '#/constants/tableColumns';
+import { useDicts } from '#/hooks/useDict';
+const { device_brand } = useDicts(['device_brand']);
 
 // 表格列配置
 const columnConfig = ref<TableColumnConfig[]>([...defaultConfigColumns]);
@@ -69,28 +69,28 @@ const selectedIds = ref<number[]>([]);
 
 // 表单弹窗控制
 const formVisible = ref(false);
-const formTitle = ref("");
+const formTitle = ref('');
 const formData = ref<Partial<DeviceConfig>>({});
 const formSubmitting = ref(false);
 
 // 顶部灯光类型选项
 const topLightTypeOptions = [
-  { label: "定时", value: 0 },
-  { label: "感应", value: 1 },
-  { label: "常亮", value: 2 },
+  { label: '定时', value: 0 },
+  { label: '感应', value: 1 },
+  { label: '常亮', value: 2 },
 ];
 
 // 箱外灯光类型选项
 const outLightTypeOptions = [
-  { label: "定时", value: 0 },
-  { label: "感应", value: 1 },
-  { label: "常亮", value: 2 },
+  { label: '定时', value: 0 },
+  { label: '感应', value: 1 },
+  { label: '常亮', value: 2 },
 ];
 
 // 状态选项
 const statusOptions = [
-  { label: "启用", value: 0 },
-  { label: "禁用", value: 1 },
+  { label: '启用', value: 0 },
+  { label: '禁用', value: 1 },
 ];
 
 // 查询参数
@@ -104,12 +104,12 @@ const queryParams = reactive<DeviceConfigPageParams>({
 
 // --- 辅助函数 ---
 function getLightTypeText(type: number): string {
-  const map: Record<number, string> = { 0: "定时", 1: "感应", 2: "常亮" };
-  return map[type] || "未知";
+  const map: Record<number, string> = { 0: '定时', 1: '感应', 2: '常亮' };
+  return map[type] || '未知';
 }
 
 function getStatusText(status: number): string {
-  return status === 0 ? "启用" : "禁用";
+  return status === 0 ? '启用' : '禁用';
 }
 
 // --- 数据加载 ---
@@ -121,7 +121,7 @@ async function loadData() {
     total.value = res.total || 0;
   } catch (error) {
     console.error(error);
-    ElMessage.error("加载数据失败");
+    ElMessage.error('加载数据失败');
   } finally {
     loading.value = false;
   }
@@ -129,7 +129,7 @@ async function loadData() {
 
 // --- 新增/编辑 ---
 function handleAdd() {
-  formTitle.value = "新增设备配置";
+  formTitle.value = '新增设备配置';
   formData.value = {
     status: 0,
     deviceBrand: 0,
@@ -141,27 +141,27 @@ function handleAdd() {
     fanTempMax: 50, // 风扇温度上限
     fanTempMin: 30, // 风扇温度下限
     topLightType: 0, // 顶部灯光类型
-    topLightBrightness: "100", // 顶部照明亮度
+    topLightBrightness: '100', // 顶部照明亮度
     outLightType: 0, // 箱外灯光类型
-    outLightBrightness: "100", // 箱外照明亮度
+    outLightBrightness: '100', // 箱外照明亮度
   };
   formVisible.value = true;
 }
 
 async function handleEdit(row: DeviceConfig) {
   try {
-    formTitle.value = "编辑设备配置";
+    formTitle.value = '编辑设备配置';
     const res = await getDeviceConfigDetailApi(row.deviceConfigId);
     formData.value = res || {};
     formVisible.value = true;
   } catch {
-    ElMessage.error("获取配置信息失败");
+    ElMessage.error('获取配置信息失败');
   }
 }
 
 async function handleSubmit() {
   if (!formData.value.configName?.trim()) {
-    ElMessage.warning("请输入配置名称");
+    ElMessage.warning('请输入配置名称');
     return;
   }
 
@@ -171,11 +171,11 @@ async function handleSubmit() {
       ? editDeviceConfigApi
       : addDeviceConfigApi;
     await api(formData.value);
-    ElMessage.success(formData.value.deviceConfigId ? "修改成功" : "新增成功");
+    ElMessage.success(formData.value.deviceConfigId ? '修改成功' : '新增成功');
     formVisible.value = false;
     handleQuery();
   } catch {
-    ElMessage.error("操作失败");
+    ElMessage.error('操作失败');
   } finally {
     formSubmitting.value = false;
   }
@@ -189,7 +189,7 @@ async function handleDelete(row?: DeviceConfig) {
     ids = [row.deviceConfigId];
   } else {
     if (selectedIds.value.length === 0) {
-      ElMessage.warning("请选择要删除的记录");
+      ElMessage.warning('请选择要删除的记录');
       return;
     }
     ids = selectedIds.value;
@@ -198,8 +198,8 @@ async function handleDelete(row?: DeviceConfig) {
   try {
     await ElMessageBox.confirm(
       `确定要删除选中的 ${ids.length} 条配置吗？`,
-      "提示",
-      { type: "warning" }
+      '提示',
+      { type: 'warning' },
     );
 
     for (const id of ids) {
@@ -338,7 +338,7 @@ onMounted(() => {
             <template #default="{ row }">
               <!-- 设备品牌 -->
               <template v-if="col.key === 'deviceBrand'">
-                 <DictTag :options="device_brand" :value="row.deviceBrand" />
+                <DictTag :options="device_brand" :value="row.deviceBrand" />
               </template>
               <!-- 投递超时 -->
               <template v-else-if="col.key === 'deliverEndTimeout'">

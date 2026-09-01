@@ -1,22 +1,27 @@
-import type { Recordable, UserInfo } from "@vben/types";
+import type { Recordable, UserInfo } from '@vben/types';
 
 import type { AuthApi } from '#/api';
 
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
-import { LOGIN_PATH } from "@vben/constants";
-import {preferences } from "@vben/preferences";
-import { resetAllStores, useAccessStore, useTabbarStore, useUserStore } from "@vben/stores";
+import { LOGIN_PATH } from '@vben/constants';
+import { preferences } from '@vben/preferences';
+import {
+  resetAllStores,
+  useAccessStore,
+  useTabbarStore,
+  useUserStore,
+} from '@vben/stores';
 
-import { ElMessage, ElNotification } from "element-plus";
-import { defineStore } from "pinia";
+import { ElMessage, ElNotification } from 'element-plus';
+import { defineStore } from 'pinia';
 
 import { changeMerchantApi, getUserInfoApi, loginApi, logoutApi } from '#/api';
-import { $t } from "#/locales";
+import { $t } from '#/locales';
 import { useDictStore } from '#/store/modules/dict';
 
-export const useAuthStore = defineStore("auth", () => {
+export const useAuthStore = defineStore('auth', () => {
   const tabbarStore = useTabbarStore();
   const accessStore = useAccessStore();
   const userStore = useUserStore();
@@ -51,10 +56,10 @@ export const useAuthStore = defineStore("auth", () => {
     const permissions = extractAccessCodes(userInfo);
 
     return {
-      userId: userInfo.personId ? String(userInfo.personId) : "",
+      userId: userInfo.personId ? String(userInfo.personId) : '',
       user: userInfo.user,
-      realName: userInfo.personName || userInfo.user.nickName || "",
-      avatar: userInfo.avatar || "", // 确保 avatar 是字符串
+      realName: userInfo.personName || userInfo.user.nickName || '',
+      avatar: userInfo.avatar || '', // 确保 avatar 是字符串
       roles: permissions,
       merchantId: userInfo.merchantId || 0,
       superAdminFlag: userInfo.superAdminFlag || 0,
@@ -73,7 +78,10 @@ export const useAuthStore = defineStore("auth", () => {
   /**
    * 异步处理登录操作
    */
-  async function authLogin(params: Recordable<any>, onSuccess?: () => Promise<void> | void) {
+  async function authLogin(
+    params: Recordable<any>,
+    onSuccess?: () => Promise<void> | void,
+  ) {
     // eslint-disable-next-line no-useless-assignment
     let userInfo: null | UserInfo = null;
     try {
@@ -88,7 +96,7 @@ export const useAuthStore = defineStore("auth", () => {
       });
 
       if (!accessToken) {
-        throw new Error("登录失败");
+        throw new Error('登录失败');
       }
 
       // 2. 存储 token
@@ -108,10 +116,10 @@ export const useAuthStore = defineStore("auth", () => {
       // } as any;
 
       if (!isValidUserInfo(userInfoResult)) {
-        console.error("用户信息无效:", userInfoResult);
-        ElMessage.error("获取用户信息失败，请重新登录");
-        accessStore.setAccessToken("");
-        throw new Error("用户信息无效");
+        console.error('用户信息无效:', userInfoResult);
+        ElMessage.error('获取用户信息失败，请重新登录');
+        accessStore.setAccessToken('');
+        throw new Error('用户信息无效');
       }
 
       // 4. 提取权限码
@@ -128,15 +136,17 @@ export const useAuthStore = defineStore("auth", () => {
       if (accessStore.loginExpired) {
         accessStore.setLoginExpired(false);
       } else {
-        await (onSuccess ? onSuccess() : router.push(preferences.app.defaultHomePath));
+        await (onSuccess
+          ? onSuccess()
+          : router.push(preferences.app.defaultHomePath));
       }
 
       // 8. 显示欢迎通知
       if (userInfo?.realName) {
         ElNotification({
-          message: `${$t("authentication.loginSuccessDesc")}: ${userInfo.realName}`,
-          title: $t("authentication.loginSuccess"),
-          type: "success",
+          message: `${$t('authentication.loginSuccessDesc')}: ${userInfo.realName}`,
+          title: $t('authentication.loginSuccess'),
+          type: 'success',
         });
       }
     } finally {
@@ -162,8 +172,8 @@ export const useAuthStore = defineStore("auth", () => {
       const userInfoResult = await getUserInfoApi();
 
       if (!isValidUserInfo(userInfoResult)) {
-        ElMessage.error("获取商户信息失败");
-        throw new Error("用户信息无效");
+        ElMessage.error('获取商户信息失败');
+        throw new Error('用户信息无效');
       }
       const accessCodes = extractAccessCodes(userInfoResult);
       const userInfo = transformUserInfo(userInfoResult);
@@ -173,9 +183,8 @@ export const useAuthStore = defineStore("auth", () => {
 
       window.location.reload();
       await router.push(preferences.app.defaultHomePath);
-
     } catch (error) {
-      console.error("切换商户失败", error);
+      console.error('切换商户失败', error);
       throw error;
     }
   }
@@ -196,7 +205,9 @@ export const useAuthStore = defineStore("auth", () => {
 
     await router.replace({
       path: LOGIN_PATH,
-      query: redirect ? { redirect: encodeURIComponent(router.currentRoute.value.fullPath) } : {},
+      query: redirect
+        ? { redirect: encodeURIComponent(router.currentRoute.value.fullPath) }
+        : {},
     });
   }
 
@@ -208,10 +219,10 @@ export const useAuthStore = defineStore("auth", () => {
       const userInfoResult = await getUserInfoApi();
 
       if (!isValidUserInfo(userInfoResult)) {
-        console.error("用户信息无效:", userInfoResult);
-        accessStore.setAccessToken("");
+        console.error('用户信息无效:', userInfoResult);
+        accessStore.setAccessToken('');
         userStore.setUserInfo(null as any);
-        throw new Error("用户信息无效");
+        throw new Error('用户信息无效');
       }
       const accessCodes = extractAccessCodes(userInfoResult);
       const userInfo = transformUserInfo(userInfoResult);
@@ -221,7 +232,7 @@ export const useAuthStore = defineStore("auth", () => {
 
       return userInfo;
     } catch (error) {
-      console.error("获取用户信息失败", error);
+      console.error('获取用户信息失败', error);
       throw error;
     }
   }

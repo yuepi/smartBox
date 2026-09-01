@@ -30,17 +30,20 @@ export function parseTime(time: any, pattern?: string) {
     s: date.getSeconds(),
     a: date.getDay(),
   };
-  return format.replace(/{(y|m|d|h|i|s|a)+}/g, (result: string, key: string) => {
-    let value = formatObj[key];
-    // Note: getDay() returns 0 on Sunday
-    if (key === 'a') {
-      return ['日', '一', '二', '三', '四', '五', '六'][value];
-    }
-    if (result.length > 0 && value < 10) {
-      value = '0' + value;
-    }
-    return value || 0;
-  });
+  return format.replace(
+    /{(y|m|d|h|i|s|a)+}/g,
+    (result: string, key: string) => {
+      let value = formatObj[key];
+      // Note: getDay() returns 0 on Sunday
+      if (key === 'a') {
+        return ['日', '一', '二', '三', '四', '五', '六'][value];
+      }
+      if (result.length > 0 && value < 10) {
+        value = '0' + value;
+      }
+      return value || 0;
+    },
+  );
 }
 
 /**
@@ -49,9 +52,18 @@ export function parseTime(time: any, pattern?: string) {
  * @param dateRange
  * @param propName
  */
-export const addDateRange = (params: any, dateRange: any[], propName?: string) => {
+export const addDateRange = (
+  params: any,
+  dateRange: any[],
+  propName?: string,
+) => {
   const search = params;
-  search.params = typeof search.params === 'object' && search.params !== null && !Array.isArray(search.params) ? search.params : {};
+  search.params =
+    typeof search.params === 'object' &&
+    search.params !== null &&
+    !Array.isArray(search.params)
+      ? search.params
+      : {};
   dateRange = Array.isArray(dateRange) ? dateRange : [];
   if (typeof propName === 'undefined') {
     search.params['beginTime'] = dateRange[0];
@@ -149,7 +161,12 @@ export const mergeRecursive = (source: any, target: any) => {
 };
 
 // 这个不会改变list
-export function unflatten(data: any, rootId: any = null, dataKey = 'id', parentKey = 'pid') {
+export function unflatten(
+  data: any,
+  rootId: any = null,
+  dataKey = 'id',
+  parentKey = 'pid',
+) {
   const tree: any[] = [];
   const childrenMap = {} as any;
 
@@ -175,7 +192,6 @@ export function unflatten(data: any, rootId: any = null, dataKey = 'id', parentK
   return tree;
 }
 
-
 /**
  * 构造树型结构数据
  * 这个方法或改变data的chirdren
@@ -184,7 +200,12 @@ export function unflatten(data: any, rootId: any = null, dataKey = 'id', parentK
  * @param {*} parentId 父节点字段 默认 'parentId'
  * @param {*} children 孩子节点字段 默认 'children'
  */
-export const handleTree = <T>(data: any[], id?: string, pid?: string, children?: string): T[] => {
+export const handleTree = <T>(
+  data: any[],
+  id?: string,
+  pid?: string,
+  children?: string,
+): T[] => {
   const config: {
     id: string;
     pid: string;
@@ -229,7 +250,11 @@ export const tansParams = (params: any) => {
     if (value !== null && value !== '' && typeof value !== 'undefined') {
       if (typeof value === 'object') {
         for (const key of Object.keys(value)) {
-          if (value[key] !== null && value[key] !== '' && typeof value[key] !== 'undefined') {
+          if (
+            value[key] !== null &&
+            value[key] !== '' &&
+            typeof value[key] !== 'undefined'
+          ) {
             const params = propName + '[' + key + ']';
             const subPart = encodeURIComponent(params) + '=';
             result += subPart + encodeURIComponent(value[key]) + '&';

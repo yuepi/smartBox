@@ -3,17 +3,22 @@ import type { Device, DevicePageParams } from '#/api/device/device';
 import type { Dept } from '#/api/system/dept';
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
-import { Page } from "@vben/common-ui";
+import { computed, onMounted, reactive, ref } from 'vue';
+
+import { Page } from '@vben/common-ui';
 
 import {
   deleteDeviceApi,
   deviceUpgradeBatchApi,
   getDevicePageApi,
-  operateDeviceApi
+  operateDeviceApi,
 } from '#/api/device/device';
 import { getMerchantDeptListApi } from '#/api/system/dept';
-import { defaultDeviceColumns, DEVICE_STORAGE_KEY } from '#/constants/tableColumns';
-import { ModuleCodeMap } from "#/hooks/useExport";
+import {
+  defaultDeviceColumns,
+  DEVICE_STORAGE_KEY,
+} from '#/constants/tableColumns';
+import { ModuleCodeMap } from '#/hooks/useExport';
 
 import DetailModal from './detail.vue';
 import DeviceImagePreview from './deviceImagePreview.vue';
@@ -23,12 +28,18 @@ import OperateModal from './operation.vue';
 import QrcodeModal from './qrCode.vue';
 import UpgradeModal from './upgrade.vue';
 
-const { device_brand, device_screen, device_hatch_type, device_online_status, device_status } = useDicts([
-  "device_brand",
-  "device_screen",
-  "device_hatch_type",
-  "device_online_status",
-  "device_status"
+const {
+  device_brand,
+  device_screen,
+  device_hatch_type,
+  device_online_status,
+  device_status,
+} = useDicts([
+  'device_brand',
+  'device_screen',
+  'device_hatch_type',
+  'device_online_status',
+  'device_status',
 ]);
 
 // --- 表格列配置 ---
@@ -114,7 +125,7 @@ async function handleBatchUpgrade() {
           }
           return true;
         },
-      }
+      },
     );
 
     batchUpgradeLoading.value = true;
@@ -124,7 +135,7 @@ async function handleBatchUpgrade() {
     });
     ElMessage.success(`已向 ${selectedIds.value.length} 台设备发送升级指令`);
     selectedIds.value = [];
-    handleQuery();
+    loadData();
   } catch {
     // 用户取消或接口失败
   } finally {
@@ -135,29 +146,29 @@ async function handleBatchUpgrade() {
 // --- 下拉菜单 ---
 function handleCommand(cmd: string, row: Device) {
   switch (cmd) {
-    case "ipPort": {
+    case 'ipPort': {
       handleChangeIpPort(row);
       break;
     }
-    case "operation": {
+    case 'operation': {
       handleOperation(row);
       break;
     }
-    case "restart": {
-      ElMessageBox.confirm("确认重启设备吗？", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
+    case 'restart': {
+      ElMessageBox.confirm('确认重启设备吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
       }).then(async () => {
         await operateDeviceApi({
           deviceId: row.deviceId,
           operateType: 3,
         });
-        ElMessage.success("重启指令已发送");
+        ElMessage.success('重启指令已发送');
       });
       break;
     }
-    case "upgrade": {
+    case 'upgrade': {
       handleUpgrade(row);
       break;
     }
@@ -183,7 +194,7 @@ async function loadData() {
     total.value = res.total || 0;
   } catch (error) {
     console.error(error);
-    ElMessage.error("加载数据失败");
+    ElMessage.error('加载数据失败');
   } finally {
     loading.value = false;
   }
@@ -196,12 +207,12 @@ function handleView(row: Device) {
 
 // --- 新增 ---
 function handleAdd() {
-  editModalRef.value?.open()
+  editModalRef.value?.open();
 }
 
 // --- 编辑 ---
 function handleEdit(row: Device) {
-  editModalRef.value?.open(row)
+  editModalRef.value?.open(row);
 }
 
 function handleOperation(row: Device) {
@@ -234,13 +245,17 @@ async function handleDelete(row?: Device) {
     ids = [row.deviceId];
   } else {
     if (selectedIds.value.length === 0) {
-      ElMessage.warning("请选择要删除的记录");
+      ElMessage.warning('请选择要删除的记录');
       return;
     }
     ids = selectedIds.value;
   }
   try {
-    await ElMessageBox.confirm(`确定要删除选中的 ${ids.length} 条设备吗？`, "提示", { type: "warning" });
+    await ElMessageBox.confirm(
+      `确定要删除选中的 ${ids.length} 条设备吗？`,
+      '提示',
+      { type: 'warning' },
+    );
     for (const id of ids) {
       await deleteDeviceApi(id);
     }
@@ -263,6 +278,7 @@ function handleQuery() {
 
 function resetQuery() {
   queryParams.deviceName = undefined;
+  queryParams.deptId = undefined;
   queryParams.deviceNo = undefined;
   queryParams.onlineStatus = undefined;
   queryParams.status = undefined;
@@ -281,19 +297,29 @@ onMounted(() => {
 <template>
   <Page auto-content-height>
     <BaseTableLayout
-v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="loading"
-      :total="total" @search="loadData" @reset="resetQuery"
->
+      v-model:query-params="queryParams"
+      v-model:more-params="moreParams"
+      :loading="loading"
+      :total="total"
+      @search="loadData"
+      @reset="resetQuery"
+    >
       <!-- 📥 基础常驻筛选项 -->
       <template #search-basic>
         <el-form-item>
           <el-tree-select
-v-model="queryParams.deptId" :data="deptOptions" :props="{
-            value: 'deptId',
-            label: 'deptName',
-            children: 'children',
-          }" placeholder="请选择" clearable check-strictly style="width: 200px"
->
+            v-model="queryParams.deptId"
+            :data="deptOptions"
+            :props="{
+              value: 'deptId',
+              label: 'deptName',
+              children: 'children',
+            }"
+            placeholder="请选择"
+            clearable
+            check-strictly
+            style="width: 200px"
+          >
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">部门:</span>
             </template>
@@ -302,9 +328,12 @@ v-model="queryParams.deptId" :data="deptOptions" :props="{
 
         <el-form-item>
           <el-input
-v-model="queryParams.deviceName" placeholder="请输入" clearable style="width: 200px"
+            v-model="queryParams.deviceName"
+            placeholder="请输入"
+            clearable
+            style="width: 200px"
             @keyup.enter="handleQuery"
->
+          >
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">设备名称:</span>
             </template>
@@ -313,9 +342,12 @@ v-model="queryParams.deviceName" placeholder="请输入" clearable style="width:
 
         <el-form-item>
           <el-input
-v-model="queryParams.deviceNo" placeholder="请输入" clearable style="width: 200px"
+            v-model="queryParams.deviceNo"
+            placeholder="请输入"
+            clearable
+            style="width: 200px"
             @keyup.enter="handleQuery"
->
+          >
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">设备编号:</span>
             </template>
@@ -324,29 +356,50 @@ v-model="queryParams.deviceNo" placeholder="请输入" clearable style="width: 2
 
         <el-form-item>
           <el-input
-v-model="queryParams.qrCode" placeholder="请输入" clearable style="width: 200px"
+            v-model="queryParams.qrCode"
+            placeholder="请输入"
+            clearable
+            style="width: 200px"
             @keyup.enter="handleQuery"
->
+          >
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">面贴编号:</span>
             </template>
           </el-input>
         </el-form-item>
         <el-form-item>
-          <el-select v-model="queryParams.onlineStatus" clearable style="width: 200px">
+          <el-select
+            v-model="queryParams.onlineStatus"
+            clearable
+            style="width: 200px"
+          >
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">在线状态:</span>
             </template>
-            <el-option v-for="item in device_online_status" :key="item.value" :label="item.label" :value="item.value" />
+            <el-option
+              v-for="item in device_online_status"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
 
         <el-form-item>
-          <el-select v-model="queryParams.status" clearable style="width: 200px">
+          <el-select
+            v-model="queryParams.status"
+            clearable
+            style="width: 200px"
+          >
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">状态:</span>
             </template>
-            <el-option v-for="item in device_status" :key="item.value" :label="item.label" :value="item.value" />
+            <el-option
+              v-for="item in device_status"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
       </template>
@@ -360,13 +413,26 @@ v-model="queryParams.qrCode" placeholder="请输入" clearable style="width: 200
         <el-button type="primary" plain icon="Plus" @click="handleAdd">
           新增设备
         </el-button>
-        <ExportButton :module-code="ModuleCodeMap.DEVICE" :fields="visibleColumns" :find-cond="queryParams" />
+        <ExportButton
+          :module-code="ModuleCodeMap.DEVICE"
+          :fields="visibleColumns"
+          :find-cond="queryParams"
+        />
 
-        <el-button type="danger" plain icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete()">
+        <el-button
+          type="danger"
+          plain
+          icon="Delete"
+          :disabled="selectedIds.length === 0"
+          @click="handleDelete()"
+        >
           批量删除
         </el-button>
 
-        <el-dropdown v-if="selectedIds.length > 0" @command="handleBatchQrcodeCommand">
+        <el-dropdown
+          v-if="selectedIds.length > 0"
+          @command="handleBatchQrcodeCommand"
+        >
           <el-button type="primary" plain>
             批量二维码
             <el-icon class="el-icon--right">
@@ -376,19 +442,32 @@ v-model="queryParams.qrCode" placeholder="请输入" clearable style="width: 200
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item command="show">批量展示二维码</el-dropdown-item>
-              <el-dropdown-item command="download">批量下载二维码</el-dropdown-item>
+              <el-dropdown-item command="download">
+                批量下载二维码
+              </el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
 
-        <el-button type="warning" plain icon="Upload" :disabled="selectedIds.length === 0" @click="handleBatchUpgrade">
+        <el-button
+          type="warning"
+          plain
+          icon="Upload"
+          :disabled="selectedIds.length === 0"
+          @click="handleBatchUpgrade"
+        >
           批量升级
         </el-button>
 
         <transition name="el-fade-in">
-          <span v-if="selectedIds.length > 0" class="ml-2 text-sm text-gray-400">
+          <span
+            v-if="selectedIds.length > 0"
+            class="ml-2 text-sm text-gray-400"
+          >
             已选
-            <span class="text-red-500 font-medium">{{ selectedIds.length }}</span>
+            <span class="text-red-500 font-medium">{{
+              selectedIds.length
+            }}</span>
             项
           </span>
         </transition>
@@ -397,44 +476,62 @@ v-model="queryParams.qrCode" placeholder="请输入" clearable style="width: 200
       <!-- 📥 工具栏右侧 -->
       <template #toolbar-right>
         <ColumnSelector
-:storage-key="DEVICE_STORAGE_KEY" :default-columns="defaultDeviceColumns"
+          :storage-key="DEVICE_STORAGE_KEY"
+          :default-columns="defaultDeviceColumns"
           @update:columns="handleColumnsUpdate"
-/>
+        />
       </template>
 
       <!-- 📥 表格 -->
       <template #table>
         <el-table
-:data="tableData" border stripe style="width: 100%; height: 100%"
+          :data="tableData"
+          border
+          stripe
+          style="width: 100%; height: 100%"
           @selection-change="handleSelectionChange"
->
+        >
           <el-table-column type="selection" width="55" align="center" />
 
           <el-table-column
-v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
-            :width="typeof col.width === 'number' ? col.width : undefined" :min-width="col.minWidth" :align="col.align"
-            :show-overflow-tooltip="col.showOverflowTooltip || false" :fixed="col.fixed"
->
+            v-for="col in visibleColumns"
+            :key="col.key"
+            :prop="col.key"
+            :label="col.label"
+            :width="typeof col.width === 'number' ? col.width : undefined"
+            :min-width="col.minWidth"
+            :align="col.align"
+            :show-overflow-tooltip="col.showOverflowTooltip || false"
+            :fixed="col.fixed"
+          >
             <template #default="{ row }">
               <template v-if="col.key === 'deviceHatchType'">
-                <DictTag :options="device_hatch_type" :value="row.deviceHatchType" />
+                <DictTag
+                  :options="device_hatch_type"
+                  :value="row.deviceHatchType"
+                />
               </template>
               <template v-else-if="col.key === 'deviceBrand'">
                 <DictTag :options="device_brand" :value="row.deviceBrand" />
               </template>
               <template v-else-if="col.key === 'onlineStatus'">
-                <DictTag :options="device_online_status" :value="row.onlineStatus" />
+                <DictTag
+                  :options="device_online_status"
+                  :value="row.onlineStatus"
+                />
               </template>
               <template v-else-if="col.key === 'status'">
                 <DictTag :options="device_status" :value="row.status" />
               </template>
               <template v-else-if="col.key === 'qrCode'">
                 <div class="flex items-center justify-center gap-1">
-                  <span>{{ row.qrCode || "-" }}</span>
+                  <span>{{ row.qrCode || '-' }}</span>
                   <el-icon
-v-if="row.qrCode" class="cursor-pointer text-primary hover:text-primary-dark" title="查看二维码"
+                    v-if="row.qrCode"
+                    class="cursor-pointer text-primary hover:text-primary-dark"
+                    title="查看二维码"
                     @click.stop="handleQrcodeShow(row)"
->
+                  >
                     <Picture />
                   </el-icon>
                 </div>
@@ -448,7 +545,12 @@ v-if="row.qrCode" class="cursor-pointer text-primary hover:text-primary-dark" ti
             </template>
           </el-table-column>
 
-          <el-table-column label="操作" width="200" fixed="right" align="center">
+          <el-table-column
+            label="操作"
+            width="200"
+            fixed="right"
+            align="center"
+          >
             <template #default="{ row }">
               <div class="action-buttons">
                 <el-button size="small" type="info" @click="handleView(row)">
@@ -457,16 +559,30 @@ v-if="row.qrCode" class="cursor-pointer text-primary hover:text-primary-dark" ti
                 <el-button size="small" type="primary" @click="handleEdit(row)">
                   编辑
                 </el-button>
-                <el-button size="small" type="warning" @click="handleQuickCapture(row)">
+                <el-button
+                  size="small"
+                  type="warning"
+                  @click="handleQuickCapture(row)"
+                >
                   抓拍
                 </el-button>
-                <el-button size="small" type="warning" @click="handleQuickScreenshot(row)">
+                <el-button
+                  size="small"
+                  type="warning"
+                  @click="handleQuickScreenshot(row)"
+                >
                   截图
                 </el-button>
-                <el-button size="small" type="danger" @click="handleDelete(row)">
+                <el-button
+                  size="small"
+                  type="danger"
+                  @click="handleDelete(row)"
+                >
                   删除
                 </el-button>
-                <el-dropdown @command="(cmd: string) => handleCommand(cmd, row)">
+                <el-dropdown
+                  @command="(cmd: string) => handleCommand(cmd, row)"
+                >
                   <el-button size="small" type="primary">
                     更多
                     <el-icon class="el-icon--right">
@@ -475,10 +591,18 @@ v-if="row.qrCode" class="cursor-pointer text-primary hover:text-primary-dark" ti
                   </el-button>
                   <template #dropdown>
                     <el-dropdown-menu>
-                      <el-dropdown-item command="restart">重启设备</el-dropdown-item>
-                      <el-dropdown-item command="operation">设备操作</el-dropdown-item>
-                      <el-dropdown-item command="ipPort">切换IP端口</el-dropdown-item>
-                      <el-dropdown-item command="upgrade">设备升级</el-dropdown-item>
+                      <el-dropdown-item command="restart">
+                        重启设备
+                      </el-dropdown-item>
+                      <el-dropdown-item command="operation">
+                        设备操作
+                      </el-dropdown-item>
+                      <el-dropdown-item command="ipPort">
+                        切换IP端口
+                      </el-dropdown-item>
+                      <el-dropdown-item command="upgrade">
+                        设备升级
+                      </el-dropdown-item>
                     </el-dropdown-menu>
                   </template>
                 </el-dropdown>

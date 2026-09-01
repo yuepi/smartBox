@@ -56,20 +56,34 @@ async function handleSwitchMerchant(merchantId: number) {
 
 <template>
   <el-dialog
-v-model="open" title="切换商户" width="420px" class="merchant-select-dialog" :close-on-click-modal="false"
-    destroy-on-close append-to-body
->
+    v-model="open"
+    title="切换商户"
+    width="420px"
+    class="merchant-select-dialog"
+    :close-on-click-modal="false"
+    destroy-on-close
+    append-to-body
+  >
     <div v-if="merchantList.length > 5" class="search-box">
-      <el-input v-model="searchKeyword" placeholder="搜索商户名称..." prefix-icon="Search" clearable />
+      <el-input
+        v-model="searchKeyword"
+        placeholder="搜索商户名称..."
+        prefix-icon="Search"
+        clearable
+      />
     </div>
 
     <div v-loading="loading" class="merchant-dialog-list">
       <template v-if="filteredMerchantList.length > 0">
         <div
-v-for="merchant in filteredMerchantList" :key="merchant.merchantId" class="merchant-dialog-item" :class="{
-          active: merchant.merchantId === currentMerchantId,
-        }" @click="handleSwitchMerchant(merchant.merchantId)"
->
+          v-for="merchant in filteredMerchantList"
+          :key="merchant.merchantId"
+          class="merchant-dialog-item"
+          :class="{
+            active: merchant.merchantId === currentMerchantId,
+          }"
+          @click="handleSwitchMerchant(merchant.merchantId)"
+        >
           <div class="merchant-info">
             <el-icon class="merchant-icon">
               <OfficeBuilding />
@@ -80,7 +94,13 @@ v-for="merchant in filteredMerchantList" :key="merchant.merchantId" class="merch
           </div>
 
           <div class="merchant-status">
-            <el-tag v-if="merchant.merchantId === currentMerchantId" type="primary" effect="light" size="small" round>
+            <el-tag
+              v-if="merchant.merchantId === currentMerchantId"
+              type="primary"
+              effect="light"
+              size="small"
+              round
+            >
               <el-icon>
                 <Check />
               </el-icon>

@@ -1,9 +1,8 @@
 <script lang="ts" setup>
-import type { FilterNodeMethodFunction, TreeInstance } from "element-plus";
-
+import type { FilterNodeMethodFunction, TreeInstance } from 'element-plus';
 
 interface Tree {
-  [key: string]: any
+  [key: string]: any;
 }
 
 const props = defineProps({
@@ -13,7 +12,7 @@ const props = defineProps({
   },
   tip: {
     type: String,
-    default: "搜索分类",
+    default: '搜索分类',
   },
   defaultExpand: {
     type: Boolean,
@@ -21,21 +20,21 @@ const props = defineProps({
   },
   nodeKey: {
     type: String,
-    default: "deptId",
+    default: 'deptId',
   },
   labelKey: {
     type: String,
-    default: "deptName",
-  }
+    default: 'deptName',
+  },
 });
 
-const emits = defineEmits(["nodeClick"]);
+const emits = defineEmits(['nodeClick']);
 
-const filterText = ref("");
+const filterText = ref('');
 const treeRef = ref<TreeInstance>();
 
 const defaultProps = {
-  children: "children",
+  children: 'children',
   label: props.labelKey,
 };
 
@@ -50,7 +49,7 @@ const treeQuery = async () => {
     const res = await props.api({ status: 0 }); // 默认查启用状态
     state.data = res || [];
   } catch (error) {
-    console.error("树组件加载数据失败:", error);
+    console.error('树组件加载数据失败:', error);
   } finally {
     state.loading = false;
   }
@@ -63,13 +62,12 @@ const filterNode: FilterNodeMethodFunction = (value: string, data: Tree) => {
 };
 
 watch(filterText, (val: string) => {
-    treeRef.value?.filter(val);
-
+  treeRef.value?.filter(val);
 });
 
 // 节点点击向外发射事件
 const nodeClick = (node: Tree) => {
-  emits("nodeClick", node);
+  emits('nodeClick', node);
 };
 
 const toggleExpandAll = (isExpand: boolean) => {
@@ -84,20 +82,20 @@ const toggleExpandAll = (isExpand: boolean) => {
 
 const handleCommand = async (command: string) => {
   switch (command) {
-    case "collapseAll": {
+    case 'collapseAll': {
       toggleExpandAll(false);
       break;
     }
-    case "expandAll": {
+    case 'expandAll': {
       toggleExpandAll(true);
       break;
     }
-    case "refresh": {
+    case 'refresh': {
       await treeQuery();
       break;
     }
-    case "rootNode": {
-      emits("nodeClick", null);
+    case 'rootNode': {
+      emits('nodeClick', null);
       break;
     }
   }
@@ -116,22 +114,34 @@ defineExpose({ refresh: treeQuery });
     <template #header>
       <div class="flex items-center gap-1">
         <div class="flex-1">
-          <el-input prefix-icon="Search" v-model="filterText" :placeholder="props.tip" clearable size="default" />
+          <el-input
+            prefix-icon="Search"
+            v-model="filterText"
+            :placeholder="props.tip"
+            clearable
+            size="default"
+          />
         </div>
         <el-dropdown @command="handleCommand" trigger="click">
           <el-button icon="MoreFilled" class="!px-2" />
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item command="expandAll">全部展开</el-dropdown-item>
-              <el-dropdown-item command="collapseAll">全部折叠</el-dropdown-item>
-              <el-dropdown-item command="rootNode">全组织（根）</el-dropdown-item>
-              <el-dropdown-item command="refresh" divided>刷新数据</el-dropdown-item>
+              <el-dropdown-item command="collapseAll"
+                >全部折叠</el-dropdown-item
+              >
+              <el-dropdown-item command="rootNode"
+                >全组织（根）</el-dropdown-item
+              >
+              <el-dropdown-item command="refresh" divided
+                >刷新数据</el-dropdown-item
+              >
             </el-dropdown-menu>
           </template>
         </el-dropdown>
       </div>
     </template>
-    
+
     <div class="tree-container thin-scrollbar" v-loading="state.loading">
       <el-tree
         ref="treeRef"
@@ -154,11 +164,11 @@ defineExpose({ refresh: treeQuery });
   flex-direction: column;
   height: 100%;
   border: none;
-  
+
   :deep(.el-card__header) {
     padding: 12px;
   }
-  
+
   :deep(.el-card__body) {
     flex: 1;
     padding: 12px;

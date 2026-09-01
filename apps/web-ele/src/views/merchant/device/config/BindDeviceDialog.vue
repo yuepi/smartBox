@@ -65,7 +65,7 @@ async function loadUnboundDevices() {
   try {
     // 💡 提示：后期后端出完未绑定接口后，直接把下面的逻辑替换为一个 API 调用即可
     // 例如：const res = await getUnboundDevicePageApi({ deviceConfigId: currentConfigId.value, keyword: unboundSearchKeyword.value })
-    
+
     // ----- 临时前端兜底逻辑 Start -----
     const [allDevices, boundRes] = await Promise.all([
       getDeviceListApi({ status: 0 }),
@@ -76,8 +76,12 @@ async function loadUnboundDevices() {
       }),
     ]);
 
-    const boundIds = new Set((boundRes.records || []).map((d: Device) => d.deviceId));
-    let list = (allDevices || []).filter((d: Device) => !boundIds.has(d.deviceId));
+    const boundIds = new Set(
+      (boundRes.records || []).map((d: Device) => d.deviceId),
+    );
+    let list = (allDevices || []).filter(
+      (d: Device) => !boundIds.has(d.deviceId),
+    );
 
     // 本地搜索筛选
     if (unboundSearchKeyword.value.trim()) {
@@ -85,12 +89,11 @@ async function loadUnboundDevices() {
       list = list.filter(
         (d: Device) =>
           d.deviceName?.toLowerCase().includes(kw) ||
-          d.deviceNo?.toLowerCase().includes(kw)
+          d.deviceNo?.toLowerCase().includes(kw),
       );
     }
     unboundData.value = list;
     // ----- 临时前端兜底逻辑 End -----
-
   } catch {
     ElMessage.error('加载未绑定设备失败');
   } finally {
@@ -112,7 +115,7 @@ async function open(configId: number, configName: string) {
   currentConfigId.value = configId;
   currentConfigName.value = configName || '设备配置';
   visible.value = true;
-  
+
   boundParams.pageNo = 1;
   unboundSearchKeyword.value = '';
   boundSearchKeyword.value = '';
@@ -123,7 +126,7 @@ async function open(configId: number, configName: string) {
 // 绑定选中设备（左 -> 右）
 async function handleBind() {
   if (selectedUnboundIds.value.length === 0) return;
-  
+
   try {
     submitting.value = true;
     await deviceBindDeviceConfigApi({
@@ -148,7 +151,7 @@ async function handleUnbind() {
     await ElMessageBox.confirm(
       `确定要解绑选中的 ${selectedBoundIds.value.length} 台设备吗？`,
       '解绑确认',
-      { type: 'warning' }
+      { type: 'warning' },
     );
     submitting.value = true;
     await deviceUnBindDeviceConfigApi({ deviceIds: selectedBoundIds.value });
@@ -184,7 +187,7 @@ const filteredBoundData = computed(() => {
   return boundData.value.filter(
     (d: Device) =>
       d.deviceName?.toLowerCase().includes(kw) ||
-      d.deviceNo?.toLowerCase().includes(kw)
+      d.deviceNo?.toLowerCase().includes(kw),
   );
 });
 
@@ -206,10 +209,19 @@ defineExpose({ open });
     @close="visible = false"
   >
     <div class="transfer-container flex items-center gap-4">
-      <div class="panel flex-1 border border-gray-200 rounded p-3 flex flex-col h-[520px]">
-        <div class="panel-header flex items-center justify-between mb-3 pb-2 border-b">
-          <span class="font-medium text-gray-700">可绑定设备 ({{ unboundData.length }})</span>
-          <span v-if="selectedUnboundIds.length > 0" class="text-xs text-primary">
+      <div
+        class="panel flex-1 border border-gray-200 rounded p-3 flex flex-col h-[520px]"
+      >
+        <div
+          class="panel-header flex items-center justify-between mb-3 pb-2 border-b"
+        >
+          <span class="font-medium text-gray-700"
+            >可绑定设备 ({{ unboundData.length }})</span
+          >
+          <span
+            v-if="selectedUnboundIds.length > 0"
+            class="text-xs text-primary"
+          >
             已选 {{ selectedUnboundIds.length }} 台
           </span>
         </div>
@@ -230,12 +242,31 @@ defineExpose({ open });
             :data="unboundData"
             height="100%"
             stripe
-            @selection-change="(val: Device[]) => { selectedUnboundIds = val.map(v => v.deviceId) }"
+            @selection-change="
+              (val: Device[]) => {
+                selectedUnboundIds = val.map((v) => v.deviceId);
+              }
+            "
           >
             <el-table-column type="selection" width="40" align="center" />
-            <el-table-column prop="deviceName" label="设备名称" min-width="100" show-overflow-tooltip />
-            <el-table-column prop="deviceNo" label="设备编号" width="150" show-overflow-tooltip />
-            <el-table-column prop="deviceBrand" label="品牌" width="90" align="center">
+            <el-table-column
+              prop="deviceName"
+              label="设备名称"
+              min-width="100"
+              show-overflow-tooltip
+            />
+            <el-table-column
+              prop="deviceNo"
+              label="设备编号"
+              width="150"
+              show-overflow-tooltip
+            />
+            <el-table-column
+              prop="deviceBrand"
+              label="品牌"
+              width="90"
+              align="center"
+            >
               <template #default="{ row }">
                 <DictTag :options="device_brand" :value="row.deviceBrand" />
               </template>
@@ -265,9 +296,15 @@ defineExpose({ open });
         </el-button>
       </div>
 
-      <div class="panel flex-1 border border-gray-200 rounded p-3 flex flex-col h-[520px]">
-        <div class="panel-header flex items-center justify-between mb-3 pb-2 border-b">
-          <span class="font-medium text-gray-700">已绑定设备 ({{ boundTotal }})</span>
+      <div
+        class="panel flex-1 border border-gray-200 rounded p-3 flex flex-col h-[520px]"
+      >
+        <div
+          class="panel-header flex items-center justify-between mb-3 pb-2 border-b"
+        >
+          <span class="font-medium text-gray-700"
+            >已绑定设备 ({{ boundTotal }})</span
+          >
           <span v-if="selectedBoundIds.length > 0" class="text-xs text-danger">
             已选 {{ selectedBoundIds.length }} 台
           </span>
@@ -287,12 +324,31 @@ defineExpose({ open });
             :data="filteredBoundData"
             height="100%"
             stripe
-            @selection-change="(val: Device[]) => { selectedBoundIds = val.map(v => v.deviceId) }"
+            @selection-change="
+              (val: Device[]) => {
+                selectedBoundIds = val.map((v) => v.deviceId);
+              }
+            "
           >
             <el-table-column type="selection" width="40" align="center" />
-            <el-table-column prop="deviceName" label="设备名称" min-width="100" show-overflow-tooltip />
-            <el-table-column prop="deviceNo" label="设备编号" width="150" show-overflow-tooltip />
-            <el-table-column label="操作" width="60" align="center" fixed="right">
+            <el-table-column
+              prop="deviceName"
+              label="设备名称"
+              min-width="100"
+              show-overflow-tooltip
+            />
+            <el-table-column
+              prop="deviceNo"
+              label="设备编号"
+              width="150"
+              show-overflow-tooltip
+            />
+            <el-table-column
+              label="操作"
+              width="60"
+              align="center"
+              fixed="right"
+            >
               <template #default="{ row }">
                 <el-button
                   link

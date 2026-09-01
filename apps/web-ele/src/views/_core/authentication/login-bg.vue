@@ -5,7 +5,14 @@ import gsap from 'gsap';
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 let ctx: CanvasRenderingContext2D | null = null;
-let particles: Array<{ color: string; size: number; speedX: number; speedY: number; x: number; y: number; }> = [];
+let particles: Array<{
+  color: string;
+  size: number;
+  speedX: number;
+  speedY: number;
+  x: number;
+  y: number;
+}> = [];
 let animationId: number;
 let gsapCtx: gsap.Context | null = null;
 

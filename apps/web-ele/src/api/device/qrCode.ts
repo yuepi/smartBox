@@ -75,16 +75,16 @@ export function deleteQrcodeApi(qrcodeId: number) {
 /** 5.1 批量下载二维码（返回文件流/Blob） */
 export function batchDownQrcodeFileApi(data: BatchQrcodeParams) {
   return requestClient.post(
-    '/merchant/qrcode/batch/downBatchQrcode', 
+    '/merchant/qrcode/batch/downBatchQrcode',
     { ...data, qrcodeFlag: 0 }, // 强制设为下载模式
-    { responseType: 'blob' }    // 关键：交给拦截器特殊处理
+    { responseType: 'blob' }, // 关键：交给拦截器特殊处理
   );
 }
 
 /** 5.2 批量展示二维码（返回 JSON/Base64） */
 export function batchDownQrcodeJsonApi(data: BatchQrcodeParams) {
   return requestClient.post(
-    '/merchant/qrcode/batch/downBatchQrcode', 
-    { ...data, qrcodeFlag: 1 }  // 强制设为展示模式
+    '/merchant/qrcode/batch/downBatchQrcode',
+    { ...data, qrcodeFlag: 1 }, // 强制设为展示模式
   );
 }

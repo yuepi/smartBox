@@ -1,16 +1,18 @@
 <script lang="ts" setup>
 import { onMounted, reactive, ref } from 'vue';
-import { ElMessage, ElMessageBox } from 'element-plus';
-import { Search, Refresh, Edit, View } from '@element-plus/icons-vue';
+
 import { Page } from '@vben/common-ui';
 
+import { Search, Refresh, Edit, View } from '@element-plus/icons-vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
+
 import {
-  getMemberWalletPageApi,
   getMemberWalletDetailApi,
-  updateWalletStatusApi,
-  WalletStatusMap,
+  getMemberWalletPageApi,
   type MemberWallet,
   type MemberWalletPageParams,
+  updateWalletStatusApi,
+  WalletStatusMap,
 } from '#/api/member/memberWallet';
 
 // --- 状态变量 ---
@@ -43,7 +45,7 @@ const queryParams = reactive<MemberWalletPageParams>({
 });
 
 // 余额范围
-const balanceRange = ref<[number | null, number | null]>([null, null]);
+const balanceRange = ref<[null | number, null | number]>([null, null]);
 
 // --- 辅助函数 ---
 function getStatusText(status: number): string {
@@ -58,14 +60,12 @@ function formatBalance(balance: number): string {
   return `¥ ${(balance || 0).toFixed(2)}`;
 }
 
-
-
 // --- 数据加载 ---
 async function loadData() {
-  if (balanceRange.value[0] !== null) queryParams.minBalance = balanceRange.value[0];
-  else queryParams.minBalance = undefined;
-  if (balanceRange.value[1] !== null) queryParams.maxBalance = balanceRange.value[1];
-  else queryParams.maxBalance = undefined;
+  queryParams.minBalance =
+    balanceRange.value[0] !== null ? balanceRange.value[0] : undefined;
+  queryParams.maxBalance =
+    balanceRange.value[1] !== null ? balanceRange.value[1] : undefined;
 
   try {
     loading.value = true;
@@ -97,11 +97,12 @@ async function handleStatusToggle(row: MemberWallet) {
   const action = newStatus === 0 ? '解冻' : '冻结';
 
   try {
-    await ElMessageBox.confirm(`确定要${action}该会员钱包吗？`, '提示', { type: 'warning' });
+    await ElMessageBox.confirm(`确定要${action}该会员钱包吗？`, '提示', {
+      type: 'warning',
+    });
     await updateWalletStatusApi(row.memberWalletId, newStatus);
     ElMessage.success(`${action}成功`);
     loadData();
-
   } catch {
     // 取消操作
   }
@@ -142,7 +143,11 @@ onMounted(() => {
           <el-card shadow="hover" class="text-center">
             <div class="text-gray-500 text-sm">总余额</div>
             <div class="text-2xl font-bold text-success">
-              {{formatBalance(tableData.reduce((sum, item) => sum + (item.balance || 0), 0))}}
+              {{
+                formatBalance(
+                  tableData.reduce((sum, item) => sum + (item.balance || 0), 0),
+                )
+              }}
             </div>
           </el-card>
         </el-col>
@@ -150,7 +155,14 @@ onMounted(() => {
           <el-card shadow="hover" class="text-center">
             <div class="text-gray-500 text-sm">总冻结金额</div>
             <div class="text-2xl font-bold text-warning">
-              {{formatBalance(tableData.reduce((sum, item) => sum + (item.freezeBalance || 0), 0))}}
+              {{
+                formatBalance(
+                  tableData.reduce(
+                    (sum, item) => sum + (item.freezeBalance || 0),
+                    0,
+                  ),
+                )
+              }}
             </div>
           </el-card>
         </el-col>
@@ -160,23 +172,50 @@ onMounted(() => {
       <el-card shadow="never" class="mb-4">
         <el-form :inline="true" :model="queryParams">
           <el-form-item label="会员Id">
-            <el-input v-model="queryParams.memberId" placeholder="请输入会员ID" clearable style="width: 150px"
-              @keyup.enter="handleQuery" />
+            <el-input
+              v-model="queryParams.memberId"
+              placeholder="请输入会员ID"
+              clearable
+              style="width: 150px"
+              @keyup.enter="handleQuery"
+            />
           </el-form-item>
           <el-form-item label="钱包状态">
-            <el-select v-model="queryParams.status" placeholder="全部" clearable style="width: 100px">
-              <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
+            <el-select
+              v-model="queryParams.status"
+              placeholder="全部"
+              clearable
+              style="width: 100px"
+            >
+              <el-option
+                v-for="item in statusOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
             </el-select>
           </el-form-item>
           <el-form-item label="余额范围">
-            <el-input-number v-model="balanceRange[0]" :min="0" placeholder="最低" controls-position="right"
-              style="width: 120px" />
+            <el-input-number
+              v-model="balanceRange[0]"
+              :min="0"
+              placeholder="最低"
+              controls-position="right"
+              style="width: 120px"
+            />
             <span class="mx-2">-</span>
-            <el-input-number v-model="balanceRange[1]" :min="0" placeholder="最高" controls-position="right"
-              style="width: 120px" />
+            <el-input-number
+              v-model="balanceRange[1]"
+              :min="0"
+              placeholder="最高"
+              controls-position="right"
+              style="width: 120px"
+            />
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" :icon="Search" @click="handleQuery">查询</el-button>
+            <el-button type="primary" :icon="Search" @click="handleQuery">
+              查询
+            </el-button>
             <el-button :icon="Refresh" @click="resetQuery">重置</el-button>
           </el-form-item>
         </el-form>
@@ -184,52 +223,130 @@ onMounted(() => {
 
       <!-- 数据表格 -->
       <el-card shadow="never">
-        <el-table v-loading="loading" :data="tableData" border stripe style="width: 100%">
-          <el-table-column prop="memberWalletId" label="钱包ID" width="80" align="center" />
-          <el-table-column prop="memberId" label="会员ID" width="80" align="center" />
-          <el-table-column prop="balance" label="可用余额" min-width="140" align="right">
+        <el-table
+          v-loading="loading"
+          :data="tableData"
+          border
+          stripe
+          style="width: 100%"
+        >
+          <el-table-column
+            prop="memberWalletId"
+            label="钱包ID"
+            width="80"
+            align="center"
+          />
+          <el-table-column
+            prop="memberId"
+            label="会员ID"
+            width="80"
+            align="center"
+          />
+          <el-table-column
+            prop="balance"
+            label="可用余额"
+            min-width="140"
+            align="right"
+          >
             <template #default="{ row }">
-              <span class="font-medium text-success">{{ formatBalance(row.balance) }}</span>
+              <span class="font-medium text-success">{{
+                formatBalance(row.balance)
+              }}</span>
             </template>
           </el-table-column>
-          <el-table-column prop="freezeBalance" label="冻结余额" min-width="140" align="right">
+          <el-table-column
+            prop="freezeBalance"
+            label="冻结余额"
+            min-width="140"
+            align="right"
+          >
             <template #default="{ row }">
-              <span class="text-warning">{{ formatBalance(row.freezeBalance) }}</span>
+              <span class="text-warning">{{
+                formatBalance(row.freezeBalance)
+              }}</span>
             </template>
           </el-table-column>
-          <el-table-column prop="status" label="钱包状态" width="100" align="center">
+          <el-table-column
+            prop="status"
+            label="钱包状态"
+            width="100"
+            align="center"
+          >
             <template #default="{ row }">
               <el-tag :type="getStatusType(row.status)" size="small">
                 {{ getStatusText(row.status) }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="150" fixed="right" align="center">
+          <el-table-column
+            label="操作"
+            width="150"
+            fixed="right"
+            align="center"
+          >
             <template #default="{ row }">
-              <el-button link type="primary" :icon="View" @click="handleView(row)">详情</el-button>
-              <el-button v-if="row.status === 0" link type="danger" @click="handleStatusToggle(row)">
+              <el-button
+                link
+                type="primary"
+                :icon="View"
+                @click="handleView(row)"
+              >
+                详情
+              </el-button>
+              <el-button
+                v-if="row.status === 0"
+                link
+                type="danger"
+                @click="handleStatusToggle(row)"
+              >
                 冻结
               </el-button>
-              <el-button v-else link type="success" @click="handleStatusToggle(row)">解冻</el-button>
+              <el-button
+                v-else
+                link
+                type="success"
+                @click="handleStatusToggle(row)"
+              >
+                解冻
+              </el-button>
             </template>
           </el-table-column>
         </el-table>
 
         <div class="flex justify-end mt-4">
-          <el-pagination v-model:current-page="queryParams.pageNo" v-model:page-size="queryParams.pageSize"
-            :total="total" :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper"
-            @size-change="loadData" @current-change="loadData" />
+          <el-pagination
+            v-model:current-page="queryParams.pageNo"
+            v-model:page-size="queryParams.pageSize"
+            :total="total"
+            :page-sizes="[10, 20, 50, 100]"
+            layout="total, sizes, prev, pager, next, jumper"
+            @size-change="loadData"
+            @current-change="loadData"
+          />
         </div>
       </el-card>
     </div>
 
     <!-- 详情弹窗 -->
-    <el-dialog v-model="detailVisible" title="钱包详情" width="500px" append-to-body>
+    <el-dialog
+      v-model="detailVisible"
+      title="钱包详情"
+      width="500px"
+      append-to-body
+    >
       <el-descriptions :column="1" border v-if="detailData">
-        <el-descriptions-item label="钱包ID">{{ detailData.memberWalletId }}</el-descriptions-item>
-        <el-descriptions-item label="会员ID">{{ detailData.memberId }}</el-descriptions-item>
-        <el-descriptions-item label="可用余额">{{ formatBalance(detailData.balance) }}</el-descriptions-item>
-        <el-descriptions-item label="冻结余额">{{ formatBalance(detailData.freezeBalance) }}</el-descriptions-item>
+        <el-descriptions-item label="钱包ID">
+          {{ detailData.memberWalletId }}
+        </el-descriptions-item>
+        <el-descriptions-item label="会员ID">
+          {{ detailData.memberId }}
+        </el-descriptions-item>
+        <el-descriptions-item label="可用余额">
+          {{ formatBalance(detailData.balance) }}
+        </el-descriptions-item>
+        <el-descriptions-item label="冻结余额">
+          {{ formatBalance(detailData.freezeBalance) }}
+        </el-descriptions-item>
         <el-descriptions-item label="钱包状态">
           <el-tag :type="getStatusType(detailData.status)" size="small">
             {{ getStatusText(detailData.status) }}

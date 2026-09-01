@@ -17,7 +17,9 @@ const formData = ref<Partial<Customer>>({
 });
 
 const formRules = reactive({
-  customerName: [{ required: true, message: '请输入回收商名称', trigger: 'blur' }],
+  customerName: [
+    { required: true, message: '请输入回收商名称', trigger: 'blur' },
+  ],
 });
 
 function open(row?: Customer) {
@@ -56,9 +58,17 @@ defineExpose({ open });
 
 <template>
   <el-dialog v-model="visible" :title="title" width="550px" append-to-body>
-    <el-form :model="formData" :rules="formRules" label-width="100px" label-position="right">
+    <el-form
+      :model="formData"
+      :rules="formRules"
+      label-width="100px"
+      label-position="right"
+    >
       <el-form-item label="回收商名称" prop="customerName" required>
-        <el-input v-model="formData.customerName" placeholder="请输入回收商名称" />
+        <el-input
+          v-model="formData.customerName"
+          placeholder="请输入回收商名称"
+        />
       </el-form-item>
 
       <el-form-item label="联系人">
@@ -83,7 +93,9 @@ defineExpose({ open });
 
     <template #footer>
       <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :loading="loading" @click="handleSubmit">确定</el-button>
+      <el-button type="primary" :loading="loading" @click="handleSubmit"
+        >确定</el-button
+      >
     </template>
   </el-dialog>
 </template>

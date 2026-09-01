@@ -42,7 +42,11 @@ defineExpose({ open });
   <el-dialog v-model="visible" title="设备升级" width="800px" append-to-body>
     <el-form label-width="100px">
       <el-form-item label="升级文件" required>
-        <el-input v-model="fileUrl" placeholder="请输入升级文件下载地址" clearable />
+        <el-input
+          v-model="fileUrl"
+          placeholder="请输入升级文件下载地址"
+          clearable
+        />
       </el-form-item>
       <UploadFile
         v-model="file"
@@ -56,7 +60,9 @@ defineExpose({ open });
     </el-form>
     <template #footer>
       <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :loading="loading" @click="handleSubmit">确定</el-button>
+      <el-button type="primary" :loading="loading" @click="handleSubmit"
+        >确定</el-button
+      >
     </template>
   </el-dialog>
 </template>

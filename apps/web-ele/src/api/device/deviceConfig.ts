@@ -84,13 +84,14 @@ export function deviceBindDeviceConfigApi(data: {
 }
 
 /** 8. 设备解绑 */
-export function deviceUnBindDeviceConfigApi(data: {
-  deviceIds: number[];
-}) {
+export function deviceUnBindDeviceConfigApi(data: { deviceIds: number[] }) {
   return requestClient.post('/merchant/deviceConfig/unbind', data);
 }
 
 /** 9. 设备绑定分页查询 */
 export function deviceBindDeviceConfigPageApi(params: DeviceConfigPageParams) {
-  return requestClient.get('/merchant/deviceConfig/bind/deviceBindDeviceConfigPage', { params });
+  return requestClient.get(
+    '/merchant/deviceConfig/bind/deviceBindDeviceConfigPage',
+    { params },
+  );
 }

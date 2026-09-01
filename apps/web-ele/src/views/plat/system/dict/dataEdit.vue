@@ -1,8 +1,15 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
-import { ElMessage } from 'element-plus';
-import { addDictDataApi, editDictDataApi, getDictDataDetailApi } from '#/api/system/dict/dictData';
 import type { DictData } from '#/api/system/dict/dictData';
+
+import { ref } from 'vue';
+
+import { ElMessage } from 'element-plus';
+
+import {
+  addDictDataApi,
+  editDictDataApi,
+  getDictDataDetailApi,
+} from '#/api/system/dict/dictData';
 
 const emit = defineEmits(['success']);
 
@@ -22,10 +29,7 @@ const listClassOptions = [
 
 async function open(row?: DictData, dictId?: number) {
   visible.value = true;
-  if (!row) {
-    title.value = '新增字典项';
-    formData.value = { dictId, status: 0, defaultFlag: 0, sort: 0, listClass: '' };
-  } else {
+  if (row) {
     title.value = '编辑字典项';
     try {
       const res = await getDictDataDetailApi(row.dictDataId);
@@ -33,14 +37,25 @@ async function open(row?: DictData, dictId?: number) {
     } catch {
       ElMessage.error('获取字典项信息失败');
     }
+  } else {
+    title.value = '新增字典项';
+    formData.value = {
+      dictId,
+      status: 0,
+      defaultFlag: 0,
+      sort: 0,
+      listClass: '',
+    };
   }
 }
 
 defineExpose({ open });
 
 async function handleSubmit() {
-  if (!formData.value.itemLabel?.trim()) return ElMessage.warning('请输入显示标签');
-  if (formData.value.itemValue === undefined) return ElMessage.warning('请输入字典值');
+  if (!formData.value.itemLabel?.trim())
+    return ElMessage.warning('请输入显示标签');
+  if (formData.value.itemValue === undefined)
+    return ElMessage.warning('请输入字典值');
 
   try {
     submitting.value = true;
@@ -64,16 +79,36 @@ async function handleSubmit() {
         <el-input v-model="formData.itemLabel" placeholder="请输入显示标签" />
       </el-form-item>
       <el-form-item label="字典值" required>
-        <el-input-number v-model="formData.itemValue" :min="0" placeholder="请输入字典值" style="width: 100%" />
+        <el-input-number
+          v-model="formData.itemValue"
+          :min="0"
+          placeholder="请输入字典值"
+          style="width: 100%"
+        />
       </el-form-item>
       <el-form-item label="标签样式">
-        <el-select v-model="formData.listClass" placeholder="请选择标签色彩风格" style="width: 100%">
-          <el-option v-for="item in listClassOptions" :key="item.value" :label="item.label" :value="item.value" />
+        <el-select
+          v-model="formData.listClass"
+          placeholder="请选择标签色彩风格"
+          style="width: 100%"
+        >
+          <el-option
+            v-for="item in listClassOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
         </el-select>
       </el-form-item>
       <div class="grid grid-cols-2 gap-4">
         <el-form-item label="排序">
-          <el-input-number v-model="formData.sort" :min="0" :max="999" controls-position="right" style="width: 100%" />
+          <el-input-number
+            v-model="formData.sort"
+            :min="0"
+            :max="999"
+            controls-position="right"
+            style="width: 100%"
+          />
         </el-form-item>
         <el-form-item label="设为默认">
           <div class="h-8 flex items-center">
@@ -85,15 +120,29 @@ async function handleSubmit() {
         </el-form-item>
       </div>
       <el-form-item label="状态">
-        <el-switch v-model="formData.status" :active-value="0" :inactive-value="1" active-text="启用" inactive-text="禁用" inline-prompt />
+        <el-switch
+          v-model="formData.status"
+          :active-value="0"
+          :inactive-value="1"
+          active-text="启用"
+          inactive-text="禁用"
+          inline-prompt
+        />
       </el-form-item>
       <el-form-item label="备注">
-        <el-input v-model="formData.remark" type="textarea" :rows="2" placeholder="请输入备注" />
+        <el-input
+          v-model="formData.remark"
+          type="textarea"
+          :rows="2"
+          placeholder="请输入备注"
+        />
       </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :loading="submitting" @click="handleSubmit">确定</el-button>
+      <el-button type="primary" :loading="submitting" @click="handleSubmit">
+        确定
+      </el-button>
     </template>
   </el-dialog>
 </template>

@@ -57,9 +57,19 @@ const handleCountryChanged = (perfix: string) => {
 
 <template>
   <div>
-    <el-input v-model="phoneNumber" style="max-width: 600px" placeholder="请输入联系电话" class="input-with-select" @input="handlePhoneChanged">
+    <el-input
+      v-model="phoneNumber"
+      style="max-width: 600px"
+      placeholder="请输入联系电话"
+      class="input-with-select"
+      @input="handlePhoneChanged"
+    >
       <template #prepend>
-        <el-select v-model="perfix" style="width: 100px" @change="handleCountryChanged">
+        <el-select
+          v-model="perfix"
+          style="width: 100px"
+          @change="handleCountryChanged"
+        >
           <template v-for="item in countries" :key="item.country">
             <el-option :label="renderSelectLabel(item)" :value="item.perfix" />
           </template>

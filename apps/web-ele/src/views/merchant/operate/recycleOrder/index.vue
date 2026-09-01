@@ -633,7 +633,9 @@ onMounted(() => {
                       <div class="text-xs leading-relaxed">
                         <div class="flex justify-between gap-4">
                           <span class="text-white">原订单重量</span>
-                          <span class="text-white font-medium">{{ (row.weight || 0).toFixed(2) }} kg</span>
+                          <span class="text-white font-medium"
+                            >{{ (row.weight || 0).toFixed(2) }} kg</span
+                          >
                         </div>
                         <div class="flex justify-between gap-4">
                           <span class="text-white">原订单金额</span>
@@ -643,7 +645,9 @@ onMounted(() => {
                         </div>
                         <div class="flex justify-between gap-4">
                           <span class="text-white">违规重量</span>
-                          <span class="text-white font-medium">{{ (row.deductWeight || 0).toFixed(2) }} kg</span>
+                          <span class="text-white font-medium"
+                            >{{ (row.deductWeight || 0).toFixed(2) }} kg</span
+                          >
                         </div>
                         <div class="flex justify-between gap-4">
                           <span class="text-white">因违规已扣除</span>
@@ -670,8 +674,10 @@ onMounted(() => {
               </template>
               <!-- 投递前后重量 -->
               <template v-else-if="col.key === 'beforeAfterWeight'">
-                <span>{{ (row.beforeWeight || 0).toFixed(2) }} →
-                  {{ (row.afterWeight || 0).toFixed(2) }} kg</span>
+                <span
+                  >{{ (row.beforeWeight || 0).toFixed(2) }} →
+                  {{ (row.afterWeight || 0).toFixed(2) }} kg</span
+                >
               </template>
               <!-- 内网抓拍图片 -->
               <template v-else-if="col.key === 'imageUrls'">
@@ -684,6 +690,7 @@ onMounted(() => {
                       :preview-src-list="row.imageUrls"
                       :initial-index="Number(idx)"
                       fit="cover"
+                      show-progress
                       style="
                         width: 40px;
                         height: 40px;
@@ -786,9 +793,9 @@ onMounted(() => {
                   size="small"
                   type="info"
                   @click="handleViewRecord(row)"
-                  >
-操作记录
-</el-button>
+                >
+                  操作记录
+                </el-button>
                 <el-button
                   v-if="[0, 1, 2, 3, 4, 7].includes(row.orderStatus)"
                   size="small"

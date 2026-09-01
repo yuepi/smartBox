@@ -44,7 +44,7 @@ const pollImageForHatch = (
   type: 7 | 13,
   hatchId?: number,
   attempts = 0,
-  key = 'default'
+  key = 'default',
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
     if (attempts >= MAX_ATTEMPTS) {
@@ -93,7 +93,9 @@ const open = async (id: number, type: 7 | 13) => {
   try {
     // 场景 A：屏幕截图 (7) —— 绝对不查仓口，直接单图请求
     if (type === 7) {
-      imageList.value = [{ hatchName: '设备屏幕', imageUrl: '', loading: true, errorMsg: '' }];
+      imageList.value = [
+        { hatchName: '设备屏幕', imageUrl: '', loading: true, errorMsg: '' },
+      ];
       globalLoading.value = false;
 
       const url = await pollImageForHatch(id, type, undefined, 0, 'screen');
@@ -110,7 +112,9 @@ const open = async (id: number, type: 7 | 13) => {
 
     if (hatches.length === 0) {
       // 若设备没配置仓口，兜底走单张无仓口 ID 请求
-      imageList.value = [{ hatchName: '桶内画面', imageUrl: '', loading: true, errorMsg: '' }];
+      imageList.value = [
+        { hatchName: '桶内画面', imageUrl: '', loading: true, errorMsg: '' },
+      ];
       globalLoading.value = false;
 
       const url = await pollImageForHatch(id, type, undefined, 0, 'no-hatch');
@@ -133,7 +137,13 @@ const open = async (id: number, type: 7 | 13) => {
       hatches.forEach(async (hatch, index) => {
         const key = `hatch-${hatch.deviceHatchId}`;
         try {
-          const url = await pollImageForHatch(id, type, hatch.deviceHatchId, 0, key);
+          const url = await pollImageForHatch(
+            id,
+            type,
+            hatch.deviceHatchId,
+            0,
+            key,
+          );
           if (imageList.value[index]) {
             imageList.value[index].imageUrl = url;
             imageList.value[index].loading = false;
@@ -162,7 +172,13 @@ const handleRetryItem = async (index: number) => {
   const key = item.hatchId ? `hatch-${item.hatchId}` : 'retry';
 
   try {
-    const url = await pollImageForHatch(deviceId.value, opType.value, item.hatchId, 0, key);
+    const url = await pollImageForHatch(
+      deviceId.value,
+      opType.value,
+      item.hatchId,
+      0,
+      key,
+    );
     item.imageUrl = url;
   } catch (error: any) {
     item.errorMsg = error?.message || '抓拍失败';
@@ -197,7 +213,10 @@ defineExpose({ open, close: handleClose });
     @close="handleClose"
   >
     <!-- 全局连接状态 -->
-    <div v-if="globalLoading" class="flex flex-col items-center justify-center py-12">
+    <div
+      v-if="globalLoading"
+      class="flex flex-col items-center justify-center py-12"
+    >
       <el-icon class="is-loading text-4xl text-primary"><Loading /></el-icon>
       <span class="text-gray-400 mt-4">正在读取设备仓口配置...</span>
     </div>
@@ -218,17 +237,32 @@ defineExpose({ open, close: handleClose });
       <template v-for="(item, idx) in imageList" :key="idx">
         <div v-show="String(idx) === activeTab" class="py-2">
           <!-- 1. 加载中 -->
-          <div v-if="item.loading" class="flex flex-col items-center justify-center py-10">
-            <el-icon class="is-loading text-4xl text-primary"><Loading /></el-icon>
-            <span class="text-gray-400 mt-4">正在获取 {{ item.hatchName }} 照片...</span>
+          <div
+            v-if="item.loading"
+            class="flex flex-col items-center justify-center py-10"
+          >
+            <el-icon class="is-loading text-4xl text-primary"
+              ><Loading
+            /></el-icon>
+            <span class="text-gray-400 mt-4"
+              >正在获取 {{ item.hatchName }} 照片...</span
+            >
             <span class="text-xs text-gray-400 mt-2">预计等待 3-10 秒</span>
           </div>
 
           <!-- 2. 失败 -->
-          <div v-else-if="item.errorMsg" class="flex flex-col items-center justify-center py-10">
+          <div
+            v-else-if="item.errorMsg"
+            class="flex flex-col items-center justify-center py-10"
+          >
             <el-icon class="text-4xl text-danger"><CircleClose /></el-icon>
             <span class="text-gray-500 mt-4">{{ item.errorMsg }}</span>
-            <el-button class="mt-4" type="primary" size="small" @click="handleRetryItem(idx)">
+            <el-button
+              class="mt-4"
+              type="primary"
+              size="small"
+              @click="handleRetryItem(idx)"
+            >
               重新抓拍
             </el-button>
           </div>
@@ -238,8 +272,10 @@ defineExpose({ open, close: handleClose });
             <el-image
               :src="item.imageUrl"
               fit="contain"
-              style="max-width: 100%; max-height: 480px;"
-              :preview-src-list="imageList.map((i) => i.imageUrl).filter(Boolean)"
+              style="max-width: 100%; max-height: 480px"
+              :preview-src-list="
+                imageList.map((i) => i.imageUrl).filter(Boolean)
+              "
               preview-teleported
             />
           </div>
@@ -271,8 +307,12 @@ defineExpose({ open, close: handleClose });
 }
 
 @keyframes rotate {
-  from { transform: rotate(0deg); }
+  from {
+    transform: rotate(0deg);
+  }
 
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

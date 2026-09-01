@@ -3,7 +3,9 @@ import { requestClient } from '#/api/request';
 export async function listQuery(state: any) {
   state.loading = true;
   try {
-    const data = await requestClient.get(`${state.url}`, { params: state.form });
+    const data = await requestClient.get(`${state.url}`, {
+      params: state.form,
+    });
     state.rows = data.rows;
     state.total = data.total;
   } finally {

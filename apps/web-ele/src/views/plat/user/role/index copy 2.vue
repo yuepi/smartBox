@@ -1,13 +1,12 @@
 <script lang="ts" setup>
-import { computed, nextTick, onMounted, reactive, ref } from "vue";
+import { computed, nextTick, onMounted, reactive, ref } from 'vue';
 
-import { Page } from "@vben/common-ui";
+import { Page } from '@vben/common-ui';
 
-import { Delete, Edit, Plus, Refresh, Search } from "@element-plus/icons-vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+import { Delete, Edit, Plus, Refresh, Search } from '@element-plus/icons-vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
-import { getPlatMenuListApi } from "#/api/system/menu";
-
+import { getPlatMenuListApi } from '#/api/system/menu';
 
 import {
   addPlatRoleApi,
@@ -17,7 +16,7 @@ import {
   getPlatRolePageApi,
   type Role,
   type RolePageParams,
-} from "#/api/system/role";
+} from '#/api/system/role';
 
 import MemberSelector from '#/components/MemberSelector/index.vue';
 
@@ -29,13 +28,13 @@ const selectedIds = ref<number[]>([]);
 
 // 表单弹窗控制
 const formVisible = ref(false);
-const formTitle = ref("");
+const formTitle = ref('');
 const formData = ref<Partial<Role>>({});
 const formSubmitting = ref(false);
 const formRef = ref();
 
 // Tab 切换
-const activeTab = ref("basic");
+const activeTab = ref('basic');
 
 // 菜单树相关
 const menuTreeRef = ref();
@@ -50,27 +49,27 @@ const memberLoading = ref(false);
 
 // 状态选项
 const statusOptions = [
-  { label: "启用", value: 0 },
-  { label: "禁用", value: 1 },
+  { label: '启用', value: 0 },
+  { label: '禁用', value: 1 },
 ];
 
 // 角色类型选项
 const roleTypeOptions = [
-  { label: "综合角色", value: 1 },
-  { label: "数据权限角色", value: 2 },
-  { label: "菜单角色", value: 3 },
-  { label: "接口角色", value: 4 },
-  { label: "菜单与接口角色", value: 5 },
+  { label: '综合角色', value: 1 },
+  { label: '数据权限角色', value: 2 },
+  { label: '菜单角色', value: 3 },
+  { label: '接口角色', value: 4 },
+  { label: '菜单与接口角色', value: 5 },
 ];
 
 // 数据权限选项
 const scopeOptions = [
-  { label: "全部数据权限", value: 1 },
-  { label: "自定数据权限", value: 2 },
-  { label: "本部门数据权限", value: 3 },
-  { label: "本部门及以下数据权限", value: 4 },
-  { label: "仅本人数据权限", value: 5 },
-  { label: "部门及以下或本人数据权限", value: 6 },
+  { label: '全部数据权限', value: 1 },
+  { label: '自定数据权限', value: 2 },
+  { label: '本部门数据权限', value: 3 },
+  { label: '本部门及以下数据权限', value: 4 },
+  { label: '仅本人数据权限', value: 5 },
+  { label: '部门及以下或本人数据权限', value: 6 },
 ];
 
 // 查询参数
@@ -84,15 +83,15 @@ const queryParams = reactive<RolePageParams>({
 
 // 成员名称显示
 const memberNames = computed(() => {
-  if (!formData.value.members || formData.value.members.length === 0) return "";
+  if (!formData.value.members || formData.value.members.length === 0) return '';
   return formData.value.members
     .map((m: any) => m.name || m.userName)
-    .join("；");
+    .join('；');
 });
 
 // --- 辅助函数 ---
 function getStatusText(status: number): string {
-  return status === 0 ? "启用" : "禁用";
+  return status === 0 ? '启用' : '禁用';
 }
 
 // --- 数据加载 ---
@@ -104,7 +103,7 @@ async function loadData() {
     total.value = res.total || 0;
   } catch (error) {
     console.error(error);
-    ElMessage.error("加载数据失败");
+    ElMessage.error('加载数据失败');
   } finally {
     loading.value = false;
   }
@@ -118,8 +117,8 @@ async function loadMenuTree() {
     // 将平级列表转换为树形结构
     menuTreeData.value = buildMenuTree(res || []);
   } catch (error) {
-    console.error("加载菜单失败：", error);
-    ElMessage.error("加载菜单权限失败");
+    console.error('加载菜单失败：', error);
+    ElMessage.error('加载菜单权限失败');
   } finally {
     menuLoading.value = false;
   }
@@ -142,7 +141,7 @@ function buildMenuTree(menuList: any[], parentId: number = 0): any[] {
 
 // --- Tab 点击事件 ---
 const handleTabClick = async (tab: any) => {
-  if (tab.paneName === "menu" && menuTreeData.value.length === 0) {
+  if (tab.paneName === 'menu' && menuTreeData.value.length === 0) {
     await loadMenuTree();
     // 编辑场景：回显已选中的菜单权限
     if (formData.value.menuIds?.length && menuTreeRef.value) {
@@ -165,13 +164,13 @@ async function loadMemberList() {
   try {
     memberLoading.value = true;
     // 调用用户列表接口，根据你的实际接口调整
-    const res = await requestClient.get("/sys/user/list", {
+    const res = await requestClient.get('/sys/user/list', {
       params: { pageSize: 100 },
     });
     memberList.value = res.records || [];
   } catch (error) {
-    console.error("加载成员列表失败：", error);
-    ElMessage.error("加载成员列表失败");
+    console.error('加载成员列表失败：', error);
+    ElMessage.error('加载成员列表失败');
   } finally {
     memberLoading.value = false;
   }
@@ -188,8 +187,8 @@ function confirmMemberSelect() {
 
 // --- 新增/编辑 ---
 function handleAdd() {
-  formTitle.value = "新增角色";
-  activeTab.value = "basic";
+  formTitle.value = '新增角色';
+  activeTab.value = 'basic';
   formData.value = {
     status: 0,
     sort: 0,
@@ -204,8 +203,8 @@ function handleAdd() {
 
 async function handleEdit(row: Role) {
   try {
-    formTitle.value = "编辑角色";
-    activeTab.value = "basic";
+    formTitle.value = '编辑角色';
+    activeTab.value = 'basic';
     const res = await getPlatRoleDetailApi(row.roleId);
     formData.value = res || {};
     formData.value.menuIds = res.menuIds || [];
@@ -213,17 +212,17 @@ async function handleEdit(row: Role) {
     menuTreeData.value = []; // 清空，等切换tab时再加载
     formVisible.value = true;
   } catch {
-    ElMessage.error("获取角色信息失败");
+    ElMessage.error('获取角色信息失败');
   }
 }
 
 async function handleSubmit() {
   if (!formData.value.roleName?.trim()) {
-    ElMessage.warning("请输入角色名称");
+    ElMessage.warning('请输入角色名称');
     return;
   }
   if (!formData.value.roleCode?.trim()) {
-    ElMessage.warning("请输入角色编码");
+    ElMessage.warning('请输入角色编码');
     return;
   }
 
@@ -238,11 +237,11 @@ async function handleSubmit() {
   try {
     const api = formData.value.roleId ? editPlatRoleApi : addPlatRoleApi;
     await api(formData.value);
-    ElMessage.success(formData.value.roleId ? "修改成功" : "新增成功");
+    ElMessage.success(formData.value.roleId ? '修改成功' : '新增成功');
     formVisible.value = false;
     handleQuery();
   } catch {
-    ElMessage.error("操作失败");
+    ElMessage.error('操作失败');
   } finally {
     formSubmitting.value = false;
   }
@@ -256,7 +255,7 @@ async function handleDelete(row?: Role) {
     ids = [row.roleId];
   } else {
     if (selectedIds.value.length === 0) {
-      ElMessage.warning("请选择要删除的记录");
+      ElMessage.warning('请选择要删除的记录');
       return;
     }
     ids = selectedIds.value;
@@ -265,8 +264,8 @@ async function handleDelete(row?: Role) {
   try {
     await ElMessageBox.confirm(
       `确定要删除选中的 ${ids.length} 条角色吗？`,
-      "提示",
-      { type: "warning" }
+      '提示',
+      { type: 'warning' },
     );
 
     for (const id of ids) {
@@ -346,12 +345,12 @@ onMounted(() => {
           </el-form-item>
           <el-form-item>
             <el-button type="primary" :icon="Search" @click="handleQuery">
-查询
-</el-button>
+              查询
+            </el-button>
             <el-button :icon="Refresh" @click="resetQuery">重置</el-button>
             <el-button type="primary" plain :icon="Plus" @click="handleAdd">
-新增
-</el-button>
+              新增
+            </el-button>
             <el-button
               type="danger"
               plain
@@ -418,17 +417,17 @@ onMounted(() => {
                 type="primary"
                 :icon="Edit"
                 @click="handleEdit(row)"
-                >
-编辑
-</el-button>
+              >
+                编辑
+              </el-button>
               <el-button
                 link
                 type="danger"
                 :icon="Delete"
                 @click="handleDelete(row)"
-                >
-删除
-</el-button>
+              >
+                删除
+              </el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -628,9 +627,9 @@ onMounted(() => {
           type="primary"
           :loading="formSubmitting"
           @click="handleSubmit"
-          >
-确定
-</el-button>
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
 
@@ -654,7 +653,7 @@ onMounted(() => {
         <el-table-column prop="status" label="状态" width="80" align="center">
           <template #default="{ row }">
             <el-tag :type="row.status === 0 ? 'success' : 'danger'">
-              {{ row.status === 0 ? "启用" : "禁用" }}
+              {{ row.status === 0 ? '启用' : '禁用' }}
             </el-tag>
           </template>
         </el-table-column>

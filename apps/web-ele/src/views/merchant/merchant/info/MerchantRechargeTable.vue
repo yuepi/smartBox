@@ -1,10 +1,16 @@
 <script setup lang="ts">
-import type { MerchantRecharge, MerchantRechargePageParams } from '#/api/system/merchant';
+import type {
+  MerchantRecharge,
+  MerchantRechargePageParams,
+} from '#/api/system/merchant';
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
 import { refundByMerchantApi } from '#/api/common/pay';
 import { getMerchantRechargePageApi } from '#/api/system/merchant';
-import { defaultMerchantRechargeColumns, MERCHANT_RECHARGE_STORAGE_KEY } from '#/constants/tableColumns';
+import {
+  defaultMerchantRechargeColumns,
+  MERCHANT_RECHARGE_STORAGE_KEY,
+} from '#/constants/tableColumns';
 import { ModuleCodeMap } from '#/hooks/useExport';
 
 const props = defineProps<{ merchantId: number }>();
@@ -14,8 +20,12 @@ const emit = defineEmits(['refresh']);
 const { pay_status, refund_status } = useDicts(['pay_status', 'refund_status']);
 
 // 表格列配置
-const columnConfig = ref<TableColumnConfig[]>([...defaultMerchantRechargeColumns]);
-const visibleColumns = computed(() => columnConfig.value.filter((col) => col.visible));
+const columnConfig = ref<TableColumnConfig[]>([
+  ...defaultMerchantRechargeColumns,
+]);
+const visibleColumns = computed(() =>
+  columnConfig.value.filter((col) => col.visible),
+);
 
 function handleColumnsUpdate(newColumns: TableColumnConfig[]) {
   columnConfig.value = newColumns;
@@ -66,7 +76,7 @@ watch(
     queryParams.merchantId = newId;
     loadData();
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 function formatAmount(amount: number): string {
@@ -113,7 +123,9 @@ async function confirmRefund() {
   }
   if (!currentOrder.value) return;
   if (refundAmount.value > currentOrder.value.amount) {
-    ElMessage.warning(`退款金额不能超过订单金额 ${formatAmount(currentOrder.value.amount)}`);
+    ElMessage.warning(
+      `退款金额不能超过订单金额 ${formatAmount(currentOrder.value.amount)}`,
+    );
     return;
   }
 
@@ -162,13 +174,22 @@ defineExpose({ loadData });
             style="width: 200px"
             @keyup.enter="loadData"
           >
-            <template #prefix><span class="text-xs text-gray-400">充值单号:</span></template>
+            <template #prefix>
+              <span class="text-xs text-gray-400">充值单号:</span>
+            </template>
           </el-input>
         </el-form-item>
 
         <el-form-item>
-          <el-select v-model="queryParams.status" clearable style="width: 160px" placeholder="请选择">
-            <template #prefix><span class="text-xs text-gray-400">支付状态:</span></template>
+          <el-select
+            v-model="queryParams.status"
+            clearable
+            style="width: 160px"
+            placeholder="请选择"
+          >
+            <template #prefix>
+              <span class="text-xs text-gray-400">支付状态:</span>
+            </template>
             <el-option
               v-for="item in pay_status"
               :key="item.value"
@@ -179,8 +200,15 @@ defineExpose({ loadData });
         </el-form-item>
 
         <el-form-item>
-          <el-select v-model="queryParams.refundStatus" clearable style="width: 160px" placeholder="请选择">
-            <template #prefix><span class="text-xs text-gray-400">退款状态:</span></template>
+          <el-select
+            v-model="queryParams.refundStatus"
+            clearable
+            style="width: 160px"
+            placeholder="请选择"
+          >
+            <template #prefix>
+              <span class="text-xs text-gray-400">退款状态:</span>
+            </template>
             <el-option
               v-for="item in refund_status"
               :key="item.value"
@@ -203,7 +231,9 @@ defineExpose({ loadData });
         </el-form-item>
 
         <el-form-item class="filter-actions">
-          <el-button type="primary" icon="Search" @click="loadData">查询</el-button>
+          <el-button type="primary" icon="Search" @click="loadData">
+            查询
+          </el-button>
           <el-button icon="Refresh" @click="resetQuery">重置</el-button>
         </el-form-item>
       </el-form>
@@ -228,7 +258,13 @@ defineExpose({ loadData });
         </div>
       </div>
 
-      <el-table v-loading="loading" :data="tableData" border stripe style="width: 100%">
+      <el-table
+        v-loading="loading"
+        :data="tableData"
+        border
+        stripe
+        style="width: 100%"
+      >
         <el-table-column
           v-for="col in visibleColumns"
           :key="col.key"
@@ -257,7 +293,9 @@ defineExpose({ loadData });
 
         <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" @click="handleView(row)">详情</el-button>
+            <el-button link type="primary" @click="handleView(row)">
+              详情
+            </el-button>
             <el-button
               v-if="row.status === 2 && row.refundStatus !== 2"
               link
@@ -285,27 +323,52 @@ defineExpose({ loadData });
     </div>
 
     <!-- 详情弹窗 -->
-    <el-dialog v-model="detailVisible" title="充值订单详情" width="600px" append-to-body>
+    <el-dialog
+      v-model="detailVisible"
+      title="充值订单详情"
+      width="600px"
+      append-to-body
+    >
       <el-descriptions :column="2" border v-if="detailData">
-        <el-descriptions-item label="充值ID">{{ detailData.merchantRechargeId }}</el-descriptions-item>
-        <el-descriptions-item label="充值单号">{{ detailData.rechargeNo }}</el-descriptions-item>
+        <el-descriptions-item label="充值ID">
+          {{ detailData.merchantRechargeId }}
+        </el-descriptions-item>
+        <el-descriptions-item label="充值单号">
+          {{ detailData.rechargeNo }}
+        </el-descriptions-item>
         <el-descriptions-item label="充值金额">
-          <span class="text-success">{{ formatAmount(detailData.amount) }}</span>
+          <span class="text-success">{{
+            formatAmount(detailData.amount)
+          }}</span>
         </el-descriptions-item>
         <el-descriptions-item label="支付状态">
           <DictTag :options="pay_status" :value="detailData.status" />
         </el-descriptions-item>
-        <el-descriptions-item label="充值人">{{ detailData.rechargeUserName || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="支付时间">{{ detailData.payTime || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="充值人">
+          {{ detailData.rechargeUserName || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="支付时间">
+          {{ detailData.payTime || '-' }}
+        </el-descriptions-item>
         <el-descriptions-item label="退款状态">
           <DictTag :options="refund_status" :value="detailData.refundStatus" />
         </el-descriptions-item>
         <el-descriptions-item label="退款金额">
-          {{ detailData.totalRefundAmount > 0 ? formatAmount(detailData.totalRefundAmount) : '-' }}
+          {{
+            detailData.totalRefundAmount > 0
+              ? formatAmount(detailData.totalRefundAmount)
+              : '-'
+          }}
         </el-descriptions-item>
-        <el-descriptions-item label="退款时间">{{ detailData.refundTime || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="支付请求ID" :span="2">{{ detailData.payRequestId || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="退款请求ID" :span="2">{{ detailData.refundRequestId || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="退款时间">
+          {{ detailData.refundTime || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="支付请求ID" :span="2">
+          {{ detailData.payRequestId || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="退款请求ID" :span="2">
+          {{ detailData.refundRequestId || '-' }}
+        </el-descriptions-item>
       </el-descriptions>
       <template #footer>
         <el-button @click="detailVisible = false">关闭</el-button>
@@ -313,10 +376,17 @@ defineExpose({ loadData });
     </el-dialog>
 
     <!-- 退款弹窗 -->
-    <el-dialog v-model="refundVisible" title="订单退款" width="450px" append-to-body>
+    <el-dialog
+      v-model="refundVisible"
+      title="订单退款"
+      width="450px"
+      append-to-body
+    >
       <el-form label-width="100px">
         <el-form-item label="订单金额">
-          <span class="font-bold text-primary">{{ formatAmount(currentOrder?.amount || 0) }}</span>
+          <span class="font-bold text-primary">{{
+            formatAmount(currentOrder?.amount || 0)
+          }}</span>
         </el-form-item>
         <el-form-item label="退款金额" required>
           <el-input-number
@@ -328,12 +398,20 @@ defineExpose({ loadData });
             placeholder="请输入退款金额"
             style="width: 100%"
           />
-          <div class="text-gray-400 text-xs mt-1">最高可退 {{ formatAmount(currentOrder?.amount || 0) }}</div>
+          <div class="text-gray-400 text-xs mt-1">
+            最高可退 {{ formatAmount(currentOrder?.amount || 0) }}
+          </div>
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="refundVisible = false">取消</el-button>
-        <el-button type="primary" :loading="refundSubmitting" @click="confirmRefund">确认退款</el-button>
+        <el-button
+          type="primary"
+          :loading="refundSubmitting"
+          @click="confirmRefund"
+        >
+          确认退款
+        </el-button>
       </template>
     </el-dialog>
   </div>

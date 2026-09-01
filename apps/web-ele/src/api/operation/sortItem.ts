@@ -4,19 +4,20 @@ import { requestClient } from '#/api/request';
 export interface SortItem {
   sortItemId: number;
   sortTaskId: number;
-  packageType: number;      // 0=混合,1=织物,2=金属,3=塑料
+  packageType: number; // 0=混合,1=织物,2=金属,3=塑料
   packageName: string;
   weight: number;
   status: number;
 }
 
 /** 分类类型枚举 */
-export const PackageTypeMap: Record<number, { color: string; label: string; }> = {
-  0: { label: '混合', color: 'info' },
-  1: { label: '织物', color: 'primary' },
-  2: { label: '金属', color: 'warning' },
-  3: { label: '塑料', color: 'success' },
-};
+export const PackageTypeMap: Record<number, { color: string; label: string }> =
+  {
+    0: { label: '混合', color: 'info' },
+    1: { label: '织物', color: 'primary' },
+    2: { label: '金属', color: 'warning' },
+    3: { label: '塑料', color: 'success' },
+  };
 
 /** 分页参数 */
 export interface SortItemPageParams {
@@ -33,7 +34,9 @@ export function getSortItemPageApi(params: SortItemPageParams) {
 
 /** 2. 列表查询 */
 export function getSortItemListApi(sortTaskId: number) {
-  return requestClient.get('/merchant/sortItem/list', { params: { sortTaskId } });
+  return requestClient.get('/merchant/sortItem/list', {
+    params: { sortTaskId },
+  });
 }
 
 /** 3. 新增明细 */

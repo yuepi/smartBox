@@ -1,12 +1,12 @@
-import { defineComponent, watch, shallowReactive } from 'vue'
+import { defineComponent, watch, shallowReactive } from 'vue';
 
 // 声明类型
 const PropsType = {
   cdata: {
     type: Object,
-    require: true
-  }
-} as const
+    require: true,
+  },
+} as const;
 
 // 定义主体
 export default defineComponent({
@@ -16,11 +16,11 @@ export default defineComponent({
     const lineStyle = {
       normal: {
         width: 1,
-        opacity: 0.5
-      }
+        opacity: 0.5,
+      },
     };
     // 配置项
-    let options = shallowReactive({radar:null,series:null})
+    let options = shallowReactive({ radar: null, series: null });
 
     watch(
       () => props.cdata,
@@ -28,104 +28,105 @@ export default defineComponent({
         options = {
           radar: {
             indicator: val.indicatorData,
-            shape: "circle",
+            shape: 'circle',
             splitNumber: 5,
-            radius: ["0%", "65%"],
+            radius: ['0%', '65%'],
             name: {
               textStyle: {
-                color: "rgb(238, 197, 102)"
-              }
+                color: 'rgb(238, 197, 102)',
+              },
             },
             splitLine: {
               lineStyle: {
                 color: [
-                  "rgba(238, 197, 102, 0.1)",
-                  "rgba(238, 197, 102, 0.2)",
-                  "rgba(238, 197, 102, 0.4)",
-                  "rgba(238, 197, 102, 0.6)",
-                  "rgba(238, 197, 102, 0.8)",
-                  "rgba(238, 197, 102, 1)"
-                ].reverse()
-              }
+                  'rgba(238, 197, 102, 0.1)',
+                  'rgba(238, 197, 102, 0.2)',
+                  'rgba(238, 197, 102, 0.4)',
+                  'rgba(238, 197, 102, 0.6)',
+                  'rgba(238, 197, 102, 0.8)',
+                  'rgba(238, 197, 102, 1)',
+                ].reverse(),
+              },
             },
             splitArea: {
-              show: false
+              show: false,
             },
             axisLine: {
               lineStyle: {
-                color: "rgba(238, 197, 102, 0.5)"
-              }
-            }
+                color: 'rgba(238, 197, 102, 0.5)',
+              },
+            },
           },
           series: [
             {
-              name: "北京",
-              type: "radar",
+              name: '北京',
+              type: 'radar',
               lineStyle: lineStyle,
               data: val.dataBJ,
-              symbol: "none",
+              symbol: 'none',
               itemStyle: {
                 normal: {
-                  color: "#F9713C"
-                }
+                  color: '#F9713C',
+                },
               },
               areaStyle: {
                 normal: {
-                  opacity: 0.1
-                }
-              }
+                  opacity: 0.1,
+                },
+              },
             },
             {
-              name: "上海",
-              type: "radar",
+              name: '上海',
+              type: 'radar',
               lineStyle: lineStyle,
               data: val.dataSH,
-              symbol: "none",
+              symbol: 'none',
               itemStyle: {
                 normal: {
-                  color: "#B3E4A1"
-                }
+                  color: '#B3E4A1',
+                },
               },
               areaStyle: {
                 normal: {
-                  opacity: 0.05
-                }
-              }
+                  opacity: 0.05,
+                },
+              },
             },
             {
-              name: "广州",
-              type: "radar",
+              name: '广州',
+              type: 'radar',
               lineStyle: lineStyle,
               data: val.dataGZ,
-              symbol: "none",
+              symbol: 'none',
               itemStyle: {
                 normal: {
-                  color: "rgb(238, 197, 102)"
-                }
+                  color: 'rgb(238, 197, 102)',
+                },
               },
               areaStyle: {
                 normal: {
-                  opacity: 0.05
-                }
-              }
-            }
-          ]
-        }
+                  opacity: 0.05,
+                },
+              },
+            },
+          ],
+        };
       },
       {
         immediate: true,
-        deep: true
-      }
-    )
+        deep: true,
+      },
+    );
 
     return () => {
-      const height = "200px"
-      const width = "260px"
+      const height = '200px';
+      const width = '260px';
 
-      return <div>
-        <echart options={options} height={height} width={width} />
-      </div>
-    }
-  }
-})
-
+      return (
+        <div>
+          <echart options={options} height={height} width={width} />
+        </div>
+      );
+    };
+  },
+});

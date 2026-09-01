@@ -2,6 +2,8 @@
 import type { DeviceBag, DeviceBagPageParams } from '#/api/device/deviceBag';
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
+import { computed, onMounted, reactive, ref } from 'vue';
+
 import { Page } from '@vben/common-ui';
 
 import {
@@ -116,7 +118,9 @@ async function handleDownloadQrcode(row: DeviceBag) {
     let downloadName = `qrcode_${row.bagNo}.png`;
     const contentDisposition = response.headers?.['content-disposition'];
     if (contentDisposition) {
-      const fileNameMatch = contentDisposition.match(/filename\*?=['"]?(?:UTF-8'')?([^"';]+)['"]?/i);
+      const fileNameMatch = contentDisposition.match(
+        /filename\*?=['"]?(?:UTF-8'')?([^"';]+)['"]?/i,
+      );
       if (fileNameMatch?.[1]) {
         downloadName = decodeURIComponent(fileNameMatch[1]);
       }
@@ -151,7 +155,9 @@ async function handleBatchDownloadQrcode() {
     let filename = `batch_qrcodes_${Date.now()}.zip`;
     const contentDisposition = res.headers?.['content-disposition'];
     if (contentDisposition) {
-      const match = contentDisposition.match(/filename\*?=['"]?(?:UTF-8'')?([^"';]+)['"]?/i);
+      const match = contentDisposition.match(
+        /filename\*?=['"]?(?:UTF-8'')?([^"';]+)['"]?/i,
+      );
       if (match?.[1]) filename = decodeURIComponent(match[1]);
     }
     const url = window.URL.createObjectURL(blob);
@@ -184,7 +190,9 @@ async function handleUnbind(row: DeviceBag) {
     return;
   }
   try {
-    await ElMessageBox.confirm(`确定要解绑包袋【${row.bagNo}】吗？`, '提示', { type: 'warning' });
+    await ElMessageBox.confirm(`确定要解绑包袋【${row.bagNo}】吗？`, '提示', {
+      type: 'warning',
+    });
     await bagUnBindDeviceHatchApi(row.deviceBagId);
     ElMessage.success('解绑成功');
     handleQuery();
@@ -207,7 +215,11 @@ async function handleDelete(row?: DeviceBag) {
     ids = selectedIds.value;
   }
   try {
-    await ElMessageBox.confirm(`确定要删除选中的 ${ids.length} 条包袋吗？`, '提示', { type: 'warning' });
+    await ElMessageBox.confirm(
+      `确定要删除选中的 ${ids.length} 条包袋吗？`,
+      '提示',
+      { type: 'warning' },
+    );
     for (const id of ids) {
       await deleteDeviceBagApi(id);
     }
@@ -244,23 +256,34 @@ onMounted(() => {
 <template>
   <Page auto-content-height>
     <BaseTableLayout
-v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="loading"
-      :total="total" @search="loadData" @reset="resetQuery"
->
+      v-model:query-params="queryParams"
+      v-model:more-params="moreParams"
+      :loading="loading"
+      :total="total"
+      @search="loadData"
+      @reset="resetQuery"
+    >
       <!-- 📥 基础筛选项 -->
       <template #search-basic>
         <el-form-item>
           <el-input
-v-model="queryParams.bagNo" placeholder="请输入" clearable style="width: 200px"
+            v-model="queryParams.bagNo"
+            placeholder="请输入"
+            clearable
+            style="width: 200px"
             @keyup.enter="handleQuery"
->
+          >
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">包袋编号:</span>
             </template>
           </el-input>
         </el-form-item>
-         <el-form-item>
-          <el-select v-model="queryParams.bagStatus" clearable style="width: 200px">
+        <el-form-item>
+          <el-select
+            v-model="queryParams.bagStatus"
+            clearable
+            style="width: 200px"
+          >
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">包袋状态:</span>
             </template>
@@ -271,7 +294,11 @@ v-model="queryParams.bagNo" placeholder="请输入" clearable style="width: 200p
         </el-form-item>
 
         <el-form-item>
-          <el-select v-model="queryParams.status" clearable style="width: 200px">
+          <el-select
+            v-model="queryParams.status"
+            clearable
+            style="width: 200px"
+          >
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">状态:</span>
             </template>
@@ -287,21 +314,45 @@ v-model="queryParams.bagNo" placeholder="请输入" clearable style="width: 200p
 
       <!-- 📥 工具栏左侧 -->
       <template #toolbar-left>
-        <el-button type="primary" icon="Plus" @click="handleAdd">新增包袋</el-button>
-        <el-button type="success" plain icon="Picture" @click="handleGenerate">生成包袋</el-button>
-        <ExportButton :module-code="ModuleCodeMap.BAG" :fields="visibleColumns" :find-cond="queryParams" />
-        <el-button type="danger" plain icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete()">
+        <el-button type="primary" icon="Plus" @click="handleAdd">
+          新增包袋
+        </el-button>
+        <el-button type="success" plain icon="Picture" @click="handleGenerate">
+          生成包袋
+        </el-button>
+        <ExportButton
+          :module-code="ModuleCodeMap.BAG"
+          :fields="visibleColumns"
+          :find-cond="queryParams"
+        />
+        <el-button
+          type="danger"
+          plain
+          icon="Delete"
+          :disabled="selectedIds.length === 0"
+          @click="handleDelete()"
+        >
           批量删除
         </el-button>
         <el-button
-type="warning" plain icon="Download" :disabled="selectedIds.length === 0"
+          type="warning"
+          plain
+          icon="Download"
+          :disabled="selectedIds.length === 0"
           @click="handleBatchDownloadQrcode"
->
+        >
           批量下载
         </el-button>
         <transition name="el-fade-in">
-          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-sm text-gray-400">
-            已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
+          <span
+            v-if="selectedIds.length > 0"
+            class="selected-alert-badge ml-2 text-sm text-gray-400"
+          >
+            已选
+            <span class="text-red-500 font-medium">{{
+              selectedIds.length
+            }}</span>
+            项
           </span>
         </transition>
       </template>
@@ -309,32 +360,51 @@ type="warning" plain icon="Download" :disabled="selectedIds.length === 0"
       <!-- 📥 工具栏右侧 -->
       <template #toolbar-right>
         <ColumnSelector
-:storage-key="BAG_STORAGE_KEY" :default-columns="defaultBagColumns"
+          :storage-key="BAG_STORAGE_KEY"
+          :default-columns="defaultBagColumns"
           @update:columns="handleColumnsUpdate"
-/>
+        />
       </template>
 
       <!-- 📥 表格 -->
       <template #table>
         <el-table
-:data="tableData" border stripe style="width: 100%; height: 100%"
+          :data="tableData"
+          border
+          stripe
+          style="width: 100%; height: 100%"
           @selection-change="handleSelectionChange"
->
+        >
           <el-table-column type="selection" width="50" align="center" />
 
           <el-table-column
-v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
-            :width="typeof col.width === 'number' ? col.width : undefined" :min-width="col.minWidth" :align="col.align"
+            v-for="col in visibleColumns"
+            :key="col.key"
+            :prop="col.key"
+            :label="col.label"
+            :width="typeof col.width === 'number' ? col.width : undefined"
+            :min-width="col.minWidth"
+            :align="col.align"
             :show-overflow-tooltip="col.showOverflowTooltip || false"
->
+          >
             <template #default="{ row }">
               <template v-if="col.key === 'bagStatus'">
-                <el-tag :type="getBagStatusType(row.bagStatus)" size="small" round effect="light">
+                <el-tag
+                  :type="getBagStatusType(row.bagStatus)"
+                  size="small"
+                  round
+                  effect="light"
+                >
                   {{ getBagStatusText(row.bagStatus) }}
                 </el-tag>
               </template>
               <template v-else-if="col.key === 'status'">
-                <el-tag :type="row.status === 0 ? 'success' : 'danger'" size="small" round effect="light">
+                <el-tag
+                  :type="row.status === 0 ? 'success' : 'danger'"
+                  size="small"
+                  round
+                  effect="light"
+                >
                   {{ row.status === 0 ? '启用' : '禁用' }}
                 </el-tag>
               </template>
@@ -343,25 +413,52 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
               </template>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="200" fixed="right" align="center">
+          <el-table-column
+            label="操作"
+            width="200"
+            fixed="right"
+            align="center"
+          >
             <template #default="{ row }">
               <div class="action-buttons">
-                <el-button size="small" type="primary" @click="handleViewQrcode(row)">
+                <el-button
+                  size="small"
+                  type="primary"
+                  @click="handleViewQrcode(row)"
+                >
                   二维码
                 </el-button>
-                <el-button size="small" type="primary" @click="handleDownloadQrcode(row)">
+                <el-button
+                  size="small"
+                  type="primary"
+                  @click="handleDownloadQrcode(row)"
+                >
                   下载
                 </el-button>
                 <el-button size="small" type="primary" @click="handleEdit(row)">
                   编辑
                 </el-button>
-                <el-button size="small" type="danger" @click="handleDelete(row)">
+                <el-button
+                  size="small"
+                  type="danger"
+                  @click="handleDelete(row)"
+                >
                   删除
                 </el-button>
-                <el-button v-if="row.bagStatus !== 1" size="small" type="success" @click="handleBind(row)">
+                <el-button
+                  v-if="row.bagStatus !== 1"
+                  size="small"
+                  type="success"
+                  @click="handleBind(row)"
+                >
                   绑定
                 </el-button>
-                <el-button v-else size="small" type="warning" @click="handleUnbind(row)">
+                <el-button
+                  v-else
+                  size="small"
+                  type="warning"
+                  @click="handleUnbind(row)"
+                >
                   解绑
                 </el-button>
               </div>

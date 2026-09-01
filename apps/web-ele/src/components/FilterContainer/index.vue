@@ -4,24 +4,34 @@ import { computed } from 'vue';
 import { ArrowDown, ArrowUp, Refresh, Search } from '@element-plus/icons-vue';
 
 interface Props {
-  expanded: boolean;      // 展开状态
-  modelValue: any;        // 表单绑定的 queryParams 数据对象
+  expanded: boolean; // 展开状态
+  modelValue: any; // 表单绑定的 queryParams 数据对象
 }
 
 const props = defineProps<Props>();
 const emit = defineEmits(['update:expanded', 'search', 'reset']);
 
 // 按钮文字切换
-const toggleText = computed(() => props.expanded ? '收起筛选' : '更多筛选');
+const toggleText = computed(() => (props.expanded ? '收起筛选' : '更多筛选'));
 </script>
 
 <template>
   <div class="vben-filter-wrapper">
-    <el-form :inline="true" :model="modelValue" class="filter-grid-form" @submit.prevent>
+    <el-form
+      :inline="true"
+      :model="modelValue"
+      class="filter-grid-form"
+      @submit.prevent
+    >
       <div class="filter-row-basic">
         <slot></slot>
         <el-form-item class="filter-actions-group">
-          <el-button type="primary" link class="toggle-link-btn" @click="emit('update:expanded', !expanded)">
+          <el-button
+            type="primary"
+            link
+            class="toggle-link-btn"
+            @click="emit('update:expanded', !expanded)"
+          >
             {{ toggleText }}
             <el-icon class="el-icon--right">
               <component :is="expanded ? ArrowUp : ArrowDown" />
@@ -29,7 +39,12 @@ const toggleText = computed(() => props.expanded ? '收起筛选' : '更多筛�
           </el-button>
 
           <el-tooltip content="查询" placement="top">
-            <el-button type="primary" :icon="Search" circle @click="emit('search')" />
+            <el-button
+              type="primary"
+              :icon="Search"
+              circle
+              @click="emit('search')"
+            />
           </el-tooltip>
           <el-tooltip content="重置" placement="top">
             <el-button :icon="Refresh" circle @click="emit('reset')" />
@@ -51,7 +66,9 @@ const toggleText = computed(() => props.expanded ? '收起筛选' : '更多筛�
   background: #fff;
   border-radius: 6px;
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 3%);
-  transition: background-color 0.3s, box-shadow 0.3s;
+  transition:
+    background-color 0.3s,
+    box-shadow 0.3s;
 
   .dark & {
     background: #1e1e1e !important;

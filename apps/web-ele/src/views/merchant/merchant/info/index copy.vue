@@ -1,15 +1,30 @@
 <script lang="ts" setup>
-import { computed, onMounted, reactive, ref, watch } from "vue";
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 
-import { Page } from "@vben/common-ui";
-import { useUserStore } from "@vben/stores";
+import { Page } from '@vben/common-ui';
+import { useUserStore } from '@vben/stores';
 
-import { ElMessage } from "element-plus";
-import QRCode from "qrcode";
+import { ElMessage } from 'element-plus';
+import QRCode from 'qrcode';
 
-import { h5PayApi, nativePayApi, refundByMerchantApi } from "#/api/common/pay";
-import { editMerchantConfigApi, getMerchantAccountApi, getMerchantAccountFlowPageApi, getMerchantConfigDetailApi, getMerchantInfoApi, getMerchantRechargePageApi } from '#/api/system/merchant';
-import type { MerchantAccount, MerchantAccountFlow, MerchantAccountFlowPageParams, MerchantConfig, MerchantInfo, MerchantRecharge, MerchantRechargePageParams } from '#/api/system/merchant';
+import { h5PayApi, nativePayApi, refundByMerchantApi } from '#/api/common/pay';
+import {
+  editMerchantConfigApi,
+  getMerchantAccountApi,
+  getMerchantAccountFlowPageApi,
+  getMerchantConfigDetailApi,
+  getMerchantInfoApi,
+  getMerchantRechargePageApi,
+} from '#/api/system/merchant';
+import type {
+  MerchantAccount,
+  MerchantAccountFlow,
+  MerchantAccountFlowPageParams,
+  MerchantConfig,
+  MerchantInfo,
+  MerchantRecharge,
+  MerchantRechargePageParams,
+} from '#/api/system/merchant';
 
 import MerchantFlowTable from './MerchantFlowTable.vue';
 import MerchantRechargeTable from './MerchantRechargeTable.vue';
@@ -27,15 +42,15 @@ function refreshFlowData() {
 }
 
 // --- 状态变量 ---
-const activeTab = ref("basic");
+const activeTab = ref('basic');
 const merchantId = ref(0);
 
 // 充值弹窗
 const rechargeDialogVisible = ref(false);
 const rechargeAmount = ref(0);
 const rechargeSubmitting = ref(false);
-const qrcodeUrl = ref("");
-const h5PayUrl = ref("");
+const qrcodeUrl = ref('');
+const h5PayUrl = ref('');
 
 // 基本信息
 const infoLoading = ref(false);
@@ -99,23 +114,23 @@ const flowParams = reactive<MerchantAccountFlowPageParams>({
 
 // 选项
 const payStatusOptions = [
-  { label: "待支付", value: 0 },
-  { label: "支付中", value: 1 },
-  { label: "已支付", value: 2 },
-  { label: "支付失败", value: 3 },
+  { label: '待支付', value: 0 },
+  { label: '支付中', value: 1 },
+  { label: '已支付', value: 2 },
+  { label: '支付失败', value: 3 },
 ];
 
 const refundStatusOptions = [
-  { label: "未退款", value: 0 },
-  { label: "退款中", value: 1 },
-  { label: "已退款", value: 2 },
-  { label: "退款失败", value: 3 },
+  { label: '未退款', value: 0 },
+  { label: '退款中', value: 1 },
+  { label: '已退款', value: 2 },
+  { label: '退款失败', value: 3 },
 ];
 
 const changeTypeOptions = [
-  { label: "充值到账", value: 0, type: "success" },
-  { label: "平台服务费扣减", value: 1, type: "danger" },
-  { label: "会员提现扣款", value: 2, type: "warning" },
+  { label: '充值到账', value: 0, type: 'success' },
+  { label: '平台服务费扣减', value: 1, type: 'danger' },
+  { label: '会员提现扣款', value: 2, type: 'warning' },
 ];
 
 // --- 计算属性 ---
@@ -133,7 +148,7 @@ const totalExpenseAmount = computed(() => {
 
 // --- 辅助函数 ---
 function formatAmount(amount: number): string {
-  if (amount === undefined || amount === null) return "¥ 0.00";
+  if (amount === undefined || amount === null) return '¥ 0.00';
   return `¥ ${amount.toFixed(2)}`;
 }
 
@@ -141,12 +156,12 @@ function formatAmount(amount: number): string {
 function isMobileDevice(): boolean {
   const ua = navigator.userAgent.toLowerCase();
   const mobileKeywords = [
-    "android",
-    "iphone",
-    "ipad",
-    "ipod",
-    "windows phone",
-    "mobile",
+    'android',
+    'iphone',
+    'ipad',
+    'ipod',
+    'windows phone',
+    'mobile',
   ];
   return mobileKeywords.some((keyword) => ua.includes(keyword));
 }
@@ -154,15 +169,15 @@ function isMobileDevice(): boolean {
 // 打开充值弹窗
 function openRechargeDialog() {
   rechargeAmount.value = 0;
-  qrcodeUrl.value = "";
-  h5PayUrl.value = "";
+  qrcodeUrl.value = '';
+  h5PayUrl.value = '';
   rechargeDialogVisible.value = true;
 }
 
 // 执行充值
 async function handleRecharge() {
   if (rechargeAmount.value <= 0) {
-    ElMessage.warning("请输入充值金额");
+    ElMessage.warning('请输入充值金额');
     return;
   }
 
@@ -170,7 +185,7 @@ async function handleRecharge() {
   try {
     const isMobile = isMobileDevice();
     // const clientIp = await getClientIp();
-    const clientIp = "";
+    const clientIp = '';
 
     if (isMobile) {
       // H5 支付（手机浏览器）
@@ -184,7 +199,7 @@ async function handleRecharge() {
         // 跳转到 H5 支付页面
         window.location.href = res.h5Url;
       } else {
-        ElMessage.error("获取支付链接失败");
+        ElMessage.error('获取支付链接失败');
       }
     } else {
       // TODO: PC端 Native 支付
@@ -195,22 +210,22 @@ async function handleRecharge() {
       if (res?.codeUrl) {
         // 将 codeUrl 生成二维码展示
         await generateQrcode(res.codeUrl);
-        ElMessage.info("请使用微信扫码支付");
+        ElMessage.info('请使用微信扫码支付');
         closeTimer = setTimeout(() => {
           if (rechargeDialogVisible.value) {
             rechargeDialogVisible.value = false;
             loadAccountInfo();
             loadRechargeData();
-            ElMessage.info("支付窗口已关闭，可在充值订单中查看支付结果");
+            ElMessage.info('支付窗口已关闭，可在充值订单中查看支付结果');
           }
         }, 120_000);
       } else {
-        ElMessage.error("获取支付二维码失败");
+        ElMessage.error('获取支付二维码失败');
       }
     }
   } catch (error) {
-    console.error("充值失败", error);
-    ElMessage.error("充值失败");
+    console.error('充值失败', error);
+    ElMessage.error('充值失败');
   } finally {
     rechargeSubmitting.value = false;
   }
@@ -226,12 +241,12 @@ const refundAmount = ref(0);
 function openRefundDialog(row: MerchantRecharge) {
   // 只有已支付的订单才能退款
   if (row.status !== 2) {
-    ElMessage.warning("只有已支付的订单才能退款");
+    ElMessage.warning('只有已支付的订单才能退款');
     return;
   }
   // 检查是否已退款
   if (row.refundStatus === 2) {
-    ElMessage.warning("该订单已完成退款");
+    ElMessage.warning('该订单已完成退款');
     return;
   }
   currentRechargeOrder.value = row;
@@ -242,7 +257,7 @@ function openRefundDialog(row: MerchantRecharge) {
 // 执行退款
 async function handleRefund() {
   if (refundAmount.value <= 0) {
-    ElMessage.warning("请输入退款金额");
+    ElMessage.warning('请输入退款金额');
     return;
   }
 
@@ -261,12 +276,12 @@ async function handleRefund() {
       refundAmount: refundAmount.value,
       totalAmount: order.amount,
     });
-    ElMessage.success("退款申请已提交");
+    ElMessage.success('退款申请已提交');
     refundDialogVisible.value = false;
     // 刷新充值订单列表
     loadRechargeData();
   } catch {
-    ElMessage.error("退款失败");
+    ElMessage.error('退款失败');
   } finally {
     refundSubmitting.value = false;
   }
@@ -279,66 +294,66 @@ async function generateQrcode(url: string) {
     const qrcodeCanvas = await QRCode.toDataURL(url, { width: 200, margin: 2 });
     qrcodeUrl.value = qrcodeCanvas;
   } catch (error) {
-    console.error("生成二维码失败", error);
+    console.error('生成二维码失败', error);
   }
 }
 
 function getPayStatusText(status: number): string {
   const map: Record<number, string> = {
-    0: "待支付",
-    1: "支付中",
-    2: "已支付",
-    3: "支付失败",
+    0: '待支付',
+    1: '支付中',
+    2: '已支付',
+    3: '支付失败',
   };
-  return map[status] || "未知";
+  return map[status] || '未知';
 }
 
 function getPayStatusType(status: number): string {
   const map: Record<number, string> = {
-    0: "warning",
-    1: "info",
-    2: "success",
-    3: "danger",
+    0: 'warning',
+    1: 'info',
+    2: 'success',
+    3: 'danger',
   };
-  return map[status] || "info";
+  return map[status] || 'info';
 }
 
 function getRefundStatusText(status: number): string {
   const map: Record<number, string> = {
-    0: "未退款",
-    1: "退款中",
-    2: "已退款",
-    3: "退款失败",
+    0: '未退款',
+    1: '退款中',
+    2: '已退款',
+    3: '退款失败',
   };
-  return map[status] || "未知";
+  return map[status] || '未知';
 }
 
 function getRefundStatusType(status: number): string {
   const map: Record<number, string> = {
-    0: "info",
-    1: "warning",
-    2: "success",
-    3: "danger",
+    0: 'info',
+    1: 'warning',
+    2: 'success',
+    3: 'danger',
   };
-  return map[status] || "info";
+  return map[status] || 'info';
 }
 
 function getChangeTypeText(type: number): string {
   const map: Record<number, string> = {
-    0: "充值到账",
-    1: "平台服务费扣减",
-    2: "会员提现扣款",
+    0: '充值到账',
+    1: '平台服务费扣减',
+    2: '会员提现扣款',
   };
-  return map[type] || "未知";
+  return map[type] || '未知';
 }
 
 function getChangeTypeType(type: number): string {
   const map: Record<number, string> = {
-    0: "success",
-    1: "danger",
-    2: "warning",
+    0: 'success',
+    1: 'danger',
+    2: 'warning',
   };
-  return map[type] || "info";
+  return map[type] || 'info';
 }
 
 // --- 数据加载 ---
@@ -348,7 +363,7 @@ async function loadMerchantInfo() {
     const res = await getMerchantInfoApi(merchantId.value);
     merchantInfo.value = res;
   } catch {
-    ElMessage.error("获取商户信息失败");
+    ElMessage.error('获取商户信息失败');
   } finally {
     infoLoading.value = false;
   }
@@ -360,7 +375,7 @@ async function loadAccountInfo() {
     const res = await getMerchantAccountApi(merchantId.value);
     accountInfo.value = res;
   } catch {
-    ElMessage.error("获取账户信息失败");
+    ElMessage.error('获取账户信息失败');
   } finally {
     accountLoading.value = false;
   }
@@ -384,7 +399,7 @@ async function loadRechargeData() {
     rechargeData.value = res.records || [];
     rechargeTotal.value = res.total || 0;
   } catch {
-    ElMessage.error("加载充值订单失败");
+    ElMessage.error('加载充值订单失败');
   } finally {
     rechargeLoading.value = false;
   }
@@ -408,7 +423,7 @@ async function loadFlowData() {
     flowData.value = res.records || [];
     flowTotal.value = res.total || 0;
   } catch {
-    ElMessage.error("加载资金流水失败");
+    ElMessage.error('加载资金流水失败');
   } finally {
     flowLoading.value = false;
   }
@@ -420,7 +435,7 @@ async function loadConfigData(merchantId: number) {
     const res = await getMerchantConfigDetailApi(merchantId);
     configData.value = res;
   } catch {
-    ElMessage.error("获取商户配置失败");
+    ElMessage.error('获取商户配置失败');
   } finally {
     configLoading.value = false;
   }
@@ -436,9 +451,9 @@ async function handleSaveConfig() {
       orderWalletSync: configData.value.orderWalletSync,
       status: configData.value.status,
     });
-    ElMessage.success("保存成功");
+    ElMessage.success('保存成功');
   } catch {
-    ElMessage.error("保存失败");
+    ElMessage.error('保存失败');
   } finally {
     configSubmitting.value = false;
   }
@@ -446,13 +461,13 @@ async function handleSaveConfig() {
 
 // 监听 Tab 切换，懒加载数据
 watch(activeTab, (newTab) => {
-  if (newTab === "account" && !accountInfo.value) {
+  if (newTab === 'account' && !accountInfo.value) {
     loadAccountInfo();
-  } else if (newTab === "recharge" && rechargeData.value.length === 0) {
+  } else if (newTab === 'recharge' && rechargeData.value.length === 0) {
     loadRechargeData();
-  } else if (newTab === "flow" && flowData.value.length === 0) {
+  } else if (newTab === 'flow' && flowData.value.length === 0) {
     loadFlowData();
-  } else if (newTab === "config" && !configData.value) {
+  } else if (newTab === 'config' && !configData.value) {
     loadConfigData(merchantId.value);
   }
 });
@@ -524,17 +539,17 @@ onMounted(async () => {
                   {{ merchantInfo.merchantCode }}
                 </el-descriptions-item>
                 <el-descriptions-item label="联系人">
-                  {{ merchantInfo.contact || "-" }}
+                  {{ merchantInfo.contact || '-' }}
                 </el-descriptions-item>
                 <el-descriptions-item label="联系电话">
-                  {{ merchantInfo.phone || "-" }}
+                  {{ merchantInfo.phone || '-' }}
                 </el-descriptions-item>
                 <el-descriptions-item label="商户状态">
                   <el-tag
                     :type="merchantInfo.status === 0 ? 'success' : 'danger'"
                     size="small"
                   >
-                    {{ merchantInfo.status === 0 ? "启用" : "禁用" }}
+                    {{ merchantInfo.status === 0 ? '启用' : '禁用' }}
                   </el-tag>
                 </el-descriptions-item>
                 <el-descriptions-item label="所在区域">
@@ -542,7 +557,7 @@ onMounted(async () => {
                   {{ merchantInfo.district }}
                 </el-descriptions-item>
                 <el-descriptions-item label="详细地址" :span="2">
-                  {{ merchantInfo.detailAddress || "-" }}
+                  {{ merchantInfo.detailAddress || '-' }}
                 </el-descriptions-item>
                 <el-descriptions-item label="地理位置" :span="2">
                   <span v-if="merchantInfo.longitude && merchantInfo.latitude">
@@ -589,7 +604,7 @@ onMounted(async () => {
                     :type="accountInfo.status === 0 ? 'success' : 'danger'"
                     size="small"
                   >
-                    {{ accountInfo.status === 0 ? "正常" : "冻结" }}
+                    {{ accountInfo.status === 0 ? '正常' : '冻结' }}
                   </el-tag>
                 </el-descriptions-item>
                 <el-descriptions-item label="操作" :span="2">
@@ -607,12 +622,15 @@ onMounted(async () => {
 
           <!-- 充值订单 Tab -->
           <el-tab-pane label="充值订单" name="recharge">
-             <MerchantRechargeTable :merchant-id="merchantId" ref="rechargeTableRef" />
+            <MerchantRechargeTable
+              :merchant-id="merchantId"
+              ref="rechargeTableRef"
+            />
           </el-tab-pane>
 
           <!-- 资金流水 Tab -->
           <el-tab-pane label="资金流水" name="flow">
-           <MerchantFlowTable :merchant-id="merchantId" ref="flowTableRef" />
+            <MerchantFlowTable :merchant-id="merchantId" ref="flowTableRef" />
           </el-tab-pane>
           <!-- 商户配置 Tab -->
           <el-tab-pane label="商户配置" name="config">
@@ -704,7 +722,7 @@ onMounted(async () => {
       </div>
       <template #footer>
         <el-button @click="rechargeDialogVisible = false">
-          {{ qrcodeUrl ? "关闭" : "取消" }}
+          {{ qrcodeUrl ? '关闭' : '取消' }}
         </el-button>
         <el-button
           v-if="!qrcodeUrl"
@@ -742,10 +760,10 @@ onMounted(async () => {
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="充值人">
-          {{ rechargeDetail.rechargeUserName || "-" }}
+          {{ rechargeDetail.rechargeUserName || '-' }}
         </el-descriptions-item>
         <el-descriptions-item label="支付时间">
-          {{ rechargeDetail.payTime || "-" }}
+          {{ rechargeDetail.payTime || '-' }}
         </el-descriptions-item>
         <el-descriptions-item label="退款状态">
           <el-tag
@@ -759,17 +777,17 @@ onMounted(async () => {
           {{
             rechargeDetail.totalRefundAmount > 0
               ? formatAmount(rechargeDetail.totalRefundAmount)
-              : "-"
+              : '-'
           }}
         </el-descriptions-item>
         <el-descriptions-item label="退款时间">
-          {{ rechargeDetail.refundTime || "-" }}
+          {{ rechargeDetail.refundTime || '-' }}
         </el-descriptions-item>
         <el-descriptions-item label="支付请求ID" :span="2">
-          {{ rechargeDetail.payRequestId || "-" }}
+          {{ rechargeDetail.payRequestId || '-' }}
         </el-descriptions-item>
         <el-descriptions-item label="退款请求ID" :span="2">
-          {{ rechargeDetail.refundRequestId || "-" }}
+          {{ rechargeDetail.refundRequestId || '-' }}
         </el-descriptions-item>
       </el-descriptions>
       <template #footer>

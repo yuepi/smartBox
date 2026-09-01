@@ -1,16 +1,16 @@
 // 颜色
 $colors: (
-  "primary": #db9e3f,
-  "info-1": #4394e4,
-  "info": #4b67af,
-  "white": #ffffff,
-  "light": #f9f9f9,
-  "grey-1": #999999,
-  "grey": #666666,
-  "dark-1": #5f5f5f,
-  "dark": #222222,
-  "black-1": #171823,
-  "black": #000000,
+  'primary': #db9e3f,
+  'info-1': #4394e4,
+  'info': #4b67af,
+  'white': #ffffff,
+  'light': #f9f9f9,
+  'grey-1': #999999,
+  'grey': #666666,
+  'dark-1': #5f5f5f,
+  'dark': #222222,
+  'black-1': #171823,
+  'black': #000000,
 );
 
 // 字体大小
@@ -18,19 +18,19 @@ $base-font-size: 16px;
 $font-sizes: (
   xxs: 0.1,
   //8px
-    xs: 0.125,
+  xs: 0.125,
   //10px
-    sm: 0.2875,
+  sm: 0.2875,
   //12px
-    md: 0.1625,
+  md: 0.1625,
   //13px
-    lg: 0.175,
+  lg: 0.175,
   //14px
-    xl: 0.2,
+  xl: 0.2,
   //16px
-    xxl: 0.225,
+  xxl: 0.225,
   //18px
-    xxxl: 0.25 //20px,,,,
+  xxxl: 0.25, //20px,,,,
 );
 
 // 宽高

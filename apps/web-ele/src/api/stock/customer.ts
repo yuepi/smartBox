@@ -29,7 +29,7 @@ export interface CustomerPageParams {
 export function getCustomerPageApi(params: CustomerPageParams) {
   return requestClient.get<{ records: Customer[]; total: number }>(
     '/merchant/customer/page',
-    { params }
+    { params },
   );
 }
 
@@ -57,5 +57,7 @@ export function getCustomerDetailApi(customerId: number) {
 
 /** 删除回收商 */
 export function deleteCustomerApi(customerId: number) {
-  return requestClient.post<boolean>('/merchant/customer/delete', { customerId });
+  return requestClient.post<boolean>('/merchant/customer/delete', {
+    customerId,
+  });
 }

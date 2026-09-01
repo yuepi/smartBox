@@ -1,13 +1,15 @@
 <script lang="ts" setup>
 import { onMounted, reactive, ref } from 'vue';
-import { ElMessage } from 'element-plus';
-import { Search, Refresh, View } from '@element-plus/icons-vue';
+
 import { Page } from '@vben/common-ui';
 
+import { Refresh, Search, View } from '@element-plus/icons-vue';
+import { ElMessage } from 'element-plus';
+
 import {
-  getMemberWalletFlowPageApi,
-  getMemberWalletFlowDetailApi,
   FlowTypeMap,
+  getMemberWalletFlowDetailApi,
+  getMemberWalletFlowPageApi,
   type MemberWalletFlow,
   type MemberWalletFlowPageParams,
 } from '#/api/member/memberWalletFlow';
@@ -68,8 +70,6 @@ function formatChangeAmount(amount: number, type: number): string {
   const formatted = formatAmount(Math.abs(amount || 0));
   return sign === '+' ? `+${formatted}` : `-${formatted}`;
 }
-
-
 
 // --- 数据加载 ---
 async function loadData() {
@@ -141,7 +141,15 @@ onMounted(() => {
           <el-card shadow="hover" class="text-center">
             <div class="text-gray-500 text-sm">总入账金额</div>
             <div class="text-2xl font-bold text-success">
-              {{ formatAmount(tableData.filter(item => item.flowType === 0 || item.flowType === 3).reduce((sum, item) => sum + (item.changeAmount || 0), 0)) }}
+              {{
+                formatAmount(
+                  tableData
+                    .filter(
+                      (item) => item.flowType === 0 || item.flowType === 3,
+                    )
+                    .reduce((sum, item) => sum + (item.changeAmount || 0), 0),
+                )
+              }}
             </div>
           </el-card>
         </el-col>
@@ -149,7 +157,18 @@ onMounted(() => {
           <el-card shadow="hover" class="text-center">
             <div class="text-gray-500 text-sm">总出账金额</div>
             <div class="text-2xl font-bold text-danger">
-              {{ formatAmount(tableData.filter(item => item.flowType === 1 || item.flowType === 2).reduce((sum, item) => sum + Math.abs(item.changeAmount || 0), 0)) }}
+              {{
+                formatAmount(
+                  tableData
+                    .filter(
+                      (item) => item.flowType === 1 || item.flowType === 2,
+                    )
+                    .reduce(
+                      (sum, item) => sum + Math.abs(item.changeAmount || 0),
+                      0,
+                    ),
+                )
+              }}
             </div>
           </el-card>
         </el-col>
@@ -159,10 +178,20 @@ onMounted(() => {
       <el-card shadow="never" class="mb-4">
         <el-form :inline="true" :model="queryParams">
           <el-form-item label="会员Id">
-            <el-input v-model="queryParams.memberId" placeholder="请输入会员ID" clearable style="width: 180px" />
+            <el-input
+              v-model="queryParams.memberId"
+              placeholder="请输入会员ID"
+              clearable
+              style="width: 180px"
+            />
           </el-form-item>
           <el-form-item label="流水类型">
-            <el-select v-model="queryParams.flowType" placeholder="全部" clearable style="width: 140px">
+            <el-select
+              v-model="queryParams.flowType"
+              placeholder="全部"
+              clearable
+              style="width: 140px"
+            >
               <el-option
                 v-for="item in flowTypeOptions"
                 :key="item.value"
@@ -182,7 +211,9 @@ onMounted(() => {
             />
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" :icon="Search" @click="handleQuery">查询</el-button>
+            <el-button type="primary" :icon="Search" @click="handleQuery">
+              查询
+            </el-button>
             <el-button :icon="Refresh" @click="resetQuery">重置</el-button>
           </el-form-item>
         </el-form>
@@ -197,42 +228,104 @@ onMounted(() => {
           stripe
           style="width: 100%"
         >
-          <el-table-column prop="memberWalletFlowId" label="流水ID" min-width="90" align="center" />
-          <el-table-column prop="batchNo" label="批次号" min-width="180" align="center" show-overflow-tooltip />
-          <el-table-column prop="memberId" label="会员ID" min-width="80" align="center" />
-          <el-table-column prop="flowType" label="流水类型" width="130" align="center">
+          <el-table-column
+            prop="memberWalletFlowId"
+            label="流水ID"
+            min-width="90"
+            align="center"
+          />
+          <el-table-column
+            prop="batchNo"
+            label="批次号"
+            min-width="180"
+            align="center"
+            show-overflow-tooltip
+          />
+          <el-table-column
+            prop="memberId"
+            label="会员ID"
+            min-width="80"
+            align="center"
+          />
+          <el-table-column
+            prop="flowType"
+            label="流水类型"
+            width="130"
+            align="center"
+          >
             <template #default="{ row }">
               <el-tag :type="getFlowTypeType(row.flowType)" size="small">
                 {{ getFlowTypeText(row.flowType) }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="changeAmount" label="变动金额" width="130" align="right">
+          <el-table-column
+            prop="changeAmount"
+            label="变动金额"
+            width="130"
+            align="right"
+          >
             <template #default="{ row }">
-              <span :class="row.flowType === 0 || row.flowType === 3 ? 'text-success' : 'text-danger'">
+              <span
+                :class="
+                  row.flowType === 0 || row.flowType === 3
+                    ? 'text-success'
+                    : 'text-danger'
+                "
+              >
                 {{ formatChangeAmount(row.changeAmount, row.flowType) }}
               </span>
             </template>
           </el-table-column>
-          <el-table-column prop="beforeBalance" label="变动前余额" width="120" align="right">
+          <el-table-column
+            prop="beforeBalance"
+            label="变动前余额"
+            width="120"
+            align="right"
+          >
             <template #default="{ row }">
               {{ formatAmount(row.beforeBalance) }}
             </template>
           </el-table-column>
-          <el-table-column prop="afterBalance" label="变动后余额" width="120" align="right">
+          <el-table-column
+            prop="afterBalance"
+            label="变动后余额"
+            width="120"
+            align="right"
+          >
             <template #default="{ row }">
-              <span class="font-medium">{{ formatAmount(row.afterBalance) }}</span>
+              <span class="font-medium">{{
+                formatAmount(row.afterBalance)
+              }}</span>
             </template>
           </el-table-column>
-          <el-table-column prop="relatedBizId" label="关联业务ID" width="100" align="center">
+          <el-table-column
+            prop="relatedBizId"
+            label="关联业务ID"
+            width="100"
+            align="center"
+          >
             <template #default="{ row }">
               {{ row.relatedBizId || '-' }}
             </template>
           </el-table-column>
-          <el-table-column prop="remark" label="备注" min-width="150" align="left" show-overflow-tooltip />
+          <el-table-column
+            prop="remark"
+            label="备注"
+            min-width="150"
+            align="left"
+            show-overflow-tooltip
+          />
           <el-table-column label="操作" width="80" fixed="right" align="center">
             <template #default="{ row }">
-              <el-button link type="primary" :icon="View" @click="handleView(row)">详情</el-button>
+              <el-button
+                link
+                type="primary"
+                :icon="View"
+                @click="handleView(row)"
+              >
+                详情
+              </el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -253,28 +346,57 @@ onMounted(() => {
     </div>
 
     <!-- 详情弹窗 -->
-    <el-dialog v-model="detailVisible" title="资金流水详情" width="600px" append-to-body>
+    <el-dialog
+      v-model="detailVisible"
+      title="资金流水详情"
+      width="600px"
+      append-to-body
+    >
       <el-descriptions :column="2" border v-if="detailData">
-        <el-descriptions-item label="流水ID" :span="2">{{ detailData.memberWalletFlowId }}</el-descriptions-item>
-        <el-descriptions-item label="批次号" :span="2">{{ detailData.batchNo || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="会员ID">{{ detailData.memberId }}</el-descriptions-item>
-        <el-descriptions-item label="商户ID">{{ detailData.merchantId || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="流水ID" :span="2">
+          {{ detailData.memberWalletFlowId }}
+        </el-descriptions-item>
+        <el-descriptions-item label="批次号" :span="2">
+          {{ detailData.batchNo || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="会员ID">
+          {{ detailData.memberId }}
+        </el-descriptions-item>
+        <el-descriptions-item label="商户ID">
+          {{ detailData.merchantId || '-' }}
+        </el-descriptions-item>
         <el-descriptions-item label="流水类型">
           <el-tag :type="getFlowTypeType(detailData.flowType)" size="small">
             {{ getFlowTypeText(detailData.flowType) }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="关联业务ID">{{ detailData.relatedBizId || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="关联业务ID">
+          {{ detailData.relatedBizId || '-' }}
+        </el-descriptions-item>
         <el-descriptions-item label="变动金额">
-          <span :class="detailData.flowType === 0 || detailData.flowType === 3 ? 'text-success' : 'text-danger'">
-            {{ formatChangeAmount(detailData.changeAmount, detailData.flowType) }}
+          <span
+            :class="
+              detailData.flowType === 0 || detailData.flowType === 3
+                ? 'text-success'
+                : 'text-danger'
+            "
+          >
+            {{
+              formatChangeAmount(detailData.changeAmount, detailData.flowType)
+            }}
           </span>
         </el-descriptions-item>
-        <el-descriptions-item label="变动前余额">{{ formatAmount(detailData.beforeBalance) }}</el-descriptions-item>
-        <el-descriptions-item label="变动后余额">
-          <span class="font-bold text-primary">{{ formatAmount(detailData.afterBalance) }}</span>
+        <el-descriptions-item label="变动前余额">
+          {{ formatAmount(detailData.beforeBalance) }}
         </el-descriptions-item>
-        <el-descriptions-item label="备注" :span="2">{{ detailData.remark || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="变动后余额">
+          <span class="font-bold text-primary">{{
+            formatAmount(detailData.afterBalance)
+          }}</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="备注" :span="2">
+          {{ detailData.remark || '-' }}
+        </el-descriptions-item>
       </el-descriptions>
       <template #footer>
         <el-button @click="detailVisible = false">关闭</el-button>
@@ -284,8 +406,19 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.text-primary { color: #409eff; }
-.text-success { color: #67c23a; }
-.text-danger { color: #f56c6c; }
-.font-bold { font-weight: 600; }
+.text-primary {
+  color: #409eff;
+}
+
+.text-success {
+  color: #67c23a;
+}
+
+.text-danger {
+  color: #f56c6c;
+}
+
+.font-bold {
+  font-weight: 600;
+}
 </style>

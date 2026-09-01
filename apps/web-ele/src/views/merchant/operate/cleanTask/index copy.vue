@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from 'vue';
 
-import { Page } from "@vben/common-ui";
+import { Page } from '@vben/common-ui';
 
 import {
   Delete,
@@ -10,14 +10,14 @@ import {
   Refresh,
   Search,
   View,
-} from "@element-plus/icons-vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+} from '@element-plus/icons-vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
-import { type Device, getDeviceListApi } from "#/api/device/device";
+import { type Device, getDeviceListApi } from '#/api/device/device';
 import {
   type DeviceHatch,
   getDeviceHatchListApi,
-} from "#/api/device/deviceHatch";
+} from '#/api/device/deviceHatch';
 import {
   addCleanTaskApi,
   type CleanTask,
@@ -27,19 +27,19 @@ import {
   getCleanTaskDetailApi,
   getCleanTaskPageApi,
   TaskStatusMap,
-} from "#/api/operation/cleanTask";
-import { type Dept, getMerchantDeptListApi } from "#/api/system/dept";
-import ColumnSelector from "#/components/ColumnSelector/index.vue";
-import ExportFieldSelector from "#/components/ExportFieldSelector/index.vue";
+} from '#/api/operation/cleanTask';
+import { type Dept, getMerchantDeptListApi } from '#/api/system/dept';
+import ColumnSelector from '#/components/ColumnSelector/index.vue';
+import ExportFieldSelector from '#/components/ExportFieldSelector/index.vue';
 import {
   CLEAN_TASK_STORAGE_KEY,
   defaultCleanTaskColumns,
   type TableColumnConfig,
-} from "#/constants/tableColumns";
-import { useDicts } from "#/hooks/useDict";
-import { ModuleCodeMap, useExport } from "#/hooks/useExport";
+} from '#/constants/tableColumns';
+import { useDicts } from '#/hooks/useDict';
+import { ModuleCodeMap, useExport } from '#/hooks/useExport';
 
-const { task_status } = useDicts(["task_status"]);
+const { task_status } = useDicts(['task_status']);
 const { exporting, exportData } = useExport(ModuleCodeMap.CLEAN_TASK);
 
 // 表格列配置
@@ -80,7 +80,7 @@ const selectedIds = ref<number[]>([]);
 
 // 表单弹窗
 const formVisible = ref(false);
-const formTitle = ref("");
+const formTitle = ref('');
 const formData = ref<Partial<CleanTask>>({});
 const formSubmitting = ref(false);
 
@@ -95,7 +95,7 @@ const deptOptions = ref<Dept[]>([]);
 
 // 任务状态选项
 const taskStatusOptions = [
-  { label: "全部", value: undefined },
+  { label: '全部', value: undefined },
   ...Object.entries(TaskStatusMap).map(([key, val]) => ({
     label: val.label,
     value: Number(key),
@@ -114,11 +114,11 @@ const queryParams = reactive<CleanTaskPageParams>({
 
 // --- 辅助函数 ---
 function getTaskStatusText(status: number): string {
-  return TaskStatusMap[status]?.label || "未知";
+  return TaskStatusMap[status]?.label || '未知';
 }
 
 function getTaskStatusType(status: number): string {
-  return TaskStatusMap[status]?.type || "info";
+  return TaskStatusMap[status]?.type || 'info';
 }
 
 // --- 加载选项 ---
@@ -164,7 +164,7 @@ async function loadData() {
     total.value = res.total || 0;
   } catch (error) {
     console.error(error);
-    ElMessage.error("加载数据失败");
+    ElMessage.error('加载数据失败');
   } finally {
     loading.value = false;
   }
@@ -172,7 +172,7 @@ async function loadData() {
 
 // --- 新增/编辑 ---
 function handleAdd() {
-  formTitle.value = "新增清运任务";
+  formTitle.value = '新增清运任务';
   formData.value = {
     taskStatus: 0,
   };
@@ -181,7 +181,7 @@ function handleAdd() {
 
 async function handleEdit(row: CleanTask) {
   try {
-    formTitle.value = "编辑清运任务";
+    formTitle.value = '编辑清运任务';
     const res = await getCleanTaskDetailApi(row.cleanTaskId);
     formData.value = res || {};
     if (formData.value.deviceId) {
@@ -189,13 +189,13 @@ async function handleEdit(row: CleanTask) {
     }
     formVisible.value = true;
   } catch {
-    ElMessage.error("获取任务信息失败");
+    ElMessage.error('获取任务信息失败');
   }
 }
 
 async function handleSubmit() {
   if (!formData.value.deviceId) {
-    ElMessage.warning("请选择设备");
+    ElMessage.warning('请选择设备');
     return;
   }
 
@@ -203,11 +203,11 @@ async function handleSubmit() {
   try {
     const api = formData.value.cleanTaskId ? editCleanTaskApi : addCleanTaskApi;
     await api(formData.value);
-    ElMessage.success(formData.value.cleanTaskId ? "修改成功" : "新增成功");
+    ElMessage.success(formData.value.cleanTaskId ? '修改成功' : '新增成功');
     formVisible.value = false;
     handleQuery();
   } catch {
-    ElMessage.error("操作失败");
+    ElMessage.error('操作失败');
   } finally {
     formSubmitting.value = false;
   }
@@ -220,7 +220,7 @@ async function handleView(row: CleanTask) {
     detailData.value = res;
     detailVisible.value = true;
   } catch {
-    ElMessage.error("获取详情失败");
+    ElMessage.error('获取详情失败');
   }
 }
 
@@ -232,7 +232,7 @@ async function handleDelete(row?: CleanTask) {
     ids = [row.cleanTaskId];
   } else {
     if (selectedIds.value.length === 0) {
-      ElMessage.warning("请选择要删除的记录");
+      ElMessage.warning('请选择要删除的记录');
       return;
     }
     ids = selectedIds.value;
@@ -241,8 +241,8 @@ async function handleDelete(row?: CleanTask) {
   try {
     await ElMessageBox.confirm(
       `确定要删除选中的 ${ids.length} 条任务吗？`,
-      "提示",
-      { type: "warning" }
+      '提示',
+      { type: 'warning' },
     );
 
     for (const id of ids) {
@@ -429,27 +429,27 @@ onMounted(() => {
               </template>
               <!-- 所属小区 -->
               <template v-else-if="col.key === 'deptName'">
-                {{ row.deptName || row.deptId || "-" }}
+                {{ row.deptName || row.deptId || '-' }}
               </template>
               <!-- 仓口号 -->
               <template v-else-if="col.key === 'hatchNo'">
-                {{ row.hatchNo ? `${row.hatchNo}` : "-" }}
+                {{ row.hatchNo ? `${row.hatchNo}` : '-' }}
               </template>
               <!-- 清运人员 -->
               <template v-else-if="col.key === 'cleanUserName'">
-                {{ row.cleanUserName || "-" }}
+                {{ row.cleanUserName || '-' }}
               </template>
               <!-- 计划时间 -->
               <template v-else-if="col.key === 'planTime'">
-                {{ row.planTime || "-" }}
+                {{ row.planTime || '-' }}
               </template>
               <!-- 完成时间 -->
               <template v-else-if="col.key === 'finishTime'">
-                {{ row.finishTime || "-" }}
+                {{ row.finishTime || '-' }}
               </template>
               <!-- 备注 -->
               <template v-else-if="col.key === 'remark'">
-                {{ row.remark || "-" }}
+                {{ row.remark || '-' }}
               </template>
               <!-- 普通字段 -->
               <template v-else>
@@ -631,25 +631,25 @@ onMounted(() => {
           {{ detailData.taskNo }}
         </el-descriptions-item>
         <el-descriptions-item label="所属小区">
-          {{ detailData.deptId || "-" }}
+          {{ detailData.deptId || '-' }}
         </el-descriptions-item>
         <el-descriptions-item label="设备ID">
-          {{ detailData.deviceId || "-" }}
+          {{ detailData.deviceId || '-' }}
         </el-descriptions-item>
         <el-descriptions-item label="仓口号">
-          {{ detailData.hatchNo ? `${detailData.hatchNo}` : "-" }}
+          {{ detailData.hatchNo ? `${detailData.hatchNo}` : '-' }}
         </el-descriptions-item>
         <el-descriptions-item label="满仓重量">
           {{ detailData.fullWeight?.toFixed(2) || 0 }} kg
         </el-descriptions-item>
         <el-descriptions-item label="清运人员">
-          {{ detailData.cleanUserName || "-" }}
+          {{ detailData.cleanUserName || '-' }}
         </el-descriptions-item>
         <el-descriptions-item label="计划时间">
-          {{ detailData.planTime || "-" }}
+          {{ detailData.planTime || '-' }}
         </el-descriptions-item>
         <el-descriptions-item label="完成时间">
-          {{ detailData.finishTime || "-" }}
+          {{ detailData.finishTime || '-' }}
         </el-descriptions-item>
         <el-descriptions-item label="任务状态">
           <el-tag :type="getTaskStatusType(detailData.taskStatus)" size="small">
@@ -657,7 +657,7 @@ onMounted(() => {
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="备注" :span="2">
-          {{ detailData.remark || "-" }}
+          {{ detailData.remark || '-' }}
         </el-descriptions-item>
       </el-descriptions>
       <template #footer>
@@ -698,7 +698,7 @@ onMounted(() => {
   font-weight: 400;
   color: #909399;
   pointer-events: none;
-  content: "部门:";
+  content: '部门:';
   transform: translateY(-50%);
 }
 </style>

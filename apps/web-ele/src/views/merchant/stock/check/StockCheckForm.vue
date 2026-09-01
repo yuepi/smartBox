@@ -3,10 +3,7 @@ import type { StockCheck } from '#/api/stock/stockCheck';
 import type { StockCheckItem } from '#/api/stock/stockCheckItem';
 
 import { getStockListApi } from '#/api/stock/stock';
-import {
-  addStockCheckApi,
-  editStockCheckApi,
-} from '#/api/stock/stockCheck';
+import { addStockCheckApi, editStockCheckApi } from '#/api/stock/stockCheck';
 import { getWarehouseListApi } from '#/api/stock/warehouse';
 import { getWarehouseLocationListApi } from '#/api/stock/warehouseLocation';
 
@@ -14,7 +11,10 @@ const emit = defineEmits<{
   (e: 'success'): void;
 }>();
 
-const { stock_check_type, stock_package_type } = useDicts(['stock_check_type', 'stock_package_type']);
+const { stock_check_type, stock_package_type } = useDicts([
+  'stock_check_type',
+  'stock_package_type',
+]);
 
 const visible = ref(false);
 const title = ref('');
@@ -147,7 +147,7 @@ watch(
       loadLocationOptions(newVal);
       previewItems.value = [];
     }
-  }
+  },
 );
 
 // 监听盘点类型变化
@@ -156,7 +156,7 @@ watch(
   () => {
     previewItems.value = [];
     selectedLocationIds.value = [];
-  }
+  },
 );
 
 function open(row?: StockCheck) {
@@ -205,7 +205,9 @@ async function handleSubmit() {
 
   loading.value = true;
   try {
-    const api = formData.value.stockCheckId ? editStockCheckApi : addStockCheckApi;
+    const api = formData.value.stockCheckId
+      ? editStockCheckApi
+      : addStockCheckApi;
 
     // 组装提交数据
     const submitData = {
@@ -256,7 +258,11 @@ defineExpose({ open });
         </el-col>
         <el-col :span="12">
           <el-form-item label="盘点类型" prop="checkType" required>
-            <el-select v-model="formData.checkType" placeholder="请选择" style="width: 100%">
+            <el-select
+              v-model="formData.checkType"
+              placeholder="请选择"
+              style="width: 100%"
+            >
               <el-option
                 v-for="item in stock_check_type"
                 :key="item.value"
@@ -285,7 +291,9 @@ defineExpose({ open });
             :value="item.value"
           />
         </el-select>
-        <div class="text-gray-400 text-xs mt-1">提示：选择一个或多个货位进行抽盘</div>
+        <div class="text-gray-400 text-xs mt-1">
+          提示：选择一个或多个货位进行抽盘
+        </div>
       </el-form-item>
 
       <el-form-item label="计划完成时间">
@@ -298,7 +306,12 @@ defineExpose({ open });
       </el-form-item>
 
       <el-form-item label="备注">
-        <el-input v-model="formData.remark" type="textarea" :rows="2" placeholder="请输入备注" />
+        <el-input
+          v-model="formData.remark"
+          type="textarea"
+          :rows="2"
+          placeholder="请输入备注"
+        />
       </el-form-item>
 
       <!-- 预览/生成明细 -->
@@ -323,62 +336,109 @@ defineExpose({ open });
         max-height="300"
         v-loading="previewLoading"
       >
-        <el-table-column prop="locationId" label="货位ID" width="100" align="center">
+        <el-table-column
+          prop="locationId"
+          label="货位ID"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
             {{ row.locationId || '-' }}
           </template>
         </el-table-column>
-        <el-table-column prop="packageType" label="品类" width="120" align="center">
+        <el-table-column
+          prop="packageType"
+          label="品类"
+          width="120"
+          align="center"
+        >
           <template #default="{ row }">
             <DictTag :options="stock_package_type" :value="row.packageType" />
           </template>
         </el-table-column>
-        <el-table-column prop="stockWeight" label="账面重量(kg)" width="140" align="center">
+        <el-table-column
+          prop="stockWeight"
+          label="账面重量(kg)"
+          width="140"
+          align="center"
+        >
           <template #default="{ row }">
             {{ row.stockWeight?.toFixed(2) || 0 }}
           </template>
         </el-table-column>
-        <el-table-column prop="realWeight" label="实际重量(kg)" width="140" align="center">
+        <el-table-column
+          prop="realWeight"
+          label="实际重量(kg)"
+          width="140"
+          align="center"
+        >
           <template #default="{ row }">
             {{ row.realWeight?.toFixed(2) || 0 }}
           </template>
         </el-table-column>
-        <el-table-column prop="profitWeight" label="盘盈(kg)" width="120" align="center">
+        <el-table-column
+          prop="profitWeight"
+          label="盘盈(kg)"
+          width="120"
+          align="center"
+        >
           <template #default="{ row }">
-            <span class="text-success">{{ row.profitWeight?.toFixed(2) || 0 }}</span>
+            <span class="text-success">{{
+              row.profitWeight?.toFixed(2) || 0
+            }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="lossWeight" label="盘亏(kg)" width="120" align="center">
+        <el-table-column
+          prop="lossWeight"
+          label="盘亏(kg)"
+          width="120"
+          align="center"
+        >
           <template #default="{ row }">
-            <span class="text-danger">{{ row.lossWeight?.toFixed(2) || 0 }}</span>
+            <span class="text-danger">{{
+              row.lossWeight?.toFixed(2) || 0
+            }}</span>
           </template>
         </el-table-column>
         <el-table-column label="状态" width="100" align="center">
           <template #default="{ row }">
-            <el-tag v-if="row.realWeight === 0 && row.stockWeight > 0" type="warning" size="small">
+            <el-tag
+              v-if="row.realWeight === 0 && row.stockWeight > 0"
+              type="warning"
+              size="small"
+            >
               待盘
             </el-tag>
-            <el-tag v-else-if="row.profitWeight > 0" type="success" size="small">
+            <el-tag
+              v-else-if="row.profitWeight > 0"
+              type="success"
+              size="small"
+            >
               盘盈
             </el-tag>
             <el-tag v-else-if="row.lossWeight > 0" type="danger" size="small">
               盘亏
             </el-tag>
-            <el-tag v-else type="info" size="small">
-              持平
-            </el-tag>
+            <el-tag v-else type="info" size="small"> 持平 </el-tag>
           </template>
         </el-table-column>
       </el-table>
 
-      <div v-if="previewItems.length === 0 && !previewLoading" class="text-center text-gray-400 py-4 text-sm">
-        点击「{{ formData.checkType === 0 ? '生成全盘明细' : '预览抽盘明细' }}」加载数据
+      <div
+        v-if="previewItems.length === 0 && !previewLoading"
+        class="text-center text-gray-400 py-4 text-sm"
+      >
+        点击「{{
+          formData.checkType === 0 ? '生成全盘明细' : '预览抽盘明细'
+        }}」加载数据
       </div>
     </el-form>
 
     <template #footer>
       <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :loading="loading" @click="handleSubmit">确定</el-button>
+      <el-button type="primary" :loading="loading" @click="handleSubmit"
+        >确定</el-button
+      >
     </template>
   </el-dialog>
 </template>

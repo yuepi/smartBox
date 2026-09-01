@@ -31,7 +31,7 @@ export interface WarehousePageParams {
 export function getWarehousePageApi(params: WarehousePageParams) {
   return requestClient.get<{ records: Warehouse[]; total: number }>(
     '/merchant/warehouse/page',
-    { params }
+    { params },
   );
 }
 
@@ -59,5 +59,7 @@ export function getWarehouseDetailApi(warehouseId: number) {
 
 /** 删除仓库 */
 export function deleteWarehouseApi(warehouseId: number) {
-  return requestClient.post<boolean>('/merchant/warehouse/delete', { warehouseId });
+  return requestClient.post<boolean>('/merchant/warehouse/delete', {
+    warehouseId,
+  });
 }

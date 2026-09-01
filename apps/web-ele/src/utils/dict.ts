@@ -5,7 +5,9 @@ import { useDictStore } from '#/store/modules/dict';
 /**
  * 获取字典数据
  */
-export const useDict = (...args: string[]): { [key: string]: DictDataOption[] } => {
+export const useDict = (
+  ...args: string[]
+): { [key: string]: DictDataOption[] } => {
   const res = ref<{
     [key: string]: DictDataOption[];
   }>({});
@@ -16,8 +18,16 @@ export const useDict = (...args: string[]): { [key: string]: DictDataOption[] } 
     if (dicts) {
       res.value[dictType] = dicts;
     } else {
-      const backData = await requestClient.get(`/tool/dict/main/data?code=${dictType}`);
-      res.value[dictType] = backData.map((p: any): DictDataOption => ({ label: p.label, value: p.value, elTagClass: p.shsty }));
+      const backData = await requestClient.get(
+        `/tool/dict/main/data?code=${dictType}`,
+      );
+      res.value[dictType] = backData.map(
+        (p: any): DictDataOption => ({
+          label: p.label,
+          value: p.value,
+          elTagClass: p.shsty,
+        }),
+      );
       useDictStore().setDict(dictType, res.value[dictType] || []);
     }
   });

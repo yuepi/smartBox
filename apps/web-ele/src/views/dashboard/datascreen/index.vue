@@ -1,87 +1,87 @@
 <script lang="ts" setup>
 import type { SongItem } from './MusicPlayer/index.vue';
 
-import { onMounted, onUnmounted, reactive, ref } from 'vue'
+import { onMounted, onUnmounted, reactive, ref } from 'vue';
 
-import { subtitle, title, WEEK } from '#/constants/screen'
-import { formatTime } from '#/utils/index'
-import useDraw from '#/utils/useDraw'
+import { subtitle, title, WEEK } from '#/constants/screen';
+import { formatTime } from '#/utils/index';
+import useDraw from '#/utils/useDraw';
 
-import BottomLeft from './bottomLeft/index.vue'
-import BottomRight from './bottomRight/index.vue'
-import Center from './center/index.vue'
-import CenterLeft1 from './centerLeft1/index.vue'
-import CenterRight1 from './centerRight1/index.vue'
+import BottomLeft from './bottomLeft/index.vue';
+import BottomRight from './bottomRight/index.vue';
+import Center from './center/index.vue';
+import CenterLeft1 from './centerLeft1/index.vue';
+import CenterRight1 from './centerRight1/index.vue';
 import MusicPlayer from './MusicPlayer/index.vue';
 
 // * 颜色
-const decorationColors = ['#568aea', '#000000']
+const decorationColors = ['#568aea', '#000000'];
 // * 加载标识
-const loading = ref<boolean>(true)
+const loading = ref<boolean>(true);
 // * 时间内容
 const timeInfo = reactive({
   setInterval: 0,
   dateDay: '',
   dateYear: '',
-  dateWeek: ''
-})
+  dateWeek: '',
+});
 // * 适配处理
-const { appRef, calcRate, windowDraw, unWindowDraw } = useDraw()
+const { appRef, calcRate, windowDraw, unWindowDraw } = useDraw();
 
 // 配置你的大屏专属歌单列表
 const bgmList = ref<SongItem[]>([
-   {
+  {
     id: 'hakishuo',
     name: '哈基说',
     src: '/hajishuo.mp3',
     loopStart: 0,
-    loopEnd: 60
+    loopEnd: 60,
   },
   {
     id: 'hakimi',
     name: '哈基米之歌 (Happy Haki)',
-    src: '/hajimi.mp3', 
-    loopStart: 5,   
-    loopEnd: 35     
+    src: '/hajimi.mp3',
+    loopStart: 5,
+    loopEnd: 35,
   },
   {
     id: 'ksl',
     name: '圣诞',
     src: '/ksl.mp3',
     loopStart: 30,
-    loopEnd: 60
-  }
-])
+    loopEnd: 60,
+  },
+]);
 
 // todo 处理 loading 展示
 const cancelLoading = () => {
   setTimeout(() => {
-    loading.value = false
-  }, 500)
-}
+    loading.value = false;
+  }, 500);
+};
 
 // todo 处理时间监听
 const handleTime = () => {
   timeInfo.setInterval = setInterval(() => {
-    const date = new Date()
-    timeInfo.dateDay = formatTime(date, 'HH: mm: ss')
-    timeInfo.dateYear = formatTime(date, 'yyyy-MM-dd')
-    timeInfo.dateWeek = WEEK[date.getDay()]
-  }, 1000)
-}
+    const date = new Date();
+    timeInfo.dateDay = formatTime(date, 'HH: mm: ss');
+    timeInfo.dateYear = formatTime(date, 'yyyy-MM-dd');
+    timeInfo.dateWeek = WEEK[date.getDay()];
+  }, 1000);
+};
 
 // 生命周期
 onMounted(() => {
-  cancelLoading()
-  handleTime()
-  windowDraw()
-  calcRate()
-})
+  cancelLoading();
+  handleTime();
+  windowDraw();
+  calcRate();
+});
 
 onUnmounted(() => {
-  unWindowDraw()
-  clearInterval(timeInfo.setInterval)
-})
+  unWindowDraw();
+  clearInterval(timeInfo.setInterval);
+});
 </script>
 
 <template>
@@ -95,9 +95,17 @@ onUnmounted(() => {
             <dv-decoration-8 class="dv-dec-8" :color="decorationColors" />
             <div class="title">
               <span class="title-text">{{ title }}</span>
-              <dv-decoration-6 class="dv-dec-6" :reverse="true" :color="['#50e3c2', '#67a1e5']" />
+              <dv-decoration-6
+                class="dv-dec-6"
+                :reverse="true"
+                :color="['#50e3c2', '#67a1e5']"
+              />
             </div>
-            <dv-decoration-8 class="dv-dec-8" :reverse="true" :color="decorationColors" />
+            <dv-decoration-8
+              class="dv-dec-8"
+              :reverse="true"
+              :color="decorationColors"
+            />
           </div>
           <dv-decoration-10 class="dv-dec-10-s" />
         </div>
@@ -156,7 +164,7 @@ onUnmounted(() => {
         </div>
       </div>
     </div>
-    
+
     <MusicPlayer :songs="bgmList" :default-volume="0.2" :auto-play="true" />
   </div>
 </template>
@@ -183,7 +191,6 @@ onUnmounted(() => {
   }
 
   .host-body {
-
     .dv-dec-10,
     .dv-dec-10-s {
       width: 33.3%;

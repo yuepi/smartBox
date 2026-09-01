@@ -28,7 +28,6 @@ export function deleteMerchantLoginLogApi(ids: string) {
   return requestClient.delete(`/merchant/loginLog/remove/${ids}`);
 }
 
-
 /** 1. 分页查询 (平台接口) */
 export function getPlatLoginLogPageApi(params: LoginLogPageParams) {
   return requestClient.get<any>('/plat/loginLog/page', { params });

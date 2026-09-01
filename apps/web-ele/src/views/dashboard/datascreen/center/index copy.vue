@@ -8,7 +8,10 @@
       >
         <p class="ml-3 colorBlue fw-b">{{ item.title }}</p>
         <div>
-          <dv-digital-flop class="dv-dig-flop ml-1 mt-1 pl-3" :config="item.config" />
+          <dv-digital-flop
+            class="dv-dig-flop ml-1 mt-1 pl-3"
+            :config="item.config"
+          />
         </div>
       </div>
     </div>
@@ -23,17 +26,11 @@
       <div class="percent">
         <div class="item bg-color-black">
           <span>今日任务通过率</span>
-          <chart
-            :tips="rate[0].tips"
-            :colorObj="rate[0].colorData"
-          />
+          <chart :tips="rate[0].tips" :colorObj="rate[0].colorData" />
         </div>
         <div class="item bg-color-black">
           <span>今日任务达标率</span>
-          <chart
-            :tips="rate[1].tips"
-            :colorObj="rate[1].colorData"
-          />
+          <chart :tips="rate[1].tips" :colorObj="rate[1].colorData" />
         </div>
         <div class="water">
           <dv-water-level-pond class="dv-wa-le-po" :config="water" />
@@ -44,101 +41,101 @@
 </template>
 
 <script>
-import { defineComponent, reactive, onMounted } from 'vue'
-import Chart from '../center/chart/draw'
+import { defineComponent, reactive, onMounted } from 'vue';
+import Chart from '../center/chart/draw';
 
 export default defineComponent({
   components: {
-    Chart
+    Chart,
   },
   setup() {
     // 下层数据
     const titleDate = [
       {
         number: 1020,
-        text: '今年累计任务建次数'
+        text: '今年累计任务建次数',
       },
       {
         number: 18,
-        text: '本月累计任务次数'
+        text: '本月累计任务次数',
       },
       {
         number: 4,
-        text: '今日累计任务次数'
+        text: '今日累计任务次数',
       },
       {
         number: 71,
-        text: '今年失败任务次数'
+        text: '今年失败任务次数',
       },
       {
         number: 949,
-        text: '今年失败成功次数'
+        text: '今年失败成功次数',
       },
       {
         number: 811,
-        text: '今年达标任务个数'
+        text: '今年达标任务个数',
       },
-    ]
-    const titleItem = reactive([])
+    ];
+    const titleItem = reactive([]);
 
     // 初始化数据
     onMounted(() => {
-      setData()
-    })
+      setData();
+    });
 
     const ranking = reactive({
       data: [
         {
           name: '周口',
-          value: 55
+          value: 55,
         },
         {
           name: '南阳',
-          value: 120
+          value: 120,
         },
         {
           name: '西峡',
-          value: 78
+          value: 78,
         },
         {
           name: '驻马店',
-          value: 66
+          value: 66,
         },
         {
           name: '新乡',
-          value: 80
+          value: 80,
         },
         {
           name: '新乡2',
-          value: 80
+          value: 80,
         },
         {
           name: '新乡3',
-          value: 80
+          value: 80,
         },
         {
           name: '新乡4',
-          value: 80
+          value: 80,
         },
         {
           name: '新乡5',
-          value: 80
+          value: 80,
         },
         {
           name: '新乡6',
-          value: 80
-        }
+          value: 80,
+        },
       ],
       carousel: 'single',
-      unit: '人'
-    })
+      unit: '人',
+    });
 
     const water = reactive({
       data: [24, 45],
       shape: 'roundRect',
       formatter: '{value}%',
-      waveNum: 3
-    })
+      waveNum: 3,
+    });
 
     const rate = reactive([
       {
@@ -150,10 +147,10 @@ export default defineComponent({
             color: ['#00bcd44a', 'transparent'],
             dataColor: {
               normal: '#03a9f4',
-              shadowColor: '#97e2f5'
-            }
-          }
-        }
+              shadowColor: '#97e2f5',
+            },
+          },
+        },
       },
       {
         id: 'centerRate2',
@@ -164,16 +161,16 @@ export default defineComponent({
             color: ['#faf3a378', 'transparent'],
             dataColor: {
               normal: '#ff9800',
-              shadowColor: '#fcebad'
-            }
-          }
-        }
-      }
-    ])
+              shadowColor: '#fcebad',
+            },
+          },
+        },
+      },
+    ]);
 
     // 设置数据
     const setData = () => {
-      titleDate.map(e => {
+      titleDate.map((e) => {
         titleItem.push({
           title: e.text,
           config: {
@@ -182,20 +179,20 @@ export default defineComponent({
             textAlign: 'left',
             content: '{nt}',
             style: {
-              fontSize: 26
-            }
-          }
-        })
-      })
-    }
+              fontSize: 26,
+            },
+          },
+        });
+      });
+    };
     return {
       titleItem,
       ranking,
       water,
-      rate
-    }
-  }
-})
+      rate,
+    };
+  },
+});
 </script>
 
 <style lang="scss" scoped>

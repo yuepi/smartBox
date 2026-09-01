@@ -27,7 +27,9 @@ export interface MerchantInfo {
  * 获取商户详情（当前登录商户）
  */
 export function getMerchantDetailApi(merchantId: number) {
-  return requestClient.get('/merchant/merchant/detail', { params: { merchantId } });
+  return requestClient.get('/merchant/merchant/detail', {
+    params: { merchantId },
+  });
 }
 
 /**

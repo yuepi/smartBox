@@ -53,7 +53,9 @@ export function getDeviceFaultListApi(params?: any) {
 
 /** 3. 设备故障详情 */
 export function getDeviceFaultDetailApi(deviceFaultId: number) {
-  return requestClient.get('/merchant/deviceFault/detail', { params: { deviceFaultId } });
+  return requestClient.get('/merchant/deviceFault/detail', {
+    params: { deviceFaultId },
+  });
 }
 
 /** 4. 修改设备故障 */

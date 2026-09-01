@@ -1,36 +1,60 @@
 <script lang="ts">
-import { defineComponent, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { defineComponent, onMounted, onUnmounted, reactive, ref } from 'vue';
 
-import { formatTime } from '#/utils/index'
+import { formatTime } from '#/utils/index';
 
 interface DeliveryNotice {
-  id: number
-  userPhone: string // 脱敏手机号
-  deviceId: string // 设备编号
-  weight: number // 投递重量(kg)
-  amount: number // 预计金额(元)
-  time: string // 投递时间
-  category: string // 垃圾类型
+  id: number;
+  userPhone: string; // 脱敏手机号
+  deviceId: string; // 设备编号
+  weight: number; // 投递重量(kg)
+  amount: number; // 预计金额(元)
+  time: string; // 投递时间
+  category: string; // 垃圾类型
 }
 
 export default defineComponent({
   setup() {
     // ===== 模拟数据生成 =====
-    const categories = ['可回收', '厨余', '有害', '其他', '玻璃', '金属', '纸张', '塑料']
+    const categories = [
+      '可回收',
+      '厨余',
+      '有害',
+      '其他',
+      '玻璃',
+      '金属',
+      '纸张',
+      '塑料',
+    ];
     const devices = [
-      'A9HPG6EZXJR', 'XK3M9N7WQPL', 'B2D5F8H1JKL', 'C4E7G0I3MNO',
-      'D6F9H2J5PQR', 'E8G1K4M7STU', 'F0H3L6N9VWX', 'G2J5M8P2YZA',
-    ]
+      'A9HPG6EZXJR',
+      'XK3M9N7WQPL',
+      'B2D5F8H1JKL',
+      'C4E7G0I3MNO',
+      'D6F9H2J5PQR',
+      'E8G1K4M7STU',
+      'F0H3L6N9VWX',
+      'G2J5M8P2YZA',
+    ];
     const phones = [
-      '138****1234', '159****5678', '177****9012', '136****3456',
-      '188****7890', '150****2345', '139****6789', '158****0123',
-      '176****4567', '137****8901', '152****3456', '186****7890',
-    ]
+      '138****1234',
+      '159****5678',
+      '177****9012',
+      '136****3456',
+      '188****7890',
+      '150****2345',
+      '139****6789',
+      '158****0123',
+      '176****4567',
+      '137****8901',
+      '152****3456',
+      '186****7890',
+    ];
 
     // 生成一条投递通知
     const generateNotice = (): DeliveryNotice => {
-      const weight = +(Math.random() * 4 + 0.5).toFixed(1) // 0.5-4.5 kg
-      const pricePerKg = +(Math.random() * 2 + 1).toFixed(1) // 1-3 元/kg
+      const weight = +(Math.random() * 4 + 0.5).toFixed(1); // 0.5-4.5 kg
+      const pricePerKg = +(Math.random() * 2 + 1).toFixed(1); // 1-3 元/kg
       return {
         id: Date.now() + Math.random() * 1000,
         userPhone: phones[Math.floor(Math.random() * phones.length)],
@@ -39,60 +63,67 @@ export default defineComponent({
         amount: +(weight * pricePerKg).toFixed(2),
         time: formatTime(new Date(), 'HH:mm:ss'),
         category: categories[Math.floor(Math.random() * categories.length)],
-      }
-    }
+      };
+    };
 
     // 初始生成3条
-    const notices = reactive<DeliveryNotice[]>([])
-    let intervalInstance: any = null
-    const isPaused = ref(false)
+    const notices = reactive<DeliveryNotice[]>([]);
+    let intervalInstance: any = null;
+    const isPaused = ref(false);
 
     const addNotice = () => {
-      const newNotice = generateNotice()
-      notices.unshift(newNotice)
+      const newNotice = generateNotice();
+      notices.unshift(newNotice);
       // 保留最多20条
       if (notices.length > 20) {
-        notices.pop()
+        notices.pop();
       }
-    }
+    };
 
     // 初始化几条数据
     const initNotices = () => {
       for (let i = 0; i < 8; i++) {
-        const notice = generateNotice()
+        const notice = generateNotice();
         // 时间往前推几分钟
-        const date = new Date()
-        date.setMinutes(date.getMinutes() - i * 3)
-        notice.time = formatTime(date, 'HH:mm:ss')
-        notices.push(notice)
+        const date = new Date();
+        date.setMinutes(date.getMinutes() - i * 3);
+        notice.time = formatTime(date, 'HH:mm:ss');
+        notices.push(notice);
       }
-    }
+    };
 
     onMounted(() => {
-      initNotices()
+      initNotices();
       // 每3-6秒随机新增一条
-      intervalInstance = setInterval(() => {
-        if (!isPaused.value) {
-          addNotice()
-        }
-      }, 3000 + Math.random() * 3000)
-    })
+      intervalInstance = setInterval(
+        () => {
+          if (!isPaused.value) {
+            addNotice();
+          }
+        },
+        3000 + Math.random() * 3000,
+      );
+    });
 
     onUnmounted(() => {
-      clearInterval(intervalInstance)
-    })
+      clearInterval(intervalInstance);
+    });
 
     // 鼠标悬停暂停滚动
-    const onMouseEnter = () => { isPaused.value = true }
-    const onMouseLeave = () => { isPaused.value = false }
+    const onMouseEnter = () => {
+      isPaused.value = true;
+    };
+    const onMouseLeave = () => {
+      isPaused.value = false;
+    };
 
     return {
       notices,
       onMouseEnter,
       onMouseLeave,
-    }
+    };
   },
-})
+});
 </script>
 
 <template>
@@ -107,17 +138,26 @@ export default defineComponent({
       </div>
 
       <!-- 通知列表 -->
-      <div class="flex-1 overflow-hidden rounded bg-black/30 p-2" @mouseenter="onMouseEnter" @mouseleave="onMouseLeave">
+      <div
+        class="flex-1 overflow-hidden rounded bg-black/30 p-2"
+        @mouseenter="onMouseEnter"
+        @mouseleave="onMouseLeave"
+      >
         <div class="scroll-container h-full overflow-y-auto pr-1">
           <div
-v-for="item in notices" :key="item.id"
+            v-for="item in notices"
+            :key="item.id"
             class="mb-2 rounded bg-cyan-500/5 p-2 transition-all hover:bg-cyan-500/15"
->
+          >
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <span class="text-sm font-medium text-cyan-300">{{ item.userPhone }}</span>
+                <span class="text-sm font-medium text-cyan-300">{{
+                  item.userPhone
+                }}</span>
                 <span class="text-xs text-gray-400">在</span>
-                <span class="rounded bg-blue-500/20 px-1.5 py-0.5 text-xs text-blue-300">
+                <span
+                  class="rounded bg-blue-500/20 px-1.5 py-0.5 text-xs text-blue-300"
+                >
                   {{ item.deviceId }}
                 </span>
               </div>
@@ -135,7 +175,9 @@ v-for="item in notices" :key="item.id"
               </span> -->
               <span class="ml-auto">
                 预计
-                <span class="font-bold text-lime-400">¥{{ item.amount.toFixed(2) }}</span>
+                <span class="font-bold text-lime-400"
+                  >¥{{ item.amount.toFixed(2) }}</span
+                >
               </span>
             </div>
           </div>

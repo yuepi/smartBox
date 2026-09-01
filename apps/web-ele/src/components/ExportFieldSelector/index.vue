@@ -1,9 +1,9 @@
 <!-- components/ExportFieldSelector/index.vue -->
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch } from 'vue';
 
 import { Download, InfoFilled } from '@element-plus/icons-vue';
-import { ElMessage } from "element-plus";
+import { ElMessage } from 'element-plus';
 
 interface FieldConfig {
   prop: string;
@@ -23,7 +23,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   confirm: [selectedFields: string[]];
-  "update:visible": [value: boolean];
+  'update:visible': [value: boolean];
 }>();
 
 const dialogVisible = ref(false);
@@ -53,15 +53,15 @@ function handleCheckAllChange(val: boolean) {
 
 function handleConfirm() {
   if (selectedFields.value.length === 0) {
-    ElMessage.warning("请至少选择一个导出字段");
+    ElMessage.warning('请至少选择一个导出字段');
     return;
   }
-  emit("confirm", selectedFields.value);
-  emit("update:visible", false);
+  emit('confirm', selectedFields.value);
+  emit('update:visible', false);
 }
 
 function handleClose() {
-  emit("update:visible", false);
+  emit('update:visible', false);
 }
 
 watch(
@@ -71,12 +71,12 @@ watch(
     if (newVal) {
       initSelectedFields();
     }
-  }
+  },
 );
 
 watch(dialogVisible, (newVal) => {
   if (!newVal) {
-    emit("update:visible", false);
+    emit('update:visible', false);
   }
 });
 </script>
@@ -113,7 +113,9 @@ watch(dialogVisible, (newVal) => {
           @change="handleCheckAllChange"
           class="!h-auto"
         >
-          <span class="text-sm font-bold text-gray-700 dark:text-gray-200">全选所有字段</span>
+          <span class="text-sm font-bold text-gray-700 dark:text-gray-200"
+            >全选所有字段</span
+          >
         </el-checkbox>
         <span class="text-xs text-gray-400">
           已选择 {{ selectedFields.length }} / {{ fields.length }}

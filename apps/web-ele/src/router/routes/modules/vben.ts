@@ -3,7 +3,6 @@ import type { RouteRecordRaw } from 'vue-router';
 import { $t } from '#/locales';
 
 const routes: RouteRecordRaw[] = [
-  
   {
     name: 'Profile',
     path: '/profile',

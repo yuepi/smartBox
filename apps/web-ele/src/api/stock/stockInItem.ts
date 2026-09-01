@@ -31,20 +31,25 @@ export interface StockInItemPageParams {
 export function getStockInItemPageApi(params: StockInItemPageParams) {
   return requestClient.get<{ records: StockInItem[]; total: number }>(
     '/merchant/stockInItem/page',
-    { params }
+    { params },
   );
 }
 
 /** 列表查询入库明细 */
 export function getStockInItemListApi(params?: Partial<StockInItemPageParams>) {
-  return requestClient.get<StockInItem[]>('/merchant/stockInItem/list', { params });
+  return requestClient.get<StockInItem[]>('/merchant/stockInItem/list', {
+    params,
+  });
 }
 
 /** 按入库单ID查询关联的入库明细 */
 export function getStockInItemListByStockInIdApi(stockInId: number) {
-  return requestClient.get<StockInItem[]>('/merchant/stockInItem/listByStockInId', {
-    params: { stockInId },
-  });
+  return requestClient.get<StockInItem[]>(
+    '/merchant/stockInItem/listByStockInId',
+    {
+      params: { stockInId },
+    },
+  );
 }
 
 /** 新增入库明细 */
@@ -66,5 +71,7 @@ export function getStockInItemDetailApi(stockInItemId: number) {
 
 /** 删除入库明细 */
 export function deleteStockInItemApi(stockInItemId: number) {
-  return requestClient.post<boolean>('/merchant/stockInItem/delete', { stockInItemId });
+  return requestClient.post<boolean>('/merchant/stockInItem/delete', {
+    stockInItemId,
+  });
 }

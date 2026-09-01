@@ -40,8 +40,14 @@ export default defineComponent({
       <div class="mb-2 flex items-center gap-2">
         <i class="iconfont icon-align-left text-cyan-400"></i>
         <span class="text-sm text-white">小区投递量排行</span>
-        <dv-decoration-3 style="width: 100px; height: 20px;" />
-        <el-button size="small" type="primary" plain @click="showMap = !showMap" class="ml-auto">
+        <dv-decoration-3 style="width: 100px; height: 20px" />
+        <el-button
+          size="small"
+          type="primary"
+          plain
+          @click="showMap = !showMap"
+          class="ml-auto"
+        >
           {{ showMap ? '收起地图' : '查看地图' }}
         </el-button>
       </div>

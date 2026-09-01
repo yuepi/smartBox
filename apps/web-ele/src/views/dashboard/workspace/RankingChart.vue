@@ -12,7 +12,9 @@ const rankingConfig = {
   merchantWeight: { name: '投递重量 (kg)', unit: 'kg' },
 };
 
-const type = ref<'memberCount' | 'memberWeight' | 'merchantWeight'>('memberWeight');
+const type = ref<'memberCount' | 'memberWeight' | 'merchantWeight'>(
+  'memberWeight',
+);
 const dateRange = ref<[string, string] | null>(null);
 
 // 禁用超过今天的日期
@@ -51,9 +53,15 @@ function renderChart(list: { name: string; phone: string; value: number }[]) {
       formatter: (params: any) => {
         const p = params[0];
         return `${p.axisValue}<br/>${p.marker} ${p.seriesName}: ${p.value.toFixed(2)} ${config.unit}`;
-      }
+      },
     },
-    grid: { top: '12%', left: '2%', right: '3%', bottom: '12%', containLabel: true },
+    grid: {
+      top: '12%',
+      left: '2%',
+      right: '3%',
+      bottom: '12%',
+      containLabel: true,
+    },
     xAxis: {
       type: 'category',
       data: xData,
@@ -62,7 +70,8 @@ function renderChart(list: { name: string; phone: string; value: number }[]) {
       axisLabel: {
         color: '#6B7280',
         fontSize: 10,
-        formatter: (value: string) => value.length > 8 ? `${value.slice(0, 8)}...` : value,
+        formatter: (value: string) =>
+          value.length > 8 ? `${value.slice(0, 8)}...` : value,
       },
     },
     yAxis: {
@@ -70,7 +79,11 @@ function renderChart(list: { name: string; phone: string; value: number }[]) {
       name: config.unit,
       nameTextStyle: { color: '#9CA3AF', fontSize: 11 },
       splitLine: { lineStyle: { type: 'dashed', color: '#F3F4F6' } },
-      axisLabel: { color: '#9CA3AF', fontSize: 11, formatter: (value: number) => `${value.toFixed(0)}` },
+      axisLabel: {
+        color: '#9CA3AF',
+        fontSize: 11,
+        formatter: (value: number) => `${value.toFixed(0)}`,
+      },
     },
     series: [
       {
@@ -116,18 +129,28 @@ onUnmounted(() => {
 <template>
   <div
     class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-zinc-700/80 flex flex-col min-h-0 min-w-0"
->
-    <div class="flex items-center justify-between mb-2 shrink-0 gap-2 flex-wrap">
+  >
+    <div
+      class="flex items-center justify-between mb-2 shrink-0 gap-2 flex-wrap"
+    >
       <div class="flex items-center gap-1.5 shrink-0">
         <span class="w-1 h-3.5 bg-rose-500 rounded-full"></span>
-        <span class="font-bold text-sm text-gray-800 dark:text-gray-100">聚合排行榜</span>
+        <span class="font-bold text-sm text-gray-800 dark:text-gray-100"
+          >聚合排行榜</span
+        >
       </div>
       <div class="flex items-center gap-2 flex-wrap justify-end">
         <el-date-picker
-v-model="dateRange" type="daterange" range-separator="-" start-placeholder="开始"
-          end-placeholder="结束" :disabled-date="disabledDate" value-format="YYYY-MM-DD" style="width: 220px"
+          v-model="dateRange"
+          type="daterange"
+          range-separator="-"
+          start-placeholder="开始"
+          end-placeholder="结束"
+          :disabled-date="disabledDate"
+          value-format="YYYY-MM-DD"
+          style="width: 220px"
           @change="fetchData"
-/>
+        />
         <el-select v-model="type" style="width: 150px">
           <el-option label="会员投递重量榜" value="memberWeight" />
           <el-option label="会员投递次数榜" value="memberCount" />

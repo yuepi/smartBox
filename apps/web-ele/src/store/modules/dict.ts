@@ -10,7 +10,7 @@ export const useDictStore = defineStore('dict', {
   state: (): DictState => ({
     dictMap: new Map(),
   }),
-  
+
   actions: {
     /**
      * 获取字典
@@ -19,7 +19,7 @@ export const useDictStore = defineStore('dict', {
       if (!dictCode) return null;
       return this.dictMap.get(dictCode) || null;
     },
-    
+
     /**
      * 设置字典
      */
@@ -28,7 +28,7 @@ export const useDictStore = defineStore('dict', {
       this.dictMap.set(dictCode, options);
       return true;
     },
-    
+
     /**
      * 删除字典
      */
@@ -36,7 +36,7 @@ export const useDictStore = defineStore('dict', {
       if (!dictCode) return false;
       return this.dictMap.delete(dictCode);
     },
-    
+
     /**
      * 清空所有字典
      */

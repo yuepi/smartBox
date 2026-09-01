@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import OSS from "ali-oss";
+import OSS from 'ali-oss';
 
 // 定义文件/文件夹数据结构
 interface OssItem {
@@ -17,11 +17,11 @@ interface ExtendedUploadFile {
   size?: number;
   raw: File & { webkitRelativePath?: string };
   ossPath?: string; // 我们强行注入的带有文件夹层级的真实路径
-  status: "fail" | "ready" | "success" | "uploading";
+  status: 'fail' | 'ready' | 'success' | 'uploading';
   percentage?: number;
 }
 
-const currentDir = ref(""); // 当前目录路径
+const currentDir = ref(''); // 当前目录路径
 const tableData = ref<OssItem[]>([]); // 表格展示的数据
 
 // ✨ 弹窗与宝塔队列上传控制状态
@@ -46,23 +46,23 @@ const activeFileDetail = ref<{
   size?: number;
   url: string;
 }>({
-  name: "",
-  fullPath: "",
-  url: "",
-  ext: "",
+  name: '',
+  fullPath: '',
+  url: '',
+  ext: '',
 });
 
 // ✨ 告诉我们哪些格式支持图片预览，哪些支持文本预览
-const imageExts = ["png", "jpg", "jpeg", "gif", "svg", "webp"];
+const imageExts = ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'];
 const textExts = new Set([
-  "css",
-  "html",
-  "js",
-  "json",
-  "md",
-  "ts",
-  "txt",
-  "xml",
+  'css',
+  'html',
+  'js',
+  'json',
+  'md',
+  'ts',
+  'txt',
+  'xml',
 ]);
 
 // ✨ 核心修正：不仅清空响应式数组，还要强行洗干净 Element 内部的缓存队列
@@ -88,10 +88,10 @@ async function getOssClient() {
   //   .trim();
 
   // ------------------ 临时硬编码配置开始 ------------------
-  const ADMIN_ACCESS_KEY_ID = "LTAI5t9agcna5FWTctQBZoP6";
-  const ADMIN_ACCESS_KEY_SECRET = "HeBhWrBWBhAH51vk71tW3vInqxqRWz";
-  const BUCKET_NAME = "smart-box-test-2026-04-02";
-  const REGION = "oss-cn-beijing";
+  const ADMIN_ACCESS_KEY_ID = 'LTAI5t9agcna5FWTctQBZoP6';
+  const ADMIN_ACCESS_KEY_SECRET = 'HeBhWrBWBhAH51vk71tW3vInqxqRWz';
+  const BUCKET_NAME = 'smart-box-test-2026-04-02';
+  const REGION = 'oss-cn-beijing';
 
   return new OSS({
     region: REGION,
@@ -113,28 +113,28 @@ async function getOssClient() {
 // 2. 加载当前目录下的文件和文件夹列表
 async function loadFileList() {
   const loading = ElLoading.service({
-    target: ".oss-manager-container",
-    text: "正在读取OSS目录...",
+    target: '.oss-manager-container',
+    text: '正在读取OSS目录...',
   });
   try {
     const client = await getOssClient();
     const result = await client.list(
       {
         prefix: currentDir.value,
-        delimiter: "/",
-        "max-keys": 1000,
+        delimiter: '/',
+        'max-keys': 1000,
       },
-      {}
+      {},
     );
 
-    console.log(result, "文件目录");
+    console.log(result, '文件目录');
 
     const list: OssItem[] = [];
 
     // 处理子文件夹
     if (result.prefixes) {
       result.prefixes.forEach((p: string) => {
-        const name = p.replace(currentDir.value, "").replace("/", "");
+        const name = p.replace(currentDir.value, '').replace('/', '');
         if (name) {
           list.push({ name, fullPath: p, isFolder: true });
         }
@@ -145,7 +145,7 @@ async function loadFileList() {
     if (result.objects) {
       result.objects.forEach((item: any) => {
         if (item.name !== currentDir.value) {
-          const name = item.name.replace(currentDir.value, "");
+          const name = item.name.replace(currentDir.value, '');
           list.push({
             name,
             fullPath: item.name,
@@ -160,7 +160,7 @@ async function loadFileList() {
     tableData.value = list;
   } catch (error: any) {
     console.error(error);
-    ElMessage.error("获取列表失败，请检查控制台");
+    ElMessage.error('获取列表失败，请检查控制台');
   } finally {
     loading.close();
   }
@@ -179,34 +179,34 @@ function handleBack() {
   if (!currentDir.value) return;
   const temp = currentDir.value.slice(
     0,
-    Math.max(0, currentDir.value.length - 1)
+    Math.max(0, currentDir.value.length - 1),
   );
-  const lastSlashIndex = temp.lastIndexOf("/");
+  const lastSlashIndex = temp.lastIndexOf('/');
 
   currentDir.value =
-    lastSlashIndex === -1 ? "" : temp.slice(0, Math.max(0, lastSlashIndex + 1));
+    lastSlashIndex === -1 ? '' : temp.slice(0, Math.max(0, lastSlashIndex + 1));
   loadFileList();
 }
 
 // 5. 新建文件夹
 function handleCreateFolder() {
-  ElMessageBox.prompt("请输入文件夹名称", "新建文件夹", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
+  ElMessageBox.prompt('请输入文件夹名称', '新建文件夹', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
     inputPattern: /^[a-zA-Z0-9_\u4E00-\u9FA5]+$/,
-    inputErrorMessage: "文件夹名称格式不正确（不能包含特殊字符和斜杠）",
+    inputErrorMessage: '文件夹名称格式不正确（不能包含特殊字符和斜杠）',
   })
     .then(async ({ value }) => {
-      const loading = ElLoading.service({ text: "正在创建..." });
+      const loading = ElLoading.service({ text: '正在创建...' });
       try {
         const client = await getOssClient();
         const folderPath = `${currentDir.value}${value}/`;
         await client.put(folderPath, new Blob([]));
-        ElMessage.success("创建成功");
+        ElMessage.success('创建成功');
         loadFileList();
       } catch (error) {
         console.error(error);
-        ElMessage.error("创建失败");
+        ElMessage.error('创建失败');
       } finally {
         loading.close();
       }
@@ -217,7 +217,7 @@ function handleCreateFolder() {
 // 当文件/文件夹被选择或拖入时触发
 function handleFileChange(uploadFile: any, uploadFiles: any) {
   console.log(uploadFile, uploadFiles);
-  if (uploadFile.status !== "ready") return;
+  if (uploadFile.status !== 'ready') return;
 
   const rawFile = uploadFile.raw;
   const relativePath =
@@ -242,9 +242,9 @@ function handleRemoveQueue(file: ExtendedUploadFile) {
 // 点击“开始上传”按钮，触发有序的队列分片同步
 async function startBatchUpload() {
   // 过滤出所有等待上传的文件
-  const pendingFiles = fileList.value.filter((f) => f.status === "ready");
+  const pendingFiles = fileList.value.filter((f) => f.status === 'ready');
   if (pendingFiles.length === 0) {
-    ElMessage.warning("当前队列中没有等待上传的文件");
+    ElMessage.warning('当前队列中没有等待上传的文件');
     return;
   }
 
@@ -253,9 +253,9 @@ async function startBatchUpload() {
 
   for (let i = 0; i < fileList.value.length; i++) {
     const currentFile = fileList.value[i];
-    if (currentFile.status !== "ready") continue;
+    if (currentFile.status !== 'ready') continue;
 
-    currentFile.status = "uploading";
+    currentFile.status = 'uploading';
     currentFile.percentage = 0;
 
     // 拼接最终的 OSS 绝对路径：当前目录 + 保留层级的相对路径
@@ -271,22 +271,22 @@ async function startBatchUpload() {
           currentFile.percentage = Math.floor(percentage * 100);
         },
       });
-      currentFile.status = "success";
+      currentFile.status = 'success';
     } catch (error) {
       console.error(`${currentFile.name} 上传失败:`, error);
-      currentFile.status = "fail";
+      currentFile.status = 'fail';
     }
   }
 
   isUploading.value = false;
-  ElMessage.success("队列处理完毕！");
+  ElMessage.success('队列处理完毕！');
   loadFileList(); // 刷新主盘列表
 }
 
 // 弹窗关闭前的拦截
 function handleBeforeCloseDialog(done: () => void) {
   if (isUploading.value) {
-    ElMessage.warning("文件队列正在长连接同步中，请勿关闭弹窗");
+    ElMessage.warning('文件队列正在长连接同步中，请勿关闭弹窗');
   } else {
     done();
   }
@@ -300,11 +300,11 @@ function handleDialogClose() {
 
 // 8. 查看/预览文件内容（重构为抽屉驱动版）
 async function handleView(row: OssItem) {
-  const loading = ElLoading.service({ text: "正在加载文件详情..." });
+  const loading = ElLoading.service({ text: '正在加载文件详情...' });
   try {
     const client = await getOssClient();
     const url = client.signatureUrl(row.fullPath, { expires: 3600 });
-    const ext = row.name.split(".").pop()?.toLowerCase() || "";
+    const ext = row.name.split('.').pop()?.toLowerCase() || '';
 
     // 初始化抽屉基本数据
     activeFileDetail.value = {
@@ -314,7 +314,7 @@ async function handleView(row: OssItem) {
       lastModified: row.lastModified,
       url,
       ext,
-      previewTextContent: "",
+      previewTextContent: '',
     };
 
     // 如果是文本类型，提前异步把内容抓取回来渲染
@@ -324,14 +324,14 @@ async function handleView(row: OssItem) {
         activeFileDetail.value.previewTextContent = await res.text();
       } catch {
         activeFileDetail.value.previewTextContent =
-          "文件内容读取失败，请检查 OSS 跨域(CORS)设置。";
+          '文件内容读取失败，请检查 OSS 跨域(CORS)设置。';
       }
     }
 
     // 唤醒抽屉
     detailDrawerVisible.value = true;
   } catch {
-    ElMessage.error("无法获取该文件详情");
+    ElMessage.error('无法获取该文件详情');
   } finally {
     loading.close();
   }
@@ -339,27 +339,27 @@ async function handleView(row: OssItem) {
 
 // 9. 强制下载文件功能（终极突破：利用 SDK 属性规避 APK 拦截）
 async function handleDownload(row: OssItem) {
-  const loading = ElLoading.service({ text: "正在调取安全下载通道..." });
+  const loading = ElLoading.service({ text: '正在调取安全下载通道...' });
   try {
     const client = await getOssClient();
-    const ext = row.name.split(".").pop()?.toLowerCase();
+    const ext = row.name.split('.').pop()?.toLowerCase();
 
-    if (ext === "apk") {
+    if (ext === 'apk') {
       // 利用 ali-oss SDK 的底层 get 方法直接获取文件的 ArrayBuffer 原始字节
       // 这样完全不走浏览器的普通 URL 路由，阿里云的公网 APK 过滤器直接失效
       const result = await client.get(row.fullPath);
 
       if (!result || !result.content) {
-        throw new Error("未读取到文件内容");
+        throw new Error('未读取到文件内容');
       }
 
       // 将二进制数据包装成前端标准的 Blob 流，并强行指定通用流类型
       const blob = new Blob([result.content], {
-        type: "application/octet-stream",
+        type: 'application/octet-stream',
       });
       const blobUrl = window.URL.createObjectURL(blob);
 
-      const link = document.createElement("a");
+      const link = document.createElement('a');
       link.href = blobUrl;
       link.download = row.name;
       document.body.append(link);
@@ -373,19 +373,19 @@ async function handleDownload(row: OssItem) {
       const url = client.signatureUrl(row.fullPath, {
         expires: 3600,
         response: {
-          "content-disposition": `attachment; filename=${encodeURIComponent(
-            row.name
+          'content-disposition': `attachment; filename=${encodeURIComponent(
+            row.name,
           )}`,
         },
       });
-      const link = document.createElement("a");
+      const link = document.createElement('a');
       link.href = url;
       link.download = row.name;
       link.click();
     }
   } catch (error: any) {
-    console.error("下载失败详情：", error);
-    ElMessage.error("下载失败，请查看控制台报错");
+    console.error('下载失败详情：', error);
+    ElMessage.error('下载失败，请查看控制台报错');
   } finally {
     loading.close();
   }
@@ -393,22 +393,22 @@ async function handleDownload(row: OssItem) {
 
 // 7. 删除文件或文件夹
 function handleDelete(row: OssItem) {
-  console.log(row, "删除文件");
+  console.log(row, '删除文件');
 
   ElMessageBox.confirm(
-    `确定要删除 ${row.isFolder ? "文件夹" : "文件"} "${row.name}" 吗？`,
-    "警告",
-    { confirmButtonText: "确定", cancelButtonText: "取消", type: "warning" }
+    `确定要删除 ${row.isFolder ? '文件夹' : '文件'} "${row.name}" 吗？`,
+    '警告',
+    { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' },
   )
     .then(async () => {
-      const loading = ElLoading.service({ text: "正在删除..." });
+      const loading = ElLoading.service({ text: '正在删除...' });
       try {
         const client = await getOssClient();
 
         if (row.isFolder) {
           const result = await client.list(
-            { prefix: row.fullPath, "max-keys": 1000 },
-            {}
+            { prefix: row.fullPath, 'max-keys': 1000 },
+            {},
           );
           if (result.objects && result.objects.length > 0) {
             const deleteList = result.objects.map((o: any) => o.name);
@@ -418,10 +418,10 @@ function handleDelete(row: OssItem) {
           await client.delete(row.fullPath);
         }
 
-        ElMessage.success("删除成功");
+        ElMessage.success('删除成功');
         loadFileList();
       } catch {
-        ElMessage.error("删除失败");
+        ElMessage.error('删除失败');
       } finally {
         loading.close();
       }
@@ -430,13 +430,13 @@ function handleDelete(row: OssItem) {
 }
 
 function formatSize(bytes?: number) {
-  if (bytes === undefined) return "-";
-  if (bytes === 0) return "0 B";
+  if (bytes === undefined) return '-';
+  if (bytes === 0) return '0 B';
   const k = 1024;
-  const sizes = ["B", "KB", "MB", "GB"];
+  const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return (
-    Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
+    Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   );
 }
 
@@ -465,7 +465,7 @@ function handleNativeDrop(e: DragEvent) {
   for (const item of items) {
     const entry = item.webkitGetAsEntry();
     if (entry) {
-      traverseFileTree(entry, "", tempFiles);
+      traverseFileTree(entry, '', tempFiles);
     }
   }
 
@@ -479,7 +479,7 @@ function handleNativeDrop(e: DragEvent) {
         size: file.size,
         raw: file,
         ossPath: relativePath,
-        status: "ready" as const,
+        status: 'ready' as const,
         percentage: 0,
       };
     });
@@ -489,12 +489,12 @@ function handleNativeDrop(e: DragEvent) {
 
 // 深度递归解析拖拽文件夹目录树
 function traverseFileTree(item: any, path: string, fileListResult: File[]) {
-  path = path || "";
+  path = path || '';
   if (item.isFile) {
     // 如果是文件，读取真实的 File 对象
     item.file((file: File) => {
       // 关键：利用 Object.defineProperty 绕过只读限制，注入我们拼好的完整相对路径
-      Object.defineProperty(file, "customRelativePath", {
+      Object.defineProperty(file, 'customRelativePath', {
         value: path + file.name,
         writable: false,
         configurable: true,
@@ -507,7 +507,7 @@ function traverseFileTree(item: any, path: string, fileListResult: File[]) {
     dirReader.readEntries((entries: any[]) => {
       for (const entry of entries) {
         // 拼接路径，如: "assets/" + "images/"
-        traverseFileTree(entry, path + item.name + "/", fileListResult);
+        traverseFileTree(entry, path + item.name + '/', fileListResult);
       }
     });
   }
@@ -532,7 +532,7 @@ onMounted(() => {
         </el-button>
         <span class="current-path">
           <el-icon><ArrowRight /></el-icon>
-          当前路径: <el-tag type="info">/ {{ currentDir || "根目录" }}</el-tag>
+          当前路径: <el-tag type="info">/ {{ currentDir || '根目录' }}</el-tag>
         </span>
       </div>
 
@@ -614,12 +614,15 @@ onMounted(() => {
         </div>
 
         <div class="target-dir-alert">
-          上传目标目录：<code>/{{ currentDir || "根目录" }}</code>
+          上传目标目录：<code>/{{ currentDir || '根目录' }}</code>
         </div>
 
         <div
           class="baota-drag-container"
-          :class="{ 'is-dragover': isDragOver, 'is-empty': fileList.length === 0 }"
+          :class="{
+            'is-dragover': isDragOver,
+            'is-empty': fileList.length === 0,
+          }"
           @dragover.prevent="handleDragOver"
           @dragleave="handleDragLeave"
           @drop.prevent.stop="handleNativeDrop"
@@ -654,12 +657,16 @@ onMounted(() => {
                   class="table-data-row"
                 >
                   <span class="col-name truncate" :title="file.ossPath">
-                    <el-icon style="margin-right: 4px; color: #909399"><Document /></el-icon>
+                    <el-icon style="margin-right: 4px; color: #909399"
+                      ><Document
+                    /></el-icon>
                     /{{ file.ossPath }}
                   </span>
                   <span class="col-size">{{ formatSize(file.size) }}</span>
                   <span class="col-status">
-                    <span v-if="file.status === 'ready'" class="status-ready">等待上传</span>
+                    <span v-if="file.status === 'ready'" class="status-ready"
+                      >等待上传</span
+                    >
                     <div
                       v-else-if="file.status === 'uploading'"
                       class="status-uploading-box"
@@ -673,8 +680,11 @@ onMounted(() => {
                     <span
                       v-else-if="file.status === 'success'"
                       class="status-success"
-                      >✓ 成功</span>
-                    <span v-else-if="file.status === 'fail'" class="status-fail">✕ 失败</span>
+                      >✓ 成功</span
+                    >
+                    <span v-else-if="file.status === 'fail'" class="status-fail"
+                      >✕ 失败</span
+                    >
                   </span>
                   <span class="col-action">
                     <el-button
@@ -699,7 +709,8 @@ onMounted(() => {
           <el-button
             @click="uploadDialogVisible = false"
             :disabled="isUploading"
-            >关闭</el-button>
+            >关闭</el-button
+          >
           <el-button
             type="success"
             :loading="isUploading"
@@ -793,19 +804,20 @@ onMounted(() => {
           </el-descriptions-item>
           <el-descriptions-item label="文件类型">
             <el-tag size="small" type="success">
-              {{ activeFileDetail.ext.toUpperCase() || "未知" }} 文件
+              {{ activeFileDetail.ext.toUpperCase() || '未知' }} 文件
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="文件大小">
             {{ formatSize(activeFileDetail.size) }}
           </el-descriptions-item>
           <el-descriptions-item label="最后修改时间">
-            {{ activeFileDetail.lastModified || "-" }}
+            {{ activeFileDetail.lastModified || '-' }}
           </el-descriptions-item>
           <el-descriptions-item label="OSS 完整路径 Key">
             <code
               style="font-size: 12px; color: #606266; word-break: break-all"
-              >{{ activeFileDetail.fullPath }}</code>
+              >{{ activeFileDetail.fullPath }}</code
+            >
           </el-descriptions-item>
         </el-descriptions>
 
@@ -863,7 +875,8 @@ onMounted(() => {
                 color: #2f3542;
                 text-align: left;
               "
-              >{{ activeFileDetail.previewTextContent }}</pre>
+              >{{ activeFileDetail.previewTextContent }}</pre
+            >
 
             <el-empty
               v-else
@@ -991,7 +1004,7 @@ onMounted(() => {
           transform: translateY(-4px);
         }
       }
-      
+
       :deep(.el-upload) {
         display: block;
         width: 100%;
@@ -1017,7 +1030,7 @@ onMounted(() => {
           }
         }
       }
-      
+
       .baota-file-table {
         width: 100%;
         font-size: 13px;

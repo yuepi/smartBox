@@ -52,7 +52,6 @@ export interface MerchantMenuListParams {
   menuIds?: number[];
 }
 
-
 // 分页响应数据
 export interface MenuPageResult {
   records: Menu[];
@@ -104,7 +103,6 @@ export function deletePlatMenuApi(menuId: number) {
   return requestClient.post('/plat/menu/delete', { menuId });
 }
 
-
 /**
  * 平台下的商户列表查询商户菜单
  */
@@ -117,7 +115,10 @@ export function getPlatMerchantMenuListApi(params?: MerchantMenuListParams) {
  * @param data.merchantId 商户ID
  * @param data.menuIds 系统菜单IDs数组
  */
-export function addPlatMerchantMenuApi(data: { merchantId: number; menuIds: number[] }) {
+export function addPlatMerchantMenuApi(data: {
+  merchantId: number;
+  menuIds: number[];
+}) {
   return requestClient.post('/plat/merchantMenu/add', data);
 }
 
@@ -127,10 +128,13 @@ export function addPlatMerchantMenuApi(data: { merchantId: number; menuIds: numb
  * @param data.merchantId 商户ID
  * @param data.menuIds 系统菜单IDs数组
  */
-export function editPlatMerchantMenuApi(data: { merchantMenuId: number; merchantId: number; menuIds: number[] }) {
+export function editPlatMerchantMenuApi(data: {
+  merchantMenuId: number;
+  merchantId: number;
+  menuIds: number[];
+}) {
   return requestClient.post('/plat/merchantMenu/edit', data);
 }
-
 
 //通用接口
 
@@ -189,4 +193,3 @@ export function editMerchantMenuApi(data: Partial<Menu>) {
 export function deleteMerchantMenuApi(menuId: number) {
   return requestClient.post('/merchant/menu/delete', { menuId });
 }
-

@@ -21,12 +21,12 @@ function formatDateTime(date: Date): string {
 export function getRecentDays(days: number) {
   const now = new Date();
   const endTime = formatDateTime(now);
-  
+
   const startDate = new Date();
   startDate.setDate(now.getDate() - days);
   startDate.setHours(0, 0, 0, 0);
   const startTime = formatDateTime(startDate);
-  
+
   return { startTime, endTime };
 }
 
@@ -36,10 +36,10 @@ export function getRecentDays(days: number) {
 export function getToday() {
   const startDate = new Date();
   startDate.setHours(0, 0, 0, 0);
-  
+
   const endDate = new Date();
   endDate.setHours(23, 59, 59, 999);
-  
+
   return {
     startTime: formatDateTime(startDate),
     endTime: formatDateTime(endDate),
@@ -53,7 +53,7 @@ export function getThisMonth() {
   const now = new Date();
   const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
   startDate.setHours(0, 0, 0, 0);
-  
+
   return {
     startTime: formatDateTime(startDate),
     endTime: formatDateTime(now),

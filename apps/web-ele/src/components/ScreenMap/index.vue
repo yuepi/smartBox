@@ -54,7 +54,7 @@ const handleFullscreenChange = () => {
 };
 
 // 获取当前位置
-const getCurrentLocation = (): Promise<{ lat: number; lng: number; }> => {
+const getCurrentLocation = (): Promise<{ lat: number; lng: number }> => {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
       reject(new Error('浏览器不支持定位'));
@@ -74,7 +74,7 @@ const getCurrentLocation = (): Promise<{ lat: number; lng: number; }> => {
         enableHighAccuracy: true,
         timeout: 5000,
         maximumAge: 60_000,
-      }
+      },
     );
   });
 };
@@ -95,7 +95,6 @@ const loadMap = async () => {
       console.warn('⚠️ 获取位置失败，使用默认中心:', defaultCenter);
     }
 
-
     map = new AMapObj.Map(mapContainer.value, {
       zoom: defaultZoom,
       center: [center.lng, center.lat],
@@ -107,9 +106,10 @@ const loadMap = async () => {
     });
 
     // 初始化点位数据
-    const dataPoints = props.points?.length ? props.points : generateMockPoints(500);
+    const dataPoints = props.points?.length
+      ? props.points
+      : generateMockPoints(500);
     renderCluster(dataPoints);
-
   } catch (error) {
     console.error('地图加载失败：', error);
   }
@@ -135,7 +135,8 @@ const renderCluster = (points: DevicePoint[]) => {
     maxZoom: 15,
     renderMarker: (ctx: any) => {
       const data = ctx.data[0];
-      const color = statusColorMap[data.status as keyof typeof statusColorMap] || '#4c65d4';
+      const color =
+        statusColorMap[data.status as keyof typeof statusColorMap] || '#4c65d4';
 
       // 清理了无用标签，Pin 结构极简且标准
       const pinContent = `
@@ -154,7 +155,7 @@ const renderCluster = (points: DevicePoint[]) => {
           <div style="padding:8px 12px;font-size:13px;color:#333;">
             <div style="font-weight:bold;margin-bottom:4px;">${data.name || '设备'}</div>
             <div>投递量：${data.value || 0} 次</div>
-            <div>状态：${data.status === 'online' ? '在线' : (data.status === 'full' ? '满箱' : '离线')}</div>
+            <div>状态：${data.status === 'online' ? '在线' : data.status === 'full' ? '满箱' : '离线'}</div>
           </div>
         `;
         const infoWindow = new AMapObj.InfoWindow({
@@ -178,7 +179,7 @@ const renderCluster = (points: DevicePoint[]) => {
 
       ctx.marker.setContent(content);
       ctx.marker.setOffset(new AMapObj.Pixel(-size / 2, -size / 2));
-    }
+    },
   });
 
   cluster.on('click', (e: any) => {
@@ -198,7 +199,11 @@ const generateMockPoints = (count = 500): DevicePoint[] => {
   const points: DevicePoint[] = [];
   const baseLng = 116.397_428;
   const baseLat = 39.909_23;
-  const statuses: ('full' | 'offline' | 'online')[] = ['online', 'offline', 'full'];
+  const statuses: ('full' | 'offline' | 'online')[] = [
+    'online',
+    'offline',
+    'full',
+  ];
 
   for (let i = 0; i < count; i++) {
     // 在北京周边随机生成坐标
@@ -224,7 +229,7 @@ watch(
       renderCluster(newPoints);
     }
   },
-  { deep: true }
+  { deep: true },
 );
 
 onMounted(() => {
@@ -251,7 +256,11 @@ defineExpose({
 
 <template>
   <div class="screen-map-wrapper">
-    <div ref="mapContainer" class="map-container" :style="{ height: height || '400px' }">
+    <div
+      ref="mapContainer"
+      class="map-container"
+      :style="{ height: height || '400px' }"
+    >
       <!-- 全屏按钮 -->
       <div class="fullscreen-btn" @click="toggleFullscreen">
         <el-icon :size="20">
@@ -438,7 +447,11 @@ defineExpose({
   color: #fff;
   text-shadow: 0 1px 3px rgb(0 0 0 / 50%);
   cursor: pointer;
-  background: radial-gradient(circle, rgb(14 165 233 / 95%) 0%, rgb(3 105 161 / 85%) 100%);
+  background: radial-gradient(
+    circle,
+    rgb(14 165 233 / 95%) 0%,
+    rgb(3 105 161 / 85%) 100%
+  );
   border: 3px solid #7dd3fc;
   border-radius: 50%;
   box-shadow:
@@ -446,7 +459,6 @@ defineExpose({
     inset 0 0 12px rgb(255 255 255 / 40%);
   transition: transform 0.2s ease;
 }
-
 
 :deep(.custom-cluster-node)::before {
   position: absolute;

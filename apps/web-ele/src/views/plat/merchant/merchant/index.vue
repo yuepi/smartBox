@@ -2,10 +2,18 @@
 import type { Merchant, MerchantPageParams } from '#/api/system/merchant';
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
+import { computed, onMounted, reactive, ref } from 'vue';
+
 import { Page } from '@vben/common-ui';
 
-import { deletePlatMerchantApi, getPlatMerchantPageApi } from '#/api/system/merchant';
-import { defaultMerchantColumns, MERCHANT_STORAGE_KEY } from '#/constants/tableColumns';
+import {
+  deletePlatMerchantApi,
+  getPlatMerchantPageApi,
+} from '#/api/system/merchant';
+import {
+  defaultMerchantColumns,
+  MERCHANT_STORAGE_KEY,
+} from '#/constants/tableColumns';
 import { ModuleCodeMap } from '#/hooks/useExport';
 
 import MerchantAccountDialog from './MerchantAccountDialog.vue';
@@ -103,7 +111,7 @@ async function handleDelete(row?: Merchant) {
     await ElMessageBox.confirm(
       `确定要删除选中的 ${ids.length} 条商户吗？删除商户会同时删除其下的管理员账号和所有关联数据。`,
       '提示',
-      { type: 'warning' }
+      { type: 'warning' },
     );
     for (const id of ids) {
       await deletePlatMerchantApi(id);
@@ -212,7 +220,11 @@ onMounted(() => {
         </el-form-item>
 
         <el-form-item>
-          <el-select v-model="queryParams.status" clearable style="width: 200px">
+          <el-select
+            v-model="queryParams.status"
+            clearable
+            style="width: 200px"
+          >
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">状态:</span>
             </template>
@@ -224,14 +236,33 @@ onMounted(() => {
 
       <!-- 📥 工具栏左侧 -->
       <template #toolbar-left>
-        <el-button type="primary" plain icon="Plus" @click="handleAdd">新增</el-button>
-        <ExportButton :module-code="ModuleCodeMap.MERCHANT" :fields="visibleColumns" :find-cond="queryParams" />
-        <el-button type="danger" plain icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete()">
+        <el-button type="primary" plain icon="Plus" @click="handleAdd">
+          新增
+        </el-button>
+        <ExportButton
+          :module-code="ModuleCodeMap.MERCHANT"
+          :fields="visibleColumns"
+          :find-cond="queryParams"
+        />
+        <el-button
+          type="danger"
+          plain
+          icon="Delete"
+          :disabled="selectedIds.length === 0"
+          @click="handleDelete()"
+        >
           批量删除
         </el-button>
         <transition name="el-fade-in">
-          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-xs text-gray-400">
-            已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
+          <span
+            v-if="selectedIds.length > 0"
+            class="selected-alert-badge ml-2 text-xs text-gray-400"
+          >
+            已选
+            <span class="text-red-500 font-medium">{{
+              selectedIds.length
+            }}</span>
+            项
           </span>
         </transition>
       </template>
@@ -268,7 +299,12 @@ onMounted(() => {
           >
             <template #default="{ row }">
               <template v-if="col.key === 'status'">
-                <el-tag :type="row.status === 0 ? 'success' : 'danger'" size="small" round effect="light">
+                <el-tag
+                  :type="row.status === 0 ? 'success' : 'danger'"
+                  size="small"
+                  round
+                  effect="light"
+                >
                   {{ getStatusText(row.status) }}
                 </el-tag>
               </template>
@@ -278,19 +314,44 @@ onMounted(() => {
             </template>
           </el-table-column>
 
-          <el-table-column label="操作" width="150" fixed="right" align="center">
+          <el-table-column
+            label="操作"
+            width="150"
+            fixed="right"
+            align="center"
+          >
             <template #default="{ row }">
               <el-tooltip content="账户" placement="top" :enterable="false">
-                <el-button link type="primary" icon="Wallet" @click="handleViewAccount(row)" />
+                <el-button
+                  link
+                  type="primary"
+                  icon="Wallet"
+                  @click="handleViewAccount(row)"
+                />
               </el-tooltip>
               <el-tooltip content="编辑" placement="top" :enterable="false">
-                <el-button link type="primary" icon="Edit" @click="handleEdit(row)" />
+                <el-button
+                  link
+                  type="primary"
+                  icon="Edit"
+                  @click="handleEdit(row)"
+                />
               </el-tooltip>
-               <el-tooltip content="数据迁移" placement="top" :enterable="false">
-              <el-button link type="warning" icon="Upload" @click="handleMigration(row)" />
-            </el-tooltip>
+              <el-tooltip content="数据迁移" placement="top" :enterable="false">
+                <el-button
+                  link
+                  type="warning"
+                  icon="Upload"
+                  @click="handleMigration(row)"
+                />
+              </el-tooltip>
               <el-tooltip content="删除" placement="top" :enterable="false">
-                <el-button link type="danger" icon="Delete" @click="handleDelete(row)" />
+                <el-button
+                  link
+                  type="danger"
+                  icon="Delete"
+                  @click="handleDelete(row)"
+                />
               </el-tooltip>
             </template>
           </el-table-column>

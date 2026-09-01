@@ -37,13 +37,17 @@ export interface StockCheckItemPageParams {
 export function getStockCheckItemPageApi(params: StockCheckItemPageParams) {
   return requestClient.get<{ records: StockCheckItem[]; total: number }>(
     '/merchant/stockCheckItem/page',
-    { params }
+    { params },
   );
 }
 
 /** 列表查询盘点明细 */
-export function getStockCheckItemListApi(params?: Partial<StockCheckItemPageParams>) {
-  return requestClient.get<StockCheckItem[]>('/merchant/stockCheckItem/list', { params });
+export function getStockCheckItemListApi(
+  params?: Partial<StockCheckItemPageParams>,
+) {
+  return requestClient.get<StockCheckItem[]>('/merchant/stockCheckItem/list', {
+    params,
+  });
 }
 
 /** 新增盘点明细 */
@@ -72,7 +76,10 @@ export function deleteStockCheckItemApi(stockCheckItemId: number) {
 
 /** 根据盘点单ID查询盘点明细列表 */
 export function getStockCheckItemListByStockCheckIdApi(stockCheckId: number) {
-  return requestClient.get<StockCheckItem[]>('/merchant/stockCheckItem/listByStockCheckId', {
-    params: { stockCheckId },
-  });
+  return requestClient.get<StockCheckItem[]>(
+    '/merchant/stockCheckItem/listByStockCheckId',
+    {
+      params: { stockCheckId },
+    },
+  );
 }

@@ -1,9 +1,15 @@
 <script setup lang="ts">
-import type { MerchantAccountFlow, MerchantAccountFlowPageParams } from '#/api/system/merchant';
+import type {
+  MerchantAccountFlow,
+  MerchantAccountFlowPageParams,
+} from '#/api/system/merchant';
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
 import { getMerchantAccountFlowPageApi } from '#/api/system/merchant';
-import { defaultMerchantFlowColumns, MERCHANT_FLOW_STORAGE_KEY } from '#/constants/tableColumns';
+import {
+  defaultMerchantFlowColumns,
+  MERCHANT_FLOW_STORAGE_KEY,
+} from '#/constants/tableColumns';
 import { ModuleCodeMap } from '#/hooks/useExport';
 
 const props = defineProps<{ merchantId: number }>();
@@ -12,7 +18,9 @@ const { flow_change_type } = useDicts(['flow_change_type']);
 
 // 表格列配置
 const columnConfig = ref<TableColumnConfig[]>([...defaultMerchantFlowColumns]);
-const visibleColumns = computed(() => columnConfig.value.filter((col) => col.visible));
+const visibleColumns = computed(() =>
+  columnConfig.value.filter((col) => col.visible),
+);
 
 function handleColumnsUpdate(newColumns: TableColumnConfig[]) {
   columnConfig.value = newColumns;
@@ -51,7 +59,7 @@ watch(
     queryParams.merchantId = newId;
     loadData();
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 function formatAmount(amount: number): string {
@@ -90,8 +98,15 @@ defineExpose({ loadData });
     <div class="filter-bar">
       <el-form :inline="true" :model="queryParams" class="filter-form">
         <el-form-item>
-          <el-select v-model="queryParams.changeType" clearable style="width: 180px" placeholder="请选择">
-            <template #prefix><span class="text-xs text-gray-400">变动类型:</span></template>
+          <el-select
+            v-model="queryParams.changeType"
+            clearable
+            style="width: 180px"
+            placeholder="请选择"
+          >
+            <template #prefix
+              ><span class="text-xs text-gray-400">变动类型:</span></template
+            >
             <el-option
               v-for="item in flow_change_type"
               :key="item.value"
@@ -114,7 +129,9 @@ defineExpose({ loadData });
         </el-form-item>
 
         <el-form-item class="filter-actions">
-          <el-button type="primary" icon="Search" @click="loadData">查询</el-button>
+          <el-button type="primary" icon="Search" @click="loadData"
+            >查询</el-button
+          >
           <el-button icon="Refresh" @click="resetQuery">重置</el-button>
         </el-form-item>
       </el-form>
@@ -139,7 +156,13 @@ defineExpose({ loadData });
         </div>
       </div>
 
-      <el-table v-loading="loading" :data="tableData" border stripe style="width: 100%">
+      <el-table
+        v-loading="loading"
+        :data="tableData"
+        border
+        stripe
+        style="width: 100%"
+      >
         <el-table-column
           v-for="col in visibleColumns"
           :key="col.key"
@@ -155,8 +178,11 @@ defineExpose({ loadData });
               <DictTag :options="flow_change_type" :value="row.changeType" />
             </template>
             <template v-else-if="col.key === 'changeAmount'">
-              <span :class="row.changeAmount > 0 ? 'text-success' : 'text-danger'">
-                {{ row.changeAmount > 0 ? '+' : '' }}{{ formatAmount(row.changeAmount) }}
+              <span
+                :class="row.changeAmount > 0 ? 'text-success' : 'text-danger'"
+              >
+                {{ row.changeAmount > 0 ? '+' : ''
+                }}{{ formatAmount(row.changeAmount) }}
               </span>
             </template>
             <template v-else>

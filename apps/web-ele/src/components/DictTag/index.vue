@@ -26,39 +26,54 @@ const props = withDefaults(defineProps<Props>(), {
 
 // 1. 优化查找性能：使用 Set 并预处理字符串转换
 const valuesSet = computed(() => {
-  if (props.value === null || props.value === undefined || props.value === '') return new Set();
+  if (props.value === null || props.value === undefined || props.value === '')
+    return new Set();
 
   const rawValues = Array.isArray(props.value)
     ? props.value
     : String(props.value).split(props.separator);
 
   // 注意：不要使用 filter(Boolean)，改为处理空格和无效字符，保留数字 0
-  return new Set(rawValues.map(v => String(v).trim()).filter(v => v !== ''));
+  return new Set(
+    rawValues.map((v) => String(v).trim()).filter((v) => v !== ''),
+  );
 });
 
 // 2. 提取匹配到的选项
 const matchedOptions = computed(() => {
-  return props.options.filter(opt => valuesSet.value.has(String(opt.value)));
+  return props.options.filter((opt) => valuesSet.value.has(String(opt.value)));
 });
 
 // 3. 提取未匹配的原始值
 const unmatchValues = computed(() => {
   if (!props.showValue) return [];
-  const matchedSet = new Set(props.options.map(opt => String(opt.value)));
-  return [...valuesSet.value].filter(val => !matchedSet.has(val));
+  const matchedSet = new Set(props.options.map((opt) => String(opt.value)));
+  return [...valuesSet.value].filter((val) => !matchedSet.has(val));
 });
 </script>
 
 <template>
   <div class="dict-tag flex flex-wrap gap-1">
     <template v-for="item in matchedOptions" :key="item.value">
-      <el-tag :type="item.elTagClass || 'info'" :size="size" :effect="effect" disable-transitions>
+      <el-tag
+        :type="item.elTagClass || 'info'"
+        :size="size"
+        :effect="effect"
+        disable-transitions
+      >
         {{ item.label }}
       </el-tag>
     </template>
 
     <template v-if="showValue && unmatchValues.length > 0">
-      <el-tag v-for="val in unmatchValues" :key="val" type="info" :size="size" effect="plain" class="opacity-70">
+      <el-tag
+        v-for="val in unmatchValues"
+        :key="val"
+        type="info"
+        :size="size"
+        effect="plain"
+        class="opacity-70"
+      >
         {{ val }}
       </el-tag>
     </template>

@@ -12,6 +12,10 @@ export default (path: any) => {
       //   enabledCollections: ['ep'],
       // }),
     ],
-    dts: path.resolve(path.resolve(__dirname, '../../'), 'types', 'components.d.ts'),
+    dts: path.resolve(
+      path.resolve(__dirname, '../../'),
+      'types',
+      'components.d.ts',
+    ),
   });
 };

@@ -1,21 +1,28 @@
-import { defineComponent, ref, shallowReactive, watch } from 'vue'
+import { defineComponent, ref, shallowReactive, watch } from 'vue';
 
 // 声明类型
 const PropsType = {
   cdata: {
     type: Object,
-    require: true
-  }
-} as const
+    require: true,
+  },
+} as const;
 
 // 定义主体
 export default defineComponent({
   props: PropsType,
   setup(props) {
     // 定义 ref
-    const chartRef = ref()
+    const chartRef = ref();
     // 配置项
-    let options = shallowReactive({color:null,tooltip:null,toolbox:null,calculable:null,legend:null,series:null})
+    let options = shallowReactive({
+      color: null,
+      tooltip: null,
+      toolbox: null,
+      calculable: null,
+      legend: null,
+      series: null,
+    });
 
     watch(
       () => props.cdata,
@@ -29,14 +36,14 @@ export default defineComponent({
             '#ff9f7f',
             '#fb7293',
             '#e7bcf3',
-            '#8378ea'
+            '#8378ea',
           ],
           tooltip: {
             trigger: 'item',
-            formatter: '{a} <br/>{b} : {c} ({d}%)'
+            formatter: '{a} <br/>{b} : {c} ({d}%)',
           },
           toolbox: {
-            show: true
+            show: true,
           },
           calculable: true,
           legend: {
@@ -46,8 +53,8 @@ export default defineComponent({
             x: 'center',
             data: val.xData,
             textStyle: {
-              color: '#fff'
-            }
+              color: '#fff',
+            },
           },
           series: [
             {
@@ -57,41 +64,47 @@ export default defineComponent({
               roseType: 'area',
               center: ['50%', '40%'],
               itemStyle: {
-                borderRadius: 5
+                borderRadius: 5,
               },
               label: {
                 show: true,
-                color: "#fff",
+                color: '#fff',
               },
               emphasis: {
                 label: {
-                  show: false
-                }
+                  show: false,
+                },
               },
-              data: val.seriesData
-            }
-          ]
-        }
+              data: val.seriesData,
+            },
+          ],
+        };
         // 手动触发更新
         if (chartRef.value) {
           // 通过初始化参数打入数据
-          chartRef.value.initChart(options)
+          chartRef.value.initChart(options);
         }
       },
       {
         immediate: true,
-        deep: true
-      }
-    )
+        deep: true,
+      },
+    );
 
     return () => {
-      const height = "220px"
-      const width = "300px"
+      const height = '220px';
+      const width = '300px';
 
-      return <div>
-        <echart height={height} options={options} ref={chartRef} width={width} />
-      </div>
-    }
-  }
-})
-
+      return (
+        <div>
+          <echart
+            height={height}
+            options={options}
+            ref={chartRef}
+            width={width}
+          />
+        </div>
+      );
+    };
+  },
+});

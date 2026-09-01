@@ -3,10 +3,10 @@ import { baseRequestClient, requestClient } from '#/api/request';
 export namespace AuthApi {
   /** 登录接口参数 */
   export interface LoginParams {
-    authAccount: string;   // 账号
-    authType: number;      // 认证类型: 0=账号密码,1=手机验证码,2=微信小程序
-    authSecret: string;    // 密码/密钥
-    userType: number;      // 用户类型: 0=后台用户,1=会员
+    authAccount: string; // 账号
+    authType: number; // 认证类型: 0=账号密码,1=手机验证码,2=微信小程序
+    authSecret: string; // 密码/密钥
+    userType: number; // 用户类型: 0=后台用户,1=会员
   }
 
   /** 登录接口返回值 */
@@ -19,10 +19,10 @@ export namespace AuthApi {
     personName: string;
     merchantId: number;
     openId: string;
-    superAdminFlag: number;  // 商户唯一超管标识: 0=否,1=是
+    superAdminFlag: number; // 商户唯一超管标识: 0=否,1=是
     loginType: string;
     sessionKey: string;
-    list: Array<{ code: string; userId: number; }>;  // 用户权限列表
+    list: Array<{ code: string; userId: number }>; // 用户权限列表
     userMerchant: Array<{
       merchantId: number;
       userId: number;
@@ -61,7 +61,9 @@ export async function updateUserInfoApi(data: Partial<User>) {
  * 切换商户
  */
 export async function changeMerchantApi(merchantId: number) {
-  return requestClient.get('/login/change/changeMerchant', { params: { merchantId } });
+  return requestClient.get('/login/change/changeMerchant', {
+    params: { merchantId },
+  });
 }
 
 /**

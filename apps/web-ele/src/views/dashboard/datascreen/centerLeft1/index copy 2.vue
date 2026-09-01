@@ -1,7 +1,7 @@
 <script lang="ts">
-import { defineComponent, onMounted, onUnmounted, reactive } from 'vue'
+import { defineComponent, onMounted, onUnmounted, reactive } from 'vue';
 
-import Chart from './chart/index'
+import Chart from './chart/index';
 
 export default defineComponent({
   components: { Chart },
@@ -11,17 +11,17 @@ export default defineComponent({
       { number: 96, text: '今日投递重量', unit: 'kg' },
       { number: 32, text: '今日回收金额', unit: '元' },
       { number: 245, text: '今日订单数量', unit: '单' },
-    ]
+    ];
 
     const iconFont = [
       'icon-diagnose',
       'icon-monitoring',
       'icon-cloudupload',
       'icon-clouddownload',
-    ]
+    ];
 
-    const numberData = reactive([])
-    let intervalInstance = null
+    const numberData = reactive([]);
+    let intervalInstance = null;
 
     const setData = () => {
       dataArr.forEach((e) => {
@@ -33,30 +33,30 @@ export default defineComponent({
             style: { fontSize: 24 },
           },
           text: e.text,
-          unit: e.unit,  // 新增单位字段
-        })
-      })
-    }
+          unit: e.unit, // 新增单位字段
+        });
+      });
+    };
 
     const changeNumber = () => {
       numberData.forEach((item, index) => {
-        item.config.number[0] += index + 1
-        item.config = { ...item.config }
-      })
-    }
+        item.config.number[0] += index + 1;
+        item.config = { ...item.config };
+      });
+    };
 
     onMounted(() => {
-      setData()
-      intervalInstance = setInterval(changeNumber, 20_000)
-    })
+      setData();
+      intervalInstance = setInterval(changeNumber, 20_000);
+    });
 
     onUnmounted(() => {
-      clearInterval(intervalInstance)
-    })
+      clearInterval(intervalInstance);
+    });
 
-    return { numberData, iconFont }
+    return { numberData, iconFont };
   },
-})
+});
 </script>
 
 <template>
@@ -66,7 +66,7 @@ export default defineComponent({
       <div class="flex items-center gap-2">
         <i class="iconfont icon-tongji4 text-cyan-400"></i>
         <span class="text-white">回收垃圾分类</span>
-        <dv-decoration-3 style="width: 100px;height: 20px;" />
+        <dv-decoration-3 style="width: 100px; height: 20px" />
       </div>
 
       <!-- 图表区域 -->
@@ -82,11 +82,11 @@ export default defineComponent({
           class="flex flex-col items-center"
         >
           <div class="flex items-center gap-2">
-            <i class="iconfont text-xl text-cyan-400" :class="[iconFont[index]]"></i>
-            <dv-digital-flop
-              class="h-[30px] w-[120px]"
-              :config="item.config"
-            />
+            <i
+              class="iconfont text-xl text-cyan-400"
+              :class="[iconFont[index]]"
+            ></i>
+            <dv-digital-flop class="h-[30px] w-[120px]" :config="item.config" />
           </div>
           <p class="text-sm text-gray-300">
             {{ item.text }}

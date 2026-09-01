@@ -3,6 +3,7 @@ import type { Device } from '#/api/device/device';
 import type { CleanTask, CleanTaskPageParams } from '#/api/operation/cleanTask';
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
+import { computed, onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { Page } from '@vben/common-ui';
@@ -380,6 +381,7 @@ v-model="queryParams.taskNo" placeholder="请输入" clearable style="width: 200
                       :src="url.url"
                       :preview-src-list="row.images.map((item) => item.url)"
                       :initial-index="Number(idx)"
+                      show-progress
                       fit="cover"
                       style="
                         width: 40px;

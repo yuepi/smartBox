@@ -194,22 +194,30 @@ export function batchDeletePlatMerchantApi(ids: string) {
 
 /**  平台维度查看商户账户详情 */
 export function getPlatMerchantAccountApi(merchantId: number) {
-  return requestClient.get('/plat/merchantAccount/detail', { params: { merchantId } });
+  return requestClient.get('/plat/merchantAccount/detail', {
+    params: { merchantId },
+  });
 }
 
 /** 平台维度查看商户资金流水分页 */
-export function getPlatMerchantAccountFlowPageApi(params: MerchantAccountFlowPageParams) {
+export function getPlatMerchantAccountFlowPageApi(
+  params: MerchantAccountFlowPageParams,
+) {
   return requestClient.get('/plat/merchantAccountFlow/page', { params });
 }
 
 /** 平台维度查看商户充值订单分页 */
-export function getPlatMerchantRechargePageApi(params: MerchantRechargePageParams) {
+export function getPlatMerchantRechargePageApi(
+  params: MerchantRechargePageParams,
+) {
   return requestClient.get('/plat/merchantRecharge/page', { params });
 }
 
 /** 平台维度商户配置详情查询 */
 export function getPlatMerchantConfigDetailApi(merchantId: number) {
-  return requestClient.get('/plat/merchantConfig/detail', { params: { merchantId } });
+  return requestClient.get('/plat/merchantConfig/detail', {
+    params: { merchantId },
+  });
 }
 
 /** 平台维度商户配置修改 */
@@ -229,7 +237,9 @@ export function dataMigrationApi(data: FormData) {
 // 商户接口
 /** 1. 商户信息详情 */
 export function getMerchantInfoApi(merchantId: number) {
-  return requestClient.get('/merchant/merchant/detail', { params: { merchantId } });
+  return requestClient.get('/merchant/merchant/detail', {
+    params: { merchantId },
+  });
 }
 
 /** 2. 修改商户信息 */
@@ -239,11 +249,15 @@ export function editMerchantInfoApi(data: Partial<MerchantInfo>) {
 
 /** 3. 商户账户详情 */
 export function getMerchantAccountApi(merchantId: number) {
-  return requestClient.get('/merchant/merchantAccount/detail', { params: { merchantId } });
+  return requestClient.get('/merchant/merchantAccount/detail', {
+    params: { merchantId },
+  });
 }
 
 /** 4. 商户资金流水分页 */
-export function getMerchantAccountFlowPageApi(params: MerchantAccountFlowPageParams) {
+export function getMerchantAccountFlowPageApi(
+  params: MerchantAccountFlowPageParams,
+) {
   return requestClient.get('/merchant/merchantAccountFlow/page', { params });
 }
 
@@ -254,11 +268,12 @@ export function getMerchantRechargePageApi(params: MerchantRechargePageParams) {
 
 /** 商户配置详情查询 */
 export function getMerchantConfigDetailApi(merchantId: number) {
-  return requestClient.get('/merchant/merchantConfig/detail', { params: { merchantId } });
+  return requestClient.get('/merchant/merchantConfig/detail', {
+    params: { merchantId },
+  });
 }
 
 /** 商户配置修改 */
 export function editMerchantConfigApi(data: Partial<MerchantConfig>) {
   return requestClient.post('/merchant/merchantConfig/edit', data);
 }
-

@@ -30,7 +30,9 @@ export function getDevicePackageListApi(params?: any) {
 
 /** 3. 计费套餐详情 */
 export function getDevicePackageDetailApi(devicePackageId: number) {
-  return requestClient.get('/merchant/devicePackage/detail', { params: { devicePackageId } });
+  return requestClient.get('/merchant/devicePackage/detail', {
+    params: { devicePackageId },
+  });
 }
 
 /** 4. 新增计费套餐 */
@@ -45,14 +47,15 @@ export function editDevicePackageApi(data: Partial<DevicePackage>) {
 
 /** 6. 删除计费套餐 */
 export function deleteDevicePackageApi(devicePackageId: number) {
-  return requestClient.post('/merchant/devicePackage/delete', { devicePackageId });
+  return requestClient.post('/merchant/devicePackage/delete', {
+    devicePackageId,
+  });
 }
-
 
 /** 仓口绑定计费标准参数 */
 export interface HatchBindPackageParams {
-  deviceHatchIds: number[];  // 设备仓口ids
-  devicePackageId: number;   // 计费标准id
+  deviceHatchIds: number[]; // 设备仓口ids
+  devicePackageId: number; // 计费标准id
 }
 
 /** 仓口绑定计费标准分页查询参数 */
@@ -76,15 +79,24 @@ export interface HatchBindPackageRecord {
 
 /** 7. 设备仓口绑定设备计费标准 */
 export function hatchBindPackageApi(data: HatchBindPackageParams) {
-  return requestClient.post('/merchant/devicePackage/bind/hatchBindPackage', data);
+  return requestClient.post(
+    '/merchant/devicePackage/bind/hatchBindPackage',
+    data,
+  );
 }
 
 /** 8. 设备仓口解绑设备计费标准 */
 export function hatchUnBindPackageApi(data: HatchBindPackageParams) {
-  return requestClient.post('/merchant/devicePackage/unbind/hatchUnBindPackage', data);
+  return requestClient.post(
+    '/merchant/devicePackage/unbind/hatchUnBindPackage',
+    data,
+  );
 }
 
 /** 9. 设备仓口绑定设备计费标准-分页查询 */
 export function hatchBindPackagePageApi(params: HatchBindPackagePageParams) {
-  return requestClient.get('/merchant/devicePackage/bind/hatchUnBindPackagePage', { params });
+  return requestClient.get(
+    '/merchant/devicePackage/bind/hatchUnBindPackagePage',
+    { params },
+  );
 }

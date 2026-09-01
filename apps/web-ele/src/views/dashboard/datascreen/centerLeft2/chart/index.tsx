@@ -1,9 +1,9 @@
-import { defineComponent, reactive } from 'vue'
-import Draw from './draw'
+import { defineComponent, reactive } from 'vue';
+import Draw from './draw';
 
 export default defineComponent({
   components: {
-    Draw
+    Draw,
   },
   setup() {
     const cdata = reactive([
@@ -13,7 +13,7 @@ export default defineComponent({
         value: 10,
         elseData: {
           // 这里放置地图 tooltip 里想显示的数据
-        }
+        },
       },
       {
         name: '厦门市',
@@ -46,13 +46,15 @@ export default defineComponent({
       {
         name: '宁德市',
         value: 2,
-      }
-    ])
+      },
+    ]);
 
     return () => {
-      return <div>
-        <Draw cdata={cdata} />
-      </div>
-    }
-  }
-})
+      return (
+        <div>
+          <Draw cdata={cdata} />
+        </div>
+      );
+    };
+  },
+});

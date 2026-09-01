@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, reactive, ref } from 'vue';
 
-import { Page } from "@vben/common-ui";
+import { Page } from '@vben/common-ui';
 
-import { Delete, Edit, Plus, Refresh, Search } from "@element-plus/icons-vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+import { Delete, Edit, Plus, Refresh, Search } from '@element-plus/icons-vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
 import {
   addDictApi,
@@ -14,7 +14,7 @@ import {
   editDictApi,
   getDictDetailApi,
   getDictPageApi,
-} from "#/api/system/dict/dict";
+} from '#/api/system/dict/dict';
 import {
   addDictDataApi,
   deleteDictDataApi,
@@ -23,7 +23,7 @@ import {
   editDictDataApi,
   getDictDataDetailApi,
   getDictDataPageApi,
-} from "#/api/system/dict/dictData";
+} from '#/api/system/dict/dictData';
 
 // ==================== 字典主表 ====================
 const loading = ref(false);
@@ -34,7 +34,7 @@ const currentDict = ref<Dict | null>(null);
 
 // 主表表单弹窗
 const dictFormVisible = ref(false);
-const dictFormTitle = ref("");
+const dictFormTitle = ref('');
 const dictFormData = ref<Partial<Dict>>({});
 const dictFormSubmitting = ref(false);
 
@@ -55,7 +55,7 @@ const dataSelectedIds = ref<number[]>([]);
 
 // 明细表表单弹窗
 const dataFormVisible = ref(false);
-const dataFormTitle = ref("");
+const dataFormTitle = ref('');
 const dataFormData = ref<Partial<DictData>>({});
 const dataFormSubmitting = ref(false);
 
@@ -69,32 +69,32 @@ const dataQueryParams = reactive<DictDataPageParams>({
 
 // ==================== 通用选项 ====================
 const statusOptions = [
-  { label: "启用", value: 0 },
-  { label: "禁用", value: 1 },
+  { label: '启用', value: 0 },
+  { label: '禁用', value: 1 },
 ];
 
 const defaultFlagOptions = [
-  { label: "否", value: 0 },
-  { label: "是", value: 1 },
+  { label: '否', value: 0 },
+  { label: '是', value: 1 },
 ];
 
 // 样式选项
 const listClassOptions = [
-  { label: "默认", value: "" },
-  { label: "主要", value: "primary" },
-  { label: "成功", value: "success" },
-  { label: "信息", value: "info" },
-  { label: "警告", value: "warning" },
-  { label: "危险", value: "danger" },
+  { label: '默认', value: '' },
+  { label: '主要', value: 'primary' },
+  { label: '成功', value: 'success' },
+  { label: '信息', value: 'info' },
+  { label: '警告', value: 'warning' },
+  { label: '危险', value: 'danger' },
 ];
 
 // ==================== 辅助函数 ====================
 function getStatusText(status: number): string {
-  return status === 0 ? "启用" : "禁用";
+  return status === 0 ? '启用' : '禁用';
 }
 
 function getDefaultFlagText(flag: number): string {
-  return flag === 1 ? "是" : "否";
+  return flag === 1 ? '是' : '否';
 }
 
 // ==================== 字典主表操作 ====================
@@ -106,14 +106,14 @@ async function loadData() {
     total.value = res.total || 0;
   } catch (error) {
     console.error(error);
-    ElMessage.error("加载数据失败");
+    ElMessage.error('加载数据失败');
   } finally {
     loading.value = false;
   }
 }
 
 function handleDictAdd() {
-  dictFormTitle.value = "新增字典";
+  dictFormTitle.value = '新增字典';
   dictFormData.value = {
     status: 0,
   };
@@ -122,22 +122,22 @@ function handleDictAdd() {
 
 async function handleDictEdit(row: Dict) {
   try {
-    dictFormTitle.value = "编辑字典";
+    dictFormTitle.value = '编辑字典';
     const res = await getDictDetailApi(row.dictId);
     dictFormData.value = res || {};
     dictFormVisible.value = true;
   } catch {
-    ElMessage.error("获取字典信息失败");
+    ElMessage.error('获取字典信息失败');
   }
 }
 
 async function handleDictSubmit() {
   if (!dictFormData.value.dictName?.trim()) {
-    ElMessage.warning("请输入字典名称");
+    ElMessage.warning('请输入字典名称');
     return;
   }
   if (!dictFormData.value.dictCode?.trim()) {
-    ElMessage.warning("请输入字典编码");
+    ElMessage.warning('请输入字典编码');
     return;
   }
 
@@ -145,11 +145,11 @@ async function handleDictSubmit() {
   try {
     const api = dictFormData.value.dictId ? editDictApi : addDictApi;
     await api(dictFormData.value);
-    ElMessage.success(dictFormData.value.dictId ? "修改成功" : "新增成功");
+    ElMessage.success(dictFormData.value.dictId ? '修改成功' : '新增成功');
     dictFormVisible.value = false;
     handleQuery();
   } catch {
-    ElMessage.error("操作失败");
+    ElMessage.error('操作失败');
   } finally {
     dictFormSubmitting.value = false;
   }
@@ -162,7 +162,7 @@ async function handleDictDelete(row?: Dict) {
     ids = [row.dictId];
   } else {
     if (selectedIds.value.length === 0) {
-      ElMessage.warning("请选择要删除的记录");
+      ElMessage.warning('请选择要删除的记录');
       return;
     }
     ids = selectedIds.value;
@@ -171,8 +171,8 @@ async function handleDictDelete(row?: Dict) {
   try {
     await ElMessageBox.confirm(
       `确定要删除选中的 ${ids.length} 条字典吗？删除字典会同时删除其下的所有字典项。`,
-      "提示",
-      { type: "warning" }
+      '提示',
+      { type: 'warning' },
     );
 
     for (const id of ids) {
@@ -232,7 +232,7 @@ async function loadDataData() {
     dataTotal.value = res.total || 0;
   } catch (error) {
     console.error(error);
-    ElMessage.error("加载字典项失败");
+    ElMessage.error('加载字典项失败');
   } finally {
     dataLoading.value = false;
   }
@@ -240,10 +240,10 @@ async function loadDataData() {
 
 function handleDataAdd() {
   if (!currentDict.value) {
-    ElMessage.warning("请先选择一个字典");
+    ElMessage.warning('请先选择一个字典');
     return;
   }
-  dataFormTitle.value = "新增字典项";
+  dataFormTitle.value = '新增字典项';
   dataFormData.value = {
     dictId: currentDict.value.dictId,
     status: 0,
@@ -255,22 +255,22 @@ function handleDataAdd() {
 
 async function handleDataEdit(row: DictData) {
   try {
-    dataFormTitle.value = "编辑字典项";
+    dataFormTitle.value = '编辑字典项';
     const res = await getDictDataDetailApi(row.dictDataId);
     dataFormData.value = res || {};
     dataFormVisible.value = true;
   } catch {
-    ElMessage.error("获取字典项信息失败");
+    ElMessage.error('获取字典项信息失败');
   }
 }
 
 async function handleDataSubmit() {
   if (!dataFormData.value.itemLabel?.trim()) {
-    ElMessage.warning("请输入显示标签");
+    ElMessage.warning('请输入显示标签');
     return;
   }
   if (dataFormData.value.itemValue === undefined) {
-    ElMessage.warning("请输入字典值");
+    ElMessage.warning('请输入字典值');
     return;
   }
 
@@ -280,11 +280,11 @@ async function handleDataSubmit() {
       ? editDictDataApi
       : addDictDataApi;
     await api(dataFormData.value);
-    ElMessage.success(dataFormData.value.dictDataId ? "修改成功" : "新增成功");
+    ElMessage.success(dataFormData.value.dictDataId ? '修改成功' : '新增成功');
     dataFormVisible.value = false;
     loadDataData();
   } catch {
-    ElMessage.error("操作失败");
+    ElMessage.error('操作失败');
   } finally {
     dataFormSubmitting.value = false;
   }
@@ -297,7 +297,7 @@ async function handleDataDelete(row?: DictData) {
     ids = [row.dictDataId];
   } else {
     if (dataSelectedIds.value.length === 0) {
-      ElMessage.warning("请选择要删除的记录");
+      ElMessage.warning('请选择要删除的记录');
       return;
     }
     ids = dataSelectedIds.value;
@@ -306,10 +306,10 @@ async function handleDataDelete(row?: DictData) {
   try {
     await ElMessageBox.confirm(
       `确定要删除选中的 ${ids.length} 条字典项吗？`,
-      "提示",
+      '提示',
       {
-        type: "warning",
-      }
+        type: 'warning',
+      },
     );
 
     for (const id of ids) {

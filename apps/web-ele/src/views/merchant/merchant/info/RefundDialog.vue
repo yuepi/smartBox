@@ -33,7 +33,9 @@ async function handleSubmit() {
   }
   if (!order.value) return;
   if (refundAmount.value > order.value.amount) {
-    ElMessage.warning(`退款金额不能超过订单金额 ${formatAmount(order.value.amount)}`);
+    ElMessage.warning(
+      `退款金额不能超过订单金额 ${formatAmount(order.value.amount)}`,
+    );
     return;
   }
 
@@ -60,7 +62,9 @@ defineExpose({ open });
   <el-dialog v-model="visible" title="订单退款" width="450px" append-to-body>
     <el-form label-width="100px">
       <el-form-item label="订单金额">
-        <span class="font-bold text-primary">{{ formatAmount(order?.amount || 0) }}</span>
+        <span class="font-bold text-primary">{{
+          formatAmount(order?.amount || 0)
+        }}</span>
       </el-form-item>
       <el-form-item label="退款金额" required>
         <el-input-number
@@ -72,12 +76,16 @@ defineExpose({ open });
           placeholder="请输入退款金额"
           style="width: 100%"
         />
-        <div class="text-gray-400 text-xs mt-1">最高可退 {{ formatAmount(order?.amount || 0) }}</div>
+        <div class="text-gray-400 text-xs mt-1">
+          最高可退 {{ formatAmount(order?.amount || 0) }}
+        </div>
       </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :loading="loading" @click="handleSubmit">确认退款</el-button>
+      <el-button type="primary" :loading="loading" @click="handleSubmit"
+        >确认退款</el-button
+      >
     </template>
   </el-dialog>
 </template>

@@ -2,7 +2,9 @@ import { requestClient } from '#/api/request';
 import { handleTree } from '#/utils/ruoyi';
 
 export const treeQuery = async (state: any) => {
-  const res = await requestClient.get(`${state.url}/list`, { params: state.form });
+  const res = await requestClient.get(`${state.url}/list`, {
+    params: state.form,
+  });
   state.list = handleTree(res);
 };
 

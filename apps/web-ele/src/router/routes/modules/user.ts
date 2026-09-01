@@ -7,7 +7,7 @@ const routes: RouteRecordRaw[] = [
   {
     name: 'PlatUser',
     path: '/plat/user',
-    redirect: "/user",
+    redirect: '/user',
     meta: {
       icon: 'lucide:settings',
       title: $t('page.user.title') || '用户管理',
@@ -60,7 +60,7 @@ const routes: RouteRecordRaw[] = [
   {
     name: 'MerchantUser',
     path: '/merchant/user',
-    redirect: "/user",
+    redirect: '/user',
     meta: {
       icon: 'lucide:settings',
       title: $t('page.user.title') || '用户管理',

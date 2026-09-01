@@ -150,7 +150,7 @@ async function handleOk() {
               :content="t('component.cropper.selectImage')"
               placement="bottom"
             >
-              <el-button size="small" type="primary" style="width:26px">
+              <el-button size="small" type="primary" style="width: 26px">
                 <template #icon>
                   <div class="flex items-center justify-center">
                     <el-icon>
@@ -162,8 +162,17 @@ async function handleOk() {
             </el-tooltip>
           </el-upload>
           <el-space>
-            <el-tooltip :content="t('component.cropper.btn_reset')" placement="bottom">
-              <el-button :disabled="!src" size="small" type="primary" @click="handlerToolbar('reset')" style="width:26px">
+            <el-tooltip
+              :content="t('component.cropper.btn_reset')"
+              placement="bottom"
+            >
+              <el-button
+                :disabled="!src"
+                size="small"
+                type="primary"
+                @click="handlerToolbar('reset')"
+                style="width: 26px"
+              >
                 <template #icon>
                   <div class="flex items-center justify-center">
                     <el-icon>
@@ -174,8 +183,17 @@ async function handleOk() {
               </el-button>
             </el-tooltip>
 
-            <el-tooltip :content="t('component.cropper.btn_rotate_left')" placement="bottom">
-              <el-button :disabled="!src" size="small" type="primary" @click="handlerToolbar('rotate', -45)" style="width:26px">
+            <el-tooltip
+              :content="t('component.cropper.btn_rotate_left')"
+              placement="bottom"
+            >
+              <el-button
+                :disabled="!src"
+                size="small"
+                type="primary"
+                @click="handlerToolbar('rotate', -45)"
+                style="width: 26px"
+              >
                 <template #icon>
                   <div class="flex items-center justify-center">
                     <el-icon>
@@ -186,8 +204,18 @@ async function handleOk() {
               </el-button>
             </el-tooltip>
 
-            <el-tooltip :content="t('component.cropper.btn_rotate_right')" placement="bottom">
-              <el-button :disabled="!src" pre-icon="ep:d-arrow-right" size="small" type="primary" @click="handlerToolbar('rotate', 45)" style="width:26px">
+            <el-tooltip
+              :content="t('component.cropper.btn_rotate_right')"
+              placement="bottom"
+            >
+              <el-button
+                :disabled="!src"
+                pre-icon="ep:d-arrow-right"
+                size="small"
+                type="primary"
+                @click="handlerToolbar('rotate', 45)"
+                style="width: 26px"
+              >
                 <template #icon>
                   <div class="flex items-center justify-center">
                     <el-icon>
@@ -198,8 +226,17 @@ async function handleOk() {
               </el-button>
             </el-tooltip>
 
-            <el-tooltip :content="t('component.cropper.btn_scale_x')" placement="bottom">
-              <el-button :disabled="!src" size="small" type="primary" @click="handlerToolbar('scaleX')" style="width:26px">
+            <el-tooltip
+              :content="t('component.cropper.btn_scale_x')"
+              placement="bottom"
+            >
+              <el-button
+                :disabled="!src"
+                size="small"
+                type="primary"
+                @click="handlerToolbar('scaleX')"
+                style="width: 26px"
+              >
                 <template #icon>
                   <div class="flex items-center justify-center">
                     <el-icon>
@@ -210,8 +247,17 @@ async function handleOk() {
               </el-button>
             </el-tooltip>
 
-            <el-tooltip :content="t('component.cropper.btn_scale_y')" placement="bottom">
-              <el-button :disabled="!src" size="small" type="primary" @click="handlerToolbar('scaleY')" style="width:26px">
+            <el-tooltip
+              :content="t('component.cropper.btn_scale_y')"
+              placement="bottom"
+            >
+              <el-button
+                :disabled="!src"
+                size="small"
+                type="primary"
+                @click="handlerToolbar('scaleY')"
+                style="width: 26px"
+              >
                 <template #icon>
                   <div class="flex items-center justify-center">
                     <el-icon>
@@ -222,8 +268,17 @@ async function handleOk() {
               </el-button>
             </el-tooltip>
 
-            <el-tooltip :content="t('component.cropper.btn_zoom_in')" placement="bottom">
-              <el-button :disabled="!src" size="small" type="primary" @click="handlerToolbar('zoom', 0.1)" style="width:26px">
+            <el-tooltip
+              :content="t('component.cropper.btn_zoom_in')"
+              placement="bottom"
+            >
+              <el-button
+                :disabled="!src"
+                size="small"
+                type="primary"
+                @click="handlerToolbar('zoom', 0.1)"
+                style="width: 26px"
+              >
                 <template #icon>
                   <div class="flex items-center justify-center">
                     <el-icon>
@@ -234,8 +289,17 @@ async function handleOk() {
               </el-button>
             </el-tooltip>
 
-            <el-tooltip :content="t('component.cropper.btn_zoom_out')" placement="bottom">
-              <el-button :disabled="!src" size="small" type="primary" @click="handlerToolbar('zoom', -0.1)" style="width:26px">
+            <el-tooltip
+              :content="t('component.cropper.btn_zoom_out')"
+              placement="bottom"
+            >
+              <el-button
+                :disabled="!src"
+                size="small"
+                type="primary"
+                @click="handlerToolbar('zoom', -0.1)"
+                style="width: 26px"
+              >
                 <template #icon>
                   <div class="flex items-center justify-center">
                     <el-icon>

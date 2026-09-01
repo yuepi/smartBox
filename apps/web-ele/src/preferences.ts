@@ -10,7 +10,7 @@ export const overridesPreferences = defineOverridesPreferences({
   app: {
     name: import.meta.env.VITE_APP_TITLE,
     layout: 'header-nav',
-     // 是否开启检查更新
+    // 是否开启检查更新
     enableCheckUpdates: true,
     // 检查更新的时间间隔，单位为分钟
     checkUpdatesInterval: 1,
@@ -24,20 +24,20 @@ export const overridesPreferences = defineOverridesPreferences({
     source: import.meta.env.VITE_APP_LOGO,
     sourceDark: import.meta.env.VITE_APP_LOGO_DARK,
   },
-   header: {
-    menuAlign: "center",
+  header: {
+    menuAlign: 'center',
   },
   theme: {
-    builtinType: "green",
-    colorPrimary: "hsl(161 90% 43%)",
-    mode: "light"
+    builtinType: 'green',
+    colorPrimary: 'hsl(161 90% 43%)',
+    mode: 'light',
   },
   widget: {
     themeToggle: false,
     sidebarToggle: false,
     timezone: false,
   },
-   copyright: {
+  copyright: {
     companyName: '慧小分',
     companySiteLink: 'https://tadmin.huiyifamily.com',
     date: '2026',

@@ -2,6 +2,8 @@
 import type { SortTask, SortTaskPageParams } from '#/api/operation/sortTask';
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
+import { computed, onMounted, reactive, ref } from 'vue';
+
 import { Page } from '@vben/common-ui';
 
 import { getDeviceListApi } from '#/api/device/device';
@@ -10,7 +12,10 @@ import {
   editSortTaskApi,
   getSortTaskPageApi,
 } from '#/api/operation/sortTask';
-import { defaultSortTaskColumns, SORT_TASK_STORAGE_KEY } from '#/constants/tableColumns';
+import {
+  defaultSortTaskColumns,
+  SORT_TASK_STORAGE_KEY,
+} from '#/constants/tableColumns';
 import { ModuleCodeMap } from '#/hooks/useExport';
 
 import SortItemDialog from './SortItemDialog.vue';
@@ -90,13 +95,24 @@ function handleManageItems(row: SortTask) {
 
 // --- 状态变更 ---
 async function handleStatusChange(row: SortTask, status: number) {
-  const statusMap: Record<number, string> = { 0: '待分拣', 1: '分拣中', 2: '已完成' };
+  const statusMap: Record<number, string> = {
+    0: '待分拣',
+    1: '分拣中',
+    2: '已完成',
+  };
   try {
-    await ElMessageBox.confirm(`确定要将任务状态改为【${statusMap[status] || '未知'}】吗？`, '提示', { type: 'warning' });
+    await ElMessageBox.confirm(
+      `确定要将任务状态改为【${statusMap[status] || '未知'}】吗？`,
+      '提示',
+      { type: 'warning' },
+    );
     await editSortTaskApi({
       sortTaskId: row.sortTaskId,
       sortStatus: status,
-      sortTime: status === 2 ? new Date().toISOString().slice(0, 19).replace('T', ' ') : undefined,
+      sortTime:
+        status === 2
+          ? new Date().toISOString().slice(0, 19).replace('T', ' ')
+          : undefined,
     });
     ElMessage.success('状态更新成功');
     handleQuery();
@@ -119,7 +135,11 @@ async function handleDelete(row?: SortTask) {
     ids = selectedIds.value;
   }
   try {
-    await ElMessageBox.confirm(`确定要删除选中的 ${ids.length} 条分拣任务吗？`, '提示', { type: 'warning' });
+    await ElMessageBox.confirm(
+      `确定要删除选中的 ${ids.length} 条分拣任务吗？`,
+      '提示',
+      { type: 'warning' },
+    );
     for (const id of ids) {
       await deleteSortTaskApi(id);
     }
@@ -158,16 +178,23 @@ onMounted(() => {
 <template>
   <Page auto-content-height>
     <BaseTableLayout
-v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="loading"
-      :total="total" @search="loadData" @reset="resetQuery"
->
+      v-model:query-params="queryParams"
+      v-model:more-params="moreParams"
+      :loading="loading"
+      :total="total"
+      @search="loadData"
+      @reset="resetQuery"
+    >
       <!-- 📥 基础筛选项 -->
       <template #search-basic>
         <el-form-item>
           <el-input
-v-model="queryParams.sortNo" placeholder="请输入" clearable style="width: 200px"
+            v-model="queryParams.sortNo"
+            placeholder="请输入"
+            clearable
+            style="width: 200px"
             @keyup.enter="handleQuery"
->
+          >
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">分拣单号:</span>
             </template>
@@ -175,22 +202,38 @@ v-model="queryParams.sortNo" placeholder="请输入" clearable style="width: 200
         </el-form-item>
 
         <el-form-item>
-          <el-select v-model="queryParams.deviceId" clearable filterable style="width: 200px">
+          <el-select
+            v-model="queryParams.deviceId"
+            clearable
+            filterable
+            style="width: 200px"
+          >
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">设备名称:</span>
             </template>
             <el-option
-v-for="item in deviceOptions" :key="item.deviceId" :label="item.deviceName"
+              v-for="item in deviceOptions"
+              :key="item.deviceId"
+              :label="item.deviceName"
               :value="item.deviceId"
-/>
+            />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-select v-model="queryParams.sortStatus" clearable style="width: 200px">
+          <el-select
+            v-model="queryParams.sortStatus"
+            clearable
+            style="width: 200px"
+          >
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">分拣状态:</span>
             </template>
-            <el-option v-for="item in sort_status" :key="item.value" :label="item.label" :value="item.value" />
+            <el-option
+              v-for="item in sort_status"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
       </template>
@@ -201,13 +244,30 @@ v-for="item in deviceOptions" :key="item.deviceId" :label="item.deviceName"
 
       <!-- 📥 工具栏左侧 -->
       <template #toolbar-left>
-        <ExportButton :module-code="ModuleCodeMap.SORT_TASK" :fields="visibleColumns" :find-cond="queryParams" />
-        <el-button type="danger" plain icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete()">
+        <ExportButton
+          :module-code="ModuleCodeMap.SORT_TASK"
+          :fields="visibleColumns"
+          :find-cond="queryParams"
+        />
+        <el-button
+          type="danger"
+          plain
+          icon="Delete"
+          :disabled="selectedIds.length === 0"
+          @click="handleDelete()"
+        >
           批量删除
         </el-button>
         <transition name="el-fade-in">
-          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-sm text-gray-400">
-            已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
+          <span
+            v-if="selectedIds.length > 0"
+            class="selected-alert-badge ml-2 text-sm text-gray-400"
+          >
+            已选
+            <span class="text-red-500 font-medium">{{
+              selectedIds.length
+            }}</span>
+            项
           </span>
         </transition>
       </template>
@@ -215,29 +275,42 @@ v-for="item in deviceOptions" :key="item.deviceId" :label="item.deviceName"
       <!-- 📥 工具栏右侧 -->
       <template #toolbar-right>
         <ColumnSelector
-:storage-key="SORT_TASK_STORAGE_KEY" :default-columns="defaultSortTaskColumns"
+          :storage-key="SORT_TASK_STORAGE_KEY"
+          :default-columns="defaultSortTaskColumns"
           @update:columns="handleColumnsUpdate"
-/>
+        />
       </template>
 
       <!-- 📥 表格 -->
       <template #table>
         <el-table
-:data="tableData" border stripe style="width: 100%; height: 100%"
+          :data="tableData"
+          border
+          stripe
+          style="width: 100%; height: 100%"
           @selection-change="handleSelectionChange"
->
+        >
           <el-table-column type="selection" width="55" align="center" />
 
           <el-table-column
-v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
-            :width="typeof col.width === 'number' ? col.width : undefined" :min-width="col.minWidth" :align="col.align"
+            v-for="col in visibleColumns"
+            :key="col.key"
+            :prop="col.key"
+            :label="col.label"
+            :width="typeof col.width === 'number' ? col.width : undefined"
+            :min-width="col.minWidth"
+            :align="col.align"
             :show-overflow-tooltip="col.showOverflowTooltip || false"
->
+          >
             <template #default="{ row }">
               <template v-if="col.key === 'sortStatus'">
                 <DictTag :options="sort_status" :value="row.sortStatus" />
               </template>
-              <template v-else-if="col.key === 'totalWeight' || col.key === 'realWeight'">
+              <template
+                v-else-if="
+                  col.key === 'totalWeight' || col.key === 'realWeight'
+                "
+              >
                 {{ (row as any)[col.key]?.toFixed(2) || 0 }} kg
               </template>
               <template v-else>
@@ -246,22 +319,45 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
             </template>
           </el-table-column>
 
-          <el-table-column label="操作" width="200" fixed="right" align="center">
+          <el-table-column
+            label="操作"
+            width="200"
+            fixed="right"
+            align="center"
+          >
             <template #default="{ row }">
               <div class="action-buttons">
                 <el-button size="small" type="primary" @click="handleView(row)">
                   详情
                 </el-button>
-                <el-button size="small" type="primary" @click="handleManageItems(row)">
+                <el-button
+                  size="small"
+                  type="primary"
+                  @click="handleManageItems(row)"
+                >
                   明细
                 </el-button>
-                <el-button v-if="row.sortStatus === 0" size="small" type="primary" @click="handleStatusChange(row, 1)">
+                <el-button
+                  v-if="row.sortStatus === 0"
+                  size="small"
+                  type="primary"
+                  @click="handleStatusChange(row, 1)"
+                >
                   开始分拣
                 </el-button>
-                <el-button v-if="row.sortStatus === 1" size="small" type="success" @click="handleStatusChange(row, 2)">
+                <el-button
+                  v-if="row.sortStatus === 1"
+                  size="small"
+                  type="success"
+                  @click="handleStatusChange(row, 2)"
+                >
                   完成分拣
                 </el-button>
-                <el-button size="small" type="danger" @click="handleDelete(row)">
+                <el-button
+                  size="small"
+                  type="danger"
+                  @click="handleDelete(row)"
+                >
                   删除
                 </el-button>
               </div>

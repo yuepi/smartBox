@@ -1,14 +1,14 @@
 <script lang="ts">
-import { defineComponent, reactive } from 'vue'
+import { defineComponent, reactive } from 'vue';
 
-import Chart from './chart/index.tsx'
+import Chart from './chart/index.tsx';
 
 export default defineComponent({
-  components: { Chart},
+  components: { Chart },
   setup() {
     const capsuleConfig = reactive({
       data: [
-         { name: '阳光花园', value: 156 },
+        { name: '阳光花园', value: 156 },
         { name: '翠湖苑', value: 132 },
         { name: '龙湖花园', value: 98 },
         { name: '滨江新城', value: 87 },
@@ -20,11 +20,11 @@ export default defineComponent({
         { name: '中心花园', value: 21 },
       ],
       unit: '次',
-      showValue: true
-    })
-    return { capsuleConfig }
+      showValue: true,
+    });
+    return { capsuleConfig };
   },
-})
+});
 </script>
 
 <template>
@@ -34,7 +34,7 @@ export default defineComponent({
       <div class="mb-2 flex items-center gap-2">
         <i class="iconfont icon-align-left text-cyan-400"></i>
         <span class="text-sm text-white">小区投递量排行</span>
-        <dv-decoration-3 style="width: 100px;height: 20px;" />
+        <dv-decoration-3 style="width: 100px; height: 20px" />
       </div>
 
       <!-- 胶囊图 + 图表 -->

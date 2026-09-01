@@ -1,11 +1,11 @@
-import type { ModuleInfo } from './index.d'
+import type { ModuleInfo } from './index.d';
 
 // 星期
-export const WEEK = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+export const WEEK = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 
 // 主题名称与副标题名称
-export const title = '智能回收箱监控平台'
-export const subtitle = ['设备总数: 524', '在线率: 94.2%', '智能回收系统 v1.0']
+export const title = '智能回收箱监控平台';
+export const subtitle = ['设备总数: 524', '在线率: 94.2%', '智能回收系统 v1.0'];
 
 export const moduleInfo: ModuleInfo = [
   // 中间的几个模块
@@ -34,4 +34,4 @@ export const moduleInfo: ModuleInfo = [
     name: '设备故障与维修统计',
     icon: 'icon-fenxi7',
   },
-]
+];

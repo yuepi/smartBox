@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import { computed, onMounted, reactive, ref, watch } from "vue";
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 
-import { Page } from "@vben/common-ui";
+import { Page } from '@vben/common-ui';
 
-import { Check, Delete, Refresh, Search, View } from "@element-plus/icons-vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+import { Check, Delete, Refresh, Search, View } from '@element-plus/icons-vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
 import {
   auditMemberWithdrawPassApi,
@@ -16,27 +16,27 @@ import {
   type MemberWithdraw,
   type MemberWithdrawPageParams,
   WithdrawStatusMap,
-} from "#/api/member/memberWithdraw";
+} from '#/api/member/memberWithdraw';
 import {
   getRecycleOrderPageApi,
   type RecycleOrder,
-} from "#/api/operation/recycleOrder";
-import ColumnSelector from "#/components/ColumnSelector/index.vue";
-import DictTag from "#/components/DictTag/index.vue";
-import ExportFieldSelector from "#/components/ExportFieldSelector/index.vue";
+} from '#/api/operation/recycleOrder';
+import ColumnSelector from '#/components/ColumnSelector/index.vue';
+import DictTag from '#/components/DictTag/index.vue';
+import ExportFieldSelector from '#/components/ExportFieldSelector/index.vue';
 import {
   defaultMemberWithdrawColumns,
   MEMBER_WITHDRAW_STORAGE_KEY,
   type TableColumnConfig,
-} from "#/constants/tableColumns";
-import { useDicts } from "#/hooks/useDict";
-import { ModuleCodeMap } from "#/hooks/useExport";
-import { getRecentDays } from "#/utils/date";
+} from '#/constants/tableColumns';
+import { useDicts } from '#/hooks/useDict';
+import { ModuleCodeMap } from '#/hooks/useExport';
+import { getRecentDays } from '#/utils/date';
 
 const { withdraw_status, audit_mode, order_status } = useDicts([
-  "withdraw_status",
-  "audit_mode",
-  "order_status",
+  'withdraw_status',
+  'audit_mode',
+  'order_status',
 ]);
 
 // 表格列配置
@@ -67,7 +67,7 @@ const auditVisible = ref(false);
 const auditData = ref<MemberWithdraw | null>(null);
 const auditForm = reactive({
   status: 1, // 1=通过, 4=拒绝
-  auditReason: "",
+  auditReason: '',
 });
 const auditSubmitting = ref(false);
 
@@ -76,12 +76,12 @@ const memberOptions = ref<{ label: string; value: number }[]>([]);
 
 // 提现状态选项
 const statusOptions = [
-  { label: "全部", value: undefined },
-  { label: "待审核", value: 0 },
-  { label: "提现中", value: 1 },
-  { label: "已提现", value: 2 },
-  { label: "提现失败", value: 3 },
-  { label: "审核拒绝", value: 4 },
+  { label: '全部', value: undefined },
+  { label: '待审核', value: 0 },
+  { label: '提现中', value: 1 },
+  { label: '已提现', value: 2 },
+  { label: '提现失败', value: 3 },
+  { label: '审核拒绝', value: 4 },
 ];
 
 // 查询参数
@@ -122,15 +122,15 @@ const recentOrdersVisible = ref(false);
 const recentOrdersLoading = ref(false);
 const recentOrdersData = ref<RecycleOrder[]>([]);
 const currentMemberId = ref<number>(0);
-const currentMemberName = ref("");
+const currentMemberName = ref('');
 
 // 近期订单查询参数
 const recentOrdersParams = reactive({
   pageNo: 1,
   pageSize: 10,
   memberId: undefined as number | undefined,
-  startTime: "",
-  endTime: "",
+  startTime: '',
+  endTime: '',
 });
 
 // 查看近期订单
@@ -151,8 +151,8 @@ async function handleViewRecentOrders(row: MemberWithdraw) {
     const res = await getRecycleOrderPageApi(recentOrdersParams);
     recentOrdersData.value = res.records || [];
   } catch (error) {
-    console.error("获取近期订单失败", error);
-    ElMessage.error("获取近期订单失败");
+    console.error('获取近期订单失败', error);
+    ElMessage.error('获取近期订单失败');
   } finally {
     recentOrdersLoading.value = false;
   }
@@ -166,15 +166,15 @@ function closeRecentOrders() {
 
 // --- 辅助函数 ---
 function getStatusText(status: number): string {
-  return WithdrawStatusMap[status]?.label || "未知";
+  return WithdrawStatusMap[status]?.label || '未知';
 }
 
 function getStatusType(status: number): string {
-  return WithdrawStatusMap[status]?.type || "info";
+  return WithdrawStatusMap[status]?.type || 'info';
 }
 
 function getAuditModeText(mode: number): string {
-  return AuditModeMap[mode] || "未知";
+  return AuditModeMap[mode] || '未知';
 }
 
 function formatAmount(amount: number): string {
@@ -198,7 +198,7 @@ async function loadData() {
     total.value = res.total || 0;
   } catch (error) {
     console.error(error);
-    ElMessage.error("加载数据失败");
+    ElMessage.error('加载数据失败');
   } finally {
     loading.value = false;
   }
@@ -211,19 +211,19 @@ async function handleView(row: MemberWithdraw) {
     detailData.value = res;
     detailVisible.value = true;
   } catch {
-    ElMessage.error("获取详情失败");
+    ElMessage.error('获取详情失败');
   }
 }
 
 // --- 审核弹窗 ---
 function handleAudit(row: MemberWithdraw) {
   if (row.status !== 0) {
-    ElMessage.warning("只有待审核状态的提现才能审核");
+    ElMessage.warning('只有待审核状态的提现才能审核');
     return;
   }
   auditData.value = row;
   auditForm.status = 1;
-  auditForm.auditReason = "";
+  auditForm.auditReason = '';
   auditVisible.value = true;
 }
 
@@ -231,7 +231,7 @@ async function handleAuditSubmit() {
   if (!auditData.value) return;
 
   if (auditForm.status === 4 && !auditForm.auditReason.trim()) {
-    ElMessage.warning("请填写驳回原因");
+    ElMessage.warning('请填写驳回原因');
     return;
   }
 
@@ -242,19 +242,19 @@ async function handleAuditSubmit() {
       await auditMemberWithdrawPassApi({
         memberWithdrawId: auditData.value.memberWithdrawId,
       });
-      ElMessage.success("审核通过");
+      ElMessage.success('审核通过');
     } else {
       // 审核拒绝
       await auditMemberWithdrawRefuseApi({
         memberWithdrawId: auditData.value.memberWithdrawId,
         auditReason: auditForm.auditReason,
       });
-      ElMessage.success("已拒绝");
+      ElMessage.success('已拒绝');
     }
     auditVisible.value = false;
     handleQuery();
   } catch {
-    ElMessage.error("操作失败");
+    ElMessage.error('操作失败');
   } finally {
     auditSubmitting.value = false;
   }
@@ -268,7 +268,7 @@ async function handleDelete(row?: MemberWithdraw) {
     ids = [row.memberWithdrawId];
   } else {
     if (selectedIds.value.length === 0) {
-      ElMessage.warning("请选择要删除的记录");
+      ElMessage.warning('请选择要删除的记录');
       return;
     }
     ids = selectedIds.value;
@@ -277,8 +277,8 @@ async function handleDelete(row?: MemberWithdraw) {
   try {
     await ElMessageBox.confirm(
       `确定要删除选中的 ${ids.length} 条提现记录吗？`,
-      "提示",
-      { type: "warning" }
+      '提示',
+      { type: 'warning' },
     );
 
     for (const id of ids) {
@@ -500,27 +500,27 @@ onMounted(() => {
               </template>
               <!-- 审核时间 -->
               <template v-else-if="col.key === 'auditTime'">
-                {{ row.auditTime || "-" }}
+                {{ row.auditTime || '-' }}
               </template>
               <!-- 审核人 -->
               <template v-else-if="col.key === 'auditUserName'">
-                {{ row.auditUserName || "-" }}
+                {{ row.auditUserName || '-' }}
               </template>
               <!-- 驳回原因 -->
               <template v-else-if="col.key === 'auditReason'">
-                {{ row.auditReason || "-" }}
+                {{ row.auditReason || '-' }}
               </template>
               <!-- 支付请求ID -->
               <template v-else-if="col.key === 'payRequestId'">
-                {{ row.payRequestId || "-" }}
+                {{ row.payRequestId || '-' }}
               </template>
               <!-- 支付请求时间 -->
               <template v-else-if="col.key === 'payRequestTime'">
-                {{ row.payRequestTime || "-" }}
+                {{ row.payRequestTime || '-' }}
               </template>
               <!-- 批次号 -->
               <template v-else-if="col.key === 'batchNo'">
-                {{ row.batchNo || "-" }}
+                {{ row.batchNo || '-' }}
               </template>
               <!-- 提现单号 -->
               <template v-else-if="col.key === 'withdrawNo'">
@@ -532,11 +532,11 @@ onMounted(() => {
               </template>
               <!-- 商户ID -->
               <template v-else-if="col.key === 'merchantId'">
-                {{ row.merchantId || "-" }}
+                {{ row.merchantId || '-' }}
               </template>
               <!-- 申请时间 -->
               <template v-else-if="col.key === 'createTime'">
-                {{ row.createTime || "-" }}
+                {{ row.createTime || '-' }}
               </template>
               <!-- 普通字段 -->
               <template v-else>
@@ -620,7 +620,7 @@ onMounted(() => {
           {{ detailData.memberId }}
         </el-descriptions-item>
         <el-descriptions-item label="商户ID">
-          {{ detailData.merchantId || "-" }}
+          {{ detailData.merchantId || '-' }}
         </el-descriptions-item>
         <el-descriptions-item label="申请金额">
           {{ formatAmount(detailData.applyAmount) }}
@@ -647,10 +647,10 @@ onMounted(() => {
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="审核人">
-          {{ detailData.auditUserName || "-" }}
+          {{ detailData.auditUserName || '-' }}
         </el-descriptions-item>
         <el-descriptions-item label="审核时间">
-          {{ detailData.auditTime || "-" }}
+          {{ detailData.auditTime || '-' }}
         </el-descriptions-item>
         <el-descriptions-item
           label="驳回原因"
@@ -660,10 +660,10 @@ onMounted(() => {
           <span class="text-danger">{{ detailData.auditReason }}</span>
         </el-descriptions-item>
         <el-descriptions-item label="支付请求ID" :span="2">
-          {{ detailData.payRequestId || "-" }}
+          {{ detailData.payRequestId || '-' }}
         </el-descriptions-item>
         <el-descriptions-item label="支付请求时间">
-          {{ detailData.payRequestTime || "-" }}
+          {{ detailData.payRequestTime || '-' }}
         </el-descriptions-item>
       </el-descriptions>
       <template #footer>

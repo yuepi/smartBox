@@ -43,5 +43,3 @@ export async function getProvincesApi() {
 export async function getProvinceCityDistrictApi() {
   return requestClient.get<Area[]>('/common/area/tree/provinceCityDistrict');
 }
-
-

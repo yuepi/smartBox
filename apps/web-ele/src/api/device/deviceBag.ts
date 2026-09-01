@@ -44,7 +44,9 @@ export function getDeviceBagListApi(params?: any) {
 
 /** 3. 包袋详情 */
 export function getDeviceBagDetailApi(deviceBagId: number) {
-  return requestClient.get('/merchant/deviceBag/detail', { params: { deviceBagId } });
+  return requestClient.get('/merchant/deviceBag/detail', {
+    params: { deviceBagId },
+  });
 }
 
 /** 4. 新增包袋 */
@@ -69,9 +71,10 @@ export function generateDeviceBagApi(params: GenerateBagParams) {
 
 /** 8. 下载单个包袋二维码（返回文件流） */
 export function downOneDeviceBagQrcodeFileApi(deviceBagId: number) {
-  return requestClient.post('/merchant/deviceBag/one/downOneDeviceBagQrcode', 
+  return requestClient.post(
+    '/merchant/deviceBag/one/downOneDeviceBagQrcode',
     { deviceBagId, bagQrcodeFlag: 0 },
-    { responseType: 'blob' }
+    { responseType: 'blob' },
   );
 }
 
@@ -85,21 +88,29 @@ export function downOneDeviceBagQrcodeJsonApi(deviceBagId: number) {
 
 /** 9. 批量下载包袋二维码（返回文件流） */
 export function batchDownDeviceBagQrcodeFileApi(deviceBagIds: number[]) {
-  return requestClient.post('/merchant/deviceBag/batch/downOneDeviceBagQrcode',
+  return requestClient.post(
+    '/merchant/deviceBag/batch/downOneDeviceBagQrcode',
     { deviceBagIds, bagQrcodeFlag: 0 },
-    { responseType: 'blob' }
+    { responseType: 'blob' },
   );
 }
 
 /** 9. 批量展示包袋二维码（返回JSON） */
 export function batchDownDeviceBagQrcodeJsonApi(deviceBagIds: number[]) {
-  return requestClient.post('/merchant/deviceBag/batch/downOneDeviceBagQrcode', {
-    deviceBagIds,
-    bagQrcodeFlag: 1,
-  });
+  return requestClient.post(
+    '/merchant/deviceBag/batch/downOneDeviceBagQrcode',
+    {
+      deviceBagIds,
+      bagQrcodeFlag: 1,
+    },
+  );
 }
 /** 10. 包袋绑定设备仓口 */
-export function bagBindDeviceHatchApi(deviceBagId: number, deviceId: number, deviceHatchId: number) {
+export function bagBindDeviceHatchApi(
+  deviceBagId: number,
+  deviceId: number,
+  deviceHatchId: number,
+) {
   return requestClient.post('/merchant/deviceBag/bind/bagBindDeviceHatch', {
     deviceBagId,
     deviceId,
@@ -108,7 +119,10 @@ export function bagBindDeviceHatchApi(deviceBagId: number, deviceId: number, dev
 }
 
 /** 11. 包袋解绑设备仓口 */
-export function bagUnBindDeviceHatchApi(deviceBagId?: number, deviceHatchId?: number) {
+export function bagUnBindDeviceHatchApi(
+  deviceBagId?: number,
+  deviceHatchId?: number,
+) {
   return requestClient.post('/merchant/deviceBag/bind/bagUnBindDeviceHatch', {
     deviceBagId,
     deviceHatchId,

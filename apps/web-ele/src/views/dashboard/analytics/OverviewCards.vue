@@ -1,7 +1,12 @@
 <!-- components/OverviewCards.vue -->
 <script setup lang="ts">
 import { AnalysisOverview } from '@vben/common-ui';
-import { SvgBellIcon, SvgCakeIcon, SvgCardIcon, SvgDownloadIcon } from '@vben/icons';
+import {
+  SvgBellIcon,
+  SvgCakeIcon,
+  SvgCardIcon,
+  SvgDownloadIcon,
+} from '@vben/icons';
 
 const overviewItems = [
   {

@@ -1,5 +1,8 @@
 <script lang="ts" setup>
-import type { RecycleOrder, RecycleOrderPageParams } from '#/api/operation/recycleOrder';
+import type {
+  RecycleOrder,
+  RecycleOrderPageParams,
+} from '#/api/operation/recycleOrder';
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
 import { Page } from '@vben/common-ui';
@@ -13,7 +16,10 @@ import {
   getRecycleOrderPageApi,
 } from '#/api/operation/recycleOrder';
 import { getMerchantDeptListApi } from '#/api/system/dept';
-import { defaultRecycleOrderColumns, RECYCLE_ORDER_STORAGE_KEY } from '#/constants/tableColumns';
+import {
+  defaultRecycleOrderColumns,
+  RECYCLE_ORDER_STORAGE_KEY,
+} from '#/constants/tableColumns';
 import { ModuleCodeMap } from '#/hooks/useExport';
 import { getRecentDays } from '#/utils/date';
 
@@ -129,11 +135,15 @@ function handleView(row: RecycleOrder) {
 // --- 异常订单 ---
 async function handleAbnormal(row: RecycleOrder) {
   try {
-    await ElMessageBox.confirm(`确定要将订单【${row.orderNo}】标记为异常吗？`, '异常订单', {
-      type: 'warning',
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-    });
+    await ElMessageBox.confirm(
+      `确定要将订单【${row.orderNo}】标记为异常吗？`,
+      '异常订单',
+      {
+        type: 'warning',
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+      },
+    );
     await abnormalOrderApi(row.recycleOrderId);
     ElMessage.success('已标记为异常');
     loadData();
@@ -145,11 +155,15 @@ async function handleAbnormal(row: RecycleOrder) {
 // --- 取消订单 ---
 async function handleCancel(row: RecycleOrder) {
   try {
-    await ElMessageBox.confirm(`确定要将订单【${row.orderNo}】标记为已取消吗？`, '取消订单', {
-      type: 'warning',
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-    });
+    await ElMessageBox.confirm(
+      `确定要将订单【${row.orderNo}】标记为已取消吗？`,
+      '取消订单',
+      {
+        type: 'warning',
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+      },
+    );
     await cancelOrderApi(row.recycleOrderId);
     ElMessage.success('已标记为已取消');
     loadData();
@@ -157,8 +171,6 @@ async function handleCancel(row: RecycleOrder) {
     // 取消操作
   }
 }
-
-
 
 // --- 直接完成 ---
 async function handleDirectComplete(row: RecycleOrder) {
@@ -194,7 +206,11 @@ async function handleDelete(row?: RecycleOrder) {
     ids = selectedIds.value;
   }
   try {
-    await ElMessageBox.confirm(`确定要删除选中的 ${ids.length} 条订单吗？`, '提示', { type: 'warning' });
+    await ElMessageBox.confirm(
+      `确定要删除选中的 ${ids.length} 条订单吗？`,
+      '提示',
+      { type: 'warning' },
+    );
     for (const id of ids) {
       await deleteRecycleOrderApi(id);
     }
@@ -266,16 +282,23 @@ onMounted(() => {
 <template>
   <Page auto-content-height>
     <BaseTableLayout
-v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="loading"
-      :total="total" @search="loadData" @reset="resetQuery"
->
+      v-model:query-params="queryParams"
+      v-model:more-params="moreParams"
+      :loading="loading"
+      :total="total"
+      @search="loadData"
+      @reset="resetQuery"
+    >
       <!-- 📥 基础筛选项 -->
       <template #search-basic>
         <el-form-item>
           <el-input
-v-model="queryParams.orderNo" placeholder="请输入" clearable style="width: 200px"
+            v-model="queryParams.orderNo"
+            placeholder="请输入"
+            clearable
+            style="width: 200px"
             @keyup.enter="handleQuery"
->
+          >
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">订单编号:</span>
             </template>
@@ -284,9 +307,12 @@ v-model="queryParams.orderNo" placeholder="请输入" clearable style="width: 20
 
         <el-form-item>
           <el-input
-v-model="queryParams.memberId" placeholder="请输入" clearable style="width: 200px"
+            v-model="queryParams.memberId"
+            placeholder="请输入"
+            clearable
+            style="width: 200px"
             @keyup.enter="handleQuery"
->
+          >
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">会员ID:</span>
             </template>
@@ -295,9 +321,12 @@ v-model="queryParams.memberId" placeholder="请输入" clearable style="width: 2
 
         <el-form-item>
           <el-input
-v-model="queryParams.memberPhone" placeholder="请输入" clearable style="width: 200px"
+            v-model="queryParams.memberPhone"
+            placeholder="请输入"
+            clearable
+            style="width: 200px"
             @keyup.enter="handleQuery"
->
+          >
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">手机号:</span>
             </template>
@@ -309,19 +338,29 @@ v-model="queryParams.memberPhone" placeholder="请输入" clearable style="width
       <template #search-advanced>
         <el-form-item>
           <el-tree-select
-v-model="queryParams.deptId" :data="deptOptions" :props="{
-            value: 'deptId',
-            label: 'deptName',
-            children: 'children',
-          }" placeholder="请选择" clearable check-strictly style="width: 200px" class="tree-prefix-dept"
-/>
+            v-model="queryParams.deptId"
+            :data="deptOptions"
+            :props="{
+              value: 'deptId',
+              label: 'deptName',
+              children: 'children',
+            }"
+            placeholder="请选择"
+            clearable
+            check-strictly
+            style="width: 200px"
+            class="tree-prefix-dept"
+          />
         </el-form-item>
 
         <el-form-item>
           <el-input
-v-model="queryParams.deviceNo" placeholder="请输入" clearable style="width: 200px"
+            v-model="queryParams.deviceNo"
+            placeholder="请输入"
+            clearable
+            style="width: 200px"
             @keyup.enter="handleQuery"
->
+          >
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">设备编号:</span>
             </template>
@@ -330,9 +369,12 @@ v-model="queryParams.deviceNo" placeholder="请输入" clearable style="width: 2
 
         <el-form-item>
           <el-input
-v-model="queryParams.deviceName" placeholder="请输入" clearable style="width: 200px"
+            v-model="queryParams.deviceName"
+            placeholder="请输入"
+            clearable
+            style="width: 200px"
             @keyup.enter="handleQuery"
->
+          >
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">设备名称:</span>
             </template>
@@ -340,31 +382,62 @@ v-model="queryParams.deviceName" placeholder="请输入" clearable style="width:
         </el-form-item>
 
         <el-form-item>
-          <el-select v-model="queryParams.orderStatus" clearable style="width: 200px">
+          <el-select
+            v-model="queryParams.orderStatus"
+            clearable
+            style="width: 200px"
+          >
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">订单状态:</span>
             </template>
-            <el-option v-for="item in order_status" :key="item.value" :label="item.label" :value="item.value" />
+            <el-option
+              v-for="item in order_status"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
 
         <el-form-item>
           <el-date-picker
-v-model="dateRange" type="datetimerange" range-separator="至" start-placeholder="开始时间"
-            end-placeholder="结束时间" value-format="YYYY-MM-DD HH:mm:ss" style="width: 360px"
-/>
+            v-model="dateRange"
+            type="datetimerange"
+            range-separator="至"
+            start-placeholder="开始时间"
+            end-placeholder="结束时间"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            style="width: 360px"
+          />
         </el-form-item>
       </template>
 
       <!-- 📥 工具栏左侧 -->
       <template #toolbar-left>
-        <ExportButton :module-code="ModuleCodeMap.RECYCLE_ORDER" :fields="visibleColumns" :find-cond="queryParams" />
-        <el-button type="danger" plain icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete()">
+        <ExportButton
+          :module-code="ModuleCodeMap.RECYCLE_ORDER"
+          :fields="visibleColumns"
+          :find-cond="queryParams"
+        />
+        <el-button
+          type="danger"
+          plain
+          icon="Delete"
+          :disabled="selectedIds.length === 0"
+          @click="handleDelete()"
+        >
           批量删除
         </el-button>
         <transition name="el-fade-in">
-          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-xs text-gray-400">
-            已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
+          <span
+            v-if="selectedIds.length > 0"
+            class="selected-alert-badge ml-2 text-xs text-gray-400"
+          >
+            已选
+            <span class="text-red-500 font-medium">{{
+              selectedIds.length
+            }}</span>
+            项
           </span>
         </transition>
       </template>
@@ -372,24 +445,33 @@ v-model="dateRange" type="datetimerange" range-separator="至" start-placeholder
       <!-- 📥 工具栏右侧 -->
       <template #toolbar-right>
         <ColumnSelector
-:storage-key="RECYCLE_ORDER_STORAGE_KEY" :default-columns="defaultRecycleOrderColumns"
+          :storage-key="RECYCLE_ORDER_STORAGE_KEY"
+          :default-columns="defaultRecycleOrderColumns"
           @update:columns="handleColumnsUpdate"
-/>
+        />
       </template>
 
       <!-- 📥 表格 -->
       <template #table>
         <el-table
-:data="tableData" border stripe style="width: 100%; height: 100%"
+          :data="tableData"
+          border
+          stripe
+          style="width: 100%; height: 100%"
           @selection-change="handleSelectionChange"
->
+        >
           <el-table-column type="selection" width="50" align="center" />
 
           <el-table-column
-v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
-            :width="typeof col.width === 'number' ? col.width : undefined" :min-width="col.minWidth" :align="col.align"
+            v-for="col in visibleColumns"
+            :key="col.key"
+            :prop="col.key"
+            :label="col.label"
+            :width="typeof col.width === 'number' ? col.width : undefined"
+            :min-width="col.minWidth"
+            :align="col.align"
             :show-overflow-tooltip="col.showOverflowTooltip || false"
->
+          >
             <template #default="{ row }">
               <template v-if="col.key === 'orderStatus'">
                 <DictTag :options="order_status" :value="row.orderStatus" />
@@ -398,10 +480,15 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
                 {{ row.weight?.toFixed(2) || 0 }} kg
               </template>
               <template v-else-if="col.key === 'realAmount'">
-                <span class="font-medium text-primary">{{ formatAmount(row.realAmount) }}</span>
+                <span class="font-medium text-primary">{{
+                  formatAmount(row.realAmount)
+                }}</span>
               </template>
               <template v-else-if="col.key === 'beforeAfterWeight'">
-                <span>{{ (row.beforeWeight || 0).toFixed(2) }} → {{ (row.afterWeight || 0).toFixed(2) }} kg</span>
+                <span
+                  >{{ (row.beforeWeight || 0).toFixed(2) }} →
+                  {{ (row.afterWeight || 0).toFixed(2) }} kg</span
+                >
               </template>
               <template v-else>
                 {{ (row as any)[col.key] ?? '-' }}
@@ -409,24 +496,46 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
             </template>
           </el-table-column>
 
-          <el-table-column label="操作" width="150" fixed="right" align="center">
+          <el-table-column
+            label="操作"
+            width="150"
+            fixed="right"
+            align="center"
+          >
             <template #default="{ row }">
               <div class="action-buttons">
-              <el-tooltip content="详情" placement="top" :enterable="false">
-                <el-button link type="primary" icon="View" @click="handleView(row)" />
-              </el-tooltip>
-              <el-dropdown @command="(cmd: string) => handleCommand(cmd, row)">
-                <el-button link type="primary" icon="More" />
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item command="abnormal" icon="Warning">异常订单</el-dropdown-item>
-                    <el-dropdown-item command="cancel" icon="Close">取消异常</el-dropdown-item>
-                    <el-dropdown-item command="weight" icon="ScaleToOriginal">补重/扣重</el-dropdown-item>
-                    <el-dropdown-item command="remark" icon="ChatDotRound">添加备注</el-dropdown-item>
-                    <el-dropdown-item command="directComplete" icon="Check">直接完成</el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
+                <el-tooltip content="详情" placement="top" :enterable="false">
+                  <el-button
+                    link
+                    type="primary"
+                    icon="View"
+                    @click="handleView(row)"
+                  />
+                </el-tooltip>
+                <el-dropdown
+                  @command="(cmd: string) => handleCommand(cmd, row)"
+                >
+                  <el-button link type="primary" icon="More" />
+                  <template #dropdown>
+                    <el-dropdown-menu>
+                      <el-dropdown-item command="abnormal" icon="Warning"
+                        >异常订单</el-dropdown-item
+                      >
+                      <el-dropdown-item command="cancel" icon="Close"
+                        >取消异常</el-dropdown-item
+                      >
+                      <el-dropdown-item command="weight" icon="ScaleToOriginal"
+                        >补重/扣重</el-dropdown-item
+                      >
+                      <el-dropdown-item command="remark" icon="ChatDotRound"
+                        >添加备注</el-dropdown-item
+                      >
+                      <el-dropdown-item command="directComplete" icon="Check"
+                        >直接完成</el-dropdown-item
+                      >
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
               </div>
             </template>
           </el-table-column>
@@ -467,7 +576,7 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
   font-weight: 400;
   color: #909399;
   pointer-events: none;
-  content: "部门:";
+  content: '部门:';
   transform: translateY(-50%);
 }
 </style>

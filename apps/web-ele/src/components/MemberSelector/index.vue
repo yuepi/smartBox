@@ -11,13 +11,13 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   modelValue: () => [],
-  placeholder: "点击选择成员",
+  placeholder: '点击选择成员',
   disabled: false,
 });
 
 const emit = defineEmits<{
-  (e: "update:modelValue", value: User[]): void;
-  (e: "change", value: User[]): void;
+  (e: 'update:modelValue', value: User[]): void;
+  (e: 'change', value: User[]): void;
 }>();
 
 const dialogVisible = ref(false);
@@ -41,8 +41,8 @@ const queryParams = reactive<UserPageParams>({
 const rowKey = (row: User) => row.userId;
 
 const displayNames = computed(() => {
-  if (!props.modelValue || props.modelValue.length === 0) return "";
-  return props.modelValue.map((m) => m.userName || m.nickName).join("，");
+  if (!props.modelValue || props.modelValue.length === 0) return '';
+  return props.modelValue.map((m) => m.userName || m.nickName).join('，');
 });
 
 // 加载成员列表
@@ -59,7 +59,7 @@ async function loadMemberList() {
       // 找出当前页中，userId 存在于已选列表中的行，强行打勾
       memberList.value.forEach((row) => {
         const isSelected = selectedMembers.value.some(
-          (m) => m.userId === row.userId
+          (m) => m.userId === row.userId,
         );
         if (isSelected) {
           // 这里通过第二个参数确保是勾选状态，且不会触发重复累加
@@ -68,8 +68,8 @@ async function loadMemberList() {
       });
     }
   } catch (error) {
-    console.error("加载成员列表失败：", error);
-    ElMessage.error("加载成员列表失败");
+    console.error('加载成员列表失败：', error);
+    ElMessage.error('加载成员列表失败');
   } finally {
     loading.value = false;
   }
@@ -80,12 +80,14 @@ function resetTableSelection() {
   if (tableRef.value) {
     // 1. 先把当前表格里的所有勾选清空
     tableRef.value.clearSelection();
-    
+
     // 2. 如果外部原本就有选中的人，重新恢复它们的勾选
     const currentModelValue = props.modelValue || [];
     if (currentModelValue.length > 0 && memberList.value.length > 0) {
       memberList.value.forEach((row) => {
-        const isSelected = currentModelValue.some((m) => m.userId === row.userId);
+        const isSelected = currentModelValue.some(
+          (m) => m.userId === row.userId,
+        );
         if (isSelected) {
           tableRef.value.toggleRowSelection(row, true);
         }
@@ -128,7 +130,7 @@ function handleSelectionChange(selection: User[]) {
 // 移除右侧已选面板中的某个人（联动取消表格勾选）
 function handleRemoveSelected(user: User) {
   selectedMembers.value = selectedMembers.value.filter(
-    (m) => m.userId !== user.userId
+    (m) => m.userId !== user.userId,
   );
   // 同步取消左侧表格对应的勾选状态
   const targetRow = memberList.value.find((row) => row.userId === user.userId);
@@ -139,8 +141,8 @@ function handleRemoveSelected(user: User) {
 
 // 确认选择
 function confirmSelect() {
-  emit("update:modelValue", selectedMembers.value);
-  emit("change", selectedMembers.value);
+  emit('update:modelValue', selectedMembers.value);
+  emit('change', selectedMembers.value);
   dialogVisible.value = false;
 }
 
@@ -151,8 +153,8 @@ function clearMembers() {
     tableRef.value.clearSelection();
   }
 
-  emit("update:modelValue", []);
-  emit("change", []);
+  emit('update:modelValue', []);
+  emit('change', []);
 }
 
 // 监听外部变化
@@ -161,7 +163,7 @@ watch(
   (newVal) => {
     selectedMembers.value = [...(newVal || [])];
   },
-  { deep: true }
+  { deep: true },
 );
 </script>
 
@@ -201,8 +203,8 @@ watch(
                 @keyup.enter="handleSearch"
               >
                 <template #prefix>
-<span class="text-xs text-gray-400">用户:</span>
-</template>
+                  <span class="text-xs text-gray-400">用户:</span>
+                </template>
               </el-input>
             </el-form-item>
 
@@ -215,8 +217,8 @@ watch(
                 @keyup.enter="handleSearch"
               >
                 <template #prefix>
-<span class="text-xs text-gray-400">昵称:</span>
-</template>
+                  <span class="text-xs text-gray-400">昵称:</span>
+                </template>
               </el-input>
             </el-form-item>
 
@@ -229,8 +231,8 @@ watch(
                 @keyup.enter="handleSearch"
               >
                 <template #prefix>
-<span class="text-xs text-gray-400">手机:</span>
-</template>
+                  <span class="text-xs text-gray-400">手机:</span>
+                </template>
               </el-input>
             </el-form-item>
 
@@ -301,7 +303,7 @@ watch(
                     round
                     effect="light"
                   >
-                    {{ row.status === 0 ? "启用" : "禁用" }}
+                    {{ row.status === 0 ? '启用' : '禁用' }}
                   </el-tag>
                 </template>
               </el-table-column>
@@ -333,7 +335,8 @@ watch(
             >
               已选择成员 (<span class="text-blue-500 font-bold font-mono">{{
                 selectedMembers.length
-              }}</span>)
+              }}</span
+              >)
             </span>
             <button
               v-if="selectedMembers.length > 0"
@@ -356,11 +359,12 @@ watch(
                 <div
                   class="w-5 h-5 rounded-md bg-blue-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0"
                 >
-                  {{ (user.nickName || user.userName || "员").slice(0, 1) }}
+                  {{ (user.nickName || user.userName || '员').slice(0, 1) }}
                 </div>
                 <span
                   class="truncate font-medium text-gray-700 dark:text-gray-300"
-                  >{{ user.nickName || user.userName }}</span>
+                  >{{ user.nickName || user.userName }}</span
+                >
               </div>
               <el-icon
                 class="text-gray-400 hover:text-red-500 cursor-pointer text-sm shrink-0"
@@ -385,15 +389,15 @@ watch(
           class="flex justify-end gap-2 pt-2 border-t border-gray-100 dark:border-zinc-800"
         >
           <el-button class="rounded-lg px-4" @click="dialogVisible = false">
-取消
-</el-button>
+            取消
+          </el-button>
           <el-button
             type="primary"
             class="rounded-lg px-5 shadow-sm"
             @click="confirmSelect"
-            >
-确定
-</el-button>
+          >
+            确定
+          </el-button>
         </div>
       </template>
     </el-dialog>

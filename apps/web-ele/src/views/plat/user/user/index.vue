@@ -3,20 +3,23 @@ import type { Dept } from '#/api/system/dept';
 import type { User, UserPageParams } from '#/api/system/user';
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
+import { computed, onMounted, reactive, ref } from 'vue';
+
 import { Page } from '@vben/common-ui';
 
 import { Pane, Splitpanes } from 'splitpanes';
 
 import { getPlatDeptListApi } from '#/api/system/dept';
 import { deletePlatUserApi, getPlatUserPageApi } from '#/api/system/user';
-import { defaultUserColumns, USER_STORAGE_KEY } from '#/constants/tableColumns';
-import { ModuleCodeMap } from "#/hooks/useExport";
-const { member_sex, member_status } = useDicts(['member_sex', 'member_status']);
 import { PERMISSIONS } from '#/constants/auth';
+import { defaultUserColumns, USER_STORAGE_KEY } from '#/constants/tableColumns';
+import { ModuleCodeMap } from '#/hooks/useExport';
 
 import UserModal from './UserModal.vue';
 
 import 'splitpanes/dist/splitpanes.css';
+
+const { member_sex, member_status } = useDicts(['member_sex', 'member_status']);
 
 // 表格列配置
 const columnConfig = ref<TableColumnConfig[]>([...defaultUserColumns]);
@@ -150,37 +153,73 @@ onMounted(() => {
     <Splitpanes class="default-theme">
       <Pane size="15">
         <ViewTree
-:api="getPlatDeptListApi" tip="输入部门名称检索" node-key="deptId" label-key="deptName"
+          :api="getPlatDeptListApi"
+          tip="输入部门名称检索"
+          node-key="deptId"
+          label-key="deptName"
           @node-click="handleDeptNodeClick"
-/>
+        />
       </Pane>
 
       <Pane size="85">
         <BaseTableLayout
-v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="loading"
-          :total="total" @search="loadData" @reset="resetQuery"
->
+          v-model:query-params="queryParams"
+          v-model:more-params="moreParams"
+          :loading="loading"
+          :total="total"
+          @search="loadData"
+          @reset="resetQuery"
+        >
           <template #search-basic>
             <el-form-item>
               <el-input
-v-model="queryParams.nickName" placeholder="请输入" clearable style="width: 200px"
+                v-model="queryParams.nickName"
+                placeholder="请输入"
+                clearable
+                style="width: 200px"
                 @keyup.enter="handleQuery"
->
-                <template #prefix><span class="text-sm text-gray-400 mr-0.5">昵称:</span></template>
+              >
+                <template #prefix>
+                  <span class="text-sm text-gray-400 mr-0.5">昵称:</span>
+                </template>
               </el-input>
             </el-form-item>
 
             <el-form-item>
-              <el-select v-model="queryParams.sex" clearable style="width: 200px" placeholder="请选择">
-                <template #prefix><span class="text-sm text-gray-400 mr-0.5">性别:</span></template>
-                <el-option v-for="item in member_sex" :key="item.value" :label="item.label" :value="item.value" />
+              <el-select
+                v-model="queryParams.sex"
+                clearable
+                style="width: 200px"
+                placeholder="请选择"
+              >
+                <template #prefix>
+                  <span class="text-sm text-gray-400 mr-0.5">性别:</span>
+                </template>
+                <el-option
+                  v-for="item in member_sex"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
               </el-select>
             </el-form-item>
 
             <el-form-item>
-              <el-select v-model="queryParams.status" clearable style="width: 200px" placeholder="请选择">
-                <template #prefix><span class="text-sm text-gray-400 mr-0.5">状态:</span></template>
-                <el-option v-for="item in member_status" :key="item.value" :label="item.label" :value="item.value" />
+              <el-select
+                v-model="queryParams.status"
+                clearable
+                style="width: 200px"
+                placeholder="请选择"
+              >
+                <template #prefix>
+                  <span class="text-sm text-gray-400 mr-0.5">状态:</span>
+                </template>
+                <el-option
+                  v-for="item in member_status"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
               </el-select>
             </el-form-item>
           </template>
@@ -188,26 +227,41 @@ v-model="queryParams.nickName" placeholder="请输入" clearable style="width: 2
           <template #search-advanced>
             <el-form-item>
               <el-input
-v-model="queryParams.email" placeholder="请输入" clearable style="width: 200px"
+                v-model="queryParams.email"
+                placeholder="请输入"
+                clearable
+                style="width: 200px"
                 @keyup.enter="handleQuery"
->
-                <template #prefix><span class="text-sm text-gray-400 mr-0.5">邮箱:</span></template>
+              >
+                <template #prefix>
+                  <span class="text-sm text-gray-400 mr-0.5">邮箱:</span>
+                </template>
               </el-input>
             </el-form-item>
           </template>
 
           <template #toolbar-left>
             <el-button
-type="primary" icon="Plus" @click="handleAdd"
+              type="primary"
+              icon="Plus"
+              @click="handleAdd"
               v-access:code="[PERMISSIONS.PLAT.USER_GROUP.USER.ADD]"
->
+            >
               新增用户
             </el-button>
-            <ExportButton :module-code="ModuleCodeMap.USER" :fields="visibleColumns" :find-cond="queryParams" />
+            <ExportButton
+              :module-code="ModuleCodeMap.USER"
+              :fields="visibleColumns"
+              :find-cond="queryParams"
+            />
             <el-button
-type="danger" plain icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete()"
+              type="danger"
+              plain
+              icon="Delete"
+              :disabled="selectedIds.length === 0"
+              @click="handleDelete()"
               v-access:code="[PERMISSIONS.PLAT.USER_GROUP.USER.DEL]"
->
+            >
               批量删除
             </el-button>
 
@@ -221,25 +275,38 @@ type="danger" plain icon="Delete" :disabled="selectedIds.length === 0" @click="h
 
           <template #toolbar-right>
             <ColumnSelector
-:storage-key="USER_STORAGE_KEY" :default-columns="defaultUserColumns"
+              :storage-key="USER_STORAGE_KEY"
+              :default-columns="defaultUserColumns"
               @update:columns="handleColumnsUpdate"
-/>
+            />
           </template>
 
           <template #table>
             <el-table
-:data="tableData" border stripe :cell-style="{ padding: '6px 0' }"
+              :data="tableData"
+              border
+              stripe
+              :cell-style="{ padding: '6px 0' }"
               @selection-change="handleSelectionChange"
->
+            >
               <el-table-column type="selection" width="50" align="center" />
               <el-table-column
-v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
-                :width="col.width" :min-width="col.minWidth" :align="col.align"
+                v-for="col in visibleColumns"
+                :key="col.key"
+                :prop="col.key"
+                :label="col.label"
+                :width="col.width"
+                :min-width="col.minWidth"
+                :align="col.align"
                 :show-overflow-tooltip="col.showOverflowTooltip"
->
+              >
                 <template #default="{ row }">
                   <template v-if="col.key === 'avatar'">
-                    <el-avatar :size="26" :src="row.avatar" class="align-middle shadow-sm" />
+                    <el-avatar
+                      :size="26"
+                      :src="row.avatar"
+                      class="align-middle shadow-sm"
+                    />
                   </template>
                   <template v-else-if="col.key === 'sex'">
                     <DictTag :options="member_sex" :value="row.sex" />
@@ -248,7 +315,12 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
                     <DictTag :options="member_status" :value="row.status" />
                   </template>
                   <template v-else-if="col.key === 'superAdminFlag'">
-                    <el-tag :type="row.superAdminFlag === 1 ? 'danger' : 'info'" size="small" effect="light" round>
+                    <el-tag
+                      :type="row.superAdminFlag === 1 ? 'danger' : 'info'"
+                      size="small"
+                      effect="light"
+                      round
+                    >
                       {{ row.superAdminFlag === 1 ? '是' : '否' }}
                     </el-tag>
                   </template>
@@ -256,19 +328,28 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
                 </template>
               </el-table-column>
 
-              <el-table-column label="操作" width="150" fixed="right" align="center">
+              <el-table-column
+                label="操作"
+                width="150"
+                fixed="right"
+                align="center"
+              >
                 <template #default="{ row }">
                   <div class="action-buttons">
                     <el-button
-size="small" type="primary" @click="handleEdit(row)"
+                      size="small"
+                      type="primary"
+                      @click="handleEdit(row)"
                       v-access:code="[PERMISSIONS.PLAT.USER_GROUP.USER.EDIT]"
->
+                    >
                       修改
                     </el-button>
                     <el-button
-size="small" type="danger" @click="handleDelete(row)"
+                      size="small"
+                      type="danger"
+                      @click="handleDelete(row)"
                       v-access:code="[PERMISSIONS.PLAT.USER_GROUP.USER.DEL]"
->
+                    >
                       删除
                     </el-button>
                   </div>

@@ -25,13 +25,21 @@ const columns = ref<ExtendedColumnConfig[]>([]);
 // 按 [左固定 -> 普通列 -> 右固定] 排序，保证表格和配置列表顺序一致
 function sortColumns(cols: ExtendedColumnConfig[]) {
   const defaultIndexMap = new Map(
-    props.defaultColumns.map((col, index) => [col.key, index])
+    props.defaultColumns.map((col, index) => [col.key, index]),
   );
 
-  const leftList = cols.filter(c => c.fixed === 'left' || c.pinned === 'left');
-  const rightList = cols.filter(c => c.fixed === 'right' || c.pinned === 'right');
+  const leftList = cols.filter(
+    (c) => c.fixed === 'left' || c.pinned === 'left',
+  );
+  const rightList = cols.filter(
+    (c) => c.fixed === 'right' || c.pinned === 'right',
+  );
   const normalList = cols.filter(
-    c => !c.fixed && !c.pinned && c.fixed !== 'left' && c.fixed !== 'right'
+    (c) =>
+      c.fixed !== 'left' &&
+      c.fixed !== 'right' &&
+      c.pinned !== 'left' &&
+      c.pinned !== 'right',
   );
 
   // 普通列保持默认定义的顺序
@@ -52,7 +60,9 @@ function loadFromLocalStorage() {
       const savedConfig = JSON.parse(saved);
       if (Array.isArray(savedConfig) && savedConfig.length > 0) {
         const merged = props.defaultColumns.map((defaultCol) => {
-          const savedCol = savedConfig.find((c: any) => c.key === defaultCol.key);
+          const savedCol = savedConfig.find(
+            (c: any) => c.key === defaultCol.key,
+          );
           if (savedCol) {
             // 兼容历史数据（旧版 pinned 为 boolean）
             let isPinned: PinDirection = false;
@@ -79,10 +89,10 @@ function loadFromLocalStorage() {
     }
     // 没有缓存时使用默认并排序
     columns.value = sortColumns(
-      props.defaultColumns.map(col => ({
+      props.defaultColumns.map((col) => ({
         ...col,
         pinned: (col.fixed as PinDirection) || false,
-      }))
+      })),
     );
   } catch (error) {
     console.error('加载列配置失败:', error);
@@ -97,7 +107,7 @@ function saveToLocalStorage() {
 
 // 隐藏的字段数量
 const hiddenCount = computed(() => {
-  return columns.value.filter(col => !col.fixed && !col.visible).length;
+  return columns.value.filter((col) => !col.fixed && !col.visible).length;
 });
 
 // 全选
@@ -119,11 +129,11 @@ function handleDeselectAll() {
 // 重置默认
 function handleReset() {
   columns.value = sortColumns(
-    props.defaultColumns.map(col => ({
+    props.defaultColumns.map((col) => ({
       ...col,
       pinned: false,
       fixed: col.fixed || false,
-    }))
+    })),
   );
   notifyChange();
   ElMessage.success('已重置为默认显示字段');
@@ -168,7 +178,7 @@ watch(
   () => {
     loadFromLocalStorage();
     emit('update:columns', [...columns.value]);
-  }
+  },
 );
 
 init();
@@ -176,13 +186,27 @@ init();
 
 <template>
   <el-popover
-placement="bottom-end" :width="460" trigger="click" :hide-after="0"
+    placement="bottom-end"
+    :width="460"
+    trigger="click"
+    :hide-after="0"
     popper-class="!p-0 !rounded-lg overflow-hidden border-none shadow-xl"
->
+  >
     <template #reference>
-      <el-button link class="!p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors rounded-md group">
-        <el-badge :value="hiddenCount" :hidden="hiddenCount === 0" type="warning" :offset="[2, 2]">
-          <el-icon :size="20" class="text-gray-500 group-hover:text-primary transition-colors">
+      <el-button
+        link
+        class="!p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors rounded-md group"
+      >
+        <el-badge
+          :value="hiddenCount"
+          :hidden="hiddenCount === 0"
+          type="warning"
+          :offset="[2, 2]"
+        >
+          <el-icon
+            :size="20"
+            class="text-gray-500 group-hover:text-primary transition-colors"
+          >
             <Setting />
           </el-icon>
         </el-badge>
@@ -194,17 +218,25 @@ placement="bottom-end" :width="460" trigger="click" :hide-after="0"
       <!-- 头部：标题与重置 -->
       <div
         class="flex items-center justify-between px-4 py-3 bg-gray-50/50 dark:bg-zinc-800/50 border-b border-gray-100 dark:border-zinc-700"
->
+      >
         <div class="flex items-center gap-2">
-          <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">表格列配置</span>
+          <span class="text-sm font-semibold text-gray-700 dark:text-gray-200"
+            >表格列配置</span
+          >
           <span
-v-if="hiddenCount > 0"
+            v-if="hiddenCount > 0"
             class="text-xs text-orange-500 bg-orange-50 dark:bg-orange-900/20 px-1.5 py-0.5 rounded"
->
+          >
             已隐藏 {{ hiddenCount }} 项
           </span>
         </div>
-        <el-button link type="primary" size="small" class="!text-xs font-normal" @click="handleReset">
+        <el-button
+          link
+          type="primary"
+          size="small"
+          class="!text-xs font-normal"
+          @click="handleReset"
+        >
           恢复默认
         </el-button>
       </div>
@@ -214,21 +246,30 @@ v-if="hiddenCount > 0"
         <el-scrollbar max-height="380px">
           <div class="grid grid-cols-2 gap-x-3 gap-y-1">
             <div
-v-for="col in columns" :key="col.key"
+              v-for="col in columns"
+              :key="col.key"
               class="flex items-center justify-between px-2 py-1.5 rounded hover:bg-gray-50 dark:hover:bg-zinc-800 group transition-all border border-transparent"
-              :class="{ '!bg-blue-50/40 dark:!bg-blue-950/20 !border-blue-100 dark:!border-blue-900/30': col.pinned }"
->
+              :class="{
+                '!bg-blue-50/40 dark:!bg-blue-950/20 !border-blue-100 dark:!border-blue-900/30':
+                  col.pinned,
+              }"
+            >
               <!-- 复选框及名称 -->
               <el-checkbox
-v-model="col.visible" :disabled="col.fixed && !col.pinned" @change="handleChange"
+                v-model="col.visible"
+                :disabled="col.fixed && !col.pinned"
+                @change="handleChange"
                 class="!mr-0 flex-1 min-w-0"
->
+              >
                 <span
-class="text-sm truncate block max-w-[100px]" :class="[
-                  col.visible ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400 italic',
-                  col.pinned || col.fixed ? 'font-semibold text-primary' : ''
-                ]"
->
+                  class="text-sm truncate block max-w-[100px]"
+                  :class="[
+                    col.visible
+                      ? 'text-gray-700 dark:text-gray-300'
+                      : 'text-gray-400 italic',
+                    col.pinned || col.fixed ? 'font-semibold text-primary' : '',
+                  ]"
+                >
                   {{ col.label }}
                 </span>
               </el-checkbox>
@@ -237,9 +278,12 @@ class="text-sm truncate block max-w-[100px]" :class="[
               <div class="flex items-center gap-0.5 ml-1">
                 <!-- 系统默认强制固定的 Tag -->
                 <el-tag
-v-if="col.fixed && !col.pinned" size="small" type="info" effect="plain"
+                  v-if="col.fixed && !col.pinned"
+                  size="small"
+                  type="info"
+                  effect="plain"
                   class="!scale-75 !px-1 opacity-60"
->
+                >
                   固定
                 </el-tag>
 
@@ -247,26 +291,46 @@ v-if="col.fixed && !col.pinned" size="small" type="info" effect="plain"
                 <template v-else>
                   <!-- 固定到左侧 -->
                   <button
-type="button" class="p-1 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors"
-                    :class="col.pinned === 'left' ? 'text-primary font-bold' : 'text-gray-300 hover:text-gray-500'"
-                    title="固定在最左侧" @click.stop="setPin(col, 'left')"
->
+                    type="button"
+                    class="p-1 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors"
+                    :class="
+                      col.pinned === 'left'
+                        ? 'text-primary font-bold'
+                        : 'text-gray-300 hover:text-gray-500'
+                    "
+                    title="固定在最左侧"
+                    @click.stop="setPin(col, 'left')"
+                  >
                     <LucidePin
-      class="size-4  transition-transform"
-      :class="col.pinned === 'left' ? 'text-primary' : 'text-gray-300 hover:text-gray-500'"
-    />
+                      class="size-4 transition-transform"
+                      :class="
+                        col.pinned === 'left'
+                          ? 'text-primary'
+                          : 'text-gray-300 hover:text-gray-500'
+                      "
+                    />
                   </button>
 
                   <!-- 固定到右侧 -->
                   <button
-type="button" class="p-1 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors"
-                    :class="col.pinned === 'right' ? 'text-primary font-bold' : 'text-gray-300 hover:text-gray-500'"
-                    title="固定在最右侧" @click.stop="setPin(col, 'right')"
->
+                    type="button"
+                    class="p-1 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors"
+                    :class="
+                      col.pinned === 'right'
+                        ? 'text-primary font-bold'
+                        : 'text-gray-300 hover:text-gray-500'
+                    "
+                    title="固定在最右侧"
+                    @click.stop="setPin(col, 'right')"
+                  >
                     <LucidePin
-      class="size-4 -rotate-90 transition-transform"
-      :class="col.pinned === 'right' ? 'text-primary' : 'text-gray-300 hover:text-gray-500'"
-    />
+                      class="size-4 -rotate-90 transition-transform"
+                      :class="
+                        col.pinned === 'right'
+                          ? 'text-primary'
+                          : 'text-gray-300 hover:text-gray-500'
+                      "
+                    />
                   </button>
                 </template>
               </div>
@@ -278,7 +342,7 @@ type="button" class="p-1 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 transi
       <!-- 底部：快捷操作 -->
       <div
         class="grid grid-cols-2 gap-3 p-3 border-t border-gray-100 dark:border-zinc-700 bg-gray-50/30 dark:bg-zinc-800/30"
->
+      >
         <el-button size="small" class="!rounded-md" @click="handleSelectAll">
           全选
         </el-button>

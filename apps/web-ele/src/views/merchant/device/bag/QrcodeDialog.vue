@@ -20,9 +20,20 @@ defineExpose({ open });
 </script>
 
 <template>
-  <el-dialog v-model="visible" title="包袋二维码" width="400px" append-to-body center>
+  <el-dialog
+    v-model="visible"
+    title="包袋二维码"
+    width="400px"
+    append-to-body
+    center
+  >
     <div class="flex justify-center">
-      <img v-if="qrcodeUrl" :src="qrcodeUrl" alt="二维码" style="width: 200px; height: 200px" />
+      <img
+        v-if="qrcodeUrl"
+        :src="qrcodeUrl"
+        alt="二维码"
+        style="width: 200px; height: 200px"
+      />
       <el-empty v-else description="暂无二维码" />
     </div>
     <template #footer>

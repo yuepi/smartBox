@@ -45,14 +45,18 @@ export interface ApiResponse<T> {
  * 商户分页查询角色
  */
 export function getMerchantRolePageApi(params: RolePageParams) {
-  return requestClient.get<ApiResponse<RolePageResult>>('/merchant/role/page', { params });
+  return requestClient.get<ApiResponse<RolePageResult>>('/merchant/role/page', {
+    params,
+  });
 }
 
 /**
  * 列表查询角色
  */
 export function getMerchantRoleListApi(params?: Partial<RolePageParams>) {
-  return requestClient.get<ApiResponse<Role[]>>('/merchant/role/list', { params });
+  return requestClient.get<ApiResponse<Role[]>>('/merchant/role/list', {
+    params,
+  });
 }
 
 /**
@@ -82,16 +86,18 @@ export function editMerchantRoleApi(data: Partial<Role>) {
  * 逻辑删除角色
  */
 export function deleteMerchantRoleApi(roleId: number) {
-  return requestClient.post<ApiResponse<boolean>>('/merchant/role/delete', { roleId });
+  return requestClient.post<ApiResponse<boolean>>('/merchant/role/delete', {
+    roleId,
+  });
 }
-
-
 
 /**
  * 平台分页查询角色
  */
 export function getPlatRolePageApi(params: RolePageParams) {
-  return requestClient.get<ApiResponse<RolePageResult>>('/plat/role/page', { params });
+  return requestClient.get<ApiResponse<RolePageResult>>('/plat/role/page', {
+    params,
+  });
 }
 
 /**
@@ -128,5 +134,7 @@ export function editPlatRoleApi(data: Partial<Role>) {
  * 逻辑删除角色
  */
 export function deletePlatRoleApi(roleId: number) {
-  return requestClient.post<ApiResponse<boolean>>('/plat/role/delete', { roleId });
+  return requestClient.post<ApiResponse<boolean>>('/plat/role/delete', {
+    roleId,
+  });
 }

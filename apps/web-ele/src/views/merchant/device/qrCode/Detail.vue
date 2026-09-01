@@ -6,7 +6,7 @@ import { getQrcodeDetailApi } from '#/api/device/qrCode';
 const { qrcode_type, qrcode_bind_status, qrcode_status } = useDicts([
   'qrcode_type',
   'qrcode_bind_status',
-  'qrcode_status'
+  'qrcode_status',
 ]);
 
 const visible = ref(false);

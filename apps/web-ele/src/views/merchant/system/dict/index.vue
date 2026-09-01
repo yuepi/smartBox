@@ -1,12 +1,25 @@
 <script lang="ts" setup>
-
 import type { Dict, DictPageParams } from '#/api/system/dict/dict';
 import type { DictData, DictDataPageParams } from '#/api/system/dict/dictData';
 
+import { onMounted, reactive, ref } from 'vue';
+
 import { Page } from '@vben/common-ui';
 
-import { addDictApi, deleteDictApi, editDictApi, getDictDetailApi, getDictPageApi } from '#/api/system/dict/dict';
-import { addDictDataApi, deleteDictDataApi, editDictDataApi, getDictDataDetailApi, getDictDataPageApi } from '#/api/system/dict/dictData';
+import {
+  addDictApi,
+  deleteDictApi,
+  editDictApi,
+  getDictDetailApi,
+  getDictPageApi,
+} from '#/api/system/dict/dict';
+import {
+  addDictDataApi,
+  deleteDictDataApi,
+  editDictDataApi,
+  getDictDataDetailApi,
+  getDictDataPageApi,
+} from '#/api/system/dict/dictData';
 
 // ==================== 字典主表 ====================
 const loading = ref(false);
@@ -131,7 +144,6 @@ async function handleDictSubmit() {
     ElMessage.success(dictFormData.value.dictId ? '修改成功' : '新增成功');
     dictFormVisible.value = false;
     handleQuery();
-
   } catch {
     ElMessage.error('操作失败');
   } finally {
@@ -157,7 +169,7 @@ async function handleDictDelete(row?: Dict) {
     await ElMessageBox.confirm(
       `确定要删除选中的 ${ids.length} 条字典吗？删除字典会同时删除其下的所有字典项。`,
       '提示',
-      { type: 'warning' }
+      { type: 'warning' },
     );
 
     for (const id of ids) {
@@ -261,10 +273,14 @@ async function handleDataSubmit() {
 
   dataFormSubmitting.value = true;
   try {
-    const api = dataFormData.value.dictDataId ? editDictDataApi : addDictDataApi;
+    const api = dataFormData.value.dictDataId
+      ? editDictDataApi
+      : addDictDataApi;
     const res = await api(dataFormData.value);
     if (res.code === 200) {
-      ElMessage.success(dataFormData.value.dictDataId ? '修改成功' : '新增成功');
+      ElMessage.success(
+        dataFormData.value.dictDataId ? '修改成功' : '新增成功',
+      );
       dataFormVisible.value = false;
       loadDataData();
     } else {
@@ -292,9 +308,13 @@ async function handleDataDelete(row?: DictData) {
   }
 
   try {
-    await ElMessageBox.confirm(`确定要删除选中的 ${ids.length} 条字典项吗？`, '提示', {
-      type: 'warning',
-    });
+    await ElMessageBox.confirm(
+      `确定要删除选中的 ${ids.length} 条字典项吗？`,
+      '提示',
+      {
+        type: 'warning',
+      },
+    );
 
     for (const id of ids) {
       await deleteDictDataApi(id);
@@ -340,13 +360,22 @@ onMounted(() => {
             <div class="flex justify-between items-center">
               <span>字典列表</span>
               <div>
-                <el-button type="primary" size="small" icon="Plus" @click="handleDictAdd">
+                <el-button
+                  type="primary"
+                  size="small"
+                  icon="Plus"
+                  @click="handleDictAdd"
+                >
                   新增
                 </el-button>
                 <el-button
-type="danger" size="small" plain icon="Delete" :disabled="selectedIds.length === 0"
+                  type="danger"
+                  size="small"
+                  plain
+                  icon="Delete"
+                  :disabled="selectedIds.length === 0"
                   @click="handleDictDelete()"
->
+                >
                   批量删除
                 </el-button>
               </div>
@@ -357,44 +386,98 @@ type="danger" size="small" plain icon="Delete" :disabled="selectedIds.length ===
           <el-form :inline="true" :model="queryParams" class="mb-4">
             <el-form-item label="字典名称">
               <el-input
-v-model="queryParams.dictName" placeholder="请输入" clearable size="small" style="width: 120px"
+                v-model="queryParams.dictName"
+                placeholder="请输入"
+                clearable
+                size="small"
+                style="width: 120px"
                 @keyup.enter="handleQuery"
-/>
+              />
             </el-form-item>
             <el-form-item label="字典编码">
               <el-input
-v-model="queryParams.dictCode" placeholder="请输入" clearable size="small" style="width: 120px"
+                v-model="queryParams.dictCode"
+                placeholder="请输入"
+                clearable
+                size="small"
+                style="width: 120px"
                 @keyup.enter="handleQuery"
-/>
+              />
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" size="small" icon="Search" @click="handleQuery">
+              <el-button
+                type="primary"
+                size="small"
+                icon="Search"
+                @click="handleQuery"
+              >
                 查询
               </el-button>
-              <el-button size="small" icon="Refresh" @click="resetQuery">重置</el-button>
+              <el-button size="small" icon="Refresh" @click="resetQuery">
+                重置
+              </el-button>
             </el-form-item>
           </el-form>
 
           <el-table
-v-loading="loading" :data="tableData" border size="small" height="calc(100vh - 340px)"
-            highlight-current-row @selection-change="handleDictSelectionChange" @row-click="handleDictRowClick"
->
+            v-loading="loading"
+            :data="tableData"
+            border
+            size="small"
+            height="calc(100vh - 340px)"
+            highlight-current-row
+            @selection-change="handleDictSelectionChange"
+            @row-click="handleDictRowClick"
+          >
             <el-table-column type="selection" width="40" align="center" />
-            <el-table-column prop="dictName" label="字典名称" min-width="120" show-overflow-tooltip />
-            <el-table-column prop="dictCode" label="字典编码" min-width="120" show-overflow-tooltip />
-            <el-table-column prop="status" label="状态" width="80" align="center">
+            <el-table-column
+              prop="dictName"
+              label="字典名称"
+              min-width="120"
+              show-overflow-tooltip
+            />
+            <el-table-column
+              prop="dictCode"
+              label="字典编码"
+              min-width="120"
+              show-overflow-tooltip
+            />
+            <el-table-column
+              prop="status"
+              label="状态"
+              width="80"
+              align="center"
+            >
               <template #default="{ row }">
-                <el-tag :type="row.status === 0 ? 'success' : 'danger'" size="small">
+                <el-tag
+                  :type="row.status === 0 ? 'success' : 'danger'"
+                  size="small"
+                >
                   {{ getStatusText(row.status) }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column label="操作" width="150" align="center" fixed="right">
+            <el-table-column
+              label="操作"
+              width="150"
+              align="center"
+              fixed="right"
+            >
               <template #default="{ row }">
-                <el-button link type="primary" icon="Edit" @click.stop="handleDictEdit(row)">
+                <el-button
+                  link
+                  type="primary"
+                  icon="Edit"
+                  @click.stop="handleDictEdit(row)"
+                >
                   编辑
                 </el-button>
-                <el-button link type="danger" icon="Delete" @click.stop="handleDictDelete(row)">
+                <el-button
+                  link
+                  type="danger"
+                  icon="Delete"
+                  @click.stop="handleDictDelete(row)"
+                >
                   删除
                 </el-button>
               </template>
@@ -404,10 +487,15 @@ v-loading="loading" :data="tableData" border size="small" height="calc(100vh - 3
           <!-- 字典分页 -->
           <div class="flex justify-end mt-4">
             <el-pagination
-v-model:current-page="queryParams.pageNo" v-model:page-size="queryParams.pageSize"
-              :total="total" :page-sizes="[10, 20, 50]" layout="total, sizes, prev, pager, next" size="small"
-              @size-change="loadData" @current-change="loadData"
-/>
+              v-model:current-page="queryParams.pageNo"
+              v-model:page-size="queryParams.pageSize"
+              :total="total"
+              :page-sizes="[10, 20, 50]"
+              layout="total, sizes, prev, pager, next"
+              size="small"
+              @size-change="loadData"
+              @current-change="loadData"
+            />
           </div>
         </el-card>
       </el-col>
@@ -424,13 +512,23 @@ v-model:current-page="queryParams.pageNo" v-model:page-size="queryParams.pageSiz
                 </span>
               </div>
               <div>
-                <el-button type="primary" size="small" icon="Plus" :disabled="!currentDict" @click="handleDataAdd">
+                <el-button
+                  type="primary"
+                  size="small"
+                  icon="Plus"
+                  :disabled="!currentDict"
+                  @click="handleDataAdd"
+                >
                   新增
                 </el-button>
                 <el-button
-type="danger" size="small" plain icon="Delete" :disabled="dataSelectedIds.length === 0"
+                  type="danger"
+                  size="small"
+                  plain
+                  icon="Delete"
+                  :disabled="dataSelectedIds.length === 0"
                   @click="handleDataDelete()"
->
+                >
                   批量删除
                 </el-button>
               </div>
@@ -441,49 +539,118 @@ type="danger" size="small" plain icon="Delete" :disabled="dataSelectedIds.length
           <el-form :inline="true" :model="dataQueryParams" class="mb-4">
             <el-form-item label="标签">
               <el-input
-v-model="dataQueryParams.itemLabel" placeholder="请输入" clearable size="small"
-                style="width: 120px" @keyup.enter="handleDataQuery"
-/>
+                v-model="dataQueryParams.itemLabel"
+                placeholder="请输入"
+                clearable
+                size="small"
+                style="width: 120px"
+                @keyup.enter="handleDataQuery"
+              />
             </el-form-item>
             <el-form-item label="状态">
-              <el-select v-model="dataQueryParams.status" placeholder="全部" clearable size="small" style="width: 90px">
-                <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
+              <el-select
+                v-model="dataQueryParams.status"
+                placeholder="全部"
+                clearable
+                size="small"
+                style="width: 90px"
+              >
+                <el-option
+                  v-for="item in statusOptions"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
               </el-select>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" size="small" icon="Search" @click="handleDataQuery">
+              <el-button
+                type="primary"
+                size="small"
+                icon="Search"
+                @click="handleDataQuery"
+              >
                 查询
               </el-button>
-              <el-button size="small" icon="Refresh" @click="resetDataQuery">重置</el-button>
+              <el-button size="small" icon="Refresh" @click="resetDataQuery">
+                重置
+              </el-button>
             </el-form-item>
           </el-form>
 
           <el-table
-v-loading="dataLoading" :data="dataTableData" border size="small" height="calc(100vh - 340px)"
+            v-loading="dataLoading"
+            :data="dataTableData"
+            border
+            size="small"
+            height="calc(100vh - 340px)"
             @selection-change="handleDataSelectionChange"
->
+          >
             <el-table-column type="selection" width="40" align="center" />
-            <el-table-column prop="itemLabel" label="显示标签" min-width="120" show-overflow-tooltip />
-            <el-table-column prop="itemValue" label="字典值" min-width="100" align="center" />
-            <el-table-column prop="sort" label="排序" width="70" align="center" />
-            <el-table-column prop="defaultFlag" label="默认" width="70" align="center">
+            <el-table-column
+              prop="itemLabel"
+              label="显示标签"
+              min-width="120"
+              show-overflow-tooltip
+            />
+            <el-table-column
+              prop="itemValue"
+              label="字典值"
+              min-width="100"
+              align="center"
+            />
+            <el-table-column
+              prop="sort"
+              label="排序"
+              width="70"
+              align="center"
+            />
+            <el-table-column
+              prop="defaultFlag"
+              label="默认"
+              width="70"
+              align="center"
+            >
               <template #default="{ row }">
                 {{ getDefaultFlagText(row.defaultFlag) }}
               </template>
             </el-table-column>
-            <el-table-column prop="status" label="状态" width="70" align="center">
+            <el-table-column
+              prop="status"
+              label="状态"
+              width="70"
+              align="center"
+            >
               <template #default="{ row }">
-                <el-tag :type="row.status === 0 ? 'success' : 'danger'" size="small">
+                <el-tag
+                  :type="row.status === 0 ? 'success' : 'danger'"
+                  size="small"
+                >
                   {{ getStatusText(row.status) }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column label="操作" width="150" align="center" fixed="right">
+            <el-table-column
+              label="操作"
+              width="150"
+              align="center"
+              fixed="right"
+            >
               <template #default="{ row }">
-                <el-button link type="primary" icon="Edit" @click="handleDataEdit(row)">
+                <el-button
+                  link
+                  type="primary"
+                  icon="Edit"
+                  @click="handleDataEdit(row)"
+                >
                   编辑
                 </el-button>
-                <el-button link type="danger" icon="Delete" @click="handleDataDelete(row)">
+                <el-button
+                  link
+                  type="danger"
+                  icon="Delete"
+                  @click="handleDataDelete(row)"
+                >
                   删除
                 </el-button>
               </template>
@@ -493,23 +660,39 @@ v-loading="dataLoading" :data="dataTableData" border size="small" height="calc(1
           <!-- 字典项分页 -->
           <div class="flex justify-end mt-4">
             <el-pagination
-v-model:current-page="dataQueryParams.pageNo" v-model:page-size="dataQueryParams.pageSize"
-              :total="dataTotal" :page-sizes="[10, 20, 50]" layout="total, sizes, prev, pager, next" size="small"
-              @size-change="loadDataData" @current-change="loadDataData"
-/>
+              v-model:current-page="dataQueryParams.pageNo"
+              v-model:page-size="dataQueryParams.pageSize"
+              :total="dataTotal"
+              :page-sizes="[10, 20, 50]"
+              layout="total, sizes, prev, pager, next"
+              size="small"
+              @size-change="loadDataData"
+              @current-change="loadDataData"
+            />
           </div>
         </el-card>
       </el-col>
     </el-row>
 
     <!-- 字典主表新增/编辑弹窗 -->
-    <el-dialog v-model="dictFormVisible" :title="dictFormTitle" width="500px" append-to-body>
+    <el-dialog
+      v-model="dictFormVisible"
+      :title="dictFormTitle"
+      width="500px"
+      append-to-body
+    >
       <el-form :model="dictFormData" label-width="80px">
         <el-form-item label="字典名称" required>
-          <el-input v-model="dictFormData.dictName" placeholder="请输入字典名称" />
+          <el-input
+            v-model="dictFormData.dictName"
+            placeholder="请输入字典名称"
+          />
         </el-form-item>
         <el-form-item label="字典编码" required>
-          <el-input v-model="dictFormData.dictCode" placeholder="请输入字典编码，如: sys_user_sex" />
+          <el-input
+            v-model="dictFormData.dictCode"
+            placeholder="请输入字典编码，如: sys_user_sex"
+          />
         </el-form-item>
         <el-form-item label="状态">
           <el-radio-group v-model="dictFormData.status">
@@ -518,37 +701,73 @@ v-model:current-page="dataQueryParams.pageNo" v-model:page-size="dataQueryParams
           </el-radio-group>
         </el-form-item>
         <el-form-item label="备注">
-          <el-input v-model="dictFormData.remark" type="textarea" :rows="3" placeholder="请输入备注" />
+          <el-input
+            v-model="dictFormData.remark"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入备注"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dictFormVisible = false">取消</el-button>
-        <el-button type="primary" :loading="dictFormSubmitting" @click="handleDictSubmit">
+        <el-button
+          type="primary"
+          :loading="dictFormSubmitting"
+          @click="handleDictSubmit"
+        >
           确定
         </el-button>
       </template>
     </el-dialog>
 
     <!-- 字典明细表新增/编辑弹窗 -->
-    <el-dialog v-model="dataFormVisible" :title="dataFormTitle" width="500px" append-to-body>
+    <el-dialog
+      v-model="dataFormVisible"
+      :title="dataFormTitle"
+      width="500px"
+      append-to-body
+    >
       <el-form :model="dataFormData" label-width="80px">
         <el-form-item label="显示标签" required>
-          <el-input v-model="dataFormData.itemLabel" placeholder="请输入显示标签" />
+          <el-input
+            v-model="dataFormData.itemLabel"
+            placeholder="请输入显示标签"
+          />
         </el-form-item>
         <el-form-item label="字典值" required>
-          <el-input-number v-model="dataFormData.itemValue" :min="0" placeholder="请输入字典值" style="width: 100%" />
+          <el-input-number
+            v-model="dataFormData.itemValue"
+            :min="0"
+            placeholder="请输入字典值"
+            style="width: 100%"
+          />
         </el-form-item>
         <el-form-item label="排序">
           <el-input-number v-model="dataFormData.sort" :min="0" :max="999" />
         </el-form-item>
         <el-form-item label="样式">
-          <el-select v-model="dataFormData.listClass" placeholder="请选择" clearable style="width: 100%">
-            <el-option v-for="item in listClassOptions" :key="item.value" :label="item.label" :value="item.value" />
+          <el-select
+            v-model="dataFormData.listClass"
+            placeholder="请选择"
+            clearable
+            style="width: 100%"
+          >
+            <el-option
+              v-for="item in listClassOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="默认">
           <el-radio-group v-model="dataFormData.defaultFlag">
-            <el-radio v-for="item in defaultFlagOptions" :key="item.value" :value="item.value">
+            <el-radio
+              v-for="item in defaultFlagOptions"
+              :key="item.value"
+              :value="item.value"
+            >
               {{ item.label }}
             </el-radio>
           </el-radio-group>
@@ -560,12 +779,21 @@ v-model:current-page="dataQueryParams.pageNo" v-model:page-size="dataQueryParams
           </el-radio-group>
         </el-form-item>
         <el-form-item label="备注">
-          <el-input v-model="dataFormData.remark" type="textarea" :rows="2" placeholder="请输入备注" />
+          <el-input
+            v-model="dataFormData.remark"
+            type="textarea"
+            :rows="2"
+            placeholder="请输入备注"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dataFormVisible = false">取消</el-button>
-        <el-button type="primary" :loading="dataFormSubmitting" @click="handleDataSubmit">
+        <el-button
+          type="primary"
+          :loading="dataFormSubmitting"
+          @click="handleDataSubmit"
+        >
           确定
         </el-button>
       </template>

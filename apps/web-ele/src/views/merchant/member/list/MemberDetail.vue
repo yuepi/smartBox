@@ -22,7 +22,11 @@ function getStatusText(status: number): string {
 }
 
 function getStatusType(status: number): string {
-  const map: Record<number, string> = { 0: 'success', 1: 'danger', 2: 'warning' };
+  const map: Record<number, string> = {
+    0: 'success',
+    1: 'danger',
+    2: 'warning',
+  };
   return map[status] || 'info';
 }
 
@@ -46,10 +50,18 @@ defineExpose({ open });
     <el-tabs v-model="activeTab">
       <el-tab-pane label="基本信息" name="basic">
         <el-descriptions :column="1" border v-if="detailData">
-          <el-descriptions-item label="会员ID">{{ detailData.memberId }}</el-descriptions-item>
-          <el-descriptions-item label="手机号">{{ detailData.mobile }}</el-descriptions-item>
-          <el-descriptions-item label="昵称">{{ detailData.nickname || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="性别">{{ getSexText(detailData.sex) }}</el-descriptions-item>
+          <el-descriptions-item label="会员ID">{{
+            detailData.memberId
+          }}</el-descriptions-item>
+          <el-descriptions-item label="手机号">{{
+            detailData.mobile
+          }}</el-descriptions-item>
+          <el-descriptions-item label="昵称">{{
+            detailData.nickname || '-'
+          }}</el-descriptions-item>
+          <el-descriptions-item label="性别">{{
+            getSexText(detailData.sex)
+          }}</el-descriptions-item>
           <el-descriptions-item label="状态">
             <el-tag :type="getStatusType(detailData.status)" size="small">
               {{ getStatusText(detailData.status) }}
@@ -58,7 +70,10 @@ defineExpose({ open });
         </el-descriptions>
       </el-tab-pane>
       <el-tab-pane label="认证信息" name="auth">
-        <AuthList :member-id="detailData?.memberId" :member-name="detailData?.nickname" />
+        <AuthList
+          :member-id="detailData?.memberId"
+          :member-name="detailData?.nickname"
+        />
       </el-tab-pane>
     </el-tabs>
     <template #footer>

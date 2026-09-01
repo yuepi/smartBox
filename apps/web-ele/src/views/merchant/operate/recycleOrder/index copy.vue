@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { computed, onMounted, reactive, ref, watch } from "vue";
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 
-import { Page } from "@vben/common-ui";
+import { Page } from '@vben/common-ui';
 
 import {
   ArrowDown,
@@ -9,16 +9,16 @@ import {
   Refresh,
   Search,
   View,
-} from "@element-plus/icons-vue";
+} from '@element-plus/icons-vue';
 import {
   ChatDotRound,
   Check,
   ScaleToOriginal,
   Warning,
-} from "@element-plus/icons-vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+} from '@element-plus/icons-vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
-import { type Device, getDeviceListApi } from "#/api/device/device";
+import { type Device, getDeviceListApi } from '#/api/device/device';
 import {
   deleteRecycleOrderApi,
   directCompleteOrderApi,
@@ -28,25 +28,25 @@ import {
   PayStatusMap,
   type RecycleOrder,
   type RecycleOrderPageParams,
-} from "#/api/operation/recycleOrder";
+} from '#/api/operation/recycleOrder';
 import {
   abnormalOrderApi,
   remarkOperateApi,
   weightOperateApi,
-} from "#/api/operation/recycleOrder";
-import { type Dept, getMerchantDeptListApi } from "#/api/system/dept";
-import { useDicts } from "#/hooks/useDict";
-import { getRecentDays } from "#/utils/date";
-const { order_status } = useDicts(["order_status"]);
-import ColumnSelector from "#/components/ColumnSelector/index.vue";
-import DictTag from "#/components/DictTag/index.vue";
-import ExportFieldSelector from "#/components/ExportFieldSelector/index.vue";
+} from '#/api/operation/recycleOrder';
+import { type Dept, getMerchantDeptListApi } from '#/api/system/dept';
+import { useDicts } from '#/hooks/useDict';
+import { getRecentDays } from '#/utils/date';
+const { order_status } = useDicts(['order_status']);
+import ColumnSelector from '#/components/ColumnSelector/index.vue';
+import DictTag from '#/components/DictTag/index.vue';
+import ExportFieldSelector from '#/components/ExportFieldSelector/index.vue';
 import {
   defaultRecycleOrderColumns,
   RECYCLE_ORDER_STORAGE_KEY,
   type TableColumnConfig,
-} from "#/constants/tableColumns";
-import { ModuleCodeMap } from "#/hooks/useExport";
+} from '#/constants/tableColumns';
+import { ModuleCodeMap } from '#/hooks/useExport';
 
 // 表格列配置
 const columnConfig = ref<TableColumnConfig[]>([...defaultRecycleOrderColumns]);
@@ -100,16 +100,16 @@ async function loadImages(orderId: number) {
     imageUrls.value = res?.length
       ? res
       : [
-        "https://fuss10.elemecdn.com/a/3f/3302e58f9a181d2509f3dc0fa68b0jpeg.jpeg",
-        "https://fuss10.elemecdn.com/1/34/19aa98b1fcb2781c4fba33d850549jpeg.jpeg",
-        "https://fuss10.elemecdn.com/0/6f/e35ff375812e6b0020b6b4e8f9583jpeg.jpeg",
-        "https://fuss10.elemecdn.com/9/bb/e27858e973f5d7d3904835f46abbdjpeg.jpeg",
-        "https://fuss10.elemecdn.com/d/e6/c4d93a3805b3ce3f323f7974e6f78jpeg.jpeg",
-        "https://fuss10.elemecdn.com/3/28/bbf893f792f03a54408b3b7a7ebf0jpeg.jpeg",
-        "https://fuss10.elemecdn.com/2/11/6535bcfb26e4c79b48ddde44f4b6fjpeg.jpeg",
-      ];
+          'https://fuss10.elemecdn.com/a/3f/3302e58f9a181d2509f3dc0fa68b0jpeg.jpeg',
+          'https://fuss10.elemecdn.com/1/34/19aa98b1fcb2781c4fba33d850549jpeg.jpeg',
+          'https://fuss10.elemecdn.com/0/6f/e35ff375812e6b0020b6b4e8f9583jpeg.jpeg',
+          'https://fuss10.elemecdn.com/9/bb/e27858e973f5d7d3904835f46abbdjpeg.jpeg',
+          'https://fuss10.elemecdn.com/d/e6/c4d93a3805b3ce3f323f7974e6f78jpeg.jpeg',
+          'https://fuss10.elemecdn.com/3/28/bbf893f792f03a54408b3b7a7ebf0jpeg.jpeg',
+          'https://fuss10.elemecdn.com/2/11/6535bcfb26e4c79b48ddde44f4b6fjpeg.jpeg',
+        ];
   } catch {
-    console.error("获取图片失败");
+    console.error('获取图片失败');
     imageUrls.value = [];
   } finally {
     imageLoading.value = false;
@@ -137,13 +137,13 @@ const weightSubmitting = ref(false);
 const remarkDialogVisible = ref(false);
 const remarkForm = reactive({
   recycleOrderId: 0,
-  remark: "",
+  remark: '',
 });
 const remarkSubmitting = ref(false);
 
 // 支付状态选项
 const payStatusOptions = [
-  { label: "全部", value: undefined },
+  { label: '全部', value: undefined },
   ...Object.entries(PayStatusMap).map(([key, val]) => ({
     label: val.label,
     value: Number(key),
@@ -168,7 +168,7 @@ const queryParams = reactive<RecycleOrderPageParams>({
 });
 
 function formatAmount(amount: number): string {
-  if (amount === undefined || amount === null) return "¥ 0.00";
+  if (amount === undefined || amount === null) return '¥ 0.00';
   return `¥ ${amount.toFixed(2)}`;
 }
 
@@ -195,7 +195,7 @@ async function loadData() {
     total.value = res.total || 0;
   } catch (error) {
     console.error(error);
-    ElMessage.error("加载数据失败");
+    ElMessage.error('加载数据失败');
   } finally {
     loading.value = false;
   }
@@ -208,7 +208,7 @@ async function handleView(row: RecycleOrder) {
     detailData.value = res;
     detailVisible.value = true;
   } catch {
-    ElMessage.error("获取详情失败1");
+    ElMessage.error('获取详情失败1');
   }
 }
 
@@ -220,7 +220,7 @@ async function handleDelete(row?: RecycleOrder) {
     ids = [row.recycleOrderId];
   } else {
     if (selectedIds.value.length === 0) {
-      ElMessage.warning("请选择要删除的记录");
+      ElMessage.warning('请选择要删除的记录');
       return;
     }
     ids = selectedIds.value;
@@ -229,10 +229,10 @@ async function handleDelete(row?: RecycleOrder) {
   try {
     await ElMessageBox.confirm(
       `确定要删除选中的 ${ids.length} 条订单吗？`,
-      "提示",
+      '提示',
       {
-        type: "warning",
-      }
+        type: 'warning',
+      },
     );
 
     for (const id of ids) {
@@ -252,11 +252,11 @@ async function handleAbnormal(row: RecycleOrder) {
   try {
     await ElMessageBox.confirm(
       `确定要将订单【${row.orderNo}】标记为异常吗？`,
-      "异常订单",
-      { type: "warning", confirmButtonText: "确定", cancelButtonText: "取消" }
+      '异常订单',
+      { type: 'warning', confirmButtonText: '确定', cancelButtonText: '取消' },
     );
     await abnormalOrderApi(row.recycleOrderId);
-    ElMessage.success("已标记为异常");
+    ElMessage.success('已标记为异常');
     handleQuery();
   } catch {
     // 取消操作
@@ -273,16 +273,16 @@ function handleWeight(row: RecycleOrder) {
 
 async function submitWeight() {
   if (weightForm.weight <= 0) {
-    ElMessage.warning("请输入重量");
+    ElMessage.warning('请输入重量');
     return;
   }
 
-  const action = weightForm.operateType === 0 ? "补重" : "扣重";
+  const action = weightForm.operateType === 0 ? '补重' : '扣重';
   try {
     await ElMessageBox.confirm(
       `确定要对订单进行${action} ${weightForm.weight} kg 吗？`,
-      "提示",
-      { type: "warning" }
+      '提示',
+      { type: 'warning' },
     );
 
     weightSubmitting.value = true;
@@ -300,24 +300,24 @@ async function submitWeight() {
 // --- 添加备注 ---
 function handleRemark(row: RecycleOrder) {
   remarkForm.recycleOrderId = row.recycleOrderId;
-  remarkForm.remark = "";
+  remarkForm.remark = '';
   remarkDialogVisible.value = true;
 }
 
 async function submitRemark() {
   if (!remarkForm.remark.trim()) {
-    ElMessage.warning("请输入备注内容");
+    ElMessage.warning('请输入备注内容');
     return;
   }
 
   remarkSubmitting.value = true;
   try {
     await remarkOperateApi(remarkForm);
-    ElMessage.success("添加备注成功");
+    ElMessage.success('添加备注成功');
     remarkDialogVisible.value = false;
     handleQuery();
   } catch {
-    ElMessage.error("添加备注失败");
+    ElMessage.error('添加备注失败');
   } finally {
     remarkSubmitting.value = false;
   }
@@ -326,19 +326,19 @@ async function submitRemark() {
 // 处理下拉菜单命令
 function handleCommand(cmd: string, row: RecycleOrder) {
   switch (cmd) {
-    case "abnormal": {
+    case 'abnormal': {
       handleAbnormal(row);
       break;
     }
-    case "directComplete": {
+    case 'directComplete': {
       handleDirectComplete(row);
       break;
     }
-    case "remark": {
+    case 'remark': {
       handleRemark(row);
       break;
     }
-    case "weight": {
+    case 'weight': {
       handleWeight(row);
       break;
     }
@@ -349,10 +349,10 @@ function handleCommand(cmd: string, row: RecycleOrder) {
 async function handleDirectComplete(row: RecycleOrder) {
   try {
     await directCompleteOrderApi(row.recycleOrderId);
-    ElMessage.success("直接通过成功");
+    ElMessage.success('直接通过成功');
     handleQuery();
   } catch {
-    ElMessage.error("直接通过失败");
+    ElMessage.error('直接通过失败');
   }
 }
 
@@ -393,12 +393,19 @@ onMounted(() => {
     <div class="p-0">
       <!-- 查询表单 -->
       <el-card shadow="never" class="border-none mb-4 !p-2">
-        <el-form :inline="true" :model="queryParams" class="flex flex-wrap gap-x-2 gap-y-2 items-center">
+        <el-form
+          :inline="true"
+          :model="queryParams"
+          class="flex flex-wrap gap-x-2 gap-y-2 items-center"
+        >
           <el-form-item class="!mb-0 !mr-2">
             <el-input
-v-model="queryParams.orderNo" placeholder="请输入" clearable style="width: 200px"
+              v-model="queryParams.orderNo"
+              placeholder="请输入"
+              clearable
+              style="width: 200px"
               @keyup.enter="handleQuery"
->
+            >
               <template #prefix>
                 <span class="text-xs text-gray-400 mr-0.5">订单编号:</span>
               </template>
@@ -407,9 +414,12 @@ v-model="queryParams.orderNo" placeholder="请输入" clearable style="width: 20
 
           <el-form-item class="!mb-0 !mr-2">
             <el-input
-v-model="queryParams.memberId" placeholder="请输入" clearable style="width: 200px"
+              v-model="queryParams.memberId"
+              placeholder="请输入"
+              clearable
+              style="width: 200px"
               @keyup.enter="handleQuery"
->
+            >
               <template #prefix>
                 <span class="text-xs text-gray-400 mr-0.5">会员ID:</span>
               </template>
@@ -418,9 +428,12 @@ v-model="queryParams.memberId" placeholder="请输入" clearable style="width: 2
 
           <el-form-item class="!mb-0 !mr-2">
             <el-input
-v-model="queryParams.phoneMember" placeholder="请输入" clearable style="width: 200px"
+              v-model="queryParams.phoneMember"
+              placeholder="请输入"
+              clearable
+              style="width: 200px"
               @keyup.enter="handleQuery"
->
+            >
               <template #prefix>
                 <span class="text-xs text-gray-400 mr-0.5">手机号:</span>
               </template>
@@ -429,19 +442,29 @@ v-model="queryParams.phoneMember" placeholder="请输入" clearable style="width
 
           <el-form-item class="!mb-0 !mr-2">
             <el-tree-select
-v-model="queryParams.deptId" :data="deptOptions" :props="{
-              value: 'deptId',
-              label: 'deptName',
-              children: 'children',
-            }" placeholder="请选择" clearable check-strictly style="width: 200px" class="tree-prefix-dept"
-/>
+              v-model="queryParams.deptId"
+              :data="deptOptions"
+              :props="{
+                value: 'deptId',
+                label: 'deptName',
+                children: 'children',
+              }"
+              placeholder="请选择"
+              clearable
+              check-strictly
+              style="width: 200px"
+              class="tree-prefix-dept"
+            />
           </el-form-item>
 
           <el-form-item class="!mb-0 !mr-2">
             <el-input
-v-model="queryParams.deviceNo" placeholder="请输入" clearable style="width: 200px"
+              v-model="queryParams.deviceNo"
+              placeholder="请输入"
+              clearable
+              style="width: 200px"
               @keyup.enter="handleQuery"
->
+            >
               <template #prefix>
                 <span class="text-xs text-gray-400 mr-0.5">设备编号:</span>
               </template>
@@ -450,9 +473,12 @@ v-model="queryParams.deviceNo" placeholder="请输入" clearable style="width: 2
 
           <el-form-item class="!mb-0 !mr-2">
             <el-input
-v-model="queryParams.deviceName" placeholder="请输入" clearable style="width: 200px"
+              v-model="queryParams.deviceName"
+              placeholder="请输入"
+              clearable
+              style="width: 200px"
               @keyup.enter="handleQuery"
->
+            >
               <template #prefix>
                 <span class="text-xs text-gray-400 mr-0.5">设备名称:</span>
               </template>
@@ -460,11 +486,20 @@ v-model="queryParams.deviceName" placeholder="请输入" clearable style="width:
           </el-form-item>
 
           <el-form-item class="!mb-0 !mr-2">
-            <el-select v-model="queryParams.orderStatus" clearable style="width: 200px">
+            <el-select
+              v-model="queryParams.orderStatus"
+              clearable
+              style="width: 200px"
+            >
               <template #prefix>
                 <span class="text-xs text-gray-400 mr-0.5">订单状态:</span>
               </template>
-              <el-option v-for="item in order_status" :key="item.value" :label="item.label" :value="item.value" />
+              <el-option
+                v-for="item in order_status"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
             </el-select>
           </el-form-item>
 
@@ -488,14 +523,24 @@ v-model="queryParams.deviceName" placeholder="请输入" clearable style="width:
 
           <el-form-item class="!mb-0 !mr-2">
             <el-date-picker
-v-model="dateRange" type="datetimerange" range-separator="至" start-placeholder="开始时间"
-              end-placeholder="结束时间" value-format="YYYY-MM-DD HH:mm:ss" style="width: 360px"
-/>
+              v-model="dateRange"
+              type="datetimerange"
+              range-separator="至"
+              start-placeholder="开始时间"
+              end-placeholder="结束时间"
+              value-format="YYYY-MM-DD HH:mm:ss"
+              style="width: 360px"
+            />
           </el-form-item>
 
           <el-form-item class="!mb-0 !mr-0 md:ml-auto flex items-center gap-1">
             <el-tooltip content="查询" placement="top">
-              <el-button type="primary" :icon="Search" circle @click="handleQuery" />
+              <el-button
+                type="primary"
+                :icon="Search"
+                circle
+                @click="handleQuery"
+              />
             </el-tooltip>
             <el-tooltip content="重置" placement="top">
               <el-button :icon="Refresh" circle @click="resetQuery" />
@@ -509,39 +554,53 @@ v-model="dateRange" type="datetimerange" range-separator="至" start-placeholder
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-2">
             <ExportButton
-:module-code="ModuleCodeMap.RECYCLE_ORDER" :fields="visibleColumns"
+              :module-code="ModuleCodeMap.RECYCLE_ORDER"
+              :fields="visibleColumns"
               :find-cond="queryParams"
-/>
-            <span v-if="selectedIds.length > 0" class="text-xs text-gray-400 ml-2">
+            />
+            <span
+              v-if="selectedIds.length > 0"
+              class="text-xs text-gray-400 ml-2"
+            >
               已选
               <span class="text-red-500 font-medium">{{
                 selectedIds.length
-                }}</span>
+              }}</span>
               项
             </span>
           </div>
 
           <div class="flex items-center">
             <ColumnSelector
-:storage-key="RECYCLE_ORDER_STORAGE_KEY" :default-columns="defaultRecycleOrderColumns"
+              :storage-key="RECYCLE_ORDER_STORAGE_KEY"
+              :default-columns="defaultRecycleOrderColumns"
               @update:columns="handleColumnsUpdate"
-/>
+            />
           </div>
         </div>
 
         <el-table
-v-loading="loading" :data="tableData" border stripe style="width: 100%"
+          v-loading="loading"
+          :data="tableData"
+          border
+          stripe
+          style="width: 100%"
           @selection-change="handleSelectionChange"
->
+        >
           <!-- 选择列固定写死 -->
           <el-table-column type="selection" width="50" align="center" />
 
           <!-- 动态数据列 -->
           <el-table-column
-v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
-            :width="typeof col.width === 'number' ? col.width : undefined" :min-width="col.minWidth" :align="col.align"
+            v-for="col in visibleColumns"
+            :key="col.key"
+            :prop="col.key"
+            :label="col.label"
+            :width="typeof col.width === 'number' ? col.width : undefined"
+            :min-width="col.minWidth"
+            :align="col.align"
             :show-overflow-tooltip="col.showOverflowTooltip || false"
->
+          >
             <template #default="{ row }">
               <!-- 订单状态 -->
               <template v-if="col.key === 'orderStatus'">
@@ -572,13 +631,25 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
           </el-table-column>
 
           <!-- 操作列固定写死 -->
-          <el-table-column label="操作" width="180" fixed="right" align="center">
+          <el-table-column
+            label="操作"
+            width="180"
+            fixed="right"
+            align="center"
+          >
             <template #default="{ row }">
               <div class="action-buttons">
-                <el-button link type="primary" :icon="View" @click="handleView(row)">
+                <el-button
+                  link
+                  type="primary"
+                  :icon="View"
+                  @click="handleView(row)"
+                >
                   详情
                 </el-button>
-                <el-dropdown @command="(cmd: string) => handleCommand(cmd, row)">
+                <el-dropdown
+                  @command="(cmd: string) => handleCommand(cmd, row)"
+                >
                   <el-button link type="primary" class="dropdown-trigger-btn">
                     操作<el-icon class="el-icon--right">
                       <ArrowDown />
@@ -589,7 +660,10 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
                       <el-dropdown-item command="abnormal" :icon="Warning">
                         异常订单
                       </el-dropdown-item>
-                      <el-dropdown-item command="weight" :icon="ScaleToOriginal">
+                      <el-dropdown-item
+                        command="weight"
+                        :icon="ScaleToOriginal"
+                      >
                         补重/扣重
                       </el-dropdown-item>
                       <el-dropdown-item command="remark" :icon="ChatDotRound">
@@ -609,113 +683,195 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
         <!-- 分页 -->
         <div class="flex justify-end mt-4">
           <el-pagination
-v-model:current-page="queryParams.pageNo" v-model:page-size="queryParams.pageSize"
-            :total="total" :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper" background
-            @size-change="loadData" @current-change="loadData"
-/>
+            v-model:current-page="queryParams.pageNo"
+            v-model:page-size="queryParams.pageSize"
+            :total="total"
+            :page-sizes="[10, 20, 50, 100]"
+            layout="total, sizes, prev, pager, next, jumper"
+            background
+            @size-change="loadData"
+            @current-change="loadData"
+          />
         </div>
       </el-card>
     </div>
 
     <ExportFieldSelector
-v-model:visible="exportFieldVisible" :fields="exportFields" :loading="exporting"
+      v-model:visible="exportFieldVisible"
+      :fields="exportFields"
+      :loading="exporting"
       @confirm="handleExportConfirm"
-/>
+    />
 
     <!-- 详情弹窗 -->
     <el-dialog
-v-model="detailVisible" title="订单详情" width="750px" append-to-body
+      v-model="detailVisible"
+      title="订单详情"
+      width="750px"
+      append-to-body
       @open="detailData && loadImages(detailData.recycleOrderId)"
->
+    >
       <el-scrollbar max-height="65vh">
         <div v-if="detailData" class="px-3 flex flex-col gap-5">
           <el-descriptions title="基础信息" :column="2" :border="false">
-            <el-descriptions-item label="订单编号" label-class-name="text-gray-400">
+            <el-descriptions-item
+              label="订单编号"
+              label-class-name="text-gray-400"
+            >
               <span class="font-mono text-gray-800 select-all font-semibold">{{
                 detailData.orderNo
-                }}</span>
+              }}</span>
             </el-descriptions-item>
-            <el-descriptions-item label="订单状态" label-class-name="text-gray-400">
-              <DictTag :options="order_status" :value="detailData.orderStatus" />
+            <el-descriptions-item
+              label="订单状态"
+              label-class-name="text-gray-400"
+            >
+              <DictTag
+                :options="order_status"
+                :value="detailData.orderStatus"
+              />
             </el-descriptions-item>
-            <el-descriptions-item label="会员名称" label-class-name="text-gray-400">
+            <el-descriptions-item
+              label="会员名称"
+              label-class-name="text-gray-400"
+            >
               <span class="text-gray-700">{{
-                detailData.memberName || "-"
-                }}</span>
+                detailData.memberName || '-'
+              }}</span>
             </el-descriptions-item>
-            <el-descriptions-item label="所属小区" label-class-name="text-gray-400">
+            <el-descriptions-item
+              label="所属小区"
+              label-class-name="text-gray-400"
+            >
               <span class="text-gray-700">{{
-                detailData.deptName || "-"
-                }}</span>
+                detailData.deptName || '-'
+              }}</span>
             </el-descriptions-item>
-            <el-descriptions-item label="创建时间" label-class-name="text-gray-400">
+            <el-descriptions-item
+              label="创建时间"
+              label-class-name="text-gray-400"
+            >
               <span class="font-mono text-gray-700">{{
-                detailData.createdTime || "-"
-                }}</span>
+                detailData.createdTime || '-'
+              }}</span>
             </el-descriptions-item>
-            <el-descriptions-item label="更新时间" label-class-name="text-gray-400">
+            <el-descriptions-item
+              label="更新时间"
+              label-class-name="text-gray-400"
+            >
               <span class="font-mono text-gray-700">{{
-                detailData.updatedTime || "-"
-                }}</span>
+                detailData.updatedTime || '-'
+              }}</span>
             </el-descriptions-item>
-            <el-descriptions-item label="备注说明" :span="2" label-class-name="text-gray-400">
-              <span class="text-gray-700">{{ detailData.remark || "-" }}</span>
+            <el-descriptions-item
+              label="备注说明"
+              :span="2"
+              label-class-name="text-gray-400"
+            >
+              <span class="text-gray-700">{{ detailData.remark || '-' }}</span>
             </el-descriptions-item>
           </el-descriptions>
 
           <el-descriptions title="硬件配置" :column="2" :border="false">
-            <el-descriptions-item label="设备名称" label-class-name="text-gray-400">
+            <el-descriptions-item
+              label="设备名称"
+              label-class-name="text-gray-400"
+            >
               <span class="text-gray-700">{{
-                detailData.deviceName || "-"
-                }}</span>
+                detailData.deviceName || '-'
+              }}</span>
             </el-descriptions-item>
-            <el-descriptions-item label="设备编号" label-class-name="text-gray-400">
+            <el-descriptions-item
+              label="设备编号"
+              label-class-name="text-gray-400"
+            >
               <span class="font-mono text-gray-700">{{
-                detailData.deviceNo || "-"
-                }}</span>
+                detailData.deviceNo || '-'
+              }}</span>
             </el-descriptions-item>
-            <el-descriptions-item label="定位仓口" label-class-name="text-gray-400">
-              <el-tag v-if="detailData.hatchNo" size="small" type="warning" effect="light">
+            <el-descriptions-item
+              label="定位仓口"
+              label-class-name="text-gray-400"
+            >
+              <el-tag
+                v-if="detailData.hatchNo"
+                size="small"
+                type="warning"
+                effect="light"
+              >
                 {{ detailData.hatchNo }}号仓
               </el-tag>
               <span v-else class="text-gray-400">-</span>
             </el-descriptions-item>
-            <el-descriptions-item label="包袋编号" label-class-name="text-gray-400">
+            <el-descriptions-item
+              label="包袋编号"
+              label-class-name="text-gray-400"
+            >
               <span class="font-mono text-gray-700">{{
-                detailData.deviceBagNo || "-"
-                }}</span>
+                detailData.deviceBagNo || '-'
+              }}</span>
             </el-descriptions-item>
           </el-descriptions>
 
           <el-descriptions title="计量结算" :column="3" :border="false">
-            <el-descriptions-item label="投递前重量" label-class-name="text-gray-400">
-              <span class="font-mono text-gray-500">{{ detailData.beforeWeight?.toFixed(2) || 0 }} kg</span>
-            </el-descriptions-item>
-            <el-descriptions-item label="投递重量" label-class-name="text-gray-400">
-              <span class="font-mono text-gray-700">{{ detailData.weight?.toFixed(2) || 0 }} kg</span>
-            </el-descriptions-item>
-            <el-descriptions-item label="投递后重量" label-class-name="text-gray-400">
-              <span class="font-mono text-gray-500">{{ detailData.afterWeight?.toFixed(2) || 0 }} kg</span>
-            </el-descriptions-item>
-
-            <el-descriptions-item label="回收单价" label-class-name="text-gray-400">
-              <span class="font-mono text-gray-700">¥ {{ detailData.unitPrice?.toFixed(2) || 0 }}/kg</span>
-            </el-descriptions-item>
-            <el-descriptions-item label="有效重量" label-class-name="text-gray-400">
-              <span class="font-mono text-teal-600 font-bold">{{ detailData.realWeight?.toFixed(2) || 0 }} kg</span>
-            </el-descriptions-item>
-            <el-descriptions-item label="预估金额" label-class-name="text-gray-400">
-              <span class="font-mono text-gray-700">{{
-                formatAmount(detailData.estimateAmount)
-                }}</span>
+            <el-descriptions-item
+              label="投递前重量"
+              label-class-name="text-gray-400"
+            >
+              <span class="font-mono text-gray-500"
+                >{{ detailData.beforeWeight?.toFixed(2) || 0 }} kg</span
+              >
             </el-descriptions-item>
             <el-descriptions-item
-label="实际金额" :span="3" label-class-name="text-gray-800 !font-bold"
+              label="投递重量"
+              label-class-name="text-gray-400"
+            >
+              <span class="font-mono text-gray-700"
+                >{{ detailData.weight?.toFixed(2) || 0 }} kg</span
+              >
+            </el-descriptions-item>
+            <el-descriptions-item
+              label="投递后重量"
+              label-class-name="text-gray-400"
+            >
+              <span class="font-mono text-gray-500"
+                >{{ detailData.afterWeight?.toFixed(2) || 0 }} kg</span
+              >
+            </el-descriptions-item>
+
+            <el-descriptions-item
+              label="回收单价"
+              label-class-name="text-gray-400"
+            >
+              <span class="font-mono text-gray-700"
+                >¥ {{ detailData.unitPrice?.toFixed(2) || 0 }}/kg</span
+              >
+            </el-descriptions-item>
+            <el-descriptions-item
+              label="有效重量"
+              label-class-name="text-gray-400"
+            >
+              <span class="font-mono text-teal-600 font-bold"
+                >{{ detailData.realWeight?.toFixed(2) || 0 }} kg</span
+              >
+            </el-descriptions-item>
+            <el-descriptions-item
+              label="预估金额"
+              label-class-name="text-gray-400"
+            >
+              <span class="font-mono text-gray-700">{{
+                formatAmount(detailData.estimateAmount)
+              }}</span>
+            </el-descriptions-item>
+            <el-descriptions-item
+              label="实际金额"
+              :span="3"
+              label-class-name="text-gray-800 !font-bold"
               class-name="border-t border-dashed border-gray-100 pt-2 mt-1"
->
+            >
               <span class="font-mono font-black text-primary text-base">{{
                 formatAmount(detailData.realAmount)
-                }}</span>
+              }}</span>
             </el-descriptions-item>
           </el-descriptions>
 
@@ -723,19 +879,30 @@ label="实际金额" :span="3" label-class-name="text-gray-800 !font-bold"
             <div class="text-lg font-bold mb-3">现场凭证</div>
             <div v-loading="imageLoading" class="min-h-[80px]">
               <div v-if="imageUrls.length === 0 && !imageLoading">
-                <el-empty description="暂无现场图片" :image-size="40" class="!py-2" />
+                <el-empty
+                  description="暂无现场图片"
+                  :image-size="40"
+                  class="!py-2"
+                />
               </div>
               <div v-else class="grid grid-cols-6 gap-2">
                 <div
-v-for="(url, index) in imageUrls" :key="index"
+                  v-for="(url, index) in imageUrls"
+                  :key="index"
                   class="aspect-square rounded border border-gray-100 overflow-hidden bg-gray-50"
->
+                >
                   <el-image
-:src="url" fit="cover" :preview-src-list="imageUrls" :initial-index="index"
-                    preview-teleported class="w-full h-full"
->
+                    :src="url"
+                    fit="cover"
+                    :preview-src-list="imageUrls"
+                    :initial-index="index"
+                    preview-teleported
+                    class="w-full h-full"
+                  >
                     <template #error>
-                      <div class="flex items-center justify-center h-full text-gray-300 bg-gray-100">
+                      <div
+                        class="flex items-center justify-center h-full text-gray-300 bg-gray-100"
+                      >
                         <el-icon>
                           <Picture />
                         </el-icon>
@@ -755,7 +922,12 @@ v-for="(url, index) in imageUrls" :key="index"
     </el-dialog>
 
     <!-- 补重/扣重弹窗 -->
-    <el-dialog v-model="weightDialogVisible" title="补重/扣重" width="450px" append-to-body>
+    <el-dialog
+      v-model="weightDialogVisible"
+      title="补重/扣重"
+      width="450px"
+      append-to-body
+    >
       <el-form :model="weightForm" label-width="100px">
         <el-form-item label="操作类型" required>
           <el-radio-group v-model="weightForm.operateType">
@@ -765,29 +937,51 @@ v-for="(url, index) in imageUrls" :key="index"
         </el-form-item>
         <el-form-item label="重量(kg)" required>
           <el-input-number
-v-model="weightForm.weight" :min="0.01" :precision="2" :step="0.1" placeholder="请输入重量"
+            v-model="weightForm.weight"
+            :min="0.01"
+            :precision="2"
+            :step="0.1"
+            placeholder="请输入重量"
             style="width: 100%"
-/>
+          />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="weightDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="weightSubmitting" @click="submitWeight">
+        <el-button
+          type="primary"
+          :loading="weightSubmitting"
+          @click="submitWeight"
+        >
           确定
         </el-button>
       </template>
     </el-dialog>
 
     <!-- 添加备注弹窗 -->
-    <el-dialog v-model="remarkDialogVisible" title="添加备注" width="500px" append-to-body>
+    <el-dialog
+      v-model="remarkDialogVisible"
+      title="添加备注"
+      width="500px"
+      append-to-body
+    >
       <el-form :model="remarkForm" label-width="80px">
         <el-form-item label="备注" required>
-          <el-input v-model="remarkForm.remark" type="textarea" :rows="4" placeholder="请输入备注内容" />
+          <el-input
+            v-model="remarkForm.remark"
+            type="textarea"
+            :rows="4"
+            placeholder="请输入备注内容"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="remarkDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="remarkSubmitting" @click="submitRemark">
+        <el-button
+          type="primary"
+          :loading="remarkSubmitting"
+          @click="submitRemark"
+        >
           确定
         </el-button>
       </template>
@@ -847,7 +1041,7 @@ v-model="weightForm.weight" :min="0.01" :precision="2" :step="0.1" placeholder="
   font-weight: 400;
   color: #909399;
   pointer-events: none;
-  content: "部门:";
+  content: '部门:';
   transform: translateY(-50%);
 }
 </style>

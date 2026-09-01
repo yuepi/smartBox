@@ -4,8 +4,11 @@ import type { User } from '#/api/system/user';
 
 import { getMerchantDeptListApi } from '#/api/system/dept';
 import { getMerchantRoleListApi } from '#/api/system/role';
-import { addMerchantUserApi, editMerchantUserApi, getMerchantUserDetailApi } from '#/api/system/user';
-
+import {
+  addMerchantUserApi,
+  editMerchantUserApi,
+  getMerchantUserDetailApi,
+} from '#/api/system/user';
 
 const emit = defineEmits(['success']);
 
@@ -27,7 +30,7 @@ async function loadModalOptions() {
     // 并发请求部门和角色，不阻碍彼此
     const [deptRes, roleRes] = await Promise.all([
       getMerchantDeptListApi({ status: 0 }),
-      getMerchantRoleListApi({ status: 0, pageSize: 100 })
+      getMerchantRoleListApi({ status: 0, pageSize: 100 }),
     ]);
     deptTreeData.value = deptRes || [];
     roleOptions.value = (roleRes.records || roleRes || []).map((item: any) => ({
@@ -73,12 +76,15 @@ const open = async (row?: User, defaultDeptId?: number) => {
 
 // 统一表单提交
 async function handleSubmit() {
-  if (!formData.value.userName?.trim()) return ElMessage.warning('请输入用户名');
+  if (!formData.value.userName?.trim())
+    return ElMessage.warning('请输入用户名');
   if (!formData.value.nickName?.trim()) return ElMessage.warning('请输入昵称');
-  
+
   submitting.value = true;
   try {
-    const api = formData.value.userId ? editMerchantUserApi : addMerchantUserApi;
+    const api = formData.value.userId
+      ? editMerchantUserApi
+      : addMerchantUserApi;
     await api(formData.value);
     ElMessage.success(formData.value.userId ? '修改成功' : '新增成功');
     visible.value = false;
@@ -95,18 +101,33 @@ defineExpose({ open });
 </script>
 
 <template>
-  <el-dialog v-model="visible" :title="title" width="800px" append-to-body destroy-on-close>
+  <el-dialog
+    v-model="visible"
+    :title="title"
+    width="800px"
+    append-to-body
+    destroy-on-close
+  >
     <el-form :model="formData" label-width="100px">
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item label="用户名" required>
-            <el-input v-model="formData.userName" placeholder="请输入用户名" :disabled="!!formData.userId" />
+            <el-input
+              v-model="formData.userName"
+              placeholder="请输入用户名"
+              :disabled="!!formData.userId"
+            />
           </el-form-item>
           <el-form-item label="昵称" required>
             <el-input v-model="formData.nickName" placeholder="请输入昵称" />
           </el-form-item>
           <el-form-item label="密码" v-if="!formData.userId">
-            <el-input v-model="formData.password" type="password" placeholder="不填则默认为123456" show-password />
+            <el-input
+              v-model="formData.password"
+              type="password"
+              placeholder="不填则默认为123456"
+              show-password
+            />
           </el-form-item>
           <el-form-item label="邮箱">
             <el-input v-model="formData.email" placeholder="请输入邮箱" />
@@ -116,7 +137,11 @@ defineExpose({ open });
           </el-form-item>
           <el-form-item label="性别">
             <el-radio-group v-model="formData.sex">
-              <el-radio v-for="item in member_sex" :key="item.value" :value="item.value">
+              <el-radio
+                v-for="item in member_sex"
+                :key="item.value"
+                :value="item.value"
+              >
                 {{ item.label }}
               </el-radio>
             </el-radio-group>
@@ -125,8 +150,19 @@ defineExpose({ open });
 
         <el-col :span="12">
           <el-form-item label="角色">
-            <el-select v-model="formData.userroles" multiple filterable placeholder="请选择角色" style="width: 100%">
-              <el-option v-for="item in roleOptions" :key="item.roleId" :label="item.roleName" :value="item.roleId" />
+            <el-select
+              v-model="formData.userroles"
+              multiple
+              filterable
+              placeholder="请选择角色"
+              style="width: 100%"
+            >
+              <el-option
+                v-for="item in roleOptions"
+                :key="item.roleId"
+                :label="item.roleName"
+                :value="item.roleId"
+              />
             </el-select>
           </el-form-item>
           <el-form-item label="所属部门">
@@ -137,7 +173,11 @@ defineExpose({ open });
               clearable
               filterable
               check-strictly
-              :props="{ value: 'deptId', label: 'deptName', children: 'children' }"
+              :props="{
+                value: 'deptId',
+                label: 'deptName',
+                children: 'children',
+              }"
               :default-expand-level="1"
               placeholder="请选择部门"
               style="width: 100%"
@@ -151,7 +191,11 @@ defineExpose({ open });
           </el-form-item>
           <el-form-item label="状态">
             <el-radio-group v-model="formData.status">
-              <el-radio v-for="item in member_status" :key="item.value" :value="item.value">
+              <el-radio
+                v-for="item in member_status"
+                :key="item.value"
+                :value="item.value"
+              >
                 {{ item.label }}
               </el-radio>
             </el-radio-group>
@@ -161,7 +205,9 @@ defineExpose({ open });
     </el-form>
     <template #footer>
       <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :loading="submitting" @click="handleSubmit">确定</el-button>
+      <el-button type="primary" :loading="submitting" @click="handleSubmit"
+        >确定</el-button
+      >
     </template>
   </el-dialog>
 </template>

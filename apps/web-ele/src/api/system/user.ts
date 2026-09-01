@@ -21,7 +21,6 @@ export interface User {
   status: number; // 0=启用,1=禁用
   userroles?: UserRole[];
   deptIds?: number[];
-  
 }
 
 // 分页查询参数
@@ -98,15 +97,12 @@ export function deletePlatUserApi(userId: number) {
   return requestClient.post('/plat/user/delete', { userId });
 }
 
-
-
 /**
  * 商户分页查询用户
  */
 export function getMerchantUserPageApi(params: UserPageParams) {
   return requestClient.get('/merchant/user/page', { params });
 }
-
 
 /**
  * 列表查询用户

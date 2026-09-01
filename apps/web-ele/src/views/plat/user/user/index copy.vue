@@ -1,13 +1,13 @@
 <script lang="ts" setup>
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from 'vue';
 
-import { Page } from "@vben/common-ui";
+import { Page } from '@vben/common-ui';
 
-import { Delete, Edit, Plus, Refresh, Search } from "@element-plus/icons-vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+import { Delete, Edit, Plus, Refresh, Search } from '@element-plus/icons-vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
-import { type Dept, getPlatDeptListApi } from "#/api/system/dept";
-import { getPlatRoleListApi } from "#/api/system/role";
+import { type Dept, getPlatDeptListApi } from '#/api/system/dept';
+import { getPlatRoleListApi } from '#/api/system/role';
 import {
   addPlatUserApi,
   deletePlatUserApi,
@@ -16,15 +16,15 @@ import {
   getPlatUserPageApi,
   type User,
   type UserPageParams,
-} from "#/api/system/user";
-import ColumnSelector from "#/components/ColumnSelector/index.vue";
-import ExportFieldSelector from "#/components/ExportFieldSelector/index.vue";
+} from '#/api/system/user';
+import ColumnSelector from '#/components/ColumnSelector/index.vue';
+import ExportFieldSelector from '#/components/ExportFieldSelector/index.vue';
 import {
   defaultUserColumns,
   type TableColumnConfig,
   USER_STORAGE_KEY,
-} from "#/constants/tableColumns";
-import { ModuleCodeMap } from "#/hooks/useExport";
+} from '#/constants/tableColumns';
+import { ModuleCodeMap } from '#/hooks/useExport';
 
 // 表格列配置
 const columnConfig = ref<TableColumnConfig[]>([...defaultUserColumns]);
@@ -45,7 +45,7 @@ const selectedIds = ref<number[]>([]);
 
 // 表单弹窗控制
 const formVisible = ref(false);
-const formTitle = ref("");
+const formTitle = ref('');
 const formData = ref<Partial<User>>({});
 const formSubmitting = ref(false);
 
@@ -59,9 +59,9 @@ const roleLoading = ref(false);
 
 // 性别选项
 const sexOptions = [
-  { label: "未知", value: 0 },
-  { label: "男", value: 1 },
-  { label: "女", value: 2 },
+  { label: '未知', value: 0 },
+  { label: '男', value: 1 },
+  { label: '女', value: 2 },
 ];
 
 // 身份标识选项
@@ -75,8 +75,8 @@ const sexOptions = [
 
 // 状态选项
 const statusOptions = [
-  { label: "启用", value: 0 },
-  { label: "禁用", value: 1 },
+  { label: '启用', value: 0 },
+  { label: '禁用', value: 1 },
 ];
 
 // 查询参数
@@ -93,34 +93,34 @@ const queryParams = reactive<UserPageParams>({
 const identifyArray = computed({
   get: () => {
     const val = formData.value.identify;
-    return val ? val.split(",") : [];
+    return val ? val.split(',') : [];
   },
   set: (val: string[]) => {
-    formData.value.identify = val.join(",");
+    formData.value.identify = val.join(',');
   },
 });
 
 // --- 辅助函数 ---
 function getSexText(sex: number): string {
-  const map: Record<number, string> = { 0: "未知", 1: "男", 2: "女" };
-  return map[sex] || "未知";
+  const map: Record<number, string> = { 0: '未知', 1: '男', 2: '女' };
+  return map[sex] || '未知';
 }
 
 function getIdentifyText(identify: string): string {
-  if (!identify) return "普通用户";
+  if (!identify) return '普通用户';
   const map: Record<string, string> = {
-    "0": "普通用户",
-    "1": "清运人员",
-    "2": "分拣人员",
-    "3": "回收员",
-    "4": "设备管理员",
+    '0': '普通用户',
+    '1': '清运人员',
+    '2': '分拣人员',
+    '3': '回收员',
+    '4': '设备管理员',
   };
-  const ids = identify.split(",");
-  return ids.map((id) => map[id] || "未知").join(",");
+  const ids = identify.split(',');
+  return ids.map((id) => map[id] || '未知').join(',');
 }
 
 function getStatusText(status: number): string {
-  return status === 0 ? "启用" : "禁用";
+  return status === 0 ? '启用' : '禁用';
 }
 
 // --- 构建部门树 ---
@@ -146,8 +146,8 @@ async function loadDeptTree() {
     const res = await getPlatDeptListApi({ status: 0 });
     deptTreeData.value = buildDeptTree(res || []);
   } catch (error) {
-    console.error("加载部门树失败：", error);
-    ElMessage.error("加载部门树失败");
+    console.error('加载部门树失败：', error);
+    ElMessage.error('加载部门树失败');
   } finally {
     deptLoading.value = false;
   }
@@ -156,7 +156,7 @@ async function loadDeptTree() {
 // 部门选择变化
 function handleDeptChange(values: number[]) {
   formData.value.deptIds = values;
-  console.log("已选部门ID:", values);
+  console.log('已选部门ID:', values);
 }
 
 // --- 数据加载 ---
@@ -168,7 +168,7 @@ async function loadData() {
     total.value = res.total || 0;
   } catch (error) {
     console.error(error);
-    ElMessage.error("加载数据失败");
+    ElMessage.error('加载数据失败');
   } finally {
     loading.value = false;
   }
@@ -185,8 +185,8 @@ async function loadRoleList() {
       roleCode: item.roleCode,
     }));
   } catch (error) {
-    console.error("加载角色列表失败：", error);
-    ElMessage.error("加载角色列表失败");
+    console.error('加载角色列表失败：', error);
+    ElMessage.error('加载角色列表失败');
   } finally {
     roleLoading.value = false;
   }
@@ -194,11 +194,11 @@ async function loadRoleList() {
 
 // --- 新增/编辑 ---
 function handleAdd() {
-  formTitle.value = "新增用户";
+  formTitle.value = '新增用户';
   formData.value = {
-    userName: "",
-    nickName: "",
-    password: "",
+    userName: '',
+    nickName: '',
+    password: '',
     sex: 0,
     status: 0,
     superAdminFlag: 0,
@@ -210,7 +210,7 @@ function handleAdd() {
 
 async function handleEdit(row: User) {
   try {
-    formTitle.value = "编辑用户";
+    formTitle.value = '编辑用户';
     const res = await getPlatUserDetailApi(row.userId);
     formData.value = res || {};
     formData.value.userroles = res.userroles || [];
@@ -218,34 +218,34 @@ async function handleEdit(row: User) {
     await loadRoleList();
     formVisible.value = true;
   } catch {
-    ElMessage.error("获取用户信息失败");
+    ElMessage.error('获取用户信息失败');
   }
 }
 
 async function handleSubmit() {
   if (!formData.value.userName?.trim()) {
-    ElMessage.warning("请输入用户名");
+    ElMessage.warning('请输入用户名');
     return;
   }
   if (!formData.value.nickName?.trim()) {
-    ElMessage.warning("请输入昵称");
+    ElMessage.warning('请输入昵称');
     return;
   }
 
   // 如果没有填写密码，设置默认密码 123456
   if (!formData.value.password) {
-    formData.value.password = "123456";
+    formData.value.password = '123456';
   }
 
   formSubmitting.value = true;
   try {
     const api = formData.value.userId ? editPlatUserApi : addPlatUserApi;
     await api(formData.value);
-    ElMessage.success(formData.value.userId ? "修改成功" : "新增成功");
+    ElMessage.success(formData.value.userId ? '修改成功' : '新增成功');
     formVisible.value = false;
     handleQuery();
   } catch {
-    ElMessage.error("操作失败");
+    ElMessage.error('操作失败');
   } finally {
     formSubmitting.value = false;
   }
@@ -259,7 +259,7 @@ async function handleDelete(row?: User) {
     ids = [row.userId];
   } else {
     if (selectedIds.value.length === 0) {
-      ElMessage.warning("请选择要删除的记录");
+      ElMessage.warning('请选择要删除的记录');
       return;
     }
     ids = selectedIds.value;
@@ -268,8 +268,8 @@ async function handleDelete(row?: User) {
   try {
     await ElMessageBox.confirm(
       `确定要删除选中的 ${ids.length} 条用户吗？`,
-      "提示",
-      { type: "warning" }
+      '提示',
+      { type: 'warning' },
     );
 
     for (const id of ids) {
@@ -313,7 +313,7 @@ onMounted(() => {
 
 <template>
   <Page auto-content-height>
-      <div class="p-0">
+    <div class="p-0">
       <!-- 查询表单 -->
       <el-card shadow="never" class="border-none mb-4 !p-2">
         <el-form
@@ -350,11 +350,7 @@ onMounted(() => {
           </el-form-item>
 
           <el-form-item class="!mb-0 !mr-2">
-            <el-select
-              v-model="queryParams.sex"
-              clearable
-              style="width: 200px"
-            >
+            <el-select v-model="queryParams.sex" clearable style="width: 200px">
               <template #prefix>
                 <span class="text-xs text-gray-400 mr-0.5">性别:</span>
               </template>
@@ -387,7 +383,12 @@ onMounted(() => {
 
           <el-form-item class="!mb-0 !mr-0 md:ml-auto flex items-center gap-1">
             <el-tooltip content="查询" placement="top">
-              <el-button type="primary" :icon="Search" circle @click="handleQuery" />
+              <el-button
+                type="primary"
+                :icon="Search"
+                circle
+                @click="handleQuery"
+              />
             </el-tooltip>
             <el-tooltip content="重置" placement="top">
               <el-button :icon="Refresh" circle @click="resetQuery" />
@@ -400,7 +401,13 @@ onMounted(() => {
       <el-card shadow="never" class="border-none !p-2">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-2">
-            <el-button type="primary" plain :icon="Plus" @click="handleAdd" v-access:code="['plat:user:add']">
+            <el-button
+              type="primary"
+              plain
+              :icon="Plus"
+              @click="handleAdd"
+              v-access:code="['plat:user:add']"
+            >
               新增用户
             </el-button>
             <ExportButton
@@ -418,8 +425,15 @@ onMounted(() => {
             >
               批量删除
             </el-button>
-            <span v-if="selectedIds.length > 0" class="text-xs text-gray-400 ml-2">
-              已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
+            <span
+              v-if="selectedIds.length > 0"
+              class="text-xs text-gray-400 ml-2"
+            >
+              已选
+              <span class="text-red-500 font-medium">{{
+                selectedIds.length
+              }}</span>
+              项
             </span>
           </div>
 
@@ -467,14 +481,24 @@ onMounted(() => {
               </template>
               <!-- 状态 -->
               <template v-else-if="col.key === 'status'">
-                <el-tag :type="row.status === 0 ? 'success' : 'danger'" size="small" round effect="light">
+                <el-tag
+                  :type="row.status === 0 ? 'success' : 'danger'"
+                  size="small"
+                  round
+                  effect="light"
+                >
                   {{ getStatusText(row.status) }}
                 </el-tag>
               </template>
               <!-- 超管标识 -->
               <template v-else-if="col.key === 'superAdminFlag'">
-                <el-tag :type="row.superAdminFlag === 1 ? 'danger' : 'info'" size="small" round effect="light">
-                  {{ row.superAdminFlag === 1 ? "是" : "否" }}
+                <el-tag
+                  :type="row.superAdminFlag === 1 ? 'danger' : 'info'"
+                  size="small"
+                  round
+                  effect="light"
+                >
+                  {{ row.superAdminFlag === 1 ? '是' : '否' }}
                 </el-tag>
               </template>
               <!-- 普通字段 -->
@@ -485,12 +509,29 @@ onMounted(() => {
           </el-table-column>
 
           <!-- 操作列固定写死 -->
-          <el-table-column label="操作" width="150" fixed="right" align="center">
+          <el-table-column
+            label="操作"
+            width="150"
+            fixed="right"
+            align="center"
+          >
             <template #default="{ row }">
-              <el-button link type="primary" :icon="Edit" @click="handleEdit(row)" v-access:code="['plat:user:edit']">
+              <el-button
+                link
+                type="primary"
+                :icon="Edit"
+                @click="handleEdit(row)"
+                v-access:code="['plat:user:edit']"
+              >
                 编辑
               </el-button>
-              <el-button link type="danger" :icon="Delete" @click="handleDelete(row)" v-access:code="['plat:user:del']">
+              <el-button
+                link
+                type="danger"
+                :icon="Delete"
+                @click="handleDelete(row)"
+                v-access:code="['plat:user:del']"
+              >
                 删除
               </el-button>
             </template>
@@ -533,7 +574,10 @@ onMounted(() => {
         <el-col :span="12">
           <el-form :model="formData" label-width="100px">
             <el-form-item label="用户名" required>
-              <el-input v-model="formData.userName" placeholder="请输入用户名" />
+              <el-input
+                v-model="formData.userName"
+                placeholder="请输入用户名"
+              />
             </el-form-item>
             <el-form-item label="昵称" required>
               <el-input v-model="formData.nickName" placeholder="请输入昵称" />

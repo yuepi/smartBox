@@ -1,18 +1,18 @@
-import { defineComponent, reactive } from 'vue'
-import Draw from './draw'
+import { defineComponent, reactive } from 'vue';
+import Draw from './draw';
 export default defineComponent({
   components: {
-    Draw
+    Draw,
   },
   setup() {
     const cdata = reactive({
       indicatorData: [
-        { name: "数据1", max: 300 },
-        { name: "数据2", max: 250 },
-        { name: "数据3", max: 300 },
-        { name: "数据4", max: 5 },
-        { name: "数据5", max: 200 },
-        { name: "数据6", max: 100 }
+        { name: '数据1', max: 300 },
+        { name: '数据2', max: 250 },
+        { name: '数据3', max: 300 },
+        { name: '数据4', max: 5 },
+        { name: '数据5', max: 200 },
+        { name: '数据6', max: 100 },
       ],
       dataBJ: [
         [94, 69, 114, 2.08, 73, 39, 22],
@@ -21,7 +21,7 @@ export default defineComponent({
         [42, 27, 43, 1, 53, 22, 25],
         [154, 117, 157, 3.05, 92, 58, 26],
         [234, 185, 230, 4.09, 123, 69, 27],
-        [160, 120, 186, 2.77, 91, 50, 28]
+        [160, 120, 186, 2.77, 91, 50, 28],
       ],
       dataGZ: [
         [84, 94, 140, 2.238, 68, 18, 22],
@@ -30,7 +30,7 @@ export default defineComponent({
         [146, 84, 139, 1.094, 40, 17, 25],
         [113, 108, 137, 1.481, 48, 15, 26],
         [81, 48, 62, 1.619, 26, 3, 27],
-        [56, 48, 68, 1.336, 37, 9, 28]
+        [56, 48, 68, 1.336, 37, 9, 28],
       ],
       dataSH: [
         [91, 45, 125, 0.82, 34, 23, 1],
@@ -39,13 +39,15 @@ export default defineComponent({
         [109, 81, 121, 1.28, 68, 51, 4],
         [106, 77, 114, 1.07, 55, 51, 5],
         [109, 81, 121, 1.28, 68, 51, 6],
-        [106, 77, 114, 1.07, 55, 51, 7]
-      ]
-    })
+        [106, 77, 114, 1.07, 55, 51, 7],
+      ],
+    });
     return () => {
-      return <div>
-        <draw cdata={cdata} />
-      </div>
-    }
-  }
-})
+      return (
+        <div>
+          <draw cdata={cdata} />
+        </div>
+      );
+    };
+  },
+});

@@ -54,7 +54,7 @@ export interface StockOutCancelParams {
 export function getStockOutPageApi(params: StockOutPageParams) {
   return requestClient.get<{ records: StockOut[]; total: number }>(
     '/merchant/stockOut/page',
-    { params }
+    { params },
   );
 }
 
@@ -92,5 +92,7 @@ export function getStockOutDetailApi(stockOutId: number) {
 
 /** 删除出库单 */
 export function deleteStockOutApi(stockOutId: number) {
-  return requestClient.post<boolean>('/merchant/stockOut/delete', { stockOutId });
+  return requestClient.post<boolean>('/merchant/stockOut/delete', {
+    stockOutId,
+  });
 }

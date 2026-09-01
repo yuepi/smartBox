@@ -69,7 +69,6 @@ const quickNavItems: WorkbenchQuickNavItem[] = [
   },
 ];
 
-
 const trendItems: WorkbenchTrendItem[] = [
   {
     avatar: 'svg:avatar-2',

@@ -1,9 +1,12 @@
 <script setup lang="ts">
-
-
 import type { ExportTask } from '#/api/common/export';
 
-import { delExportTasksApi, ExportStatusMap, getExportTasksApi, onceAgainExportExcelApi } from '#/api/common/export';
+import {
+  delExportTasksApi,
+  ExportStatusMap,
+  getExportTasksApi,
+  onceAgainExportExcelApi,
+} from '#/api/common/export';
 
 defineOptions({ name: 'ExportFloatingBall' });
 
@@ -14,10 +17,12 @@ const retryingId = ref<null | number>(null);
 const deletingId = ref<null | number>(null);
 let pollingTimer: null | ReturnType<typeof setInterval> = null;
 
-const hasPending = computed(() => tasks.value.some(t => [0, 1].includes(t.exportStatus)));
+const hasPending = computed(() =>
+  tasks.value.some((t) => [0, 1].includes(t.exportStatus)),
+);
 
-const unreadCount = computed(() =>
-  tasks.value.filter(t => [0, 1, 3].includes(t.exportStatus)).length
+const unreadCount = computed(
+  () => tasks.value.filter((t) => [0, 1, 3].includes(t.exportStatus)).length,
 );
 
 function getModuleName(moduleCode: number): string {
@@ -33,7 +38,9 @@ function getModuleName(moduleCode: number): string {
   return map[moduleCode] || '未知模块';
 }
 
-function getStatusType(status: number): 'danger' | 'info' | 'success' | 'warning' {
+function getStatusType(
+  status: number,
+): 'danger' | 'info' | 'success' | 'warning' {
   const map: Record<number, any> = {
     2: 'success',
     3: 'danger',
@@ -101,7 +108,9 @@ async function handleDelete(task: ExportTask, event: Event) {
 }
 
 async function handleClear() {
-  const finishedTasks = tasks.value.filter(t => t.exportStatus === 2 || t.exportStatus === 3);
+  const finishedTasks = tasks.value.filter(
+    (t) => t.exportStatus === 2 || t.exportStatus === 3,
+  );
   if (finishedTasks.length === 0) {
     ElMessage.info('没有可清空的任务');
     return;
@@ -126,7 +135,7 @@ function startPolling() {
     if (hasPending.value && showPanel.value) {
       loadTasks();
     } else if (hasPending.value) {
-      getExportTasksApi({ pageNo: 1, pageSize: 20 }).then(res => {
+      getExportTasksApi({ pageNo: 1, pageSize: 20 }).then((res) => {
         tasks.value = res.records || [];
       });
     }
@@ -170,7 +179,12 @@ onUnmounted(() => {
   <div class="export-sidebar" :class="{ 'is-open': showPanel }">
     <!-- 触发表单 -->
     <div class="export-trigger" @click="togglePanel" v-show="!showPanel">
-      <el-badge :value="unreadCount" :hidden="unreadCount === 0" :max="99" :offset="[-10, 0]">
+      <el-badge
+        :value="unreadCount"
+        :hidden="unreadCount === 0"
+        :max="99"
+        :offset="[-10, 0]"
+      >
         <div class="trigger-icon">
           <el-icon :size="20">
             <Download />
@@ -185,9 +199,26 @@ onUnmounted(() => {
         <div class="panel-header">
           <span class="panel-title">导出任务</span>
           <div class="panel-actions">
-            <el-button link size="small" icon="Refresh" :loading="loading" @click="handleRefresh" />
-            <el-button link size="small" icon="Delete" :disabled="tasks.length === 0" @click="handleClear" />
-            <el-button link size="small" icon="Close" @click="showPanel = false" />
+            <el-button
+              link
+              size="small"
+              icon="Refresh"
+              :loading="loading"
+              @click="handleRefresh"
+            />
+            <el-button
+              link
+              size="small"
+              icon="Delete"
+              :disabled="tasks.length === 0"
+              @click="handleClear"
+            />
+            <el-button
+              link
+              size="small"
+              icon="Close"
+              @click="showPanel = false"
+            />
           </div>
         </div>
 
@@ -196,7 +227,9 @@ onUnmounted(() => {
             <div v-for="task in tasks" :key="task.exportId" class="task-item">
               <div class="task-header">
                 <div class="flex items-center gap-2">
-                  <span class="task-title">{{ getModuleName(task.moduleCode) }}</span>
+                  <span class="task-title">{{
+                    getModuleName(task.moduleCode)
+                  }}</span>
                   <el-tag :type="getStatusType(task.exportStatus)" size="small">
                     {{ ExportStatusMap[task.exportStatus]?.label || '未知' }}
                   </el-tag>
@@ -204,33 +237,52 @@ onUnmounted(() => {
                 <span class="task-time">{{ formatTime(task.exportTime) }}</span>
               </div>
 
-              <div class="task-name">{{ task.fileName || `${getModuleName(task.moduleCode)}导出` }}</div>
+              <div class="task-name">
+                {{ task.fileName || `${getModuleName(task.moduleCode)}导出` }}
+              </div>
 
               <div class="task-footer">
-                <span v-if="task.exportCount > 0" class="task-count">共 {{ task.exportCount }} 条</span>
+                <span v-if="task.exportCount > 0" class="task-count"
+                  >共 {{ task.exportCount }} 条</span
+                >
                 <div class="task-actions">
                   <el-button
-v-if="task.exportStatus === 2" link size="small" type="primary" icon="Download"
+                    v-if="task.exportStatus === 2"
+                    link
+                    size="small"
+                    type="primary"
+                    icon="Download"
                     @click.stop="downloadFile(task.fileAddr, task.fileName)"
->
+                  >
                     下载
                   </el-button>
                   <el-button
-v-if="task.exportStatus === 3" link size="small" icon="RefreshRight"
-                    :loading="retryingId === task.exportId" @click.stop="handleRetry(task, $event)"
->
+                    v-if="task.exportStatus === 3"
+                    link
+                    size="small"
+                    icon="RefreshRight"
+                    :loading="retryingId === task.exportId"
+                    @click.stop="handleRetry(task, $event)"
+                  >
                     重试
                   </el-button>
                   <el-button
-link size="small" type="danger" icon="Delete" :loading="deletingId === task.exportId"
+                    link
+                    size="small"
+                    type="danger"
+                    icon="Delete"
+                    :loading="deletingId === task.exportId"
                     @click.stop="handleDelete(task, $event)"
->
+                  >
                     删除
                   </el-button>
                 </div>
               </div>
 
-              <div v-if="task.failReason && task.exportStatus === 3" class="task-error">
+              <div
+                v-if="task.failReason && task.exportStatus === 3"
+                class="task-error"
+              >
                 失败原因：{{ task.failReason }}
               </div>
             </div>

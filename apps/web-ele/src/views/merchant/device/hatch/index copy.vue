@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from 'vue';
 
-import { Page } from "@vben/common-ui";
+import { Page } from '@vben/common-ui';
 
 import {
   Delete,
@@ -11,10 +11,10 @@ import {
   Plus,
   Refresh,
   Search,
-} from "@element-plus/icons-vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+} from '@element-plus/icons-vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
-import { type Device, getDeviceListApi } from "#/api/device/device";
+import { type Device, getDeviceListApi } from '#/api/device/device';
 import {
   addDeviceHatchApi,
   deleteDeviceHatchApi,
@@ -23,21 +23,21 @@ import {
   editDeviceHatchApi,
   getDeviceHatchDetailApi,
   getDeviceHatchPageApi,
-} from "#/api/device/deviceHatch";
+} from '#/api/device/deviceHatch';
 import {
   type DevicePackage,
   getDevicePackageListApi,
-} from "#/api/device/devicePackage";
-import ColumnSelector from "#/components/ColumnSelector/index.vue";
-import ExportFieldSelector from "#/components/ExportFieldSelector/index.vue";
+} from '#/api/device/devicePackage';
+import ColumnSelector from '#/components/ColumnSelector/index.vue';
+import ExportFieldSelector from '#/components/ExportFieldSelector/index.vue';
 import {
   defaultHatchColumns,
   HATCH_STORAGE_KEY,
   type TableColumnConfig,
-} from "#/constants/tableColumns";
-import { ModuleCodeMap } from "#/hooks/useExport";
+} from '#/constants/tableColumns';
+import { ModuleCodeMap } from '#/hooks/useExport';
 
-import LogDialog from "./LogDialog.vue";
+import LogDialog from './LogDialog.vue';
 
 // 表格列配置
 const columnConfig = ref<TableColumnConfig[]>([...defaultHatchColumns]);
@@ -53,7 +53,7 @@ const visibleColumns = computed(() => {
 // 日志弹窗相关
 const logDialogVisible = ref(false);
 const currentLogHatchId = ref(0);
-const currentLogHatchName = ref("");
+const currentLogHatchName = ref('');
 
 function handleLog(row: DeviceHatch) {
   currentLogHatchId.value = row.deviceHatchId;
@@ -69,7 +69,7 @@ const selectedIds = ref<number[]>([]);
 
 // 表单弹窗控制
 const formVisible = ref(false);
-const formTitle = ref("");
+const formTitle = ref('');
 const formData = ref<Partial<DeviceHatch>>({});
 const formSubmitting = ref(false);
 
@@ -79,15 +79,15 @@ const packageOptions = ref<DevicePackage[]>([]);
 
 // 仓口状态选项
 const hatchStatusOptions = [
-  { label: "全部", value: undefined },
-  { label: "未满", value: 0 },
-  { label: "已满", value: 1 },
+  { label: '全部', value: undefined },
+  { label: '未满', value: 0 },
+  { label: '已满', value: 1 },
 ];
 
 // 状态选项
 const statusOptions = [
-  { label: "启用", value: 0 },
-  { label: "禁用", value: 1 },
+  { label: '启用', value: 0 },
+  { label: '禁用', value: 1 },
 ];
 
 // 查询参数
@@ -101,15 +101,15 @@ const queryParams = reactive<DeviceHatchPageParams>({
 
 // --- 辅助函数 ---
 function getHatchStatusText(status: number): string {
-  return status === 0 ? "未满" : "已满";
+  return status === 0 ? '未满' : '已满';
 }
 
 function getHatchStatusType(status: number): string {
-  return status === 0 ? "success" : "danger";
+  return status === 0 ? 'success' : 'danger';
 }
 
 function getStatusText(status: number): string {
-  return status === 0 ? "启用" : "禁用";
+  return status === 0 ? '启用' : '禁用';
 }
 
 // --- 加载选项 ---
@@ -135,7 +135,7 @@ async function loadData() {
     total.value = res.total || 0;
   } catch (error) {
     console.error(error);
-    ElMessage.error("加载数据失败");
+    ElMessage.error('加载数据失败');
   } finally {
     loading.value = false;
   }
@@ -146,12 +146,12 @@ async function handleClean(row: DeviceHatch) {
   try {
     await ElMessageBox.confirm(
       `确定要清空仓口【${row.hatchName}】吗？清空后当前重量将归零。`,
-      "清空仓口",
+      '清空仓口',
       {
-        type: "warning",
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-      }
+        type: 'warning',
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+      },
     );
 
     // 调用清空接口（如果没有单独接口，可以通过编辑接口设置 currentWeight=0）
@@ -160,7 +160,7 @@ async function handleClean(row: DeviceHatch) {
       currentWeight: 0,
       hatchStatus: 0,
     });
-    ElMessage.success("清空成功");
+    ElMessage.success('清空成功');
     loadData();
   } catch {
     // 取消操作
@@ -169,7 +169,7 @@ async function handleClean(row: DeviceHatch) {
 
 // --- 新增/编辑 ---
 function handleAdd() {
-  formTitle.value = "新增仓口";
+  formTitle.value = '新增仓口';
   formData.value = {
     status: 0,
     hatchStatus: 0,
@@ -181,22 +181,22 @@ function handleAdd() {
 
 async function handleEdit(row: DeviceHatch) {
   try {
-    formTitle.value = "编辑仓口";
+    formTitle.value = '编辑仓口';
     const res = await getDeviceHatchDetailApi(row.deviceHatchId);
     formData.value = res || {};
     formVisible.value = true;
   } catch {
-    ElMessage.error("获取仓口信息失败");
+    ElMessage.error('获取仓口信息失败');
   }
 }
 
 async function handleSubmit() {
   if (!formData.value.hatchName?.trim()) {
-    ElMessage.warning("请输入仓口名称");
+    ElMessage.warning('请输入仓口名称');
     return;
   }
   if (!formData.value.deviceId) {
-    ElMessage.warning("请选择所属设备");
+    ElMessage.warning('请选择所属设备');
     return;
   }
 
@@ -206,11 +206,11 @@ async function handleSubmit() {
       ? editDeviceHatchApi
       : addDeviceHatchApi;
     await api(formData.value);
-    ElMessage.success(formData.value.deviceHatchId ? "修改成功" : "新增成功");
+    ElMessage.success(formData.value.deviceHatchId ? '修改成功' : '新增成功');
     formVisible.value = false;
     handleQuery();
   } catch {
-    ElMessage.error("操作失败");
+    ElMessage.error('操作失败');
   } finally {
     formSubmitting.value = false;
   }
@@ -224,7 +224,7 @@ async function handleDelete(row?: DeviceHatch) {
     ids = [row.deviceHatchId];
   } else {
     if (selectedIds.value.length === 0) {
-      ElMessage.warning("请选择要删除的记录");
+      ElMessage.warning('请选择要删除的记录');
       return;
     }
     ids = selectedIds.value;
@@ -233,8 +233,8 @@ async function handleDelete(row?: DeviceHatch) {
   try {
     await ElMessageBox.confirm(
       `确定要删除选中的 ${ids.length} 条仓口吗？`,
-      "提示",
-      { type: "warning" }
+      '提示',
+      { type: 'warning' },
     );
 
     for (const id of ids) {
@@ -362,10 +362,10 @@ onMounted(() => {
               新增仓口
             </el-button>
             <ExportButton
-            :module-code="ModuleCodeMap.DEVICE_HATCH"
-            :fields="visibleColumns"
-            :find-cond="queryParams"
-          />
+              :module-code="ModuleCodeMap.DEVICE_HATCH"
+              :fields="visibleColumns"
+              :find-cond="queryParams"
+            />
             <el-button
               type="danger"
               plain
@@ -451,7 +451,7 @@ onMounted(() => {
               </template>
               <!-- 最后清运时间 -->
               <template v-else-if="col.key === 'lastCleanTime'">
-                {{ row.lastCleanTime || "-" }}
+                {{ row.lastCleanTime || '-' }}
               </template>
               <!-- 状态 -->
               <template v-else-if="col.key === 'status'">
@@ -466,7 +466,7 @@ onMounted(() => {
               </template>
               <!-- 所属设备 -->
               <template v-else-if="col.key === 'deviceId'">
-                {{ row.deviceName || row.deviceId || "-" }}
+                {{ row.deviceName || row.deviceId || '-' }}
               </template>
               <!-- 普通字段 -->
               <template v-else>

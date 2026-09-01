@@ -103,7 +103,6 @@ onMounted(() => {
     });
   }
 });
-
 </script>
 
 <template>

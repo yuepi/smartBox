@@ -48,7 +48,7 @@ export interface StockInSubmitParams {
 export function getStockInPageApi(params: StockInPageParams) {
   return requestClient.get<{ records: StockIn[]; total: number }>(
     '/merchant/stockIn/page',
-    { params }
+    { params },
   );
 }
 

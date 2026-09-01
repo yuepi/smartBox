@@ -30,11 +30,21 @@ onMounted(() => {
 <template>
   <div v-loading="loading" class="basic-info">
     <el-descriptions :column="2" border v-if="info">
-      <el-descriptions-item label="商户ID">{{ info.merchantId }}</el-descriptions-item>
-      <el-descriptions-item label="商户名称">{{ info.merchantName }}</el-descriptions-item>
-      <el-descriptions-item label="商户编码">{{ info.merchantCode }}</el-descriptions-item>
-      <el-descriptions-item label="联系人">{{ info.contact || '-' }}</el-descriptions-item>
-      <el-descriptions-item label="联系电话">{{ info.phone || '-' }}</el-descriptions-item>
+      <el-descriptions-item label="商户ID">{{
+        info.merchantId
+      }}</el-descriptions-item>
+      <el-descriptions-item label="商户名称">{{
+        info.merchantName
+      }}</el-descriptions-item>
+      <el-descriptions-item label="商户编码">{{
+        info.merchantCode
+      }}</el-descriptions-item>
+      <el-descriptions-item label="联系人">{{
+        info.contact || '-'
+      }}</el-descriptions-item>
+      <el-descriptions-item label="联系电话">{{
+        info.phone || '-'
+      }}</el-descriptions-item>
       <el-descriptions-item label="商户状态">
         <el-tag :type="info.status === 0 ? 'success' : 'danger'" size="small">
           {{ info.status === 0 ? '启用' : '禁用' }}
@@ -54,9 +64,12 @@ onMounted(() => {
       </el-descriptions-item>
       <el-descriptions-item label="商户Logo" :span="2">
         <el-image
-v-if="info.logo" :src="info.logo" :preview-src-list="[info.logo]" fit="cover"
+          v-if="info.logo"
+          :src="info.logo"
+          :preview-src-list="[info.logo]"
+          fit="cover"
           style="width: 60px; height: 60px; border-radius: 8px"
-/>
+        />
         <span v-else>-</span>
       </el-descriptions-item>
     </el-descriptions>

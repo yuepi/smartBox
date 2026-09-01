@@ -48,7 +48,7 @@ const tableColumns = computed(() => {
         case 'menuName': {
           return (
             <div class="flex w-full items-center gap-1 overflow-hidden">
-              {cells} 
+              {cells}
               {rowData.menuType === 0 && <Folder class="size-4 shrink-0 text-gray-400" />}
               {rowData.menuType === 1 && <Document class="size-4 shrink-0 text-gray-400" />}
               {rowData.menuType === 2 && <Operation class="size-4 shrink-0 text-gray-400" />}
@@ -98,7 +98,7 @@ const tableColumns = computed(() => {
       title: '操作',
       width: 300,          // 宽度写死
       align: 'center',
-      fixed: 'right', 
+      fixed: 'right',
       cellRenderer: ({ rowData }: { rowData: Menu }) => (
         <div class="flex w-full justify-center gap-1">
           {hasAccessByCodes(['plat:menu:add']) && (
@@ -368,37 +368,95 @@ onMounted(() => {
     <div class="p-0">
       <!-- 查询表单 -->
       <el-card shadow="never" class="border-none mb-4 !p-2">
-        <el-form :inline="true" :model="queryParams" class="flex flex-wrap gap-x-2 gap-y-2 items-center">
+        <el-form
+          :inline="true"
+          :model="queryParams"
+          class="flex flex-wrap gap-x-2 gap-y-2 items-center"
+        >
           <el-form-item class="!mb-0 !mr-2">
-            <el-input v-model="queryParams.menuName" placeholder="请输入" clearable style="width: 200px" @keyup.enter="handleQuery">
-              <template #prefix><span class="text-xs text-gray-400 mr-0.5">菜单名称:</span></template>
+            <el-input
+              v-model="queryParams.menuName"
+              placeholder="请输入"
+              clearable
+              style="width: 200px"
+              @keyup.enter="handleQuery"
+            >
+              <template #prefix
+                ><span class="text-xs text-gray-400 mr-0.5"
+                  >菜单名称:</span
+                ></template
+              >
             </el-input>
           </el-form-item>
 
           <el-form-item class="!mb-0 !mr-2">
-            <el-select v-model="queryParams.menuType" clearable style="width: 200px">
-              <template #prefix><span class="text-xs text-gray-400 mr-0.5">类型:</span></template>
-              <el-option v-for="item in menuTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
+            <el-select
+              v-model="queryParams.menuType"
+              clearable
+              style="width: 200px"
+            >
+              <template #prefix
+                ><span class="text-xs text-gray-400 mr-0.5"
+                  >类型:</span
+                ></template
+              >
+              <el-option
+                v-for="item in menuTypeOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
             </el-select>
           </el-form-item>
 
           <el-form-item class="!mb-0 !mr-2">
-            <el-select v-model="queryParams.platformType" clearable style="width: 200px">
-              <template #prefix><span class="text-xs text-gray-400 mr-0.5">归属:</span></template>
-              <el-option v-for="item in platformTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
+            <el-select
+              v-model="queryParams.platformType"
+              clearable
+              style="width: 200px"
+            >
+              <template #prefix
+                ><span class="text-xs text-gray-400 mr-0.5"
+                  >归属:</span
+                ></template
+              >
+              <el-option
+                v-for="item in platformTypeOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
             </el-select>
           </el-form-item>
 
           <el-form-item class="!mb-0 !mr-2">
-            <el-select v-model="queryParams.status" clearable style="width: 200px">
-              <template #prefix><span class="text-xs text-gray-400 mr-0.5">状态:</span></template>
-              <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
+            <el-select
+              v-model="queryParams.status"
+              clearable
+              style="width: 200px"
+            >
+              <template #prefix
+                ><span class="text-xs text-gray-400 mr-0.5"
+                  >状态:</span
+                ></template
+              >
+              <el-option
+                v-for="item in statusOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
             </el-select>
           </el-form-item>
 
           <el-form-item class="!mb-0 !mr-0 md:ml-auto flex items-center gap-1">
             <el-tooltip content="查询" placement="top">
-              <el-button type="primary" :icon="Search" circle @click="handleQuery" />
+              <el-button
+                type="primary"
+                :icon="Search"
+                circle
+                @click="handleQuery"
+              />
             </el-tooltip>
             <el-tooltip content="重置" placement="top">
               <el-button :icon="Refresh" circle @click="resetQuery" />
@@ -411,17 +469,33 @@ onMounted(() => {
       <el-card shadow="never">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-2">
-            <el-button type="primary" plain :icon="Plus" @click="handleAdd()" v-access:code="['plat:menu:add']">
+            <el-button
+              type="primary"
+              plain
+              :icon="Plus"
+              @click="handleAdd()"
+              v-access:code="['plat:menu:add']"
+            >
               新增菜单
             </el-button>
-            <el-button type="warning" plain :icon="Refresh" @click="handleRefreshCache">
+            <el-button
+              type="warning"
+              plain
+              :icon="Refresh"
+              @click="handleRefreshCache"
+            >
               刷新缓存
             </el-button>
-            <el-button type="danger" plain :icon="Delete" @click="handleClearCache">
+            <el-button
+              type="danger"
+              plain
+              :icon="Delete"
+              @click="handleClearCache"
+            >
               清除缓存
             </el-button>
             <ExportButton
-               v-access:code="['plat:menu:export']"
+              v-access:code="['plat:menu:export']"
               :module-code="ModuleCodeMap.MENU"
               :fields="visibleColumns"
               :find-cond="queryParams"
@@ -457,30 +531,50 @@ onMounted(() => {
     </div>
 
     <!-- 新增/编辑弹窗 -->
-    <el-dialog v-model="formVisible" :title="formTitle" width="600px" append-to-body>
+    <el-dialog
+      v-model="formVisible"
+      :title="formTitle"
+      width="600px"
+      append-to-body
+    >
       <el-form :model="formData" label-width="100px">
         <el-form-item label="上级菜单">
           <el-tree-select
-v-model="formData.parentId" :data="parentMenuOptions" :props="{
-            value: 'menuId',
-            label: 'menuName',
-            children: 'children',
-          }" :check-strictly="true" placeholder="请选择上级菜单" clearable filterable style="width: 100%"
-/>
+            v-model="formData.parentId"
+            :data="parentMenuOptions"
+            :props="{
+              value: 'menuId',
+              label: 'menuName',
+              children: 'children',
+            }"
+            :check-strictly="true"
+            placeholder="请选择上级菜单"
+            clearable
+            filterable
+            style="width: 100%"
+          />
         </el-form-item>
         <el-form-item label="菜单名称" required>
           <el-input v-model="formData.menuName" placeholder="请输入菜单名称" />
         </el-form-item>
         <el-form-item label="菜单类型" required>
           <el-radio-group v-model="formData.menuType">
-            <el-radio v-for="item in menuTypeOptions" :key="item.value" :value="item.value">
+            <el-radio
+              v-for="item in menuTypeOptions"
+              :key="item.value"
+              :value="item.value"
+            >
               {{ item.label }}
             </el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="菜单归属">
           <el-radio-group v-model="formData.platformType">
-            <el-radio v-for="item in platformTypeOptions" :key="item.value" :value="item.value">
+            <el-radio
+              v-for="item in platformTypeOptions"
+              :key="item.value"
+              :value="item.value"
+            >
               {{ item.label }}
             </el-radio>
           </el-radio-group>
@@ -492,7 +586,10 @@ v-model="formData.parentId" :data="parentMenuOptions" :props="{
           <el-input v-model="formData.component" placeholder="请输入组件路径" />
         </el-form-item>
         <el-form-item label="权限标识">
-          <el-input v-model="formData.code" placeholder="请输入权限标识，如: system:user:add" />
+          <el-input
+            v-model="formData.code"
+            placeholder="请输入权限标识，如: system:user:add"
+          />
         </el-form-item>
         <el-form-item label="排序">
           <el-input-number v-model="formData.sort" :min="0" :max="999" />
@@ -506,11 +603,15 @@ v-model="formData.parentId" :data="parentMenuOptions" :props="{
       </el-form>
       <template #footer>
         <el-button @click="formVisible = false">取消</el-button>
-        <el-button type="primary" :loading="formSubmitting" @click="handleSubmit">确定</el-button>
+        <el-button
+          type="primary"
+          :loading="formSubmitting"
+          @click="handleSubmit"
+          >确定</el-button
+        >
       </template>
     </el-dialog>
   </Page>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

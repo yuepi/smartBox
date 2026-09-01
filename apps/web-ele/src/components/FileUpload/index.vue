@@ -13,7 +13,16 @@ const props = defineProps({
   // 大小限制(MB)
   fileSize: propTypes.number.def(5),
   // 文件类型, 例如['png', 'jpg', 'jpeg']
-  fileType: propTypes.array.def(['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'pdf']),
+  fileType: propTypes.array.def([
+    'doc',
+    'docx',
+    'xls',
+    'xlsx',
+    'ppt',
+    'pptx',
+    'txt',
+    'pdf',
+  ]),
   // 是否显示提示
   isShowTip: propTypes.bool.def(true),
   // 禁用组件（仅查看文件）
@@ -24,17 +33,23 @@ const emit = defineEmits(['update:modelValue']);
 const number = ref(0);
 const uploadList = ref<any[]>([]);
 
-const uploadFileUrl = ref(import.meta.env.VITE_GLOB_API_URL + '/tool/oss/main/upload'); // 上传文件服务器地址
+const uploadFileUrl = ref(
+  import.meta.env.VITE_GLOB_API_URL + '/tool/oss/main/upload',
+); // 上传文件服务器地址
 
 const headers = ref(globalHeaders());
 
 const fileList = ref<any[]>([]);
-const showTip = computed(() => props.isShowTip && (props.fileType || props.fileSize));
+const showTip = computed(
+  () => props.isShowTip && (props.fileType || props.fileSize),
+);
 
 const fileUploadRef = ref();
 
 // 监听 fileType 变化，更新 fileAccept
-const fileAccept = computed(() => props.fileType.map((type) => `.${type}`).join(','));
+const fileAccept = computed(() =>
+  props.fileType.map((type) => `.${type}`).join(','),
+);
 
 watch(
   () => props.modelValue,
@@ -78,7 +93,9 @@ const handleBeforeUpload = (file: any) => {
     const fileExt = fileName[fileName.length - 1];
     const isTypeOk = props.fileType.indexOf(fileExt) >= 0;
     if (!isTypeOk) {
-      ElMessage.error(`文件格式不正确, 请上传${props.fileType.join('/')}格式文件!`);
+      ElMessage.error(
+        `文件格式不正确, 请上传${props.fileType.join('/')}格式文件!`,
+      );
       return false;
     }
   }
@@ -144,7 +161,9 @@ const handleDelete = (index: number) => {
 // 上传结束处理
 const uploadedSuccessfully = () => {
   if (number.value > 0 && uploadList.value.length === number.value) {
-    fileList.value = fileList.value.filter((f) => f.url !== undefined).concat(uploadList.value);
+    fileList.value = fileList.value
+      .filter((f) => f.url !== undefined)
+      .concat(uploadList.value);
     uploadList.value = [];
     number.value = 0;
     emit('update:modelValue', listToString(fileList.value));
@@ -208,13 +227,27 @@ const listToString = (list: any[], separator?: string) => {
       的文件
     </div>
     <!-- 文件列表 -->
-    <transition-group class="upload-file-list el-upload-list el-upload-list--text" name="el-fade-in-linear" tag="ul">
-      <li v-for="(file, index) in fileList" :key="file.uid" class="el-upload-list__item ele-upload-list__item-content">
+    <transition-group
+      class="upload-file-list el-upload-list el-upload-list--text"
+      name="el-fade-in-linear"
+      tag="ul"
+    >
+      <li
+        v-for="(file, index) in fileList"
+        :key="file.uid"
+        class="el-upload-list__item ele-upload-list__item-content"
+      >
         <el-link :href="`${file.url}`" :underline="false" target="_blank">
           <span class="el-icon-document"> {{ getFileName(file.name) }} </span>
         </el-link>
         <div class="ele-upload-list__item-content-action">
-          <el-button type="danger" v-if="!disabled" link @click="handleDelete(index)">删除 </el-button>
+          <el-button
+            type="danger"
+            v-if="!disabled"
+            link
+            @click="handleDelete(index)"
+            >删除
+          </el-button>
         </div>
       </li>
     </transition-group>

@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
-import AMapLoader from "@amap/amap-jsapi-loader";
-
+import AMapLoader from '@amap/amap-jsapi-loader';
 
 interface Location {
   lng: number;
@@ -23,12 +22,12 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:modelValue", value: Location | null): void;
-  (e: "change", value: Location | null): void;
+  (e: 'update:modelValue', value: Location | null): void;
+  (e: 'change', value: Location | null): void;
 }>();
 
 const mapContainer = ref<HTMLDivElement>();
-const searchKeyword = ref("");
+const searchKeyword = ref('');
 const searchResults = ref<SearchResult[]>([]);
 const showResults = ref(false);
 const locationLoading = ref(false);
@@ -38,19 +37,22 @@ let search: any;
 let geocoder: any;
 
 const defaultZoom = props.zoom || 14;
-const defaultCenter = props.defaultCenter || { lng: 116.397_428, lat: 39.909_23 };
+const defaultCenter = props.defaultCenter || {
+  lng: 116.397_428,
+  lat: 39.909_23,
+};
 
 // 加载高德地图
 const loadMap = async () => {
   try {
     const AMap = await AMapLoader.load({
-      key: "a2f1a77c9013204bd92f42e88da34657",
-      version: "2.0",
-      plugins: ["AMap.PlaceSearch", "AMap.Geocoder"],
+      key: 'a2f1a77c9013204bd92f42e88da34657',
+      version: '2.0',
+      plugins: ['AMap.PlaceSearch', 'AMap.Geocoder'],
     });
 
     geocoder = new AMap.Geocoder({
-      city: "010",
+      city: '010',
       radius: 1000,
     });
 
@@ -61,7 +63,7 @@ const loadMap = async () => {
     map = new AMap.Map(mapContainer.value, {
       zoom: defaultZoom,
       center,
-      viewMode: "2D",
+      viewMode: '2D',
     });
 
     if (props.modelValue) {
@@ -74,15 +76,15 @@ const loadMap = async () => {
       autoFitView: true,
     });
 
-    map.on("click", (e: any) => {
+    map.on('click', (e: any) => {
       const { lng, lat } = e.lnglat;
       addMarker([lng, lat]);
       reverseGeocode(lng, lat);
       showResults.value = false;
     });
   } catch (error) {
-    console.error("地图加载失败：", error);
-    ElMessage.error("地图加载失败，请检查网络或Key配置");
+    console.error('地图加载失败：', error);
+    ElMessage.error('地图加载失败，请检查网络或Key配置');
   }
 };
 
@@ -90,7 +92,7 @@ const loadMap = async () => {
  * 将高德的 6 位 adcode 转换为级联选择器需要的字符串路径
  */
 function transformAdcodeToPath(adcode: string): string {
-  if (!adcode || adcode.length !== 6) return "";
+  if (!adcode || adcode.length !== 6) return '';
   const province = `${adcode.slice(0, 2)}0000`;
   const city = `${adcode.slice(0, 4)}00`;
   const district = adcode;
@@ -103,7 +105,7 @@ function transformAdcodeToPath(adcode: string): string {
 function reverseGeocode(lng: number, lat: number) {
   if (!geocoder) return;
   geocoder.getAddress([lng, lat], (status: string, result: any) => {
-    if (status === "complete" && result.regeocode) {
+    if (status === 'complete' && result.regeocode) {
       const { addressComponent, formattedAddress } = result.regeocode;
       const areaPath = transformAdcodeToPath(addressComponent.adcode);
 
@@ -117,8 +119,8 @@ function reverseGeocode(lng: number, lat: number) {
         district: addressComponent.district,
       };
 
-      emit("update:modelValue", location);
-      emit("change", location);
+      emit('update:modelValue', location);
+      emit('change', location);
     }
   });
 }
@@ -126,23 +128,25 @@ function reverseGeocode(lng: number, lat: number) {
 // --- 🌟 定位到当前位置 ---
 async function handleGetLocation() {
   if (!navigator.geolocation) {
-    ElMessage.warning("您的浏览器不支持定位功能");
+    ElMessage.warning('您的浏览器不支持定位功能');
     return;
   }
 
   locationLoading.value = true;
   const loadingInstance = ElLoading.service({
-    text: "正在获取位置...",
+    text: '正在获取位置...',
   });
 
   try {
-    const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(resolve, reject, {
-        enableHighAccuracy: true,
-        timeout: 10_000,
-        maximumAge: 60_000,
-      });
-    });
+    const position = await new Promise<GeolocationPosition>(
+      (resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10_000,
+          maximumAge: 60_000,
+        });
+      },
+    );
 
     const { latitude, longitude } = position.coords;
 
@@ -157,15 +161,14 @@ async function handleGetLocation() {
 
     // 逆地理编码获取地址
     reverseGeocode(longitude, latitude);
-
   } catch (error: any) {
-    console.error("定位失败:", error);
+    console.error('定位失败:', error);
     const errorMessages: Record<number, string> = {
-      1: "用户拒绝了定位请求",
-      2: "无法获取位置信息",
-      3: "定位请求超时",
+      1: '用户拒绝了定位请求',
+      2: '无法获取位置信息',
+      3: '定位请求超时',
     };
-    const message = errorMessages[error.code] || "定位失败，请检查GPS或网络";
+    const message = errorMessages[error.code] || '定位失败，请检查GPS或网络';
     ElMessage.error(message);
   } finally {
     locationLoading.value = false;
@@ -176,17 +179,17 @@ async function handleGetLocation() {
 // 搜索地点
 const handleSearch = () => {
   if (!searchKeyword.value.trim()) {
-    ElMessage.warning("请输入搜索关键词");
+    ElMessage.warning('请输入搜索关键词');
     return;
   }
 
   if (!search) {
-    ElMessage.error("搜索功能未初始化");
+    ElMessage.error('搜索功能未初始化');
     return;
   }
 
   search.search(searchKeyword.value, (status: string, result: any) => {
-    if (status === "complete" && result.poiList.pois.length > 0) {
+    if (status === 'complete' && result.poiList.pois.length > 0) {
       searchResults.value = result.poiList.pois.map((poi: any) => ({
         name: poi.name,
         address: poi.address,
@@ -199,7 +202,7 @@ const handleSearch = () => {
     } else {
       searchResults.value = [];
       showResults.value = false;
-      ElMessage.warning("未找到相关地点");
+      ElMessage.warning('未找到相关地点');
     }
   });
 };
@@ -210,14 +213,14 @@ const selectResult = (result: SearchResult) => {
   addMarker([location.lng, location.lat]);
   map.setCenter([location.lng, location.lat]);
   map.setZoom(16);
-  emit("update:modelValue", location);
-  emit("change", location);
+  emit('update:modelValue', location);
+  emit('change', location);
   showResults.value = false;
 };
 
 // 清空搜索
 const handleClearSearch = () => {
-  searchKeyword.value = "";
+  searchKeyword.value = '';
   searchResults.value = [];
   showResults.value = false;
 };
@@ -242,8 +245,8 @@ const clearLocation = () => {
     marker.setMap(null);
     marker = null;
   }
-  emit("update:modelValue", null);
-  emit("change", null);
+  emit('update:modelValue', null);
+  emit('change', null);
 };
 
 // 定位到选中的位置
@@ -288,9 +291,12 @@ onBeforeUnmount(() => {
     <!-- 搜索框 + 定位按钮 -->
     <div class="map-search">
       <el-input
-v-model="searchKeyword" placeholder="搜索地点" clearable @keyup.enter="handleSearch"
+        v-model="searchKeyword"
+        placeholder="搜索地点"
+        clearable
+        @keyup.enter="handleSearch"
         @clear="handleClearSearch"
->
+      >
         <template #prefix>
           <el-icon>
             <Search />
@@ -303,9 +309,13 @@ v-model="searchKeyword" placeholder="搜索地点" clearable @keyup.enter="handl
 
       <!-- 🌟 定位按钮 -->
       <el-button
-class="location-btn" icon="Location" :loading="locationLoading" circle title="定位到当前位置"
+        class="location-btn"
+        icon="Location"
+        :loading="locationLoading"
+        circle
+        title="定位到当前位置"
         @click="handleGetLocation"
-/>
+      />
 
       <!-- 搜索结果列表 -->
       <div v-if="searchResults.length > 0" class="search-results-wrapper">
@@ -317,7 +327,12 @@ class="location-btn" icon="Location" :loading="locationLoading" circle title="�
           </el-icon>
         </div>
         <div v-show="showResults" class="search-results">
-          <div v-for="(item, index) in searchResults" :key="index" class="result-item" @click="selectResult(item)">
+          <div
+            v-for="(item, index) in searchResults"
+            :key="index"
+            class="result-item"
+            @click="selectResult(item)"
+          >
             <div class="result-name">{{ item.name }}</div>
             <div class="result-address">{{ item.address }}</div>
           </div>
@@ -326,7 +341,11 @@ class="location-btn" icon="Location" :loading="locationLoading" circle title="�
     </div>
 
     <!-- 地图容器 -->
-    <div ref="mapContainer" class="map-container" :style="{ height: props.height }"></div>
+    <div
+      ref="mapContainer"
+      class="map-container"
+      :style="{ height: props.height }"
+    ></div>
 
     <!-- 选中的位置信息 -->
     <div v-if="modelValue" class="mt-2 flex gap-2 text-sm text-gray-500">
@@ -337,7 +356,12 @@ class="location-btn" icon="Location" :loading="locationLoading" circle title="�
     <!-- 操作按钮 -->
     <div class="mt-2 flex gap-2">
       <el-button size="small" @click="clearLocation">清空位置</el-button>
-      <el-button v-if="modelValue" size="small" type="primary" @click="centerToLocation">
+      <el-button
+        v-if="modelValue"
+        size="small"
+        type="primary"
+        @click="centerToLocation"
+      >
         查看位置
       </el-button>
     </div>

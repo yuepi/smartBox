@@ -44,7 +44,7 @@
     "bag": "包袋列表",
     "package": "计费套餐",
     "fault": "设备故障",
-    "qrCode":"二维码"
+    "qrCode": "二维码"
   },
   "operate": {
     "title": "运营管理",

@@ -7,7 +7,10 @@ const emit = defineEmits<{
   (e: 'success'): void;
 }>();
 
-const { warehouse_type, default_status } = useDicts(['warehouse_type', 'default_status']);
+const { warehouse_type, default_status } = useDicts([
+  'warehouse_type',
+  'default_status',
+]);
 
 const visible = ref(false);
 const title = ref('');
@@ -18,7 +21,9 @@ const formData = ref<Partial<Warehouse>>({
 });
 
 const formRules = reactive({
-  warehouseName: [{ required: true, message: '请输入仓库名称', trigger: 'blur' }],
+  warehouseName: [
+    { required: true, message: '请输入仓库名称', trigger: 'blur' },
+  ],
 });
 
 function open(row?: Warehouse) {
@@ -57,13 +62,25 @@ defineExpose({ open });
 
 <template>
   <el-dialog v-model="visible" :title="title" width="550px" append-to-body>
-    <el-form :model="formData" :rules="formRules" label-width="100px" label-position="right">
+    <el-form
+      :model="formData"
+      :rules="formRules"
+      label-width="100px"
+      label-position="right"
+    >
       <el-form-item label="仓库名称" prop="warehouseName" required>
-        <el-input v-model="formData.warehouseName" placeholder="请输入仓库名称" />
+        <el-input
+          v-model="formData.warehouseName"
+          placeholder="请输入仓库名称"
+        />
       </el-form-item>
 
       <el-form-item label="仓库类型">
-        <el-select v-model="formData.warehouseType" placeholder="请选择" style="width: 100%">
+        <el-select
+          v-model="formData.warehouseType"
+          placeholder="请选择"
+          style="width: 100%"
+        >
           <el-option
             v-for="item in warehouse_type"
             :key="item.value"
@@ -95,7 +112,9 @@ defineExpose({ open });
 
     <template #footer>
       <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :loading="loading" @click="handleSubmit">确定</el-button>
+      <el-button type="primary" :loading="loading" @click="handleSubmit"
+        >确定</el-button
+      >
     </template>
   </el-dialog>
 </template>

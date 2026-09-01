@@ -1,7 +1,13 @@
 <script lang="ts" setup>
 import { ref, watch } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { Plus, Delete, Picture, VideoCamera, Upload } from '@element-plus/icons-vue';
+import {
+  Plus,
+  Delete,
+  Picture,
+  VideoCamera,
+  Upload,
+} from '@element-plus/icons-vue';
 
 import {
   getRecycleOrderImageListApi,
@@ -60,7 +66,9 @@ function handlePreview(item: RecycleOrderImage) {
 // 删除
 async function handleDelete(item: RecycleOrderImage) {
   try {
-    await ElMessageBox.confirm('确定要删除该附件吗？', '提示', { type: 'warning' });
+    await ElMessageBox.confirm('确定要删除该附件吗？', '提示', {
+      type: 'warning',
+    });
     await deleteRecycleOrderImageApi(item.recycleOrderImageId);
     ElMessage.success('删除成功');
     await loadImageList();
@@ -112,13 +120,17 @@ async function handleUploadSubmit() {
 }
 
 // 监听订单ID变化
-watch(() => props.orderId, () => {
-  if (props.orderId) {
-    loadImageList();
-  } else {
-    imageList.value = [];
-  }
-}, { immediate: true });
+watch(
+  () => props.orderId,
+  () => {
+    if (props.orderId) {
+      loadImageList();
+    } else {
+      imageList.value = [];
+    }
+  },
+  { immediate: true },
+);
 
 defineExpose({ loadImageList });
 </script>
@@ -127,10 +139,20 @@ defineExpose({ loadImageList });
   <div class="image-gallery">
     <!-- 操作按钮 -->
     <div class="mb-3 flex gap-2">
-      <el-button type="primary" size="small" :icon="Picture" @click="handleUpload">
+      <el-button
+        type="primary"
+        size="small"
+        :icon="Picture"
+        @click="handleUpload"
+      >
         添加图片
       </el-button>
-      <el-button type="success" size="small" :icon="VideoCamera" @click="handleUploadVideo">
+      <el-button
+        type="success"
+        size="small"
+        :icon="VideoCamera"
+        @click="handleUploadVideo"
+      >
         添加视频
       </el-button>
     </div>
@@ -192,9 +214,19 @@ defineExpose({ loadImageList });
     </div>
 
     <!-- 预览弹窗 -->
-    <el-dialog v-model="previewVisible" title="预览" width="600px" append-to-body center>
+    <el-dialog
+      v-model="previewVisible"
+      title="预览"
+      width="600px"
+      append-to-body
+      center
+    >
       <div class="preview-container">
-        <img v-if="previewType === 'image'" :src="previewUrl" class="preview-image" />
+        <img
+          v-if="previewType === 'image'"
+          :src="previewUrl"
+          class="preview-image"
+        />
         <video v-else :src="previewUrl" controls class="preview-video" />
       </div>
       <template #footer>
@@ -222,7 +254,11 @@ defineExpose({ loadImageList });
       </el-form>
       <template #footer>
         <el-button @click="uploadVisible = false">取消</el-button>
-        <el-button type="primary" :loading="uploadSubmitting" @click="handleUploadSubmit">
+        <el-button
+          type="primary"
+          :loading="uploadSubmitting"
+          @click="handleUploadSubmit"
+        >
           确定
         </el-button>
       </template>

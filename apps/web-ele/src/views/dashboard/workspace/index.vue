@@ -8,9 +8,13 @@ import UserCard from './UserCard.vue';
 </script>
 
 <template>
-  <div class="h-full p-4 bg-[#F5F7FA] dark:bg-zinc-900 overflow-hidden flex gap-4">
+  <div
+    class="h-full p-4 bg-[#F5F7FA] dark:bg-zinc-900 overflow-hidden flex gap-4"
+  >
     <!-- ================= 左侧：固定面板 ================= -->
-    <div class="w-[280px] xl:w-[310px] flex flex-col gap-4 shrink-0 h-full min-h-0">
+    <div
+      class="w-[280px] xl:w-[310px] flex flex-col gap-4 shrink-0 h-full min-h-0"
+    >
       <UserCard />
       <DeviceStatus />
       <QuickNav />

@@ -33,20 +33,27 @@ export interface StockOutItemPageParams {
 export function getStockOutItemPageApi(params: StockOutItemPageParams) {
   return requestClient.get<{ records: StockOutItem[]; total: number }>(
     '/merchant/stockOutItem/page',
-    { params }
+    { params },
   );
 }
 
 /** 列表查询出库明细 */
-export function getStockOutItemListApi(params?: Partial<StockOutItemPageParams>) {
-  return requestClient.get<StockOutItem[]>('/merchant/stockOutItem/list', { params });
+export function getStockOutItemListApi(
+  params?: Partial<StockOutItemPageParams>,
+) {
+  return requestClient.get<StockOutItem[]>('/merchant/stockOutItem/list', {
+    params,
+  });
 }
 
 /** 按出库单ID查询关联的出库明细 */
 export function getStockOutItemListByStockOutIdApi(stockOutId: number) {
-  return requestClient.get<StockOutItem[]>('/merchant/stockOutItem/listByStockOutId', {
-    params: { stockOutId },
-  });
+  return requestClient.get<StockOutItem[]>(
+    '/merchant/stockOutItem/listByStockOutId',
+    {
+      params: { stockOutId },
+    },
+  );
 }
 
 /** 新增出库明细 */
@@ -68,5 +75,7 @@ export function getStockOutItemDetailApi(stockOutItemId: number) {
 
 /** 删除出库明细 */
 export function deleteStockOutItemApi(stockOutItemId: number) {
-  return requestClient.post<boolean>('/merchant/stockOutItem/delete', { stockOutItemId });
+  return requestClient.post<boolean>('/merchant/stockOutItem/delete', {
+    stockOutItemId,
+  });
 }

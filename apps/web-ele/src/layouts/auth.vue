@@ -22,7 +22,7 @@ const logoDark = computed(() => preferences.logo.sourceDark);
     :toolbar="false"
     :slogan-image="loginImage"
   >
->
+    >
     <!-- 自定义工具栏 -->
     <!-- <template #toolbar></template> -->
   </AuthPageLayout>

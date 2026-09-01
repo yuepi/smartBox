@@ -1,7 +1,14 @@
 <script lang="ts" setup>
 import { ref, watch } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { Plus, Delete, Edit, User, Phone, ChatDotRound } from '@element-plus/icons-vue';
+import {
+  Plus,
+  Delete,
+  Edit,
+  User,
+  Phone,
+  ChatDotRound,
+} from '@element-plus/icons-vue';
 
 import {
   getMemberAuthListApi,
@@ -100,12 +107,13 @@ async function handleSubmit() {
 
   formSubmitting.value = true;
   try {
-    const api = formData.value.memberAuthId ? editMemberAuthApi : addMemberAuthApi;
+    const api = formData.value.memberAuthId
+      ? editMemberAuthApi
+      : addMemberAuthApi;
     await api(formData.value);
     ElMessage.success(formData.value.memberAuthId ? '修改成功' : '新增成功');
     formVisible.value = false;
     await loadAuthList();
-
   } catch {
     ElMessage.error('操作失败');
   } finally {
@@ -116,7 +124,9 @@ async function handleSubmit() {
 // 删除
 async function handleDelete(row: MemberAuth) {
   try {
-    await ElMessageBox.confirm('确定要删除该认证方式吗？', '提示', { type: 'warning' });
+    await ElMessageBox.confirm('确定要删除该认证方式吗？', '提示', {
+      type: 'warning',
+    });
     const res = await deleteMemberAuthApi(row.memberAuthId);
     if (res.code === 200) {
       ElMessage.success('删除成功');
@@ -129,11 +139,15 @@ async function handleDelete(row: MemberAuth) {
   }
 }
 
-watch(() => props.memberId, () => {
-  if (props.memberId) {
-    loadAuthList();
-  }
-}, { immediate: true });
+watch(
+  () => props.memberId,
+  () => {
+    if (props.memberId) {
+      loadAuthList();
+    }
+  },
+  { immediate: true },
+);
 
 defineExpose({ loadAuthList });
 </script>
@@ -147,16 +161,36 @@ defineExpose({ loadAuthList });
     </div>
 
     <el-table v-loading="loading" :data="authList" border stripe size="small">
-      <el-table-column prop="memberAuthId" label="认证ID" width="80" align="center" />
-      <el-table-column prop="authType" label="认证类型" width="120" align="center">
+      <el-table-column
+        prop="memberAuthId"
+        label="认证ID"
+        width="80"
+        align="center"
+      />
+      <el-table-column
+        prop="authType"
+        label="认证类型"
+        width="120"
+        align="center"
+      >
         <template #default="{ row }">
           <el-tag :type="getAuthTypeType(row.authType)" size="small">
             {{ getAuthTypeLabel(row.authType) }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="authAccount" label="认证账号" min-width="180" align="left" />
-      <el-table-column prop="authSecret" label="认证密钥" width="150" align="center">
+      <el-table-column
+        prop="authAccount"
+        label="认证账号"
+        min-width="180"
+        align="left"
+      />
+      <el-table-column
+        prop="authSecret"
+        label="认证密钥"
+        width="150"
+        align="center"
+      >
         <template #default="{ row }">
           <span class="text-gray-400">******</span>
         </template>
@@ -170,31 +204,69 @@ defineExpose({ loadAuthList });
       </el-table-column>
       <el-table-column label="操作" width="180" align="center">
         <template #default="{ row }">
-          <el-button link type="primary" :icon="Edit" @click="handleEdit(row)">编辑</el-button>
-          <el-button link type="danger" :icon="Delete" @click="handleDelete(row)">删除</el-button>
+          <el-button link type="primary" :icon="Edit" @click="handleEdit(row)"
+            >编辑</el-button
+          >
+          <el-button
+            link
+            type="danger"
+            :icon="Delete"
+            @click="handleDelete(row)"
+            >删除</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
 
-    <el-empty v-if="!loading && authList.length === 0" description="暂无认证方式" :image-size="60" />
+    <el-empty
+      v-if="!loading && authList.length === 0"
+      description="暂无认证方式"
+      :image-size="60"
+    />
 
     <!-- 新增/编辑弹窗 -->
-    <el-dialog v-model="formVisible" :title="formTitle" width="500px" append-to-body>
+    <el-dialog
+      v-model="formVisible"
+      :title="formTitle"
+      width="500px"
+      append-to-body
+    >
       <el-form :model="formData" label-width="90px">
         <el-form-item label="认证类型" required>
-          <el-select v-model="formData.authType" placeholder="请选择" style="width: 100%">
-            <el-option v-for="item in authTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
+          <el-select
+            v-model="formData.authType"
+            placeholder="请选择"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="item in authTypeOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="认证账号" required>
-          <el-input v-model="formData.authAccount" placeholder="请输入认证账号" />
+          <el-input
+            v-model="formData.authAccount"
+            placeholder="请输入认证账号"
+          />
         </el-form-item>
         <el-form-item label="认证密钥">
-          <el-input v-model="formData.authSecret" type="password" show-password placeholder="请输入认证密钥" />
+          <el-input
+            v-model="formData.authSecret"
+            type="password"
+            show-password
+            placeholder="请输入认证密钥"
+          />
         </el-form-item>
         <el-form-item label="状态">
           <el-radio-group v-model="formData.status">
-            <el-radio v-for="item in statusOptions" :key="item.value" :value="item.value">
+            <el-radio
+              v-for="item in statusOptions"
+              :key="item.value"
+              :value="item.value"
+            >
               {{ item.label }}
             </el-radio>
           </el-radio-group>
@@ -202,7 +274,12 @@ defineExpose({ loadAuthList });
       </el-form>
       <template #footer>
         <el-button @click="formVisible = false">取消</el-button>
-        <el-button type="primary" :loading="formSubmitting" @click="handleSubmit">确定</el-button>
+        <el-button
+          type="primary"
+          :loading="formSubmitting"
+          @click="handleSubmit"
+          >确定</el-button
+        >
       </template>
     </el-dialog>
   </div>

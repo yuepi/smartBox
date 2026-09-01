@@ -39,13 +39,20 @@ defineExpose({ open });
   <el-dialog v-model="visible" title="生成包袋" width="400px" append-to-body>
     <el-form label-width="100px">
       <el-form-item label="生成数量">
-        <el-input-number v-model="num" :min="1" :max="100" style="width: 100%" />
+        <el-input-number
+          v-model="num"
+          :min="1"
+          :max="100"
+          style="width: 100%"
+        />
         <div class="text-gray-400 text-sm mt-1">最多可生成100个包袋</div>
       </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :loading="loading" @click="handleSubmit">确定</el-button>
+      <el-button type="primary" :loading="loading" @click="handleSubmit"
+        >确定</el-button
+      >
     </template>
   </el-dialog>
 </template>

@@ -1,19 +1,18 @@
 <!-- views/dashboard/analytics/index.vue -->
 <script setup lang="ts">
+import { AnalysisChartCard, AnalysisChartsTabs } from '@vben/common-ui';
 
-import { AnalysisChartCard, AnalysisChartsTabs } from "@vben/common-ui";
-
-import CategoryDistribution from "./CategoryDistribution.vue";
-import DeliveryTrends from "./DeliveryTrends.vue";
-import DeviceStatus from "./DeviceStatus.vue";
-import OrderTrend from "./OrderTrend.vue";
-import OverviewCards from "./OverviewCards.vue";
-import RecycleAnalysis from "./RecycleAnalysis.vue";
+import CategoryDistribution from './CategoryDistribution.vue';
+import DeliveryTrends from './DeliveryTrends.vue';
+import DeviceStatus from './DeviceStatus.vue';
+import OrderTrend from './OrderTrend.vue';
+import OverviewCards from './OverviewCards.vue';
+import RecycleAnalysis from './RecycleAnalysis.vue';
 
 // Tab 配置
 const chartTabs = [
-  { label: "投递趋势", value: "trends" },
-  { label: "回收分析", value: "recycle" },
+  { label: '投递趋势', value: 'trends' },
+  { label: '回收分析', value: 'recycle' },
 ];
 </script>
 

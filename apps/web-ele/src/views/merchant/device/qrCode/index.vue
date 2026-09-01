@@ -2,15 +2,20 @@
 import type { Qrcode, QrcodePageParams } from '#/api/device/qrCode';
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
-import { Page } from "@vben/common-ui";
+import { computed, onMounted, reactive, ref, watch } from 'vue';
+
+import { Page } from '@vben/common-ui';
 
 import {
   batchDownQrcodeFileApi,
   deleteQrcodeApi,
   getQrcodePageApi,
 } from '#/api/device/qrCode';
-import { defaultQrcodeColumns, QRCODE_STORAGE_KEY } from '#/constants/tableColumns';
-import { ModuleCodeMap } from "#/hooks/useExport";
+import {
+  defaultQrcodeColumns,
+  QRCODE_STORAGE_KEY,
+} from '#/constants/tableColumns';
+import { ModuleCodeMap } from '#/hooks/useExport';
 
 import DetailDialog from './Detail.vue';
 import GenerateDialog from './Generate.vue';
@@ -19,7 +24,7 @@ import ShowDialog from './ShowDialog.vue';
 const { qrcode_type, qrcode_bind_status, qrcode_status } = useDicts([
   'qrcode_type',
   'qrcode_bind_status',
-  'qrcode_status'
+  'qrcode_status',
 ]);
 
 // --- 表格列配置 ---
@@ -92,10 +97,23 @@ async function handleDownloadSingle(row: Qrcode) {
     const blob = res.data;
     if (!(blob instanceof Blob)) return;
 
+    // 从响应头获取文件名
+    let filename = `QR_${row.qrcodeCode}.png`; // 兜底名称
+    const contentDisposition = res.headers?.['content-disposition'];
+    if (contentDisposition) {
+      // 匹配 filename*=UTF-8''xxx 或 filename="xxx"
+      const match = contentDisposition.match(
+        /filename\*?=['"]?(?:UTF-8'')?([^"';]+)['"]?/i,
+      );
+      if (match?.[1]) {
+        filename = decodeURIComponent(match[1]);
+      }
+    }
+
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `QR_${row.qrcodeCode}.png`;
+    link.download = filename;
     document.body.append(link);
     link.click();
     link.remove();
@@ -130,7 +148,7 @@ async function handleBatchDelete() {
     await ElMessageBox.confirm(
       `确定要删除选中的 ${selectedIds.value.length} 个二维码吗？`,
       '提示',
-      { type: 'warning' }
+      { type: 'warning' },
     );
     for (const id of selectedIds.value) {
       await deleteQrcodeApi(id);
@@ -143,14 +161,16 @@ async function handleBatchDelete() {
   }
 }
 
-
 // --- 批量展示 ---
 function handleBatchShow() {
   if (selectedIds.value.length === 0) {
     ElMessage.warning('请选择要展示的二维码');
     return;
   }
-  showDialogRef.value?.open(selectedIds.value, `批量展示二维码 (共 ${selectedIds.value.length} 个)`);
+  showDialogRef.value?.open(
+    selectedIds.value,
+    `批量展示二维码 (共 ${selectedIds.value.length} 个)`,
+  );
 }
 
 // --- 批量下载 ---
@@ -167,7 +187,9 @@ async function handleBatchDownload() {
     let filename = `qrcodes_${Date.now()}.zip`;
     const contentDisposition = res.headers?.['content-disposition'];
     if (contentDisposition) {
-      const match = contentDisposition.match(/filename\*?=['"]?(?:UTF-8'')?([^"';]+)['"]?/i);
+      const match = contentDisposition.match(
+        /filename\*?=['"]?(?:UTF-8'')?([^"';]+)['"]?/i,
+      );
       if (match?.[1]) filename = decodeURIComponent(match[1]);
     }
 
@@ -222,45 +244,79 @@ onMounted(() => {
 <template>
   <Page auto-content-height>
     <BaseTableLayout
-v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="loading"
-      :total="total" @search="loadData" @reset="resetQuery"
->
+      v-model:query-params="queryParams"
+      v-model:more-params="moreParams"
+      :loading="loading"
+      :total="total"
+      @search="loadData"
+      @reset="resetQuery"
+    >
       <!-- 📥 基础筛选项 -->
       <template #search-basic>
         <el-form-item>
           <el-input
-v-model="queryParams.qrcodeCode" placeholder="请输入" clearable style="width: 200px"
+            v-model="queryParams.qrcodeCode"
+            placeholder="请输入"
+            clearable
+            style="width: 200px"
             @keyup.enter="handleQuery"
->
+          >
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">二维码编号:</span>
             </template>
           </el-input>
         </el-form-item>
         <el-form-item>
-          <el-select v-model="queryParams.qrcodeType" clearable style="width: 200px">
+          <el-select
+            v-model="queryParams.qrcodeType"
+            clearable
+            style="width: 200px"
+          >
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">二维码类型:</span>
             </template>
-            <el-option v-for="item in qrcode_type" :key="item.value" :label="item.label" :value="item.value" />
+            <el-option
+              v-for="item in qrcode_type"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
 
         <el-form-item>
-          <el-select v-model="queryParams.bindFlag" clearable style="width: 200px">
+          <el-select
+            v-model="queryParams.bindFlag"
+            clearable
+            style="width: 200px"
+          >
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">绑定状态:</span>
             </template>
-            <el-option v-for="item in qrcode_bind_status" :key="item.value" :label="item.label" :value="item.value" />
+            <el-option
+              v-for="item in qrcode_bind_status"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
 
         <el-form-item>
-          <el-select v-model="queryParams.status" clearable style="width: 200px">
+          <el-select
+            v-model="queryParams.status"
+            clearable
+            style="width: 200px"
+          >
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">状态:</span>
             </template>
-            <el-option v-for="item in qrcode_status" :key="item.value" :label="item.label" :value="item.value" />
+            <el-option
+              v-for="item in qrcode_status"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
       </template>
@@ -274,12 +330,25 @@ v-model="queryParams.qrcodeCode" placeholder="请输入" clearable style="width:
         <el-button type="primary" plain icon="Plus" @click="handleGenerate">
           生成二维码
         </el-button>
-        <ExportButton :module-code="ModuleCodeMap.QRCODE" :fields="visibleColumns" :find-cond="queryParams" />
-        <el-button type="danger" plain icon="Delete" :disabled="selectedIds.length === 0" @click="handleBatchDelete">
+        <ExportButton
+          :module-code="ModuleCodeMap.QRCODE"
+          :fields="visibleColumns"
+          :find-cond="queryParams"
+        />
+        <el-button
+          type="danger"
+          plain
+          icon="Delete"
+          :disabled="selectedIds.length === 0"
+          @click="handleBatchDelete"
+        >
           批量删除
         </el-button>
 
-        <el-dropdown v-if="selectedIds.length > 0" @command="handleBatchQrcodeCommand">
+        <el-dropdown
+          v-if="selectedIds.length > 0"
+          @command="handleBatchQrcodeCommand"
+        >
           <el-button type="primary" plain>
             批量二维码
             <el-icon class="el-icon--right">
@@ -289,15 +358,22 @@ v-model="queryParams.qrcodeCode" placeholder="请输入" clearable style="width:
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item command="show">批量展示二维码</el-dropdown-item>
-              <el-dropdown-item command="download">批量下载二维码</el-dropdown-item>
+              <el-dropdown-item command="download">
+                批量下载二维码
+              </el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
 
         <transition name="el-fade-in">
-          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-sm text-gray-400">
+          <span
+            v-if="selectedIds.length > 0"
+            class="selected-alert-badge ml-2 text-sm text-gray-400"
+          >
             已选
-            <span class="text-red-500 font-medium">{{ selectedIds.length }}</span>
+            <span class="text-red-500 font-medium">{{
+              selectedIds.length
+            }}</span>
             项
           </span>
         </transition>
@@ -306,23 +382,32 @@ v-model="queryParams.qrcodeCode" placeholder="请输入" clearable style="width:
       <!-- 📥 工具栏右侧 -->
       <template #toolbar-right>
         <ColumnSelector
-:storage-key="QRCODE_STORAGE_KEY" :default-columns="defaultQrcodeColumns"
+          :storage-key="QRCODE_STORAGE_KEY"
+          :default-columns="defaultQrcodeColumns"
           @update:columns="handleColumnsUpdate"
-/>
+        />
       </template>
 
       <!-- 📥 表格 -->
       <template #table>
         <el-table
-:data="tableData" border stripe style="width: 100%; height: 100%"
+          :data="tableData"
+          border
+          stripe
+          style="width: 100%; height: 100%"
           @selection-change="handleSelectionChange"
->
+        >
           <el-table-column type="selection" width="50" align="center" />
 
           <el-table-column
-v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
-            :width="typeof col.width === 'number' ? col.width : undefined" :min-width="col.minWidth" :align="col.align"
->
+            v-for="col in visibleColumns"
+            :key="col.key"
+            :prop="col.key"
+            :label="col.label"
+            :width="typeof col.width === 'number' ? col.width : undefined"
+            :min-width="col.minWidth"
+            :align="col.align"
+          >
             <template #default="{ row }">
               <template v-if="col.key === 'qrcodeType'">
                 <DictTag :options="qrcode_type" :value="row.qrcodeType" />
@@ -334,7 +419,13 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
                 <DictTag :options="qrcode_status" :value="row.status" />
               </template>
               <template v-else-if="col.key === 'qrcodeUrl'">
-                <el-button v-if="row.qrcodeUrl" link type="primary" size="small" @click="showQrcodeImage(row)">
+                <el-button
+                  v-if="row.qrcodeUrl"
+                  link
+                  type="primary"
+                  size="small"
+                  @click="showQrcodeImage(row)"
+                >
                   查看图片
                 </el-button>
                 <span v-else class="text-gray-400">-</span>
@@ -345,16 +436,29 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
             </template>
           </el-table-column>
 
-          <el-table-column label="操作" width="200" fixed="right" align="center">
+          <el-table-column
+            label="操作"
+            width="200"
+            fixed="right"
+            align="center"
+          >
             <template #default="{ row }">
               <div class="action-buttons">
                 <el-button size="small" type="primary" @click="handleView(row)">
                   详情
                 </el-button>
-                <el-button size="small" type="primary" @click="handleShowSingle(row)">
+                <el-button
+                  size="small"
+                  type="primary"
+                  @click="handleShowSingle(row)"
+                >
                   展示
                 </el-button>
-                <el-button size="small" type="warning" @click="handleDownloadSingle(row)">
+                <el-button
+                  size="small"
+                  type="warning"
+                  @click="handleDownloadSingle(row)"
+                >
                   下载
                 </el-button>
               </div>

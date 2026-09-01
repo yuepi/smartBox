@@ -58,7 +58,6 @@ export const PLAT_PERMISSIONS = {
     MANAGE: 'plat:manage:merchant',
     MERCHANT: {
       ROUTE: 'plat:merchant',
-    }
+    },
   },
-  
 } as const;

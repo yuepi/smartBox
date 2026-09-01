@@ -76,10 +76,10 @@ async function loadUnboundHatchList() {
     ]);
 
     const boundIds = new Set(
-      (boundRes.records || []).map((item) => item.deviceHatchId)
+      (boundRes.records || []).map((item) => item.deviceHatchId),
     );
     let list = (allHatches || []).filter(
-      (hatch: DeviceHatch) => !boundIds.has(hatch.deviceHatchId)
+      (hatch: DeviceHatch) => !boundIds.has(hatch.deviceHatchId),
     );
 
     // 本地搜索筛选（支持搜 设备名称 或 仓口名称）
@@ -88,7 +88,7 @@ async function loadUnboundHatchList() {
       list = list.filter(
         (h: DeviceHatch) =>
           h.deviceName?.toLowerCase().includes(kw) ||
-          h.hatchName?.toLowerCase().includes(kw)
+          h.hatchName?.toLowerCase().includes(kw),
       );
     }
     unboundData.value = list;
@@ -150,7 +150,7 @@ async function handleUnbind() {
     await ElMessageBox.confirm(
       `确定要解绑选中的 ${selectedBoundRecordIds.value.length} 个仓口计费标准吗？`,
       '提示',
-      { type: 'warning' }
+      { type: 'warning' },
     );
     submitting.value = true;
     await hatchUnBindPackageApi({
@@ -174,7 +174,7 @@ async function handleSingleUnbind(record: HatchBindPackageRecord) {
     await ElMessageBox.confirm(
       `确定要解除【${record.deviceName}】-【${record.hatchName}】的计费标准绑定吗？`,
       '提示',
-      { type: 'warning' }
+      { type: 'warning' },
     );
     submitting.value = true;
     await hatchUnBindPackageApi({
@@ -198,7 +198,7 @@ const filteredBoundData = computed(() => {
   return boundData.value.filter(
     (item: HatchBindPackageRecord) =>
       item.deviceName?.toLowerCase().includes(kw) ||
-      item.hatchName?.toLowerCase().includes(kw)
+      item.hatchName?.toLowerCase().includes(kw),
   );
 });
 
@@ -226,7 +226,9 @@ defineExpose({ open });
         <div
           class="panel-header flex items-center justify-between mb-3 pb-2 border-b"
         >
-          <span class="font-medium text-gray-700">待绑定仓口 ({{ unboundData.length }})</span>
+          <span class="font-medium text-gray-700"
+            >待绑定仓口 ({{ unboundData.length }})</span
+          >
           <span
             v-if="selectedUnboundIds.length > 0"
             class="text-xs text-primary"
@@ -301,7 +303,9 @@ defineExpose({ open });
         <div
           class="panel-header flex items-center justify-between mb-3 pb-2 border-b"
         >
-          <span class="font-medium text-gray-700">已绑定仓口 ({{ boundTotal }})</span>
+          <span class="font-medium text-gray-700"
+            >已绑定仓口 ({{ boundTotal }})</span
+          >
           <span
             v-if="selectedBoundRecordIds.length > 0"
             class="text-xs text-danger"

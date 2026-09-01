@@ -2,10 +2,18 @@
 import type { LoginLogPageParams } from '#/api/monitor/login';
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
+import { computed, onMounted, reactive, ref } from 'vue';
+
 import { Page } from '@vben/common-ui';
 
-import { deleteMerchantLoginLogApi, getMerchantLoginLogPageApi } from '#/api/monitor/login';
-import { defaultLoginLogColumns, LOGIN_LOG_STORAGE_KEY } from '#/constants/tableColumns';
+import {
+  deleteMerchantLoginLogApi,
+  getMerchantLoginLogPageApi,
+} from '#/api/monitor/login';
+import {
+  defaultLoginLogColumns,
+  LOGIN_LOG_STORAGE_KEY,
+} from '#/constants/tableColumns';
 import { ModuleCodeMap } from '#/hooks/useExport';
 
 const { login_status } = useDicts(['login_status']);
@@ -67,7 +75,11 @@ async function handleDelete() {
     return;
   }
   try {
-    await ElMessageBox.confirm(`确定要删除选中的 ${selectedIds.value.length} 条日志吗？`, '提示', { type: 'warning' });
+    await ElMessageBox.confirm(
+      `确定要删除选中的 ${selectedIds.value.length} 条日志吗？`,
+      '提示',
+      { type: 'warning' },
+    );
     await deleteMerchantLoginLogApi(selectedIds.value.join(','));
     ElMessage.success('删除成功');
     selectedIds.value = [];
@@ -128,7 +140,11 @@ onMounted(() => {
       <!-- 📥 高级筛选项 -->
       <template #search-advanced>
         <el-form-item>
-          <el-select v-model="queryParams.status" clearable style="width: 200px">
+          <el-select
+            v-model="queryParams.status"
+            clearable
+            style="width: 200px"
+          >
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">状态:</span>
             </template>
@@ -144,13 +160,30 @@ onMounted(() => {
 
       <!-- 📥 工具栏左侧 -->
       <template #toolbar-left>
-        <ExportButton :module-code="ModuleCodeMap.LOGIN_LOG" :fields="visibleColumns" :find-cond="queryParams" />
-        <el-button type="danger" plain icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete">
+        <ExportButton
+          :module-code="ModuleCodeMap.LOGIN_LOG"
+          :fields="visibleColumns"
+          :find-cond="queryParams"
+        />
+        <el-button
+          type="danger"
+          plain
+          icon="Delete"
+          :disabled="selectedIds.length === 0"
+          @click="handleDelete"
+        >
           批量删除
         </el-button>
         <transition name="el-fade-in">
-          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-xs text-gray-400">
-            已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
+          <span
+            v-if="selectedIds.length > 0"
+            class="selected-alert-badge ml-2 text-xs text-gray-400"
+          >
+            已选
+            <span class="text-red-500 font-medium">{{
+              selectedIds.length
+            }}</span>
+            项
           </span>
         </transition>
       </template>
@@ -195,10 +228,20 @@ onMounted(() => {
             </template>
           </el-table-column>
 
-          <el-table-column label="操作" width="100" fixed="right" align="center">
+          <el-table-column
+            label="操作"
+            width="100"
+            fixed="right"
+            align="center"
+          >
             <template #default="{ row }">
               <el-tooltip content="详情" placement="top" :enterable="false">
-                <el-button link type="primary" icon="View" @click="handleView(row)" />
+                <el-button
+                  link
+                  type="primary"
+                  icon="View"
+                  @click="handleView(row)"
+                />
               </el-tooltip>
             </template>
           </el-table-column>
@@ -207,18 +250,42 @@ onMounted(() => {
     </BaseTableLayout>
 
     <!-- ===== 详情弹窗 ===== -->
-    <el-dialog v-model="detailVisible" title="登录日志详情" width="600px" append-to-body>
-      <el-descriptions :column="2" border v-if="detailData && Object.keys(detailData).length > 0" label-width="120px">
-        <el-descriptions-item label="登录账号">{{ detailData.accountName }}</el-descriptions-item>
-        <el-descriptions-item label="登录IP">{{ detailData.ipAddr || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="登录地点">{{ detailData.loginLocation || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="浏览器">{{ detailData.browser || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="操作系统">{{ detailData.os || '-' }}</el-descriptions-item>
+    <el-dialog
+      v-model="detailVisible"
+      title="登录日志详情"
+      width="600px"
+      append-to-body
+    >
+      <el-descriptions
+        :column="2"
+        border
+        v-if="detailData && Object.keys(detailData).length > 0"
+        label-width="120px"
+      >
+        <el-descriptions-item label="登录账号">
+          {{ detailData.accountName }}
+        </el-descriptions-item>
+        <el-descriptions-item label="登录IP">
+          {{ detailData.ipAddr || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="登录地点">
+          {{ detailData.loginLocation || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="浏览器">
+          {{ detailData.browser || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="操作系统">
+          {{ detailData.os || '-' }}
+        </el-descriptions-item>
         <el-descriptions-item label="登录状态">
           <DictTag :options="login_status" :value="detailData.status" />
         </el-descriptions-item>
-        <el-descriptions-item label="操作信息" :span="2">{{ detailData.msg || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="登录日期" :span="2">{{ detailData.loginTime || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="操作信息" :span="2">
+          {{ detailData.msg || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="登录日期" :span="2">
+          {{ detailData.loginTime || '-' }}
+        </el-descriptions-item>
       </el-descriptions>
       <el-empty v-else description="暂无数据" />
       <template #footer>

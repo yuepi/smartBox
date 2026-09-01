@@ -69,16 +69,13 @@ defineExpose({ open });
 </script>
 
 <template>
-  <el-dialog
-    v-model="visible"
-    title="数据迁移"
-    width="650px"
-    append-to-body
-  >
+  <el-dialog v-model="visible" title="数据迁移" width="650px" append-to-body>
     <el-form label-width="100px">
       <el-form-item label="目标商户">
         <span class="font-medium">{{ currentMerchant?.merchantName }}</span>
-        <span class="text-gray-400 text-xs ml-2">(ID: {{ currentMerchant?.merchantId }})</span>
+        <span class="text-gray-400 text-xs ml-2"
+          >(ID: {{ currentMerchant?.merchantId }})</span
+        >
       </el-form-item>
 
       <el-form-item label="会员列表">
@@ -97,9 +94,7 @@ defineExpose({ open });
             <div class="text-sm text-gray-500 mt-2">
               拖拽或点击上传会员列表文件
             </div>
-            <div class="text-xs text-gray-400 mt-1">
-              支持 .xlsx / .xls 格式
-            </div>
+            <div class="text-xs text-gray-400 mt-1">支持 .xlsx / .xls 格式</div>
           </div>
         </el-upload>
       </el-form-item>
@@ -117,18 +112,16 @@ defineExpose({ open });
         >
           <div class="flex flex-col items-center py-4">
             <el-icon class="text-3xl text-gray-400"><Upload /></el-icon>
-            <div class="text-sm text-gray-500 mt-2">
-              拖拽或点击上传订单文件
-            </div>
-            <div class="text-xs text-gray-400 mt-1">
-              支持 .xlsx / .xls 格式
-            </div>
+            <div class="text-sm text-gray-500 mt-2">拖拽或点击上传订单文件</div>
+            <div class="text-xs text-gray-400 mt-1">支持 .xlsx / .xls 格式</div>
           </div>
         </el-upload>
       </el-form-item>
 
       <el-form-item>
-        <div class="text-yellow-600 text-sm bg-yellow-50 p-3 rounded-lg flex items-start gap-2">
+        <div
+          class="text-yellow-600 text-sm bg-yellow-50 p-3 rounded-lg flex items-start gap-2"
+        >
           <el-icon class="mt-0.5"><Warning /></el-icon>
           <span>请确认目标商户无误，迁移后将覆盖目标商户的会员和订单数据</span>
         </div>
@@ -137,7 +130,9 @@ defineExpose({ open });
 
     <template #footer>
       <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :loading="loading" @click="handleSubmit">开始迁移</el-button>
+      <el-button type="primary" :loading="loading" @click="handleSubmit">
+        开始迁移
+      </el-button>
     </template>
   </el-dialog>
 </template>

@@ -2,6 +2,8 @@
 import type { Stock, StockPageParams } from '#/api/stock/stock';
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
+import { computed, onMounted, reactive, ref } from 'vue';
+
 import { Page } from '@vben/common-ui';
 
 import {
@@ -9,7 +11,10 @@ import {
   getWarehouseStockSummaryApi,
 } from '#/api/stock/stock';
 import { getWarehouseListApi } from '#/api/stock/warehouse';
-import { defaultStockCurrentColumns, STOCK_CURRENT_STORAGE_KEY } from '#/constants/tableColumns';
+import {
+  defaultStockCurrentColumns,
+  STOCK_CURRENT_STORAGE_KEY,
+} from '#/constants/tableColumns';
 import { ModuleCodeMap } from '#/hooks/useExport';
 
 const { stock_package_type } = useDicts(['stock_package_type']);
@@ -128,7 +133,11 @@ onMounted(() => {
       <!-- 📥 基础筛选项 -->
       <template #search-basic>
         <el-form-item>
-          <el-select v-model="queryParams.warehouseId" clearable style="width: 200px">
+          <el-select
+            v-model="queryParams.warehouseId"
+            clearable
+            style="width: 200px"
+          >
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">仓库:</span>
             </template>
@@ -142,7 +151,11 @@ onMounted(() => {
         </el-form-item>
 
         <el-form-item>
-          <el-select v-model="queryParams.packageType" clearable style="width: 200px">
+          <el-select
+            v-model="queryParams.packageType"
+            clearable
+            style="width: 200px"
+          >
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">品类:</span>
             </template>
@@ -158,11 +171,22 @@ onMounted(() => {
 
       <!-- 📥 工具栏左侧 -->
       <template #toolbar-left>
-        <ExportButton :module-code="ModuleCodeMap.STOCK_CURRENT" :fields="visibleColumns" :find-cond="queryParams" />
-        <el-button type="primary" plain :loading="summaryLoading" @click="loadSummary">
+        <ExportButton
+          :module-code="ModuleCodeMap.STOCK_CURRENT"
+          :fields="visibleColumns"
+          :find-cond="queryParams"
+        />
+        <el-button
+          type="primary"
+          plain
+          :loading="summaryLoading"
+          @click="loadSummary"
+        >
           按仓库汇总
         </el-button>
-        <el-button v-if="showSummary" @click="showSummary = false">返回列表</el-button>
+        <el-button v-if="showSummary" @click="showSummary = false">
+          返回列表
+        </el-button>
       </template>
 
       <!-- 📥 工具栏右侧 -->
@@ -179,27 +203,54 @@ onMounted(() => {
         <!-- 汇总视图 -->
         <div v-if="showSummary" v-loading="summaryLoading">
           <el-table :data="summaryData" border stripe style="width: 100%">
-            <el-table-column prop="packageType" label="品类" width="150" align="center">
+            <el-table-column
+              prop="packageType"
+              label="品类"
+              width="150"
+              align="center"
+            >
               <template #default="{ row }">
-                <DictTag :options="stock_package_type" :value="row.packageType" />
+                <DictTag
+                  :options="stock_package_type"
+                  :value="row.packageType"
+                />
               </template>
             </el-table-column>
-            <el-table-column prop="stockWeight" label="库存重量(kg)" width="180" align="center">
+            <el-table-column
+              prop="stockWeight"
+              label="库存重量(kg)"
+              width="180"
+              align="center"
+            >
               <template #default="{ row }">
                 {{ row.stockWeight?.toFixed(2) || 0 }}
               </template>
             </el-table-column>
-            <el-table-column prop="stockCostAmount" label="库存成本(元)" width="180" align="center">
+            <el-table-column
+              prop="stockCostAmount"
+              label="库存成本(元)"
+              width="180"
+              align="center"
+            >
               <template #default="{ row }">
                 {{ row.stockCostAmount?.toFixed(2) || 0 }}
               </template>
             </el-table-column>
           </el-table>
-          <el-empty v-if="!summaryLoading && summaryData.length === 0" description="暂无汇总数据" />
+          <el-empty
+            v-if="!summaryLoading && summaryData.length === 0"
+            description="暂无汇总数据"
+          />
         </div>
 
         <!-- 列表视图 -->
-        <el-table v-else :data="tableData" border stripe style="width: 100%; height: 100%">
+        <el-table
+          v-else
+          :data="tableData"
+          border
+          stripe
+          style="width: 100%; height: 100%"
+        >
           <el-table-column type="selection" width="50" align="center" />
 
           <el-table-column
@@ -214,9 +265,16 @@ onMounted(() => {
           >
             <template #default="{ row }">
               <template v-if="col.key === 'packageType'">
-                <DictTag :options="stock_package_type" :value="row.packageType" />
+                <DictTag
+                  :options="stock_package_type"
+                  :value="row.packageType"
+                />
               </template>
-              <template v-else-if="col.key === 'stockWeight' || col.key === 'lockedWeight'">
+              <template
+                v-else-if="
+                  col.key === 'stockWeight' || col.key === 'lockedWeight'
+                "
+              >
                 {{ (row as any)[col.key]?.toFixed(2) || 0 }}
               </template>
               <template v-else-if="col.key === 'stockCostAmount'">

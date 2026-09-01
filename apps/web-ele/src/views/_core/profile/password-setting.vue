@@ -55,7 +55,7 @@ async function handleSubmit(values: { newPassword: string }) {
       ElMessage.error('获取用户信息失败');
       return;
     }
-    
+
     await updateUserPasswordApi({
       userId: Number(userId),
       password: values.newPassword,
@@ -65,7 +65,6 @@ async function handleSubmit(values: { newPassword: string }) {
     ElMessage.error('密码修改失败');
   }
 }
-
 </script>
 
 <template>

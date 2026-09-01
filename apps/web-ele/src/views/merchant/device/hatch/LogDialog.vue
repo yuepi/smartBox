@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { getDeviceHatchWeightLogListApi } from "#/api/device/deviceHatch";
-import { getRecentDays, getThisMonth } from "#/utils/date";
+import { getDeviceHatchWeightLogListApi } from '#/api/device/deviceHatch';
+import { getRecentDays, getThisMonth } from '#/utils/date';
 
 // Props
 const props = defineProps<{
@@ -11,42 +11,42 @@ const props = defineProps<{
 
 // Emits
 const emit = defineEmits<{
-  (e: "update:visible", value: boolean): void;
+  (e: 'update:visible', value: boolean): void;
 }>();
 
 // 操作类型枚举
 const operateTypeOptions = [
-  { label: "全部", value: undefined },
-  { label: "去皮", value: 0 },
-  { label: "校准", value: 1 },
-  { label: "人工修改", value: 2 },
-  { label: "自动同步", value: 3 },
+  { label: '全部', value: undefined },
+  { label: '去皮', value: 0 },
+  { label: '校准', value: 1 },
+  { label: '人工修改', value: 2 },
+  { label: '自动同步', value: 3 },
 ];
 
 const dateShortcuts = [
   {
-    text: "今天",
+    text: '今天',
     value: () => {
       const { startTime, endTime } = getRecentDays(0);
       return [new Date(startTime), new Date(endTime)];
     },
   },
   {
-    text: "最近7天",
+    text: '最近7天',
     value: () => {
       const { startTime, endTime } = getRecentDays(7);
       return [new Date(startTime), new Date(endTime)];
     },
   },
   {
-    text: "最近30天",
+    text: '最近30天',
     value: () => {
       const { startTime, endTime } = getRecentDays(30);
       return [new Date(startTime), new Date(endTime)];
     },
   },
   {
-    text: "本月",
+    text: '本月',
     value: () => {
       const { startTime, endTime } = getThisMonth();
       return [new Date(startTime), new Date(endTime)];
@@ -56,7 +56,7 @@ const dateShortcuts = [
 
 const dialogVisible = computed({
   get: () => props.visible,
-  set: (val) => emit("update:visible", val),
+  set: (val) => emit('update:visible', val),
 });
 
 // 状态变量
@@ -80,23 +80,23 @@ const queryParams = reactive({
 // 获取操作类型文本
 function getOperateTypeText(type: number): string {
   const map: Record<number, string> = {
-    0: "去皮",
-    1: "校准",
-    2: "人工修改",
-    3: "自动同步",
+    0: '去皮',
+    1: '校准',
+    2: '人工修改',
+    3: '自动同步',
   };
-  return map[type] || "-";
+  return map[type] || '-';
 }
 
 // 获取操作类型标签样式
 function getOperateTypeTag(type: number): string {
   const map: Record<number, string> = {
-    0: "warning",
-    1: "primary",
-    2: "info",
-    3: "success",
+    0: 'warning',
+    1: 'primary',
+    2: 'info',
+    3: 'success',
   };
-  return map[type] || "info";
+  return map[type] || 'info';
 }
 
 // 加载数据
@@ -118,7 +118,7 @@ async function loadData() {
     total.value = res.total || 0;
   } catch (error) {
     console.error(error);
-    ElMessage.error("加载日志失败");
+    ElMessage.error('加载日志失败');
   } finally {
     loading.value = false;
   }
@@ -165,7 +165,7 @@ watch(
       handleQuery();
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 
@@ -255,7 +255,9 @@ watch(
         align="center"
       >
         <template #default="{ row }">
-          <span class="font-medium">{{ (row.currentWeight || 0).toFixed(2) }}</span>
+          <span class="font-medium">{{
+            (row.currentWeight || 0).toFixed(2)
+          }}</span>
         </template>
       </el-table-column>
 
@@ -347,12 +349,7 @@ watch(
         </template>
       </el-table-column>
 
-      <el-table-column
-        label="详情"
-        width="80"
-        fixed="right"
-        align="center"
-      >
+      <el-table-column label="详情" width="80" fixed="right" align="center">
         <template #default="{ row }">
           <el-button link type="primary" @click="showDetail(row)">
             查看
@@ -387,7 +384,11 @@ watch(
           {{ currentLog.deviceHatchWeightLogId }}
         </el-descriptions-item>
         <el-descriptions-item label="操作类型">
-          <el-tag :type="getOperateTypeTag(currentLog.operateType)" size="small" round>
+          <el-tag
+            :type="getOperateTypeTag(currentLog.operateType)"
+            size="small"
+            round
+          >
             {{ getOperateTypeText(currentLog.operateType) }}
           </el-tag>
         </el-descriptions-item>
@@ -397,19 +398,34 @@ watch(
         <el-descriptions-item label="满仓阈值">
           {{ (currentLog.weightThreshold || 0).toFixed(2) }} kg
         </el-descriptions-item>
-        <el-descriptions-item v-if="currentLog.operateType === 0" label="去皮原始值">
+        <el-descriptions-item
+          v-if="currentLog.operateType === 0"
+          label="去皮原始值"
+        >
           {{ currentLog.tareRawWeight || '-' }}
         </el-descriptions-item>
-        <el-descriptions-item v-if="currentLog.operateType === 0" label="去皮时间">
+        <el-descriptions-item
+          v-if="currentLog.operateType === 0"
+          label="去皮时间"
+        >
           {{ currentLog.tareTime || '-' }}
         </el-descriptions-item>
-        <el-descriptions-item v-if="currentLog.operateType === 1" label="称重系数">
+        <el-descriptions-item
+          v-if="currentLog.operateType === 1"
+          label="称重系数"
+        >
           {{ currentLog.weightRatio || '-' }}
         </el-descriptions-item>
-        <el-descriptions-item v-if="currentLog.operateType === 1" label="校准时间">
+        <el-descriptions-item
+          v-if="currentLog.operateType === 1"
+          label="校准时间"
+        >
           {{ currentLog.weightRatioTime || '-' }}
         </el-descriptions-item>
-        <el-descriptions-item v-if="currentLog.operateType === 1" label="校准砝码重量">
+        <el-descriptions-item
+          v-if="currentLog.operateType === 1"
+          label="校准砝码重量"
+        >
           {{ currentLog.standardWeight || '-' }} kg
         </el-descriptions-item>
         <el-descriptions-item label="操作前原始值">
@@ -422,7 +438,11 @@ watch(
           {{ currentLog.createTime || '-' }}
         </el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :type="currentLog.status === 0 ? 'success' : 'danger'" size="small" round>
+          <el-tag
+            :type="currentLog.status === 0 ? 'success' : 'danger'"
+            size="small"
+            round
+          >
             {{ currentLog.status === 0 ? '启用' : '禁用' }}
           </el-tag>
         </el-descriptions-item>

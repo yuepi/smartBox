@@ -48,7 +48,10 @@ async function loadOptions() {
 
 function calcItemAmount(index: number) {
   const item = itemRows.value[index];
-  item.saleAmount = item && item.outWeight && item.saleUnitPrice ? Number((item.outWeight * item.saleUnitPrice).toFixed(2)) : 0;
+  item.saleAmount =
+    item && item.outWeight && item.saleUnitPrice
+      ? Number((item.outWeight * item.saleUnitPrice).toFixed(2))
+      : 0;
 }
 
 function addItemRow() {
@@ -78,7 +81,9 @@ function open(row?: StockOut) {
   } else {
     title.value = '新增出库单';
     formData.value = { outStatus: 0 };
-    itemRows.value = [{ packageType: 0, outWeight: 0, saleUnitPrice: 0, saleAmount: 0 }];
+    itemRows.value = [
+      { packageType: 0, outWeight: 0, saleUnitPrice: 0, saleAmount: 0 },
+    ];
   }
   loadOptions();
   visible.value = true;
@@ -94,7 +99,9 @@ async function handleSubmit() {
     return;
   }
 
-  formData.value.items = itemRows.value.filter((item) => item.outWeight && item.outWeight > 0);
+  formData.value.items = itemRows.value.filter(
+    (item) => item.outWeight && item.outWeight > 0,
+  );
   if (formData.value.items.length === 0) {
     ElMessage.warning('请至少添加一条有效明细');
     return;
@@ -123,7 +130,11 @@ defineExpose({ open });
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item label="仓库" required>
-            <el-select v-model="formData.warehouseId" placeholder="请选择" style="width: 100%">
+            <el-select
+              v-model="formData.warehouseId"
+              placeholder="请选择"
+              style="width: 100%"
+            >
               <el-option
                 v-for="item in warehouseOptions"
                 :key="item.value"
@@ -135,7 +146,11 @@ defineExpose({ open });
         </el-col>
         <el-col :span="12">
           <el-form-item label="回收商" required>
-            <el-select v-model="formData.customerId" placeholder="请选择" style="width: 100%">
+            <el-select
+              v-model="formData.customerId"
+              placeholder="请选择"
+              style="width: 100%"
+            >
               <el-option
                 v-for="item in customerOptions"
                 :key="item.value"
@@ -148,19 +163,35 @@ defineExpose({ open });
       </el-row>
 
       <el-form-item label="备注">
-        <el-input v-model="formData.remark" type="textarea" :rows="2" placeholder="请输入备注" />
+        <el-input
+          v-model="formData.remark"
+          type="textarea"
+          :rows="2"
+          placeholder="请输入备注"
+        />
       </el-form-item>
 
       <!-- 明细表格 -->
       <div class="mb-2">
         <span class="text-sm font-medium">出库明细</span>
-        <el-button type="primary" plain size="small" class="ml-2" @click="addItemRow">添加行</el-button>
+        <el-button
+          type="primary"
+          plain
+          size="small"
+          class="ml-2"
+          @click="addItemRow"
+          >添加行</el-button
+        >
       </div>
 
       <el-table :data="itemRows" border stripe style="width: 100%">
         <el-table-column label="品类" width="130" align="center">
           <template #default="{ row }">
-            <el-select v-model="row.packageType" placeholder="请选择" size="small">
+            <el-select
+              v-model="row.packageType"
+              placeholder="请选择"
+              size="small"
+            >
               <el-option
                 v-for="item in stock_package_type"
                 :key="item.value"
@@ -203,7 +234,13 @@ defineExpose({ open });
         </el-table-column>
         <el-table-column label="操作" width="80" align="center">
           <template #default="{ $index }">
-            <el-button link type="danger" icon="Delete" size="small" @click="removeItemRow($index)" />
+            <el-button
+              link
+              type="danger"
+              icon="Delete"
+              size="small"
+              @click="removeItemRow($index)"
+            />
           </template>
         </el-table-column>
       </el-table>
@@ -211,7 +248,9 @@ defineExpose({ open });
 
     <template #footer>
       <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :loading="loading" @click="handleSubmit">确定</el-button>
+      <el-button type="primary" :loading="loading" @click="handleSubmit"
+        >确定</el-button
+      >
     </template>
   </el-dialog>
 </template>

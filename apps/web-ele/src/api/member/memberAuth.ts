@@ -4,14 +4,17 @@ import { requestClient } from '#/api/request';
 export interface MemberAuth {
   memberAuthId: number;
   memberId: number;
-  authType: number;     // 0=账号密码,1=手机号验证码,2=微信小程序
+  authType: number; // 0=账号密码,1=手机号验证码,2=微信小程序
   authAccount: string;
   authSecret: string;
-  status: number;       // 0=启用,1=禁用
+  status: number; // 0=启用,1=禁用
 }
 
 /** 认证类型枚举 */
-export const AuthTypeMap: Record<number, { label: string; icon: string; type: string }> = {
+export const AuthTypeMap: Record<
+  number,
+  { label: string; icon: string; type: string }
+> = {
   0: { label: '账号密码', icon: 'User', type: 'primary' },
   1: { label: '手机号验证码', icon: 'Phone', type: 'success' },
   2: { label: '微信小程序', icon: 'Wechat', type: 'info' },
@@ -34,12 +37,16 @@ export function getMemberAuthPageApi(params: MemberAuthPageParams) {
 
 /** 2. 列表查询（根据会员ID） */
 export function getMemberAuthListApi(memberId: number) {
-  return requestClient.get('/merchant/memberAuth/list', { params: { memberId } });
+  return requestClient.get('/merchant/memberAuth/list', {
+    params: { memberId },
+  });
 }
 
 /** 3. 详情查询 */
 export function getMemberAuthDetailApi(memberAuthId: number) {
-  return requestClient.get('/merchant/memberAuth/detail', { params: { memberAuthId } });
+  return requestClient.get('/merchant/memberAuth/detail', {
+    params: { memberAuthId },
+  });
 }
 
 /** 4. 新增认证 */

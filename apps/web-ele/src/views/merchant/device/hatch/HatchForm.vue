@@ -3,7 +3,10 @@ import type { DeviceHatch } from '#/api/device/deviceHatch';
 import type { Device } from '#/api/device/device';
 import type { DevicePackage } from '#/api/device/devicePackage';
 
-import { addDeviceHatchApi, editDeviceHatchApi } from '#/api/device/deviceHatch';
+import {
+  addDeviceHatchApi,
+  editDeviceHatchApi,
+} from '#/api/device/deviceHatch';
 import { getDeviceListApi } from '#/api/device/device';
 import { getDevicePackageListApi } from '#/api/device/devicePackage';
 
@@ -66,7 +69,9 @@ async function handleSubmit() {
 
   loading.value = true;
   try {
-    const api = formData.value.deviceHatchId ? editDeviceHatchApi : addDeviceHatchApi;
+    const api = formData.value.deviceHatchId
+      ? editDeviceHatchApi
+      : addDeviceHatchApi;
     await api(formData.value);
     ElMessage.success(formData.value.deviceHatchId ? '修改成功' : '新增成功');
     visible.value = false;
@@ -87,7 +92,10 @@ defineExpose({ open });
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item label="仓口名称" required>
-            <el-input v-model="formData.hatchName" placeholder="请输入仓口名称" />
+            <el-input
+              v-model="formData.hatchName"
+              placeholder="请输入仓口名称"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -97,24 +105,57 @@ defineExpose({ open });
         </el-col>
       </el-row>
       <el-form-item label="所属设备" required>
-        <el-select v-model="formData.deviceId" placeholder="请选择设备" clearable filterable style="width: 100%">
-          <el-option v-for="item in deviceOptions" :key="item.deviceId" :label="item.deviceName" :value="item.deviceId" />
+        <el-select
+          v-model="formData.deviceId"
+          placeholder="请选择设备"
+          clearable
+          filterable
+          style="width: 100%"
+        >
+          <el-option
+            v-for="item in deviceOptions"
+            :key="item.deviceId"
+            :label="item.deviceName"
+            :value="item.deviceId"
+          />
         </el-select>
       </el-form-item>
       <el-form-item label="绑定套餐">
-        <el-select v-model="formData.devicePackageId" placeholder="请选择计费套餐" clearable style="width: 100%">
-          <el-option v-for="item in packageOptions" :key="item.devicePackageId" :label="item.packageName" :value="item.devicePackageId" />
+        <el-select
+          v-model="formData.devicePackageId"
+          placeholder="请选择计费套餐"
+          clearable
+          style="width: 100%"
+        >
+          <el-option
+            v-for="item in packageOptions"
+            :key="item.devicePackageId"
+            :label="item.packageName"
+            :value="item.devicePackageId"
+          />
         </el-select>
       </el-form-item>
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item label="当前重量(kg)">
-            <el-input-number v-model="formData.currentWeight" :min="0" :max="500" :precision="2" style="width: 100%" />
+            <el-input-number
+              v-model="formData.currentWeight"
+              :min="0"
+              :max="500"
+              :precision="2"
+              style="width: 100%"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="满仓阈值(kg)">
-            <el-input-number v-model="formData.weightThreshold" :min="0" :max="500" :precision="2" style="width: 100%" />
+            <el-input-number
+              v-model="formData.weightThreshold"
+              :min="0"
+              :max="500"
+              :precision="2"
+              style="width: 100%"
+            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -127,7 +168,9 @@ defineExpose({ open });
     </el-form>
     <template #footer>
       <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :loading="loading" @click="handleSubmit">确定</el-button>
+      <el-button type="primary" :loading="loading" @click="handleSubmit"
+        >确定</el-button
+      >
     </template>
   </el-dialog>
 </template>

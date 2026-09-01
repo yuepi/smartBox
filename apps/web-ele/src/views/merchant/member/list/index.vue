@@ -2,12 +2,16 @@
 import type { Member, MemberPageParams } from '#/api/member/member';
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
+import { computed, onMounted, reactive, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { Page } from '@vben/common-ui';
 
 import { deleteMemberApi, getMemberPageApi } from '#/api/member/member';
-import { defaultMemberColumns, MEMBER_STORAGE_KEY } from '#/constants/tableColumns';
+import {
+  defaultMemberColumns,
+  MEMBER_STORAGE_KEY,
+} from '#/constants/tableColumns';
 import { ModuleCodeMap } from '#/hooks/useExport';
 
 import MemberDetail from './MemberDetail.vue';
@@ -100,7 +104,11 @@ async function handleDelete(row?: Member) {
     ids = selectedIds.value;
   }
   try {
-    await ElMessageBox.confirm(`确定要删除选中的 ${ids.length} 条会员吗？`, '提示', { type: 'warning' });
+    await ElMessageBox.confirm(
+      `确定要删除选中的 ${ids.length} 条会员吗？`,
+      '提示',
+      { type: 'warning' },
+    );
     for (const id of ids) {
       await deleteMemberApi(id);
     }
@@ -148,16 +156,23 @@ onMounted(() => {
 <template>
   <Page auto-content-height>
     <BaseTableLayout
-v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="loading"
-      :total="total" @search="loadData" @reset="resetQuery"
->
+      v-model:query-params="queryParams"
+      v-model:more-params="moreParams"
+      :loading="loading"
+      :total="total"
+      @search="loadData"
+      @reset="resetQuery"
+    >
       <!-- 📥 基础筛选项 -->
       <template #search-basic>
         <el-form-item>
           <el-input
-v-model="queryParams.memberId" placeholder="请输入" clearable style="width: 200px"
+            v-model="queryParams.memberId"
+            placeholder="请输入"
+            clearable
+            style="width: 200px"
             @keyup.enter="handleQuery"
->
+          >
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">会员ID:</span>
             </template>
@@ -166,9 +181,12 @@ v-model="queryParams.memberId" placeholder="请输入" clearable style="width: 2
 
         <el-form-item>
           <el-input
-v-model="queryParams.mobile" placeholder="请输入" clearable style="width: 200px"
+            v-model="queryParams.mobile"
+            placeholder="请输入"
+            clearable
+            style="width: 200px"
             @keyup.enter="handleQuery"
->
+          >
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">手机号:</span>
             </template>
@@ -177,9 +195,12 @@ v-model="queryParams.mobile" placeholder="请输入" clearable style="width: 200
 
         <el-form-item>
           <el-input
-v-model="queryParams.nickname" placeholder="请输入" clearable style="width: 200px"
+            v-model="queryParams.nickname"
+            placeholder="请输入"
+            clearable
+            style="width: 200px"
             @keyup.enter="handleQuery"
->
+          >
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">昵称:</span>
             </template>
@@ -190,16 +211,30 @@ v-model="queryParams.nickname" placeholder="请输入" clearable style="width: 2
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">性别:</span>
             </template>
-            <el-option v-for="item in member_sex" :key="item.value" :label="item.label" :value="item.value" />
+            <el-option
+              v-for="item in member_sex"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
 
         <el-form-item>
-          <el-select v-model="queryParams.status" clearable style="width: 200px">
+          <el-select
+            v-model="queryParams.status"
+            clearable
+            style="width: 200px"
+          >
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">状态:</span>
             </template>
-            <el-option v-for="item in member_status" :key="item.value" :label="item.label" :value="item.value" />
+            <el-option
+              v-for="item in member_status"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
       </template>
@@ -210,14 +245,33 @@ v-model="queryParams.nickname" placeholder="请输入" clearable style="width: 2
 
       <!-- 📥 工具栏左侧 -->
       <template #toolbar-left>
-        <el-button type="primary" icon="Plus" @click="handleAdd">新增会员</el-button>
-        <ExportButton :module-code="ModuleCodeMap.MEMBER" :fields="visibleColumns" :find-cond="queryParams" />
-        <el-button type="danger" plain icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete()">
+        <el-button type="primary" icon="Plus" @click="handleAdd">
+          新增会员
+        </el-button>
+        <ExportButton
+          :module-code="ModuleCodeMap.MEMBER"
+          :fields="visibleColumns"
+          :find-cond="queryParams"
+        />
+        <el-button
+          type="danger"
+          plain
+          icon="Delete"
+          :disabled="selectedIds.length === 0"
+          @click="handleDelete()"
+        >
           批量删除
         </el-button>
         <transition name="el-fade-in">
-          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-sm text-gray-400">
-            已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
+          <span
+            v-if="selectedIds.length > 0"
+            class="selected-alert-badge ml-2 text-sm text-gray-400"
+          >
+            已选
+            <span class="text-red-500 font-medium">{{
+              selectedIds.length
+            }}</span>
+            项
           </span>
         </transition>
       </template>
@@ -225,24 +279,33 @@ v-model="queryParams.nickname" placeholder="请输入" clearable style="width: 2
       <!-- 📥 工具栏右侧 -->
       <template #toolbar-right>
         <ColumnSelector
-:storage-key="MEMBER_STORAGE_KEY" :default-columns="defaultMemberColumns"
+          :storage-key="MEMBER_STORAGE_KEY"
+          :default-columns="defaultMemberColumns"
           @update:columns="handleColumnsUpdate"
-/>
+        />
       </template>
 
       <!-- 📥 表格 -->
       <template #table>
         <el-table
-:data="tableData" border stripe style="width: 100%; height: 100%"
+          :data="tableData"
+          border
+          stripe
+          style="width: 100%; height: 100%"
           @selection-change="handleSelectionChange"
->
+        >
           <el-table-column type="selection" width="50" align="center" />
 
           <el-table-column
-v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
-            :width="typeof col.width === 'number' ? col.width : undefined" :min-width="col.minWidth" :align="col.align"
+            v-for="col in visibleColumns"
+            :key="col.key"
+            :prop="col.key"
+            :label="col.label"
+            :width="typeof col.width === 'number' ? col.width : undefined"
+            :min-width="col.minWidth"
+            :align="col.align"
             :show-overflow-tooltip="col.showOverflowTooltip || false"
->
+          >
             <template #default="{ row }">
               <template v-if="col.key === 'avatar'">
                 <el-avatar :size="32" :src="row.avatar" />
@@ -259,13 +322,22 @@ v-for="col in visibleColumns" :key="col.key" :prop="col.key" :label="col.label"
             </template>
           </el-table-column>
 
-          <el-table-column label="操作" width="200" fixed="right" align="center">
+          <el-table-column
+            label="操作"
+            width="200"
+            fixed="right"
+            align="center"
+          >
             <template #default="{ row }">
               <div class="action-buttons">
                 <el-button size="small" type="primary" @click="handleView(row)">
                   详情
                 </el-button>
-                <el-button size="small" type="primary" @click="handleViewWallet(row)">
+                <el-button
+                  size="small"
+                  type="primary"
+                  @click="handleViewWallet(row)"
+                >
                   钱包
                 </el-button>
                 <el-button size="small" type="primary" @click="handleEdit(row)">

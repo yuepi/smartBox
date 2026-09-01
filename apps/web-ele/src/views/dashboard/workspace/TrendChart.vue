@@ -45,9 +45,15 @@ function renderChart(list: { date: string; value: number }[]) {
       formatter: (params: any) => {
         const p = params[0];
         return `${p.axisValue}<br/>${p.marker} ${p.seriesName}: ${p.value.toFixed(2)} ${config.unit}`;
-      }
+      },
     },
-    grid: { top: '12%', left: '2%', right: '3%', bottom: '8%', containLabel: true },
+    grid: {
+      top: '12%',
+      left: '2%',
+      right: '3%',
+      bottom: '8%',
+      containLabel: true,
+    },
     xAxis: {
       type: 'category',
       boundaryGap: false,
@@ -60,7 +66,11 @@ function renderChart(list: { date: string; value: number }[]) {
       name: config.unit,
       nameTextStyle: { color: '#9CA3AF', fontSize: 11 },
       splitLine: { lineStyle: { type: 'dashed', color: '#F3F4F6' } },
-      axisLabel: { color: '#9CA3AF', fontSize: 11, formatter: (value: number) => `${value.toFixed(0)}` },
+      axisLabel: {
+        color: '#9CA3AF',
+        fontSize: 11,
+        formatter: (value: number) => `${value.toFixed(0)}`,
+      },
     },
     series: [
       {
@@ -99,11 +109,18 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-zinc-700/80 flex flex-col min-h-0 min-w-0">
-    <div class="flex items-center justify-between mb-2 shrink-0 gap-2 flex-wrap">
+  <div
+    class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-zinc-700/80 flex flex-col min-h-0 min-w-0"
+  >
+    <div
+      class="flex items-center justify-between mb-2 shrink-0 gap-2 flex-wrap"
+    >
       <div class="flex items-center gap-1.5 shrink-0">
         <span class="w-1 h-3.5 bg-rose-500 rounded-full"></span>
-        <span class="font-bold text-sm text-gray-800 dark:text-gray-100 truncate">聚合数据概览</span>
+        <span
+          class="font-bold text-sm text-gray-800 dark:text-gray-100 truncate"
+          >聚合数据概览</span
+        >
       </div>
       <div class="flex items-center gap-2 flex-wrap justify-end">
         <el-select v-model="type" style="width: 100px">
@@ -120,7 +137,9 @@ onUnmounted(() => {
     </div>
     <div class="text-xs text-gray-400 mb-1 shrink-0">
       {{ rangeDays }}天{{ typeConfig[type].name }}总计:
-      <strong class="text-gray-800 dark:text-gray-200 text-sm ml-1">{{ totalValue.toFixed(2) }}</strong>
+      <strong class="text-gray-800 dark:text-gray-200 text-sm ml-1">{{
+        totalValue.toFixed(2)
+      }}</strong>
       {{ typeConfig[type].unit }}
     </div>
     <div class="relative flex-1 min-h-0 w-full">

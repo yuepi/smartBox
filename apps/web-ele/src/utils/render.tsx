@@ -110,7 +110,6 @@ export function renderHttpMethodTag(type: string) {
   return <ElTag effect="plain">{title}</ElTag>;
 }
 
-
 export function renderIconSpan(
   icon: ComponentType,
   value: string,

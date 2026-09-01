@@ -14,12 +14,14 @@ const pendingRequests = new Map<string, Promise<DictDataOption[]>>();
  * 批量获取字典数据
  * @param dictCodes 字典编码列表
  * @returns 包含各字典数据的对象
- * 
+ *
  * @example
  * const { user_status, order_status } = useDicts(['user_status', 'order_status']);
  * // user_status.value 是字典选项数组
  */
-export function useDicts<T extends string>(dictCodes: T[]): Record<T, Ref<DictDataOption[]>> {
+export function useDicts<T extends string>(
+  dictCodes: T[],
+): Record<T, Ref<DictDataOption[]>> {
   const dictStore = useDictStore();
   const result = {} as Record<T, Ref<DictDataOption[]>>;
 
@@ -34,7 +36,7 @@ export function useDicts<T extends string>(dictCodes: T[]): Record<T, Ref<DictDa
       options.value = cached;
       return; // 命中了就直接返回，不走下面的异步逻辑
     }
-    
+
     let fetchPromise = pendingRequests.get(code);
 
     if (!fetchPromise) {
@@ -69,4 +71,3 @@ export function useDicts<T extends string>(dictCodes: T[]): Record<T, Ref<DictDa
 
   return result;
 }
-

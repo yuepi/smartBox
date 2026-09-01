@@ -2,16 +2,24 @@
 import type { Warehouse, WarehousePageParams } from '#/api/stock/warehouse';
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
+import { computed, onMounted, reactive, ref } from 'vue';
+
 import { Page } from '@vben/common-ui';
 
 import { deleteWarehouseApi, getWarehousePageApi } from '#/api/stock/warehouse';
-import { defaultWarehouseColumns, WAREHOUSE_STORAGE_KEY } from '#/constants/tableColumns';
+import {
+  defaultWarehouseColumns,
+  WAREHOUSE_STORAGE_KEY,
+} from '#/constants/tableColumns';
 import { ModuleCodeMap } from '#/hooks/useExport';
 
 import LocationDialog from './LocationDialog.vue';
 import WarehouseForm from './WarehouseForm.vue';
 
-const { warehouse_type, default_status } = useDicts(['warehouse_type', 'default_status']);
+const { warehouse_type, default_status } = useDicts([
+  'warehouse_type',
+  'default_status',
+]);
 
 // --- 表格列配置 ---
 const columnConfig = ref<TableColumnConfig[]>([...defaultWarehouseColumns]);
@@ -93,7 +101,11 @@ async function handleDelete(row?: Warehouse) {
   }
 
   try {
-    await ElMessageBox.confirm(`确定要删除选中的 ${ids.length} 条仓库吗？`, '提示', { type: 'warning' });
+    await ElMessageBox.confirm(
+      `确定要删除选中的 ${ids.length} 条仓库吗？`,
+      '提示',
+      { type: 'warning' },
+    );
     for (const id of ids) {
       await deleteWarehouseApi(id);
     }
@@ -157,7 +169,11 @@ onMounted(() => {
       <!-- 📥 高级筛选项 -->
       <template #search-advanced>
         <el-form-item>
-          <el-select v-model="queryParams.warehouseType" clearable style="width: 200px">
+          <el-select
+            v-model="queryParams.warehouseType"
+            clearable
+            style="width: 200px"
+          >
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">仓库类型:</span>
             </template>
@@ -171,7 +187,11 @@ onMounted(() => {
         </el-form-item>
 
         <el-form-item>
-          <el-select v-model="queryParams.status" clearable style="width: 200px">
+          <el-select
+            v-model="queryParams.status"
+            clearable
+            style="width: 200px"
+          >
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">状态:</span>
             </template>
@@ -187,14 +207,33 @@ onMounted(() => {
 
       <!-- 📥 工具栏左侧 -->
       <template #toolbar-left>
-        <el-button type="primary" plain icon="Plus" @click="handleAdd">新增仓库</el-button>
-        <ExportButton :module-code="ModuleCodeMap.WAREHOUSE" :fields="visibleColumns" :find-cond="queryParams" />
-        <el-button type="danger" plain icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete()">
+        <el-button type="primary" plain icon="Plus" @click="handleAdd">
+          新增仓库
+        </el-button>
+        <ExportButton
+          :module-code="ModuleCodeMap.WAREHOUSE"
+          :fields="visibleColumns"
+          :find-cond="queryParams"
+        />
+        <el-button
+          type="danger"
+          plain
+          icon="Delete"
+          :disabled="selectedIds.length === 0"
+          @click="handleDelete()"
+        >
           批量删除
         </el-button>
         <transition name="el-fade-in">
-          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-xs text-gray-400">
-            已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
+          <span
+            v-if="selectedIds.length > 0"
+            class="selected-alert-badge ml-2 text-xs text-gray-400"
+          >
+            已选
+            <span class="text-red-500 font-medium">{{
+              selectedIds.length
+            }}</span>
+            项
           </span>
         </transition>
       </template>
@@ -242,16 +281,36 @@ onMounted(() => {
             </template>
           </el-table-column>
 
-          <el-table-column label="操作" width="280" fixed="right" align="center">
+          <el-table-column
+            label="操作"
+            width="280"
+            fixed="right"
+            align="center"
+          >
             <template #default="{ row }">
               <el-tooltip content="编辑" placement="top" :enterable="false">
-                <el-button link type="primary" icon="Edit" @click="handleEdit(row)" />
+                <el-button
+                  link
+                  type="primary"
+                  icon="Edit"
+                  @click="handleEdit(row)"
+                />
               </el-tooltip>
               <el-tooltip content="货位管理" placement="top" :enterable="false">
-                <el-button link type="primary" icon="Grid" @click="handleManageLocation(row)" />
+                <el-button
+                  link
+                  type="primary"
+                  icon="Grid"
+                  @click="handleManageLocation(row)"
+                />
               </el-tooltip>
               <el-tooltip content="删除" placement="top" :enterable="false">
-                <el-button link type="danger" icon="Delete" @click="handleDelete(row)" />
+                <el-button
+                  link
+                  type="danger"
+                  icon="Delete"
+                  @click="handleDelete(row)"
+                />
               </el-tooltip>
             </template>
           </el-table-column>

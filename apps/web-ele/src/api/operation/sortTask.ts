@@ -9,12 +9,12 @@ export interface SortTask {
   deviceId: number;
   hatchId: number;
   deviceBagId: number;
-  totalWeight: number;      // 总重量
-  realWeight: number;       // 实际分拣重量
+  totalWeight: number; // 总重量
+  realWeight: number; // 实际分拣重量
   sortUserId: number;
   sortUserName: string;
-  sortStatus: number;       // 0=待分拣,1=分拣中,2=已完成
-  sortTime: string;         // 分拣完成时间
+  sortStatus: number; // 0=待分拣,1=分拣中,2=已完成
+  sortTime: string; // 分拣完成时间
   remark: string;
   status: number;
 }
@@ -48,7 +48,9 @@ export function getSortTaskListApi(params?: any) {
 
 /** 3. 详情查询 */
 export function getSortTaskDetailApi(sortTaskId: number) {
-  return requestClient.get('/merchant/sortTask/detail', { params: { sortTaskId } });
+  return requestClient.get('/merchant/sortTask/detail', {
+    params: { sortTaskId },
+  });
 }
 
 /** 4. 修改任务 */

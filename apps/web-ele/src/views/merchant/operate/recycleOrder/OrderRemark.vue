@@ -43,12 +43,19 @@ defineExpose({ open });
   <el-dialog v-model="visible" title="添加备注" width="500px" append-to-body>
     <el-form :model="form" label-width="80px">
       <el-form-item label="备注" required>
-        <el-input v-model="form.remark" type="textarea" :rows="4" placeholder="请输入备注内容" />
+        <el-input
+          v-model="form.remark"
+          type="textarea"
+          :rows="4"
+          placeholder="请输入备注内容"
+        />
       </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :loading="loading" @click="handleSubmit">确定</el-button>
+      <el-button type="primary" :loading="loading" @click="handleSubmit"
+        >确定</el-button
+      >
     </template>
   </el-dialog>
 </template>

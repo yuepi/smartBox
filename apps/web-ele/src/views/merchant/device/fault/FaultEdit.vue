@@ -51,12 +51,19 @@ defineExpose({ open });
         </el-radio-group>
       </el-form-item>
       <el-form-item label="处理备注">
-        <el-input v-model="form.dealRemark" type="textarea" :rows="4" placeholder="请输入处理备注" />
+        <el-input
+          v-model="form.dealRemark"
+          type="textarea"
+          :rows="4"
+          placeholder="请输入处理备注"
+        />
       </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :loading="loading" @click="handleSubmit">确定</el-button>
+      <el-button type="primary" :loading="loading" @click="handleSubmit"
+        >确定</el-button
+      >
     </template>
   </el-dialog>
 </template>

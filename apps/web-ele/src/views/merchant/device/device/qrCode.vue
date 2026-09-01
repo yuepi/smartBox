@@ -84,7 +84,9 @@ async function downloadBatch(deviceIds: number[]) {
     let downloadName = `qrcodes_${Date.now()}.zip`;
     const contentDisposition = blob.headers?.['content-disposition'];
     if (contentDisposition) {
-      const fileNameMatch = contentDisposition.match(/filename\*?=['"]?(?:UTF-8'')?([^"';]+)['"]?/i);
+      const fileNameMatch = contentDisposition.match(
+        /filename\*?=['"]?(?:UTF-8'')?([^"';]+)['"]?/i,
+      );
       if (fileNameMatch && fileNameMatch[1]) {
         downloadName = decodeURIComponent(fileNameMatch[1]);
       }
@@ -133,14 +135,21 @@ defineExpose({
         <div v-if="qrcodeList.length === 0 && !loading" class="py-12">
           <el-empty description="暂无二维码数据" />
         </div>
-        <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-2">
+        <div
+          v-else
+          class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-2"
+        >
           <div
             v-for="(item, index) in qrcodeList"
             :key="item.qrCode || index"
             class="group relative bg-gray-50 dark:bg-zinc-800/50 rounded-lg p-3 border border-gray-100 dark:border-zinc-700 transition-all hover:shadow-md hover:border-primary/30"
           >
             <div class="mb-2">
-              <div class="text-[11px] text-gray-400 uppercase tracking-wider mb-1">QR Code No.</div>
+              <div
+                class="text-[11px] text-gray-400 uppercase tracking-wider mb-1"
+              >
+                QR Code No.
+              </div>
               <div
                 class="text-xs font-mono font-bold text-gray-700 dark:text-gray-200 truncate"
                 :title="item.qrCode"
@@ -155,12 +164,16 @@ defineExpose({
                 :src="item.base64QrCode || item.qrCodeUrl"
                 fit="contain"
                 class="w-full h-full p-2"
-                :preview-src-list="qrcodeList.map((i) => i.base64QrCode || i.qrCodeUrl)"
+                :preview-src-list="
+                  qrcodeList.map((i) => i.base64QrCode || i.qrCodeUrl)
+                "
                 :initial-index="index"
                 preview-teleported
               >
                 <template #placeholder>
-                  <div class="flex items-center justify-center h-full bg-gray-50 text-gray-400">
+                  <div
+                    class="flex items-center justify-center h-full bg-gray-50 text-gray-400"
+                  >
                     <el-icon class="is-loading">
                       <Loading />
                     </el-icon>
@@ -193,7 +206,9 @@ defineExpose({
     </div>
     <template #footer>
       <div class="flex justify-between items-center px-2">
-        <span class="text-xs text-gray-400">提示：点击图片可查看高清大图并轮播</span>
+        <span class="text-xs text-gray-400"
+          >提示：点击图片可查看高清大图并轮播</span
+        >
         <el-button @click="handleClose" class="!rounded-md">关闭</el-button>
       </div>
     </template>

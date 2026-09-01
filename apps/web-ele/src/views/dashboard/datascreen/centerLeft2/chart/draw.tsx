@@ -1,19 +1,31 @@
-import { defineComponent, watch, shallowReactive, nextTick, ref, onUnmounted } from 'vue';
+import {
+  defineComponent,
+  watch,
+  shallowReactive,
+  nextTick,
+  ref,
+  onUnmounted,
+} from 'vue';
 
 // 声明类型
 const PropsType = {
   cdata: {
     type: Array,
-    require: true
-  }
-} as const
+    require: true,
+  },
+} as const;
 
 // 定义主体
 export default defineComponent({
   props: PropsType,
   setup(props) {
     // 配置项
-    let options = shallowReactive({showLegendSymbol:null,tooltip:null,geo:null,series:null})
+    let options = shallowReactive({
+      showLegendSymbol: null,
+      tooltip: null,
+      geo: null,
+      series: null,
+    });
     // 设置点的位置(经纬度)
     const geoCoordMap = {
       厦门市: [118.11022, 24.490474, 20],
@@ -25,7 +37,7 @@ export default defineComponent({
       三明市: [117.435001, 26.465444, 20],
       南平市: [118.178459, 27.535627, 20],
       宁德市: [119.527082, 27.15924, 20],
-    }
+    };
     const seriesData = [
       {
         name: '厦门市',
@@ -54,7 +66,7 @@ export default defineComponent({
       {
         name: '宁德市',
       },
-    ]
+    ];
     const convertData = function (data) {
       const scatterData = [];
       for (let i = 0; i < data.length; i++) {
@@ -67,7 +79,7 @@ export default defineComponent({
         }
       }
       return scatterData;
-    }
+    };
     // 监听
     watch(
       () => props.cdata,
@@ -80,7 +92,7 @@ export default defineComponent({
               fontSize: 14,
               lineHeight: 22,
             },
-            position: point => {
+            position: (point) => {
               // 固定在顶部
               return [point[0] + 50, point[1] - 20];
             },
@@ -103,23 +115,25 @@ export default defineComponent({
           //   },
           // },
           // 底部背景
-          geo: [{
-            show: true,
-            aspectScale: 0.85, //长宽比
-            zoom: 1.16,
-            top: '10%',
-            left: '17%',
-            map: '中国',
-            roam: false,
-            itemStyle: {
-              normal: {
-                borderColor: '#7ad5ff7f',
-                shadowOffsetY: 5,
-                shadowBlur: 15,
-                areaColor: 'rgba(5,21,35,0.1)'
-              }
-            }
-          }],
+          geo: [
+            {
+              show: true,
+              aspectScale: 0.85, //长宽比
+              zoom: 1.16,
+              top: '10%',
+              left: '17%',
+              map: '中国',
+              roam: false,
+              itemStyle: {
+                normal: {
+                  borderColor: '#7ad5ff7f',
+                  shadowOffsetY: 5,
+                  shadowBlur: 15,
+                  areaColor: 'rgba(5,21,35,0.1)',
+                },
+              },
+            },
+          ],
           series: [
             {
               name: '相关指数',
@@ -138,14 +152,17 @@ export default defineComponent({
                     y: 300,
                     x2: 0,
                     y2: 0,
-                    colorStops: [{
-                      offset: 0,
-                      color: 'RGBA(19,96,187,1)' // 0% 处的颜色
-                    }, {
-                      offset: 1,
-                      color: 'RGBA(7,193,223,1)' // 50% 处的颜色
-                    }],
-                    global: true // 缺省为 false
+                    colorStops: [
+                      {
+                        offset: 0,
+                        color: 'RGBA(19,96,187,1)', // 0% 处的颜色
+                      },
+                      {
+                        offset: 1,
+                        color: 'RGBA(7,193,223,1)', // 50% 处的颜色
+                      },
+                    ],
+                    global: true, // 缺省为 false
                   },
                   borderColor: '#4ECEE6',
                   borderWidth: 1,
@@ -159,7 +176,7 @@ export default defineComponent({
                 },
               },
               label: {
-                formatter: params => `${params.name}`,
+                formatter: (params) => `${params.name}`,
                 show: true,
                 position: 'insideRight',
                 textStyle: {
@@ -197,21 +214,22 @@ export default defineComponent({
               data: convertData(seriesData),
             },
           ],
-        }
+        };
       },
       {
         immediate: true,
-        deep: true
-      }
-    )
+        deep: true,
+      },
+    );
     return () => {
-      const height = "360px"
-      const width = "330px"
+      const height = '360px';
+      const width = '330px';
 
-      return <div>
-        <echart options={options} height={height} width={width} />
-      </div>
-    }
-  }
-})
-
+      return (
+        <div>
+          <echart options={options} height={height} width={width} />
+        </div>
+      );
+    };
+  },
+});

@@ -31,7 +31,8 @@ const state = reactive({
   coopItems: [] as any,
 });
 
-const { receItems, tierItems, seldItems, roleItems, groupItems, coopItems } = toRefs(state);
+const { receItems, tierItems, seldItems, roleItems, groupItems, coopItems } =
+  toRefs(state);
 
 const activeName = ref('k1');
 
@@ -149,7 +150,9 @@ async function tabChange(tab: any) {
 // region x.1 最近使用
 
 async function onSearch() {
-  receItems.value = await requestClient.get(`/pub/org?type=${state.p_org_type}&name=${state.receSearch}`);
+  receItems.value = await requestClient.get(
+    `/pub/org?type=${state.p_org_type}&name=${state.receSearch}`,
+  );
   for (const rItem of receItems.value) {
     let flag = false;
     for (const sItem of seldItems.value) {
@@ -166,7 +169,9 @@ async function onSearch() {
 }
 
 const receInit = async () => {
-  receItems.value = await requestClient.get(`/pub/org/rece?type=${state.p_org_type}`);
+  receItems.value = await requestClient.get(
+    `/pub/org/rece?type=${state.p_org_type}`,
+  );
 };
 
 function receItemClick(item: any) {
@@ -214,7 +219,9 @@ function receItemClick(item: any) {
 async function nodeClick(node: any) {
   if (node && node.id) {
     //tierItems.value = await requestClient.get(`/system/user/list?type=${state.p_org_type}&depid=${node.id}`);
-    tierItems.value = await requestClient.get(`/pub/org?type=${state.p_org_type}&depid=${node.id}`);
+    tierItems.value = await requestClient.get(
+      `/pub/org?type=${state.p_org_type}&depid=${node.id}`,
+    );
 
     for (const tItem of tierItems.value) {
       for (const sItem of seldItems.value) {
@@ -270,7 +277,9 @@ function tierItemClick(item: any) {
 // region x.3 常用群组
 async function groupNodeClick(node: any) {
   if (node && node.id) {
-    groupItems.value = await requestClient.get(`/pub/org/group/list?pid=${node.id}&type=${node.type}`);
+    groupItems.value = await requestClient.get(
+      `/pub/org/group/list?pid=${node.id}&type=${node.type}`,
+    );
     for (const gItem of groupItems.value) {
       for (const sItem of seldItems.value) {
         if (sItem.id === gItem.id) {
@@ -326,7 +335,9 @@ function groupItemClick(item: any) {
 
 async function roleNodeClick(node: any) {
   if (node && node.id) {
-    roleItems.value = await requestClient.get(`/pub/org/role/list?treid=${node.id}`);
+    roleItems.value = await requestClient.get(
+      `/pub/org/role/list?treid=${node.id}`,
+    );
     for (const rItem of roleItems.value) {
       for (const sItem of seldItems.value) {
         if (sItem.id === rItem.id) {
@@ -382,7 +393,9 @@ function roleItemClick(item: any) {
 
 async function coopNodeClick(node: any) {
   if (node) {
-    coopItems.value = await requestClient.get(`/pub/coop/list?pid=${node.id}&type=${state.p_coop_type}`);
+    coopItems.value = await requestClient.get(
+      `/pub/coop/list?pid=${node.id}&type=${state.p_coop_type}`,
+    );
     for (const rItem of coopItems.value) {
       for (const sItem of seldItems.value) {
         if (sItem.id === rItem.id) {
@@ -538,19 +551,46 @@ const clearAndcloseModal = () => {
 </script>
 
 <template>
-  <el-dialog v-model="state.isShow" title="组织架构选择" width="1000px" draggable>
+  <el-dialog
+    v-model="state.isShow"
+    title="组织架构选择"
+    width="1000px"
+    draggable
+  >
     <div style="height: 440px">
       <el-row>
         <el-col :span="16">
           <el-tabs v-model="activeName" type="card" @tab-click="tabChange">
             <el-tab-pane label="快捷选择" name="k1">
               <div>
-                <el-input v-model="state.receSearch" placeholder="请输入关键字查询" style="width: 200px" @keyup.enter="onSearch" />
-                <el-button type="primary" style="margin-left: 10px" @click="onSearch">查询 </el-button>
+                <el-input
+                  v-model="state.receSearch"
+                  placeholder="请输入关键字查询"
+                  style="width: 200px"
+                  @keyup.enter="onSearch"
+                />
+                <el-button
+                  type="primary"
+                  style="margin-left: 10px"
+                  @click="onSearch"
+                  >查询
+                </el-button>
               </div>
-              <div style="margin-top: 5px; overflow: auto; height: 353px; border: 1px solid #ccc">
+              <div
+                style="
+                  margin-top: 5px;
+                  overflow: auto;
+                  height: 353px;
+                  border: 1px solid #ccc;
+                "
+              >
                 <ul class="z-org-search" id="zOrgSearch" style="padding: 2px">
-                  <li v-for="item in receItems" :key="item.id" class="f-user" @click="receItemClick(item)">
+                  <li
+                    v-for="item in receItems"
+                    :key="item.id"
+                    class="f-user"
+                    @click="receItemClick(item)"
+                  >
                     <el-checkbox v-model="item.checked" />
                     <img :src="item.avatar ?? avatar" />
                     <span class="layui-elip f-user-name">{{ item.name }}</span>
@@ -563,84 +603,182 @@ const clearAndcloseModal = () => {
               <el-row>
                 <el-col :span="12">
                   <div style="height: 390px">
-                    <SelectTree url="/sys/dept/tree" @node-click="nodeClick" :ma-init="true" ref="deptTreeRef" tip="部门名称" />
+                    <SelectTree
+                      url="/sys/dept/tree"
+                      @node-click="nodeClick"
+                      :ma-init="true"
+                      ref="deptTreeRef"
+                      tip="部门名称"
+                    />
                   </div>
                 </el-col>
                 <el-col :span="12">
-                  <div style="border: 1px solid #ccc; height: 390px; margin-left: 5px; overflow: auto">
+                  <div
+                    style="
+                      border: 1px solid #ccc;
+                      height: 390px;
+                      margin-left: 5px;
+                      overflow: auto;
+                    "
+                  >
                     <ul class="z-org-tree">
-                      <li v-for="item in tierItems" :key="item.id" class="f-user" title=" " @click="tierItemClick(item)">
+                      <li
+                        v-for="item in tierItems"
+                        :key="item.id"
+                        class="f-user"
+                        title=" "
+                        @click="tierItemClick(item)"
+                      >
                         <el-checkbox v-model="item.checked" />
                         <img :src="item.avatar ?? avatar" />
-                        <span class="layui-elip f-user-name">{{ item.name }}</span>
-                        <span class="layui-elip f-user-dept">{{ item.dept }}</span>
+                        <span class="layui-elip f-user-name">{{
+                          item.name
+                        }}</span>
+                        <span class="layui-elip f-user-dept">{{
+                          item.dept
+                        }}</span>
                       </li>
                     </ul>
                   </div>
                 </el-col>
               </el-row>
             </el-tab-pane>
-            <el-tab-pane label="常用群组" name="k3" v-if="(state.p_org_type & 8) !== 0">
+            <el-tab-pane
+              label="常用群组"
+              name="k3"
+              v-if="(state.p_org_type & 8) !== 0"
+            >
               <el-row>
                 <el-col :span="12">
                   <div style="height: 390px">
-                    <SelectTree url="/pub/org/group/tree" @node-click="groupNodeClick" :ma-init="true" ref="groupTreeRef" tip="群组分类/群组" />
+                    <SelectTree
+                      url="/pub/org/group/tree"
+                      @node-click="groupNodeClick"
+                      :ma-init="true"
+                      ref="groupTreeRef"
+                      tip="群组分类/群组"
+                    />
                   </div>
                 </el-col>
                 <el-col :span="12">
-                  <div style="border: 1px solid #ccc; height: 390px; margin-left: 5px; overflow: auto">
+                  <div
+                    style="
+                      border: 1px solid #ccc;
+                      height: 390px;
+                      margin-left: 5px;
+                      overflow: auto;
+                    "
+                  >
                     <ul class="z-org-tree">
-                      <li v-for="item in groupItems" :key="item.id" class="f-user" title=" " @click="groupItemClick(item)">
+                      <li
+                        v-for="item in groupItems"
+                        :key="item.id"
+                        class="f-user"
+                        title=" "
+                        @click="groupItemClick(item)"
+                      >
                         <el-checkbox v-model="item.checked" />
                         <img :src="item.avatar ?? avatar" />
-                        <span class="layui-elip f-user-name">{{ item.name }}</span>
+                        <span class="layui-elip f-user-name">{{
+                          item.name
+                        }}</span>
                       </li>
                     </ul>
                   </div>
                 </el-col>
               </el-row>
             </el-tab-pane>
-            <el-tab-pane label="审批角色" name="k4" v-if="(state.p_org_type & 16) !== 0">
+            <el-tab-pane
+              label="审批角色"
+              name="k4"
+              v-if="(state.p_org_type & 16) !== 0"
+            >
               <el-row>
                 <el-col :span="12">
                   <div style="height: 390px">
-                    <SelectTree url="/pub/org/role/tree" @node-click="roleNodeClick" :ma-init="true" ref="roleTreeRef" />
+                    <SelectTree
+                      url="/pub/org/role/tree"
+                      @node-click="roleNodeClick"
+                      :ma-init="true"
+                      ref="roleTreeRef"
+                    />
                   </div>
                 </el-col>
                 <el-col :span="12">
-                  <div style="border: 1px solid #ccc; height: 390px; margin-left: 5px; overflow: auto">
+                  <div
+                    style="
+                      border: 1px solid #ccc;
+                      height: 390px;
+                      margin-left: 5px;
+                      overflow: auto;
+                    "
+                  >
                     <ul class="z-org-tree">
-                      <li v-for="item in roleItems" :key="item.id" class="f-user" title=" " @click="roleItemClick(item)">
+                      <li
+                        v-for="item in roleItems"
+                        :key="item.id"
+                        class="f-user"
+                        title=" "
+                        @click="roleItemClick(item)"
+                      >
                         <el-checkbox v-model="item.checked" />
                         <img :src="item.avatar ?? avatar" />
-                        <span class="layui-elip f-user-name">{{ item.name }}</span>
+                        <span class="layui-elip f-user-name">{{
+                          item.name
+                        }}</span>
                       </li>
                     </ul>
                   </div>
                 </el-col>
               </el-row>
             </el-tab-pane>
-            <el-tab-pane label="外部协同" name="k5" v-if="state.p_coop_type >= 0">
+            <el-tab-pane
+              label="外部协同"
+              name="k5"
+              v-if="state.p_coop_type >= 0"
+            >
               <el-row>
                 <el-col :span="12">
                   <div style="height: 390px">
-                    <SelectTree url="/pub/coop/tree?type=user" @node-click="coopNodeClick" :ma-init="true" ref="coopTreeRef" />
+                    <SelectTree
+                      url="/pub/coop/tree?type=user"
+                      @node-click="coopNodeClick"
+                      :ma-init="true"
+                      ref="coopTreeRef"
+                    />
                   </div>
                 </el-col>
                 <el-col :span="12">
-                  <div style="border: 1px solid #ccc; height: 390px; margin-left: 5px; overflow: auto">
+                  <div
+                    style="
+                      border: 1px solid #ccc;
+                      height: 390px;
+                      margin-left: 5px;
+                      overflow: auto;
+                    "
+                  >
                     <ul class="z-org-tree">
-                      <li v-for="item in coopItems" :key="item.id" class="f-user" title=" " @click="coopItemClick(item)">
+                      <li
+                        v-for="item in coopItems"
+                        :key="item.id"
+                        class="f-user"
+                        title=" "
+                        @click="coopItemClick(item)"
+                      >
                         <el-checkbox v-model="item.checked" />
                         <img :src="item.avatar ?? avatar" />
-                        <span class="layui-elip f-user-name">{{ item.name }}</span>
+                        <span class="layui-elip f-user-name">{{
+                          item.name
+                        }}</span>
                       </li>
                     </ul>
                   </div>
                 </el-col>
               </el-row>
             </el-tab-pane>
-            <el-tab-pane label="我的收藏" name="k9">这个也暂不支持，待开发</el-tab-pane>
+            <el-tab-pane label="我的收藏" name="k9"
+              >这个也暂不支持，待开发</el-tab-pane
+            >
           </el-tabs>
         </el-col>
         <el-col :span="8">
@@ -650,7 +788,12 @@ const clearAndcloseModal = () => {
             </div>
             <div style="border: 1px solid #ccc; height: 390px; overflow: auto">
               <ul class="z-org-selected" style="position: relative">
-                <li v-for="item in seldItems" :key="item.id" class="f-user" style="overflow: hidden">
+                <li
+                  v-for="item in seldItems"
+                  :key="item.id"
+                  class="f-user"
+                  style="overflow: hidden"
+                >
                   <el-icon @click="selectedItemClick(item)">
                     <CircleClose />
                   </el-icon>
@@ -667,7 +810,9 @@ const clearAndcloseModal = () => {
       <span class="dialog-footer">
         <el-button type="primary" @click="closeModal">确认</el-button>
         <el-button @click="state.isShow = false">取消</el-button>
-        <el-button @click="clearAndcloseModal" style="margin-left: 20px">清空选择</el-button>
+        <el-button @click="clearAndcloseModal" style="margin-left: 20px"
+          >清空选择</el-button
+        >
       </span>
     </template>
   </el-dialog>

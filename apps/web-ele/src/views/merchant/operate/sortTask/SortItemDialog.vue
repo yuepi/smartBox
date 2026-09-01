@@ -71,7 +71,10 @@ function handleEditItem(row: SortItem) {
 }
 
 async function handleFormSubmit() {
-  if (formData.value.packageType === undefined || formData.value.packageType === null) {
+  if (
+    formData.value.packageType === undefined ||
+    formData.value.packageType === null
+  ) {
     ElMessage.warning('请选择分类类型');
     return;
   }
@@ -97,7 +100,9 @@ async function handleFormSubmit() {
 
 async function handleDeleteItem(row: SortItem) {
   try {
-    await ElMessageBox.confirm('确定要删除这条分拣明细吗？', '提示', { type: 'warning' });
+    await ElMessageBox.confirm('确定要删除这条分拣明细吗？', '提示', {
+      type: 'warning',
+    });
     await deleteSortItemApi(row.sortItemId);
     ElMessage.success('删除成功');
     await loadItemList();
@@ -119,16 +124,39 @@ defineExpose({ open });
     @close="itemList = []"
   >
     <div class="mb-4">
-      <el-button type="primary" icon="Plus" @click="handleAddItem">新增明细</el-button>
+      <el-button type="primary" icon="Plus" @click="handleAddItem"
+        >新增明细</el-button
+      >
     </div>
-    <el-table v-loading="loading" :data="itemList" border stripe style="width: 100%">
-      <el-table-column prop="sortItemId" label="明细ID" width="80" align="center" />
-      <el-table-column prop="packageType" label="分类类型" width="100" align="center">
+    <el-table
+      v-loading="loading"
+      :data="itemList"
+      border
+      stripe
+      style="width: 100%"
+    >
+      <el-table-column
+        prop="sortItemId"
+        label="明细ID"
+        width="80"
+        align="center"
+      />
+      <el-table-column
+        prop="packageType"
+        label="分类类型"
+        width="100"
+        align="center"
+      >
         <template #default="{ row }">
           <DictTag :options="package_type" :value="row.packageType" />
         </template>
       </el-table-column>
-      <el-table-column prop="packageName" label="分类名称" min-width="150" align="left" />
+      <el-table-column
+        prop="packageName"
+        label="分类名称"
+        min-width="150"
+        align="left"
+      />
       <el-table-column prop="weight" label="重量(kg)" width="120" align="right">
         <template #default="{ row }">
           {{ row.weight?.toFixed(2) || 0 }} kg
@@ -136,8 +164,20 @@ defineExpose({ open });
       </el-table-column>
       <el-table-column label="操作" width="120" align="center">
         <template #default="{ row }">
-          <el-button link type="primary" icon="Edit" @click="handleEditItem(row)">编辑</el-button>
-          <el-button link type="danger" icon="Delete" @click="handleDeleteItem(row)">删除</el-button>
+          <el-button
+            link
+            type="primary"
+            icon="Edit"
+            @click="handleEditItem(row)"
+            >编辑</el-button
+          >
+          <el-button
+            link
+            type="danger"
+            icon="Delete"
+            @click="handleDeleteItem(row)"
+            >删除</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
@@ -147,10 +187,19 @@ defineExpose({ open });
   </el-dialog>
 
   <!-- 分拣明细表单弹窗 -->
-  <el-dialog v-model="formVisible" :title="formTitle" width="450px" append-to-body>
+  <el-dialog
+    v-model="formVisible"
+    :title="formTitle"
+    width="450px"
+    append-to-body
+  >
     <el-form :model="formData" label-width="80px">
       <el-form-item label="分类类型" required>
-        <el-select v-model="formData.packageType" placeholder="请选择" style="width: 100%">
+        <el-select
+          v-model="formData.packageType"
+          placeholder="请选择"
+          style="width: 100%"
+        >
           <el-option
             v-for="item in packageTypeOptions"
             :key="item.value"
@@ -160,15 +209,26 @@ defineExpose({ open });
         </el-select>
       </el-form-item>
       <el-form-item label="分类名称">
-        <el-input v-model="formData.packageName" placeholder="请输入分类名称（可选）" />
+        <el-input
+          v-model="formData.packageName"
+          placeholder="请输入分类名称（可选）"
+        />
       </el-form-item>
       <el-form-item label="重量(kg)" required>
-        <el-input-number v-model="formData.weight" :min="0" :precision="2" :step="0.1" style="width: 100%" />
+        <el-input-number
+          v-model="formData.weight"
+          :min="0"
+          :precision="2"
+          :step="0.1"
+          style="width: 100%"
+        />
       </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="formVisible = false">取消</el-button>
-      <el-button type="primary" :loading="formLoading" @click="handleFormSubmit">确定</el-button>
+      <el-button type="primary" :loading="formLoading" @click="handleFormSubmit"
+        >确定</el-button
+      >
     </template>
   </el-dialog>
 </template>

@@ -2,6 +2,8 @@
 import type { StockOut, StockOutPageParams } from '#/api/stock/stockOut';
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
+import { computed, onMounted, reactive, ref } from 'vue';
+
 import { Page } from '@vben/common-ui';
 
 import { getCustomerListApi } from '#/api/stock/customer';
@@ -12,7 +14,10 @@ import {
   submitStockOutApi,
 } from '#/api/stock/stockOut';
 import { getWarehouseListApi } from '#/api/stock/warehouse';
-import { defaultStockOutColumns, STOCK_OUT_STORAGE_KEY } from '#/constants/tableColumns';
+import {
+  defaultStockOutColumns,
+  STOCK_OUT_STORAGE_KEY,
+} from '#/constants/tableColumns';
 import { ModuleCodeMap } from '#/hooks/useExport';
 
 import StockOutDetail from './StockOutDetail.vue';
@@ -152,7 +157,11 @@ async function handleDelete(row?: StockOut) {
   }
 
   try {
-    await ElMessageBox.confirm(`确定要删除选中的 ${ids.length} 条出库单吗？`, '提示', { type: 'warning' });
+    await ElMessageBox.confirm(
+      `确定要删除选中的 ${ids.length} 条出库单吗？`,
+      '提示',
+      { type: 'warning' },
+    );
     for (const id of ids) {
       await deleteStockOutApi(id);
     }
@@ -218,7 +227,11 @@ onMounted(() => {
       <!-- 📥 高级筛选项 -->
       <template #search-advanced>
         <el-form-item>
-          <el-select v-model="queryParams.warehouseId" clearable style="width: 200px">
+          <el-select
+            v-model="queryParams.warehouseId"
+            clearable
+            style="width: 200px"
+          >
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">仓库:</span>
             </template>
@@ -232,7 +245,11 @@ onMounted(() => {
         </el-form-item>
 
         <el-form-item>
-          <el-select v-model="queryParams.customerId" clearable style="width: 200px">
+          <el-select
+            v-model="queryParams.customerId"
+            clearable
+            style="width: 200px"
+          >
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">回收商:</span>
             </template>
@@ -246,7 +263,11 @@ onMounted(() => {
         </el-form-item>
 
         <el-form-item>
-          <el-select v-model="queryParams.outStatus" clearable style="width: 200px">
+          <el-select
+            v-model="queryParams.outStatus"
+            clearable
+            style="width: 200px"
+          >
             <template #prefix>
               <span class="text-xs text-gray-400 mr-0.5">出库状态:</span>
             </template>
@@ -262,14 +283,33 @@ onMounted(() => {
 
       <!-- 📥 工具栏左侧 -->
       <template #toolbar-left>
-        <el-button type="primary" plain icon="Plus" @click="handleAdd">新增出库单</el-button>
-        <ExportButton :module-code="ModuleCodeMap.STOCK_OUT" :fields="visibleColumns" :find-cond="queryParams" />
-        <el-button type="danger" plain icon="Delete" :disabled="selectedIds.length === 0" @click="handleDelete()">
+        <el-button type="primary" plain icon="Plus" @click="handleAdd">
+          新增出库单
+        </el-button>
+        <ExportButton
+          :module-code="ModuleCodeMap.STOCK_OUT"
+          :fields="visibleColumns"
+          :find-cond="queryParams"
+        />
+        <el-button
+          type="danger"
+          plain
+          icon="Delete"
+          :disabled="selectedIds.length === 0"
+          @click="handleDelete()"
+        >
           批量删除
         </el-button>
         <transition name="el-fade-in">
-          <span v-if="selectedIds.length > 0" class="selected-alert-badge ml-2 text-xs text-gray-400">
-            已选 <span class="text-red-500 font-medium">{{ selectedIds.length }}</span> 项
+          <span
+            v-if="selectedIds.length > 0"
+            class="selected-alert-badge ml-2 text-xs text-gray-400"
+          >
+            已选
+            <span class="text-red-500 font-medium">{{
+              selectedIds.length
+            }}</span>
+            项
           </span>
         </transition>
       </template>
@@ -320,22 +360,62 @@ onMounted(() => {
             </template>
           </el-table-column>
 
-          <el-table-column label="操作" width="340" fixed="right" align="center">
+          <el-table-column
+            label="操作"
+            width="340"
+            fixed="right"
+            align="center"
+          >
             <template #default="{ row }">
               <el-tooltip content="详情" placement="top" :enterable="false">
-                <el-button link type="primary" icon="View" @click="handleView(row)" />
+                <el-button
+                  link
+                  type="primary"
+                  icon="View"
+                  @click="handleView(row)"
+                />
               </el-tooltip>
               <el-tooltip content="编辑" placement="top" :enterable="false">
-                <el-button link type="primary" icon="Edit" @click="handleEdit(row)" />
+                <el-button
+                  link
+                  type="primary"
+                  icon="Edit"
+                  @click="handleEdit(row)"
+                />
               </el-tooltip>
-              <el-tooltip v-if="row.outStatus === 0" content="提交出库" placement="top" :enterable="false">
-                <el-button link type="success" icon="Check" @click="handleSubmitOut(row)" />
+              <el-tooltip
+                v-if="row.outStatus === 0"
+                content="提交出库"
+                placement="top"
+                :enterable="false"
+              >
+                <el-button
+                  link
+                  type="success"
+                  icon="Check"
+                  @click="handleSubmitOut(row)"
+                />
               </el-tooltip>
-              <el-tooltip v-if="row.outStatus === 0" content="取消出库" placement="top" :enterable="false">
-                <el-button link type="warning" icon="Close" @click="handleCancelOut(row)" />
+              <el-tooltip
+                v-if="row.outStatus === 0"
+                content="取消出库"
+                placement="top"
+                :enterable="false"
+              >
+                <el-button
+                  link
+                  type="warning"
+                  icon="Close"
+                  @click="handleCancelOut(row)"
+                />
               </el-tooltip>
               <el-tooltip content="删除" placement="top" :enterable="false">
-                <el-button link type="danger" icon="Delete" @click="handleDelete(row)" />
+                <el-button
+                  link
+                  type="danger"
+                  icon="Delete"
+                  @click="handleDelete(row)"
+                />
               </el-tooltip>
             </template>
           </el-table-column>

@@ -28,16 +28,23 @@ export interface WarehouseLocationPageParams {
 // ===== API =====
 
 /** 分页查询货位列表 */
-export function getWarehouseLocationPageApi(params: WarehouseLocationPageParams) {
+export function getWarehouseLocationPageApi(
+  params: WarehouseLocationPageParams,
+) {
   return requestClient.get<{ records: WarehouseLocation[]; total: number }>(
     '/merchant/warehouseLocation/page',
-    { params }
+    { params },
   );
 }
 
 /** 列表查询货位（不分页） */
-export function getWarehouseLocationListApi(params?: Partial<WarehouseLocationPageParams>) {
-  return requestClient.get<WarehouseLocation[]>('/merchant/warehouseLocation/list', { params });
+export function getWarehouseLocationListApi(
+  params?: Partial<WarehouseLocationPageParams>,
+) {
+  return requestClient.get<WarehouseLocation[]>(
+    '/merchant/warehouseLocation/list',
+    { params },
+  );
 }
 
 /** 新增货位 */
@@ -52,9 +59,12 @@ export function editWarehouseLocationApi(data: Partial<WarehouseLocation>) {
 
 /** 货位详情 */
 export function getWarehouseLocationDetailApi(warehouseLocationId: number) {
-  return requestClient.get<WarehouseLocation>('/merchant/warehouseLocation/detail', {
-    params: { warehouseLocationId },
-  });
+  return requestClient.get<WarehouseLocation>(
+    '/merchant/warehouseLocation/detail',
+    {
+      params: { warehouseLocationId },
+    },
+  );
 }
 
 /** 删除货位 */

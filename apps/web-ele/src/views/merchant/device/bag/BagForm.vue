@@ -55,7 +55,12 @@ defineExpose({ open });
         <el-input v-model="formData.bagNo" placeholder="请输入包袋编号" />
       </el-form-item>
       <el-form-item label="备注">
-        <el-input v-model="formData.remark" type="textarea" :rows="2" placeholder="请输入备注" />
+        <el-input
+          v-model="formData.remark"
+          type="textarea"
+          :rows="2"
+          placeholder="请输入备注"
+        />
       </el-form-item>
       <el-form-item label="状态">
         <el-radio-group v-model="formData.status">
@@ -66,7 +71,9 @@ defineExpose({ open });
     </el-form>
     <template #footer>
       <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :loading="loading" @click="handleSubmit">确定</el-button>
+      <el-button type="primary" :loading="loading" @click="handleSubmit"
+        >确定</el-button
+      >
     </template>
   </el-dialog>
 </template>

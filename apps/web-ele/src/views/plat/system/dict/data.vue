@@ -1,9 +1,15 @@
 <script lang="ts" setup>
+import type { DictData } from '#/api/system/dict/dictData';
+
 import { reactive, ref } from 'vue';
+
 import { Delete, Edit, Plus } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { getDictDataPageApi, deleteDictDataApi } from '#/api/system/dict/dictData';
-import type { DictData } from '#/api/system/dict/dictData';
+
+import {
+  deleteDictDataApi,
+  getDictDataPageApi,
+} from '#/api/system/dict/dictData';
 
 import DataEditModal from './dataEdit.vue';
 
@@ -57,43 +63,74 @@ async function handleReset() {
   handleQuery();
 }
 
-
 async function handleDelete(row: DictData) {
   try {
-    await ElMessageBox.confirm(`确定要删除字典项 "${row.itemLabel}" 吗？`, '提示', { type: 'warning' });
+    await ElMessageBox.confirm(
+      `确定要删除字典项 "${row.itemLabel}" 吗？`,
+      '提示',
+      { type: 'warning' },
+    );
     await deleteDictDataApi(row.dictDataId);
     ElMessage.success('删除成功');
     loadData();
-  } catch { }
+  } catch {}
 }
 </script>
 
 <template>
   <div>
-    <BaseTableLayout v-model:queryParams="queryParams" :loading="loading" :total="total"
-      v-model:more-params="moreParams" @search="loadData" @reset="handleReset">
+    <BaseTableLayout
+      v-model:query-params="queryParams"
+      :loading="loading"
+      :total="total"
+      v-model:more-params="moreParams"
+      @search="loadData"
+      @reset="handleReset"
+    >
       <template #title>
-        <span class="font-medium text-gray-800 dark:text-gray-200">字典项列表</span>
+        <span class="font-medium text-gray-800 dark:text-gray-200"
+          >字典项列表</span
+        >
       </template>
 
       <template #toolbar-left>
-        <el-button type="primary" :icon="Plus" :disabled="!dictId"
-          @click="dataEditModalRef.open(undefined, dictId)">新增项</el-button>
+        <el-button
+          type="primary"
+          :icon="Plus"
+          :disabled="!dictId"
+          @click="dataEditModalRef.open(undefined, dictId)"
+        >
+          新增项
+        </el-button>
       </template>
 
       <template #search-basic>
         <el-form-item>
-          <el-input v-model="queryParams.itemLabel" placeholder="请输入" clearable style="width: 180px"
-            :disabled="!dictId">
-            <template #prefix><span class="text-xs text-gray-400">字典标签:</span></template>
+          <el-input
+            v-model="queryParams.itemLabel"
+            placeholder="请输入"
+            clearable
+            style="width: 180px"
+            :disabled="!dictId"
+          >
+            <template #prefix>
+              <span class="text-xs text-gray-400">字典标签:</span>
+            </template>
           </el-input>
         </el-form-item>
       </template>
 
       <template #search-advanced>
         <el-form-item>
-          <el-select v-model="queryParams.status" placeholder="请选择" clearable style="width: 180px">
-            <template #prefix><span class="text-xs text-gray-400 mr-0.5">状态:</span></template>
+          <el-select
+            v-model="queryParams.status"
+            placeholder="请选择"
+            clearable
+            style="width: 180px"
+          >
+            <template #prefix>
+              <span class="text-xs text-gray-400 mr-0.5">状态:</span>
+            </template>
             <el-option label="正常" value="0" />
             <el-option label="停用" value="1" />
           </el-select>
@@ -102,16 +139,34 @@ async function handleDelete(row: DictData) {
 
       <template #table>
         <el-table v-loading="loading" :data="tableData" border size="small">
-          <el-table-column prop="itemLabel" label="字典标签" min-width="100" show-overflow-tooltip>
+          <el-table-column
+            prop="itemLabel"
+            label="字典标签"
+            min-width="100"
+            show-overflow-tooltip
+          >
             <template #default="{ row }">
-              <el-tag :type="row.listClass" size="small" effect="light" round>{{ row.itemLabel }}</el-tag>
+              <el-tag :type="row.listClass" size="small" effect="light" round>
+                {{ row.itemLabel }}
+              </el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="itemValue" label="字典值" width="70" align="center" />
+          <el-table-column
+            prop="itemValue"
+            label="字典值"
+            width="70"
+            align="center"
+          />
           <el-table-column prop="status" label="状态" width="60" align="center">
             <template #default="{ row }">
-              <el-tag :type="row.status === 0 ? 'success' : 'danger'" size="small" effect="light" round>{{ row.status
-                === 0 ? '正常' : '停用' }}</el-tag>
+              <el-tag
+                :type="row.status === 0 ? 'success' : 'danger'"
+                size="small"
+                effect="light"
+                round
+              >
+                {{ row.status === 0 ? '正常' : '停用' }}
+              </el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="sort" label="排序" width="60" align="center" />
@@ -119,10 +174,20 @@ async function handleDelete(row: DictData) {
             <template #default="{ row }">
               <div class="flex justify-center gap-1">
                 <el-tooltip content="修改" placement="top" :enterable="false">
-                  <el-button :icon="Edit" link type="primary" @click="dataEditModalRef.open(row, dictId)" />
+                  <el-button
+                    :icon="Edit"
+                    link
+                    type="primary"
+                    @click="dataEditModalRef.open(row, dictId)"
+                  />
                 </el-tooltip>
                 <el-tooltip content="删除" placement="top" :enterable="false">
-                  <el-button :icon="Delete" link type="danger" @click="handleDelete(row)" />
+                  <el-button
+                    :icon="Delete"
+                    link
+                    type="danger"
+                    @click="handleDelete(row)"
+                  />
                 </el-tooltip>
               </div>
             </template>

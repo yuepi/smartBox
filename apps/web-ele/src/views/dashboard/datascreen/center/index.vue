@@ -1,7 +1,7 @@
 <script lang="ts">
-import { defineComponent, onMounted, reactive } from 'vue'
+import { defineComponent, onMounted, reactive } from 'vue';
 
-import Chart from '../center/chart/draw'
+import Chart from '../center/chart/draw';
 
 export default defineComponent({
   components: { Chart },
@@ -20,9 +20,9 @@ export default defineComponent({
       { number: 89, text: '今日累计投递(次)' },
       { number: 62, text: '今日回收总量(kg)' },
       { number: 186, text: '今日回收金额(元)' },
-    ]
+    ];
 
-    const titleItem = reactive([])
+    const titleItem = reactive([]);
 
     const setData = () => {
       titleDate.forEach((e) => {
@@ -35,13 +35,13 @@ export default defineComponent({
             content: '{nt}',
             style: { fontSize: 22 },
           },
-        })
-      })
-    }
+        });
+      });
+    };
 
     onMounted(() => {
-      setData()
-    })
+      setData();
+    });
 
     // ===== 排行榜数据 =====
     const ranking = reactive({
@@ -69,7 +69,7 @@ export default defineComponent({
       ],
       carousel: 'single',
       unit: '次',
-    })
+    });
 
     // ===== 水位图数据 =====
     const water = reactive({
@@ -77,7 +77,7 @@ export default defineComponent({
       shape: 'roundRect',
       formatter: '{value}%',
       waveNum: 3,
-    })
+    });
 
     // ===== 两个环形图数据 =====
     const rate = reactive([
@@ -103,11 +103,11 @@ export default defineComponent({
           },
         },
       },
-    ])
+    ]);
 
-    return { titleItem, ranking, water, rate }
+    return { titleItem, ranking, water, rate };
   },
-})
+});
 </script>
 
 <template>
@@ -115,9 +115,10 @@ export default defineComponent({
     <!-- ===== 上方：12个指标卡片 (2行 x 4列) ===== -->
     <div class="grid h-[140px] grid-cols-3 gap-2">
       <div
-v-for="item in titleItem" :key="item.title"
+        v-for="item in titleItem"
+        :key="item.title"
         class="flex items-center justify-between rounded bg-black/60 px-3"
->
+      >
         <span class="text-sm text-blue-300">{{ item.title }}</span>
         <dv-digital-flop class="h-[30px] w-[150px]" :config="item.config" />
       </div>
@@ -131,7 +132,10 @@ v-for="item in titleItem" :key="item.title"
           <i class="iconfont icon-tongji2 text-cyan-400"></i>
           <span class="text-sm text-white">用户投递排行榜</span>
         </div>
-        <dv-scroll-ranking-board class="h-[calc(100%-28px)]" :config="ranking" />
+        <dv-scroll-ranking-board
+          class="h-[calc(100%-28px)]"
+          :config="ranking"
+        />
       </div>
 
       <!-- 右上：设备在线率 -->

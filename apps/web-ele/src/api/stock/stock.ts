@@ -45,7 +45,7 @@ export interface StockSummaryItem {
 export function getStockPageApi(params: StockPageParams) {
   return requestClient.get<{ records: Stock[]; total: number }>(
     '/merchant/stock/page',
-    { params }
+    { params },
   );
 }
 
@@ -56,9 +56,12 @@ export function getStockListApi(params?: Partial<StockPageParams>) {
 
 /** 按仓库汇总库存 */
 export function getWarehouseStockSummaryApi(warehouseId?: number) {
-  return requestClient.get<StockSummaryItem[]>('/merchant/stock/getWarehouseStockSummary', {
-    params: { warehouseId },
-  });
+  return requestClient.get<StockSummaryItem[]>(
+    '/merchant/stock/getWarehouseStockSummary',
+    {
+      params: { warehouseId },
+    },
+  );
 }
 
 /** 按商户与包装类型汇总库存 */
@@ -66,9 +69,12 @@ export function getPackageTypeStockSummaryApi(params?: {
   merchantId?: number;
   packageType?: number;
 }) {
-  return requestClient.get<StockSummaryItem[]>('/merchant/stock/getPackageTypeStockSummary', {
-    params,
-  });
+  return requestClient.get<StockSummaryItem[]>(
+    '/merchant/stock/getPackageTypeStockSummary',
+    {
+      params,
+    },
+  );
 }
 
 /** 按维度精确查询库存 */
@@ -78,7 +84,9 @@ export function getStockByDimensionApi(params: {
   packageType?: number;
   warehouseId?: number;
 }) {
-  return requestClient.get<Stock>('/merchant/stock/getStockByDimension', { params });
+  return requestClient.get<Stock>('/merchant/stock/getStockByDimension', {
+    params,
+  });
 }
 
 /** 库存详情 */

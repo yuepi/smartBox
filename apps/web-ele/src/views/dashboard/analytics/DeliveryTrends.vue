@@ -27,7 +27,20 @@ onMounted(() => {
     },
     xAxis: {
       type: 'category',
-      data: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+      data: [
+        '1月',
+        '2月',
+        '3月',
+        '4月',
+        '5月',
+        '6月',
+        '7月',
+        '8月',
+        '9月',
+        '10月',
+        '11月',
+        '12月',
+      ],
       axisTick: { show: false },
     },
     yAxis: [
@@ -53,7 +66,9 @@ onMounted(() => {
         name: '投递重量(kg)',
         type: 'line',
         yAxisIndex: 1,
-        data: [580, 720, 890, 1050, 1380, 1720, 1950, 2080, 2250, 2480, 2750, 3120],
+        data: [
+          580, 720, 890, 1050, 1380, 1720, 1950, 2080, 2250, 2480, 2750, 3120,
+        ],
         smooth: true,
         lineStyle: { width: 3, color: '#67c23a' },
         symbol: 'circle',
@@ -66,5 +81,5 @@ onMounted(() => {
 </script>
 
 <template>
-  <EchartsUI ref="chartRef" style=" width: 100%;height: 400px" />
+  <EchartsUI ref="chartRef" style="width: 100%; height: 400px" />
 </template>

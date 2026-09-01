@@ -25,7 +25,9 @@ const dialogVisible = ref(false);
 const open = async (url: string) => {
   if (url) {
     // eslint-disable-next-line unicorn/prefer-string-slice
-    state.uploadUrl = url.startsWith('/') ? `${import.meta.env.VITE_GLOB_API_URL}${url.substring(1, url.length - 1)}` : `${import.meta.env.VITE_GLOB_API_URL}${url}`;
+    state.uploadUrl = url.startsWith('/')
+      ? `${import.meta.env.VITE_GLOB_API_URL}${url.substring(1, url.length - 1)}`
+      : `${import.meta.env.VITE_GLOB_API_URL}${url}`;
   } else {
     state.uploadUrl = `${import.meta.env.VITE_GLOB_API_URL}/tool/oss/main/upload`;
   }
@@ -73,7 +75,16 @@ const error = (res: any) => {
 
 <template>
   <el-dialog v-model="dialogVisible" title="文件上传" draggable width="500px">
-    <el-upload class="upload-demo" drag ref="upload" :headers="headers" :action="state.uploadUrl" :auto-upload="false" :on-success="handleSuccess" :on-error="error">
+    <el-upload
+      class="upload-demo"
+      drag
+      ref="upload"
+      :headers="headers"
+      :action="state.uploadUrl"
+      :auto-upload="false"
+      :on-success="handleSuccess"
+      :on-error="error"
+    >
       <el-icon class="el-icon--upload">
         <UploadFilled />
       </el-icon>

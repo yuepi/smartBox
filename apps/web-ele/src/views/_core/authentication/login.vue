@@ -59,5 +59,5 @@ const formSchema = computed((): VbenFormSchema[] => {
     :show-code-login="false"
     :show-qrcode-login="false"
     :show-register="false"
-/>
+  />
 </template>

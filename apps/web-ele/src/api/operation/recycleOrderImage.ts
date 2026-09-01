@@ -4,7 +4,7 @@ import { requestClient } from '#/api/request';
 export interface RecycleOrderImage {
   recycleOrderImageId: number;
   recycleOrderId: number;
-  type: number;        // 0=图片,1=视频
+  type: number; // 0=图片,1=视频
   url: string;
   sort: number;
   status: number;
@@ -25,18 +25,24 @@ export interface RecycleOrderImagePageParams {
 }
 
 /** 1. 分页查询附件 */
-export function getRecycleOrderImagePageApi(params: RecycleOrderImagePageParams) {
+export function getRecycleOrderImagePageApi(
+  params: RecycleOrderImagePageParams,
+) {
   return requestClient.get('/merchant/recycleOrderImage/page', { params });
 }
 
 /** 2. 列表查询附件（根据订单ID） */
 export function getRecycleOrderImageListApi(recycleOrderId: number) {
-  return requestClient.get('/merchant/recycleOrderImage/list', { params: { recycleOrderId } });
+  return requestClient.get('/merchant/recycleOrderImage/list', {
+    params: { recycleOrderId },
+  });
 }
 
 /** 3. 附件详情 */
 export function getRecycleOrderImageDetailApi(recycleOrderImageId: number) {
-  return requestClient.get('/merchant/recycleOrderImage/detail', { params: { recycleOrderImageId } });
+  return requestClient.get('/merchant/recycleOrderImage/detail', {
+    params: { recycleOrderImageId },
+  });
 }
 
 /** 4. 新增附件 */
@@ -51,7 +57,9 @@ export function editRecycleOrderImageApi(data: Partial<RecycleOrderImage>) {
 
 /** 6. 删除附件 */
 export function deleteRecycleOrderImageApi(recycleOrderImageId: number) {
-  return requestClient.post('/merchant/recycleOrderImage/delete', { recycleOrderImageId });
+  return requestClient.post('/merchant/recycleOrderImage/delete', {
+    recycleOrderImageId,
+  });
 }
 
 /** 7. 批量删除附件 */

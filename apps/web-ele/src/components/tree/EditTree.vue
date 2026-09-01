@@ -157,10 +157,20 @@ const handleDragLeave = (draggingNode: any, dropNode: any, ev: any) => {
 const handleDragOver = (draggingNode: any, dropNode: Node, ev: any) => {
   console.log('DragOver');
 };
-const handleDragEnd = async (draggingNode: any, dropNode: any, dropType: any, ev: any) => {
+const handleDragEnd = async (
+  draggingNode: any,
+  dropNode: any,
+  dropType: any,
+  ev: any,
+) => {
   console.log('DragEnd');
 };
-const handleDrop = async (draggingNode: any, dropNode: any, dropType: any, ev: any) => {
+const handleDrop = async (
+  draggingNode: any,
+  dropNode: any,
+  dropType: any,
+  ev: any,
+) => {
   await requestClient.post(`${props.url}/move`, {
     type: dropType,
     draid: draggingNode.data.id,
@@ -213,7 +223,9 @@ const openModal = async (data: any) => {
       state.form.pid = data.pid;
     }
   }
-  rdata.cates = await (data?.id ? requestClient.get(`${props.url}/tree?id=${data?.id}`) : requestClient.get(`${props.url}/tree`));
+  rdata.cates = await (data?.id
+    ? requestClient.get(`${props.url}/tree?id=${data?.id}`)
+    : requestClient.get(`${props.url}/tree`));
   state.show = true;
   formRef?.value?.clearValidate();
 };
@@ -235,7 +247,11 @@ const save = async () => {
   state.show = false;
 
   if (state.type === 'add') {
-    if (backNode.pid === 0 || backNode.pid === null || backNode.pid === undefined) {
+    if (
+      backNode.pid === 0 ||
+      backNode.pid === null ||
+      backNode.pid === undefined
+    ) {
       state.data.push(backNode);
     } else {
       for (const targetNode of state.data) {
@@ -259,13 +275,22 @@ const save = async () => {
 </script>
 
 <template>
-  <el-card class="box-card" style="height: 100%" body-style="height: 100%;overflow: auto" body-class="thin-scrollbar">
+  <el-card
+    class="box-card"
+    style="height: 100%"
+    body-style="height: 100%;overflow: auto"
+    body-class="thin-scrollbar"
+  >
     <template #header>
       <div class="card-header">
         <div class="tree-h-flex">
           <div class="tree-h-left">
             <div>
-              <el-input prefix-icon="Search" v-model="filterText" :placeholder="`${props.tip} 可拖拽可右键`" />
+              <el-input
+                prefix-icon="Search"
+                v-model="filterText"
+                :placeholder="`${props.tip} 可拖拽可右键`"
+              />
             </div>
           </div>
           <div class="tree-h-right">
@@ -278,10 +303,22 @@ const save = async () => {
                 </el-button>
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item command="addCate">新增{{ props.tip }}</el-dropdown-item>
-                    <el-dropdown-item command="expandAll" v-if="props.type === 1">全部展开</el-dropdown-item>
-                    <el-dropdown-item command="collapseAll" v-if="props.type === 1">全部折叠</el-dropdown-item>
-                    <el-dropdown-item command="rootNode">根目录</el-dropdown-item>
+                    <el-dropdown-item command="addCate"
+                      >新增{{ props.tip }}</el-dropdown-item
+                    >
+                    <el-dropdown-item
+                      command="expandAll"
+                      v-if="props.type === 1"
+                      >全部展开</el-dropdown-item
+                    >
+                    <el-dropdown-item
+                      command="collapseAll"
+                      v-if="props.type === 1"
+                      >全部折叠</el-dropdown-item
+                    >
+                    <el-dropdown-item command="rootNode"
+                      >根目录</el-dropdown-item
+                    >
                     <el-dropdown-item command="refresh">刷新</el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
@@ -291,7 +328,12 @@ const save = async () => {
         </div>
       </div>
     </template>
-    <div style="margin-bottom: 88px; font-family: 'Courier New', Helvetica, Arial, sans-serif">
+    <div
+      style="
+        margin-bottom: 88px;
+        font-family: 'Courier New', Helvetica, Arial, sans-serif;
+      "
+    >
       <el-tree
         highlight-current
         @node-contextmenu="rightClick"
@@ -314,23 +356,65 @@ const save = async () => {
       />
       <div
         class="op-group"
-        :style="{ 'z-index': 9999, width: '100px', position: 'fixed', left: `${state.optionCardX}px`, top: `${state.optionCardY}px` }"
+        :style="{
+          'z-index': 9999,
+          width: '100px',
+          position: 'fixed',
+          left: `${state.optionCardX}px`,
+          top: `${state.optionCardY}px`,
+        }"
         v-show="state.optionCardShow"
         id="option-button-group"
       >
-        <el-button class="option-card-button" @click="addChildCate" style="border-bottom: 0" v-if="props.type === 1"> 新增{{ props.tip }} </el-button>
-        <el-button class="option-card-button" @click="editCate" style="border-bottom: 0"> 修改{{ props.tip }} </el-button>
-        <el-button class="option-card-button" @click="deleteCate">删除{{ props.tip }}</el-button>
+        <el-button
+          class="option-card-button"
+          @click="addChildCate"
+          style="border-bottom: 0"
+          v-if="props.type === 1"
+        >
+          新增{{ props.tip }}
+        </el-button>
+        <el-button
+          class="option-card-button"
+          @click="editCate"
+          style="border-bottom: 0"
+        >
+          修改{{ props.tip }}
+        </el-button>
+        <el-button class="option-card-button" @click="deleteCate"
+          >删除{{ props.tip }}</el-button
+        >
       </div>
-      <el-dialog v-model="state.show" :title="`${props.tip}编辑`" draggable width="500px">
+      <el-dialog
+        v-model="state.show"
+        :title="`${props.tip}编辑`"
+        draggable
+        width="500px"
+      >
         <el-form ref="formRef" :model="form" label-width="120px">
           <el-form-item label="上级分类" v-if="props.type === 1">
-            <el-tree-select v-model="form.pid" :data="rdata.cates" :props="{ value: 'id', label: 'name' } as any" value-key="id" placeholder="选择上级分类" check-strictly />
+            <el-tree-select
+              v-model="form.pid"
+              :data="rdata.cates"
+              :props="{ value: 'id', label: 'name' } as any"
+              value-key="id"
+              placeholder="选择上级分类"
+              check-strictly
+            />
           </el-form-item>
-          <el-form-item label="分类名称" prop="name" :rules="[{ required: true, message: '分类名称不能为空' }]">
+          <el-form-item
+            label="分类名称"
+            prop="name"
+            :rules="[{ required: true, message: '分类名称不能为空' }]"
+          >
             <el-input v-model="form.name" />
           </el-form-item>
-          <el-form-item label="是否可用" prop="avtag" style="width: 50%" v-if="props.type === 1">
+          <el-form-item
+            label="是否可用"
+            prop="avtag"
+            style="width: 50%"
+            v-if="props.type === 1"
+          >
             <el-switch v-model="form.avtag" />
           </el-form-item>
           <el-form-item label="备注：" prop="notes">

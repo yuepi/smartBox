@@ -22,8 +22,13 @@ export interface OverviewData {
   deviceTotal: number;
 }
 
-export function getOverviewApi(params?: { endTime?: string; startTime?: string; }) {
-  return requestClient.get<OverviewData>('/plat/statistics/overview', { params });
+export function getOverviewApi(params?: {
+  endTime?: string;
+  startTime?: string;
+}) {
+  return requestClient.get<OverviewData>('/plat/statistics/overview', {
+    params,
+  });
 }
 
 /** 数据趋势 */
@@ -34,7 +39,10 @@ export interface TrendData {
   trendList: Array<{ date: string; value: number }>;
 }
 
-export function getDataTrendApi(params?: { rangeDays?: number; type?: string; }) {
+export function getDataTrendApi(params?: {
+  rangeDays?: number;
+  type?: string;
+}) {
   return requestClient.get<TrendData>('/plat/statistics/dataTrend', { params });
 }
 

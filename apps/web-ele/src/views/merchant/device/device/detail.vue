@@ -4,12 +4,13 @@ import type { Device } from '#/api/device/device';
 import { getDeviceDetailApi } from '#/api/device/device';
 
 // 引入字典
-const { device_brand, device_hatch_type, device_online_status, device_status } = useDicts([
-  'device_brand',
-  'device_hatch_type',
-  'device_online_status',
-  'device_status',
-]);
+const { device_brand, device_hatch_type, device_online_status, device_status } =
+  useDicts([
+    'device_brand',
+    'device_hatch_type',
+    'device_online_status',
+    'device_status',
+  ]);
 
 // 控制弹窗显示隐藏
 const visible = ref(false);
@@ -50,44 +51,50 @@ defineExpose({ open });
         <DictTag :options="device_brand" :value="detailData.deviceBrand" />
       </el-descriptions-item>
       <el-descriptions-item label="设备类型">
-        <DictTag :options="device_hatch_type" :value="detailData.deviceHatchType" />
+        <DictTag
+          :options="device_hatch_type"
+          :value="detailData.deviceHatchType"
+        />
       </el-descriptions-item>
       <el-descriptions-item label="设备套餐">
-        {{ detailData.devicePackageId || "-" }}
+        {{ detailData.devicePackageId || '-' }}
       </el-descriptions-item>
       <el-descriptions-item label="在线状态">
-        <DictTag :options="device_online_status" :value="detailData.onlineStatus" />
+        <DictTag
+          :options="device_online_status"
+          :value="detailData.onlineStatus"
+        />
       </el-descriptions-item>
       <el-descriptions-item label="最后心跳">
-        {{ detailData.lastHeartTime || "-" }}
+        {{ detailData.lastHeartTime || '-' }}
       </el-descriptions-item>
       <el-descriptions-item label="过期时间">
-        {{ detailData.expireTime || "-" }}
+        {{ detailData.expireTime || '-' }}
       </el-descriptions-item>
       <el-descriptions-item label="设备地址">
-        {{ detailData.deviceAddress || "" }}
-        {{ detailData.detailAddress || "" }}
+        {{ detailData.deviceAddress || '' }}
+        {{ detailData.detailAddress || '' }}
       </el-descriptions-item>
       <el-descriptions-item label="经度">
-        {{ detailData.longitude || "-" }}
+        {{ detailData.longitude || '-' }}
       </el-descriptions-item>
       <el-descriptions-item label="纬度">
-        {{ detailData.latitude || "-" }}
+        {{ detailData.latitude || '-' }}
       </el-descriptions-item>
       <el-descriptions-item label="硬件版本">
-        {{ detailData.hardwareVersion || "-" }}
+        {{ detailData.hardwareVersion || '-' }}
       </el-descriptions-item>
       <el-descriptions-item label="软件版本">
-        {{ detailData.softwareVersion || "-" }}
+        {{ detailData.softwareVersion || '-' }}
       </el-descriptions-item>
       <el-descriptions-item label="信号强度">
-        {{ detailData.signal || "-" }}
+        {{ detailData.signal || '-' }}
       </el-descriptions-item>
       <el-descriptions-item label="设备音量">
-        {{ detailData.volume || "-" }}
+        {{ detailData.volume || '-' }}
       </el-descriptions-item>
       <el-descriptions-item label="客服电话">
-        {{ detailData.customerPhone || "-" }}
+        {{ detailData.customerPhone || '-' }}
       </el-descriptions-item>
       <el-descriptions-item label="状态">
         <DictTag :options="device_status" :value="detailData.status" />

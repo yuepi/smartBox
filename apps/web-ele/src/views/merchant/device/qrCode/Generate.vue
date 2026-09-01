@@ -47,7 +47,11 @@ defineExpose({ open });
   <el-dialog v-model="visible" title="生成二维码" width="500px" append-to-body>
     <el-form :model="form" label-width="100px">
       <el-form-item label="二维码类型" required>
-        <el-select v-model="form.qrcodeType" placeholder="请选择" style="width: 100%">
+        <el-select
+          v-model="form.qrcodeType"
+          placeholder="请选择"
+          style="width: 100%"
+        >
           <el-option
             v-for="item in qrcode_type"
             :key="item.value"
@@ -57,13 +61,20 @@ defineExpose({ open });
         </el-select>
       </el-form-item>
       <el-form-item label="生成数量" required>
-        <el-input-number v-model="form.qrcodeTotal" :min="1" :max="1000" style="width: 100%" />
+        <el-input-number
+          v-model="form.qrcodeTotal"
+          :min="1"
+          :max="1000"
+          style="width: 100%"
+        />
         <div class="text-gray-400 text-xs mt-1">最多一次生成1000个二维码</div>
       </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :loading="loading" @click="handleSubmit">确定</el-button>
+      <el-button type="primary" :loading="loading" @click="handleSubmit"
+        >确定</el-button
+      >
     </template>
   </el-dialog>
 </template>

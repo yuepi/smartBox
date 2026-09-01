@@ -1,8 +1,14 @@
 <script lang="ts" setup>
 import type { Member } from '#/api/member/member';
-import type { MemberWalletFlow, MemberWalletFlowPageParams } from '#/api/member/memberWalletFlow';
+import type {
+  MemberWalletFlow,
+  MemberWalletFlowPageParams,
+} from '#/api/member/memberWalletFlow';
 
-import { getMemberWalletDetailApi, updateWalletStatusApi } from '#/api/member/memberWallet';
+import {
+  getMemberWalletDetailApi,
+  updateWalletStatusApi,
+} from '#/api/member/memberWallet';
 import { getMemberWalletFlowPageApi } from '#/api/member/memberWalletFlow';
 
 const visible = ref(false);
@@ -58,7 +64,12 @@ function getFlowTypeText(type: number): string {
 }
 
 function getFlowTypeType(type: number): string {
-  const map: Record<number, string> = { 0: 'success', 1: 'warning', 2: 'danger', 3: 'info' };
+  const map: Record<number, string> = {
+    0: 'success',
+    1: 'warning',
+    2: 'danger',
+    3: 'info',
+  };
   return map[type] || 'info';
 }
 
@@ -114,7 +125,9 @@ async function handleWalletStatusToggle() {
   const action = newStatus === 0 ? '解冻' : '冻结';
 
   try {
-    await ElMessageBox.confirm(`确定要${action}该会员钱包吗？`, '提示', { type: 'warning' });
+    await ElMessageBox.confirm(`确定要${action}该会员钱包吗？`, '提示', {
+      type: 'warning',
+    });
     await updateWalletStatusApi(walletInfo.value.memberWalletId, newStatus);
     ElMessage.success(`${action}成功`);
     await loadWalletInfo(currentMember.value!.memberId);
@@ -170,16 +183,27 @@ defineExpose({ open });
       <el-tab-pane label="钱包信息" name="info">
         <div v-loading="loading">
           <el-descriptions :column="2" border v-if="walletInfo">
-            <el-descriptions-item label="钱包ID">{{ walletInfo.memberWalletId }}</el-descriptions-item>
-            <el-descriptions-item label="会员ID">{{ walletInfo.memberId }}</el-descriptions-item>
+            <el-descriptions-item label="钱包ID">{{
+              walletInfo.memberWalletId
+            }}</el-descriptions-item>
+            <el-descriptions-item label="会员ID">{{
+              walletInfo.memberId
+            }}</el-descriptions-item>
             <el-descriptions-item label="可用余额">
-              <span class="text-success font-bold text-lg">{{ formatBalance(walletInfo.balance) }}</span>
+              <span class="text-success font-bold text-lg">{{
+                formatBalance(walletInfo.balance)
+              }}</span>
             </el-descriptions-item>
             <el-descriptions-item label="冻结余额">
-              <span class="text-warning">{{ formatBalance(walletInfo.freezeBalance) }}</span>
+              <span class="text-warning">{{
+                formatBalance(walletInfo.freezeBalance)
+              }}</span>
             </el-descriptions-item>
             <el-descriptions-item label="钱包状态">
-              <el-tag :type="getWalletStatusType(walletInfo.status)" size="small">
+              <el-tag
+                :type="getWalletStatusType(walletInfo.status)"
+                size="small"
+              >
                 {{ getWalletStatusText(walletInfo.status) }}
               </el-tag>
             </el-descriptions-item>
@@ -190,9 +214,15 @@ defineExpose({ open });
                 size="small"
                 @click="handleWalletStatusToggle"
               >
-冻结钱包
-</el-button>
-              <el-button v-else type="success" size="small" @click="handleWalletStatusToggle">解冻钱包</el-button>
+                冻结钱包
+              </el-button>
+              <el-button
+                v-else
+                type="success"
+                size="small"
+                @click="handleWalletStatusToggle"
+                >解冻钱包</el-button
+              >
             </el-descriptions-item>
           </el-descriptions>
           <el-empty v-else description="暂无钱包信息" />
@@ -230,37 +260,99 @@ defineExpose({ open });
               />
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="handleFlowQuery">查询</el-button>
+              <el-button type="primary" @click="handleFlowQuery"
+                >查询</el-button
+              >
               <el-button @click="resetFlowQuery">重置</el-button>
             </el-form-item>
           </el-form>
         </div>
 
-        <el-table v-loading="flowLoading" :data="flowData" border stripe style="width: 100%">
-          <el-table-column prop="memberWalletFlowId" label="流水ID" width="90" align="center" />
-          <el-table-column prop="batchNo" label="批次号" min-width="180" align="center" show-overflow-tooltip />
-          <el-table-column prop="flowType" label="流水类型" width="130" align="center">
+        <el-table
+          v-loading="flowLoading"
+          :data="flowData"
+          border
+          stripe
+          style="width: 100%"
+        >
+          <el-table-column
+            prop="memberWalletFlowId"
+            label="流水ID"
+            width="90"
+            align="center"
+          />
+          <el-table-column
+            prop="batchNo"
+            label="批次号"
+            min-width="180"
+            align="center"
+            show-overflow-tooltip
+          />
+          <el-table-column
+            prop="flowType"
+            label="流水类型"
+            width="130"
+            align="center"
+          >
             <template #default="{ row }">
               <el-tag :type="getFlowTypeType(row.flowType)" size="small">
                 {{ getFlowTypeText(row.flowType) }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="changeAmount" label="变动金额" width="130" align="right">
+          <el-table-column
+            prop="changeAmount"
+            label="变动金额"
+            width="130"
+            align="right"
+          >
             <template #default="{ row }">
-              <span :class="row.flowType === 0 || row.flowType === 3 ? 'text-success' : 'text-danger'">
+              <span
+                :class="
+                  row.flowType === 0 || row.flowType === 3
+                    ? 'text-success'
+                    : 'text-danger'
+                "
+              >
                 {{ formatChangeAmount(row.changeAmount, row.flowType) }}
               </span>
             </template>
           </el-table-column>
-          <el-table-column prop="beforeBalance" label="变动前余额" width="120" align="right">
-            <template #default="{ row }">{{ formatBalance(row.beforeBalance) }}</template>
+          <el-table-column
+            prop="beforeBalance"
+            label="变动前余额"
+            width="120"
+            align="right"
+          >
+            <template #default="{ row }">{{
+              formatBalance(row.beforeBalance)
+            }}</template>
           </el-table-column>
-          <el-table-column prop="afterBalance" label="变动后余额" width="120" align="right">
-            <template #default="{ row }"><span class="font-medium">{{ formatBalance(row.afterBalance) }}</span></template>
+          <el-table-column
+            prop="afterBalance"
+            label="变动后余额"
+            width="120"
+            align="right"
+          >
+            <template #default="{ row }"
+              ><span class="font-medium">{{
+                formatBalance(row.afterBalance)
+              }}</span></template
+            >
           </el-table-column>
-          <el-table-column prop="createTime" label="发生时间" width="160" align="center" />
-          <el-table-column prop="remark" label="备注" min-width="150" align="left" show-overflow-tooltip />
+          <el-table-column
+            prop="createTime"
+            label="发生时间"
+            width="160"
+            align="center"
+          />
+          <el-table-column
+            prop="remark"
+            label="备注"
+            min-width="150"
+            align="left"
+            show-overflow-tooltip
+          />
         </el-table>
 
         <div class="flex justify-end mt-4">

@@ -37,7 +37,9 @@ function open(row: RecycleOrder) {
   currentOrder.value = row;
   orderInfo.weight = row.weight || 0;
   orderInfo.unitPrice = row.unitPrice || 0;
-  orderInfo.totalAmount = Number((orderInfo.weight * orderInfo.unitPrice).toFixed(2));
+  orderInfo.totalAmount = Number(
+    (orderInfo.weight * orderInfo.unitPrice).toFixed(2),
+  );
 
   // 默认全部扣除
   formData.deductWeight = orderInfo.weight;
@@ -64,7 +66,9 @@ function handleAmountInput(amount = 0) {
   // 反算重量 = 金额 / 单价
   if (orderInfo.unitPrice > 0) {
     const calcWeight = amount / orderInfo.unitPrice;
-    formData.deductWeight = Number(Math.min(calcWeight, orderInfo.weight).toFixed(2));
+    formData.deductWeight = Number(
+      Math.min(calcWeight, orderInfo.weight).toFixed(2),
+    );
   } else {
     formData.deductWeight = 0;
   }
@@ -87,7 +91,9 @@ function handleWeightInput(weight = 0) {
 
   // 正算金额 = 重量 × 单价
   const calcAmount = weight * orderInfo.unitPrice;
-  formData.deductAmount = Number(Math.min(calcAmount, orderInfo.totalAmount).toFixed(2));
+  formData.deductAmount = Number(
+    Math.min(calcAmount, orderInfo.totalAmount).toFixed(2),
+  );
 
   // 校验是否属于全部扣除状态
   checkIsAllDeduct();
@@ -167,19 +173,32 @@ defineExpose({ open });
 
 <template>
   <el-dialog
-v-model="visible" title="订单异常处理" width="500px" append-to-body :close-on-click-modal="false"
+    v-model="visible"
+    title="订单异常处理"
+    width="500px"
+    append-to-body
+    :close-on-click-modal="false"
     @close="handleClose"
->
+  >
     <el-form label-width="110px" class="custom-form">
       <!-- 扣除环保金 -->
       <el-form-item label="扣除环保金" required>
         <div class="input-with-checkbox">
           <el-input-number
-v-model="formData.deductAmount" :min="0" :max="maxAmount" :precision="2" :controls="false"
-            placeholder="0.00" class="full-width-input" @change="handleAmountInput"
-/>
+            v-model="formData.deductAmount"
+            :min="0"
+            :max="maxAmount"
+            :precision="2"
+            :controls="false"
+            placeholder="0.00"
+            class="full-width-input"
+            @change="handleAmountInput"
+          />
           <div class="checkbox-wrapper">
-            <el-checkbox v-model="formData.isAllAmountDeduct" @change="handleAllAmountChange">
+            <el-checkbox
+              v-model="formData.isAllAmountDeduct"
+              @change="handleAllAmountChange"
+            >
               全部扣除
             </el-checkbox>
           </div>
@@ -190,11 +209,20 @@ v-model="formData.deductAmount" :min="0" :max="maxAmount" :precision="2" :contro
       <el-form-item label="扣除重量">
         <div class="input-with-checkbox">
           <el-input-number
-v-model="formData.deductWeight" :min="0" :max="orderInfo.weight" :precision="2"
-            :controls="false" placeholder="0.00" class="full-width-input" @change="handleWeightInput"
-/>
+            v-model="formData.deductWeight"
+            :min="0"
+            :max="orderInfo.weight"
+            :precision="2"
+            :controls="false"
+            placeholder="0.00"
+            class="full-width-input"
+            @change="handleWeightInput"
+          />
           <div class="checkbox-wrapper">
-            <el-checkbox v-model="formData.isAllWeightDeduct" @change="handleAllWeightChange">
+            <el-checkbox
+              v-model="formData.isAllWeightDeduct"
+              @change="handleAllWeightChange"
+            >
               全部扣除
             </el-checkbox>
           </div>
@@ -204,9 +232,13 @@ v-model="formData.deductWeight" :min="0" :max="orderInfo.weight" :precision="2"
       <!-- 违规原因 -->
       <el-form-item label="违规原因" required>
         <el-input
-v-model="formData.reason" type="textarea" :rows="4" maxlength="250" show-word-limit
+          v-model="formData.reason"
+          type="textarea"
+          :rows="4"
+          maxlength="250"
+          show-word-limit
           placeholder="请输入违规原因"
-/>
+        />
       </el-form-item>
 
       <!-- 底部订单基本参数提示（带小图标） -->
@@ -215,21 +247,27 @@ v-model="formData.reason" type="textarea" :rows="4" maxlength="250" show-word-li
           <el-icon class="info-icon">
             <InfoFilled />
           </el-icon>
-          本单投递量 <strong class="text-gray-700 ml-1">{{ orderInfo.weight }} kg</strong>
+          本单投递量
+          <strong class="text-gray-700 ml-1">{{ orderInfo.weight }} kg</strong>
         </span>
         <span class="divider">|</span>
         <span class="info-item">
           <el-icon class="info-icon">
             <InfoFilled />
           </el-icon>
-          本单投递单价 <strong class="text-gray-700 ml-1">{{ orderInfo.unitPrice }} 元/kg</strong>
+          本单投递单价
+          <strong class="text-gray-700 ml-1"
+            >{{ orderInfo.unitPrice }} 元/kg</strong
+          >
         </span>
       </div>
     </el-form>
 
     <template #footer>
       <el-button @click="handleClose">取消</el-button>
-      <el-button type="primary" :loading="loading" @click="handleSubmit">确定</el-button>
+      <el-button type="primary" :loading="loading" @click="handleSubmit"
+        >确定</el-button
+      >
     </template>
   </el-dialog>
 </template>

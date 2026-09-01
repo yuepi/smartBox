@@ -18,7 +18,9 @@ let closeTimer: null | ReturnType<typeof setTimeout> = null;
 // --- 检测手机浏览器 ---
 function isMobileDevice(): boolean {
   const ua = navigator.userAgent.toLowerCase();
-  return ['android', 'iphone', 'ipad', 'ipod', 'windows phone', 'mobile'].some(k => ua.includes(k));
+  return ['android', 'iphone', 'ipad', 'ipod', 'windows phone', 'mobile'].some(
+    (k) => ua.includes(k),
+  );
 }
 
 // --- 生成二维码 ---
@@ -128,15 +130,26 @@ defineExpose({ open });
       <!-- 已生成二维码：显示二维码 -->
       <div v-else class="qrcode-content">
         <div class="flex justify-center mb-4">
-          <img :src="qrcodeUrl" alt="支付二维码" style="width: 200px; height: 200px" />
+          <img
+            :src="qrcodeUrl"
+            alt="支付二维码"
+            style="width: 200px; height: 200px"
+          />
         </div>
         <div class="text-center text-gray-500 text-sm">请使用微信扫码支付</div>
       </div>
     </div>
 
     <template #footer>
-      <el-button @click="handleClose">{{ qrcodeUrl ? '关闭' : '取消' }}</el-button>
-      <el-button v-if="!qrcodeUrl" type="primary" :loading="loading" @click="handleSubmit">
+      <el-button @click="handleClose">{{
+        qrcodeUrl ? '关闭' : '取消'
+      }}</el-button>
+      <el-button
+        v-if="!qrcodeUrl"
+        type="primary"
+        :loading="loading"
+        @click="handleSubmit"
+      >
         确认充值
       </el-button>
     </template>

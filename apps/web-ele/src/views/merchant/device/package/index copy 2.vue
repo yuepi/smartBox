@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from 'vue';
 
-import { Page } from "@vben/common-ui";
+import { Page } from '@vben/common-ui';
 
 import {
   Delete,
@@ -10,13 +10,13 @@ import {
   Plus,
   Refresh,
   Search,
-} from "@element-plus/icons-vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+} from '@element-plus/icons-vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
 import {
   type DeviceHatch,
   getDeviceHatchListApi,
-} from "#/api/device/deviceHatch";
+} from '#/api/device/deviceHatch';
 import {
   addDevicePackageApi,
   deleteDevicePackageApi,
@@ -25,24 +25,24 @@ import {
   editDevicePackageApi,
   getDevicePackageDetailApi,
   getDevicePackagePageApi,
-} from "#/api/device/devicePackage";
+} from '#/api/device/devicePackage';
 import {
   hatchBindPackageApi,
   hatchBindPackagePageApi,
   type HatchBindPackageRecord,
   hatchUnBindPackageApi,
-} from "#/api/device/devicePackage";
-import ExportFieldSelector from "#/components/ExportFieldSelector/index.vue";
-import { useDicts } from "#/hooks/useDict";
-import { ModuleCodeMap, useExport } from "#/hooks/useExport";
+} from '#/api/device/devicePackage';
+import ExportFieldSelector from '#/components/ExportFieldSelector/index.vue';
+import { useDicts } from '#/hooks/useDict';
+import { ModuleCodeMap, useExport } from '#/hooks/useExport';
 const { exporting, exportData } = useExport(ModuleCodeMap.PACKAGE);
 
-import ColumnSelector from "#/components/ColumnSelector/index.vue";
+import ColumnSelector from '#/components/ColumnSelector/index.vue';
 import {
   defaultPackageColumns,
   PACKAGE_STORAGE_KEY,
   type TableColumnConfig,
-} from "#/constants/tableColumns";
+} from '#/constants/tableColumns';
 
 // 表格列配置
 const columnConfig = ref<TableColumnConfig[]>([...defaultPackageColumns]);
@@ -79,8 +79,8 @@ async function handleExportConfirm(selectedFields: string[]) {
 }
 
 const { package_type, order_status } = useDicts([
-  "package_type",
-  "order_status",
+  'package_type',
+  'order_status',
 ]);
 
 // --- 绑定弹窗相关状态 ---
@@ -111,14 +111,14 @@ async function loadHatchList() {
     const res = await getDeviceHatchListApi({ status: 0 });
     // 过滤掉已绑定计费套餐的仓口
     const boundIds = new Set(
-      boundHatchList.value.map((item) => item.deviceHatchId)
+      boundHatchList.value.map((item) => item.deviceHatchId),
     );
     hatchList.value = (res || []).filter(
-      (hatch: DeviceHatch) => !boundIds.has(hatch.deviceHatchId)
+      (hatch: DeviceHatch) => !boundIds.has(hatch.deviceHatchId),
     );
   } catch (error) {
-    console.error("加载仓口列表失败:", error);
-    ElMessage.error("加载仓口列表失败");
+    console.error('加载仓口列表失败:', error);
+    ElMessage.error('加载仓口列表失败');
   } finally {
     hatchLoading.value = false;
   }
@@ -138,8 +138,8 @@ async function loadBoundHatchList() {
     boundHatchList.value = res.records || [];
     boundHatchTotal.value = res.total || 0;
   } catch (error) {
-    console.error("加载已绑定仓口失败:", error);
-    ElMessage.error("加载已绑定仓口失败");
+    console.error('加载已绑定仓口失败:', error);
+    ElMessage.error('加载已绑定仓口失败');
   } finally {
     boundHatchLoading.value = false;
   }
@@ -159,7 +159,7 @@ async function handleOpenBindDialog(row: DevicePackage) {
 async function handleBindSubmit() {
   if (!currentPackage.value) return;
   if (bindForm.deviceHatchIds.length === 0) {
-    ElMessage.warning("请选择要绑定的仓口");
+    ElMessage.warning('请选择要绑定的仓口');
     return;
   }
 
@@ -176,7 +176,7 @@ async function handleBindSubmit() {
     // 刷新主列表（如果需要显示绑定数量）
     handleQuery();
   } catch {
-    ElMessage.error("绑定失败");
+    ElMessage.error('绑定失败');
   } finally {
     bindLoading.value = false;
   }
@@ -189,15 +189,15 @@ async function handleUnbindHatch(record: HatchBindPackageRecord) {
   try {
     await ElMessageBox.confirm(
       `确定要解除【${record.deviceName}】-【${record.hatchName}】的计费标准绑定吗？`,
-      "提示",
-      { type: "warning" }
+      '提示',
+      { type: 'warning' },
     );
 
     await hatchUnBindPackageApi({
       deviceHatchIds: [record.deviceHatchId],
       devicePackageId: currentPackage.value.devicePackageId,
     });
-    ElMessage.success("解绑成功");
+    ElMessage.success('解绑成功');
     // 刷新已绑定列表
     await loadBoundHatchList();
     await loadHatchList();
@@ -219,22 +219,22 @@ const selectedIds = ref<number[]>([]);
 
 // 表单弹窗控制
 const formVisible = ref(false);
-const formTitle = ref("");
+const formTitle = ref('');
 const formData = ref<Partial<DevicePackage>>({});
 const formSubmitting = ref(false);
 
 // 计费类型选项
 const packageTypeOptions = [
-  { label: "混合", value: 0, color: "info" },
-  { label: "织物", value: 1, color: "primary" },
-  { label: "金属", value: 2, color: "warning" },
-  { label: "塑料", value: 3, color: "success" },
+  { label: '混合', value: 0, color: 'info' },
+  { label: '织物', value: 1, color: 'primary' },
+  { label: '金属', value: 2, color: 'warning' },
+  { label: '塑料', value: 3, color: 'success' },
 ];
 
 // 状态选项
 const statusOptions = [
-  { label: "启用", value: 0 },
-  { label: "禁用", value: 1 },
+  { label: '启用', value: 0 },
+  { label: '禁用', value: 1 },
 ];
 
 // 查询参数
@@ -249,26 +249,26 @@ const queryParams = reactive<DevicePackagePageParams>({
 // --- 辅助函数 ---
 function getPackageTypeText(type: number): string {
   const map: Record<number, string> = {
-    0: "混合",
-    1: "织物",
-    2: "金属",
-    3: "塑料",
+    0: '混合',
+    1: '织物',
+    2: '金属',
+    3: '塑料',
   };
-  return map[type] || "未知";
+  return map[type] || '未知';
 }
 
 function getPackageTypeColor(type: number): string {
   const map: Record<number, string> = {
-    0: "info",
-    1: "primary",
-    2: "warning",
-    3: "success",
+    0: 'info',
+    1: 'primary',
+    2: 'warning',
+    3: 'success',
   };
-  return map[type] || "info";
+  return map[type] || 'info';
 }
 
 function getStatusText(status: number): string {
-  return status === 0 ? "启用" : "禁用";
+  return status === 0 ? '启用' : '禁用';
 }
 
 // --- 数据加载 ---
@@ -280,7 +280,7 @@ async function loadData() {
     total.value = res.total || 0;
   } catch (error) {
     console.error(error);
-    ElMessage.error("加载数据失败");
+    ElMessage.error('加载数据失败');
   } finally {
     loading.value = false;
   }
@@ -288,7 +288,7 @@ async function loadData() {
 
 // --- 新增/编辑 ---
 function handleAdd() {
-  formTitle.value = "新增计费套餐";
+  formTitle.value = '新增计费套餐';
   formData.value = {
     status: 0,
     packageType: 0,
@@ -299,22 +299,22 @@ function handleAdd() {
 
 async function handleEdit(row: DevicePackage) {
   try {
-    formTitle.value = "编辑计费套餐";
+    formTitle.value = '编辑计费套餐';
     const res = await getDevicePackageDetailApi(row.devicePackageId);
     formData.value = res || {};
     formVisible.value = true;
   } catch {
-    ElMessage.error("获取套餐信息失败");
+    ElMessage.error('获取套餐信息失败');
   }
 }
 
 async function handleSubmit() {
   if (!formData.value.packageName?.trim()) {
-    ElMessage.warning("请输入套餐名称");
+    ElMessage.warning('请输入套餐名称');
     return;
   }
   if (formData.value.unitPrice === undefined || formData.value.unitPrice < 0) {
-    ElMessage.warning("请输入有效的回收单价");
+    ElMessage.warning('请输入有效的回收单价');
     return;
   }
 
@@ -324,11 +324,11 @@ async function handleSubmit() {
       ? editDevicePackageApi
       : addDevicePackageApi;
     await api(formData.value);
-    ElMessage.success(formData.value.devicePackageId ? "修改成功" : "新增成功");
+    ElMessage.success(formData.value.devicePackageId ? '修改成功' : '新增成功');
     formVisible.value = false;
     handleQuery();
   } catch {
-    ElMessage.error("操作失败");
+    ElMessage.error('操作失败');
   } finally {
     formSubmitting.value = false;
   }
@@ -342,7 +342,7 @@ async function handleDelete(row?: DevicePackage) {
     ids = [row.devicePackageId];
   } else {
     if (selectedIds.value.length === 0) {
-      ElMessage.warning("请选择要删除的记录");
+      ElMessage.warning('请选择要删除的记录');
       return;
     }
     ids = selectedIds.value;
@@ -351,8 +351,8 @@ async function handleDelete(row?: DevicePackage) {
   try {
     await ElMessageBox.confirm(
       `确定要删除选中的 ${ids.length} 条计费套餐吗？删除后可能影响已绑定的设备仓口。`,
-      "提示",
-      { type: "warning" }
+      '提示',
+      { type: 'warning' },
     );
 
     for (const id of ids) {
@@ -406,7 +406,9 @@ onMounted(() => {
             @keyup.enter="handleQuery"
           >
             <template #prefix>
-               <span class="text-xs text-gray-400 font-normal mr-0.5">套餐名称:</span>
+              <span class="text-xs text-gray-400 font-normal mr-0.5"
+                >套餐名称:</span
+              >
               <!-- <el-icon class="text-gray-400 mr-0.5"><Search /></el-icon> -->
             </template>
           </el-input>
@@ -419,7 +421,9 @@ onMounted(() => {
             style="width: 200px"
           >
             <template #prefix>
-              <span class="text-xs text-gray-400 font-normal mr-0.5">计费类型:</span>
+              <span class="text-xs text-gray-400 font-normal mr-0.5"
+                >计费类型:</span
+              >
             </template>
             <el-option
               v-for="item in packageTypeOptions"
@@ -437,7 +441,9 @@ onMounted(() => {
             style="width: 200px"
           >
             <template #prefix>
-              <span class="text-xs text-gray-400 font-normal mr-0.5">状态:</span>
+              <span class="text-xs text-gray-400 font-normal mr-0.5"
+                >状态:</span
+              >
             </template>
             <el-option
               v-for="item in statusOptions"
@@ -539,7 +545,7 @@ onMounted(() => {
                 round
                 effect="light"
               >
-                {{ row.status === 0 ? "启用" : "禁用" }}
+                {{ row.status === 0 ? '启用' : '禁用' }}
               </el-tag>
             </template>
             <template v-else>

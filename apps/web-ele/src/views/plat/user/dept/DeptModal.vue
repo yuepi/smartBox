@@ -1,8 +1,12 @@
 <script lang="ts" setup>
-
 import type { Dept } from '#/api/system/dept';
 
-import { addPlatDeptApi, editPlatDeptApi, getPlatDeptDetailApi, getPlatDeptListApi } from '#/api/system/dept';
+import {
+  addPlatDeptApi,
+  editPlatDeptApi,
+  getPlatDeptDetailApi,
+  getPlatDeptListApi,
+} from '#/api/system/dept';
 
 const emit = defineEmits(['success']);
 
@@ -32,8 +36,8 @@ async function loadParentDeptOptions() {
       {
         deptId: 0,
         deptName: '顶级部门',
-        children: depts // 后端返回的部门树直接作为子节点
-      }
+        children: depts, // 后端返回的部门树直接作为子节点
+      },
     ];
   } catch (error) {
     console.error(error);
@@ -75,7 +79,10 @@ async function handleSubmit() {
   }
 
   // 🌟 防错安全小优化：防止用户在编辑时，不小心把“上级部门”选成了自己本身
-  if (formData.value.deptId && formData.value.parentId === formData.value.deptId) {
+  if (
+    formData.value.deptId &&
+    formData.value.parentId === formData.value.deptId
+  ) {
     ElMessage.warning('上级部门不能选择自身');
     return;
   }
@@ -97,16 +104,25 @@ async function handleSubmit() {
 
 <template>
   <el-dialog
-v-model="formVisible" :title="formTitle" width="520px" append-to-body
+    v-model="formVisible"
+    :title="formTitle"
+    width="520px"
+    append-to-body
     class="rounded-xl overflow-hidden shadow-2xl"
->
+  >
     <el-form :model="formData" label-position="top" class="p-2">
-<el-form-item label="上级部门" required>
+      <el-form-item label="上级部门" required>
         <el-tree-select
-v-model="formData.parentId" :data="parentDeptOptions"
-          :props="{ label: 'deptName', value: 'deptId', children: 'children' }" value-key="deptId" placeholder="请选择上级部门"
-          check-strictly default-expand-all clearable style="width: 100%"
-/>
+          v-model="formData.parentId"
+          :data="parentDeptOptions"
+          :props="{ label: 'deptName', value: 'deptId', children: 'children' }"
+          value-key="deptId"
+          placeholder="请选择上级部门"
+          check-strictly
+          default-expand-all
+          clearable
+          style="width: 100%"
+        />
       </el-form-item>
 
       <el-form-item label="部门名称" required>
@@ -116,29 +132,51 @@ v-model="formData.parentId" :data="parentDeptOptions"
       <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4">
         <el-form-item label="部门类型">
           <el-select v-model="formData.deptType" placeholder="请选择类型">
-            <el-option v-for="item in deptTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
+            <el-option
+              v-for="item in deptTypeOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
 
         <el-form-item label="排序">
-          <el-input-number v-model="formData.sort" :min="0" :max="999" controls-position="right" class="!w-full" />
+          <el-input-number
+            v-model="formData.sort"
+            :min="0"
+            :max="999"
+            controls-position="right"
+            class="!w-full"
+          />
         </el-form-item>
       </div>
 
       <el-form-item label="状态">
         <div class="h-10 flex items-center">
           <el-switch
-v-model="formData.status" :active-value="0" :inactive-value="1" active-text="启用" inactive-text="禁用"
+            v-model="formData.status"
+            :active-value="0"
+            :inactive-value="1"
+            active-text="启用"
+            inactive-text="禁用"
             inline-prompt
-/>
+          />
         </div>
       </el-form-item>
     </el-form>
 
     <template #footer>
-      <div class="flex justify-end gap-2 px-2 pt-2 border-t border-gray-100 dark:border-zinc-800">
+      <div
+        class="flex justify-end gap-2 px-2 pt-2 border-t border-gray-100 dark:border-zinc-800"
+      >
         <el-button @click="formVisible = false">取消</el-button>
-        <el-button type="primary" :loading="formSubmitting" @click="handleSubmit">确定</el-button>
+        <el-button
+          type="primary"
+          :loading="formSubmitting"
+          @click="handleSubmit"
+          >确定</el-button
+        >
       </div>
     </template>
   </el-dialog>

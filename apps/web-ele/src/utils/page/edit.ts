@@ -31,7 +31,9 @@ export const tabSave = async (data: ItabSave) => {
   if (!data.iouField) {
     data.iouField = 'id';
   }
-  await (data.state.form[data.iouField] ? requestClient.put(data.state.url, data.state.form) : requestClient.post(data.state.url, data.state.form));
+  await (data.state.form[data.iouField]
+    ? requestClient.put(data.state.url, data.state.form)
+    : requestClient.post(data.state.url, data.state.form));
   return true;
 };
 
@@ -99,7 +101,9 @@ export const drawerSave = async (data: IdrawerSave) => {
   if (!data.iouField) {
     data.iouField = 'id';
   }
-  await (data.state.form[data.iouField] ? requestClient.put(data.state.url, data.state.form) : requestClient.post(data.state.url, data.state.form));
+  await (data.state.form[data.iouField]
+    ? requestClient.put(data.state.url, data.state.form)
+    : requestClient.post(data.state.url, data.state.form));
   data.state.show = false;
   return true;
 };
@@ -113,7 +117,9 @@ export const formSave = async (data: IdrawerSave) => {
   if (!data.iouField) {
     data.iouField = 'id';
   }
-  return await (data.state.form[data.iouField] ? requestClient.put(data.state.url, data.state.form) : requestClient.post(data.state.url, data.state.form));
+  return await (data.state.form[data.iouField]
+    ? requestClient.put(data.state.url, data.state.form)
+    : requestClient.post(data.state.url, data.state.form));
 };
 
 // interface IdrawerOpen {

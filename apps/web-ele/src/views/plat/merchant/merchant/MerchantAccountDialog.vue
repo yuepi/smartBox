@@ -53,7 +53,7 @@ async function loadData(merchantId: number) {
   loading.value = true;
   try {
     const accountRes = await getPlatMerchantAccountApi(merchantId);
-  
+
     accountDetail.value = accountRes || {
       merchantAccountId: 0,
       merchantId,
@@ -91,27 +91,45 @@ defineExpose({ open });
 
 <template>
   <el-drawer
-v-model="visible" :title="`账户详情 - ${currentMerchant?.merchantName}`" size="70%"
-    :close-on-click-modal="false" destroy-on-close
->
+    v-model="visible"
+    :title="`账户详情 - ${currentMerchant?.merchantName}`"
+    size="70%"
+    :close-on-click-modal="false"
+    destroy-on-close
+  >
     <div v-loading="loading" class="drawer-content">
       <!-- 账户信息 -->
       <el-descriptions :column="3" border v-if="accountDetail">
-        <el-descriptions-item label="商户名称">{{ currentMerchant?.merchantName }}</el-descriptions-item>
-        <el-descriptions-item label="商户编码">{{ currentMerchant?.merchantCode }}</el-descriptions-item>
-        <el-descriptions-item label="账户ID">{{ accountDetail.merchantAccountId || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="商户名称">
+          {{ currentMerchant?.merchantName }}
+        </el-descriptions-item>
+        <el-descriptions-item label="商户编码">
+          {{ currentMerchant?.merchantCode }}
+        </el-descriptions-item>
+        <el-descriptions-item label="账户ID">
+          {{ accountDetail.merchantAccountId || '-' }}
+        </el-descriptions-item>
         <el-descriptions-item label="账户余额" label-class-name="font-medium">
-          <span class="text-lg font-bold" :class="accountDetail.balance > 0 ? 'text-success' : 'text-danger'">
+          <span
+            class="text-lg font-bold"
+            :class="accountDetail.balance > 0 ? 'text-success' : 'text-danger'"
+          >
             {{ formatBalance(accountDetail.balance) }}
           </span>
         </el-descriptions-item>
         <el-descriptions-item label="账户状态">
-          <el-tag :type="getAccountStatusType(accountDetail.status)" size="default">
+          <el-tag
+            :type="getAccountStatusType(accountDetail.status)"
+            size="default"
+          >
             {{ getAccountStatusText(accountDetail.status) }}
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="商户状态">
-          <el-tag :type="currentMerchant?.status === 0 ? 'success' : 'danger'" size="default">
+          <el-tag
+            :type="currentMerchant?.status === 0 ? 'success' : 'danger'"
+            size="default"
+          >
             {{ getStatusText(currentMerchant?.status ?? 0) }}
           </el-tag>
         </el-descriptions-item>
@@ -121,9 +139,10 @@ v-model="visible" :title="`账户详情 - ${currentMerchant?.merchantName}`" siz
       <el-tabs v-model="activeTab" class="mt-4">
         <el-tab-pane label="充值订单" name="recharge">
           <MerchantRechargeTable
-:merchant-id="currentMerchant!.merchantId" @view-detail="handleViewRecharge"
+            :merchant-id="currentMerchant!.merchantId"
+            @view-detail="handleViewRecharge"
             @open-refund="handleOpenRefund"
-/>
+          />
         </el-tab-pane>
 
         <el-tab-pane label="资金流水" name="flow">
@@ -132,9 +151,10 @@ v-model="visible" :title="`账户详情 - ${currentMerchant?.merchantName}`" siz
 
         <el-tab-pane label="商户配置" name="config">
           <MerchantConfigForm
-:merchant-id="currentMerchant!.merchantId"
-            :get-config-api="getPlatMerchantConfigDetailApi" :save-config-api="editPlatMerchantConfigApi"
-/>
+            :merchant-id="currentMerchant!.merchantId"
+            :get-config-api="getPlatMerchantConfigDetailApi"
+            :save-config-api="editPlatMerchantConfigApi"
+          />
         </el-tab-pane>
       </el-tabs>
     </div>
@@ -143,7 +163,11 @@ v-model="visible" :title="`账户详情 - ${currentMerchant?.merchantName}`" siz
     <template #footer>
       <div class="flex justify-end gap-2 px-4 py-2">
         <el-button @click="visible = false">关闭</el-button>
-        <el-button type="primary" @click="currentMerchant && loadData(currentMerchant.merchantId)" :loading="loading">
+        <el-button
+          type="primary"
+          @click="currentMerchant && loadData(currentMerchant.merchantId)"
+          :loading="loading"
+        >
           刷新
         </el-button>
       </div>
@@ -151,31 +175,62 @@ v-model="visible" :title="`账户详情 - ${currentMerchant?.merchantName}`" siz
   </el-drawer>
 
   <!-- 充值订单详情 -->
-  <el-dialog v-model="rechargeDetailVisible" title="充值订单详情" width="600px" append-to-body>
+  <el-dialog
+    v-model="rechargeDetailVisible"
+    title="充值订单详情"
+    width="600px"
+    append-to-body
+  >
     <el-descriptions :column="2" border v-if="rechargeDetail">
-      <el-descriptions-item label="充值ID">{{ rechargeDetail.merchantRechargeId }}</el-descriptions-item>
-      <el-descriptions-item label="充值单号">{{ rechargeDetail.rechargeNo }}</el-descriptions-item>
+      <el-descriptions-item label="充值ID">
+        {{ rechargeDetail.merchantRechargeId }}
+      </el-descriptions-item>
+      <el-descriptions-item label="充值单号">
+        {{ rechargeDetail.rechargeNo }}
+      </el-descriptions-item>
       <el-descriptions-item label="充值金额">
-        <span class="text-success">¥ {{ (rechargeDetail.amount || 0).toFixed(2) }}</span>
+        <span class="text-success"
+          >¥ {{ (rechargeDetail.amount || 0).toFixed(2) }}</span
+        >
       </el-descriptions-item>
       <el-descriptions-item label="支付状态">
-        <el-tag :type="rechargeDetail.status === 2 ? 'success' : 'warning'" size="small">
+        <el-tag
+          :type="rechargeDetail.status === 2 ? 'success' : 'warning'"
+          size="small"
+        >
           {{ rechargeDetail.status === 2 ? '已支付' : '待支付' }}
         </el-tag>
       </el-descriptions-item>
-      <el-descriptions-item label="充值人">{{ rechargeDetail.rechargeUserName || '-' }}</el-descriptions-item>
-      <el-descriptions-item label="支付时间">{{ rechargeDetail.payTime || '-' }}</el-descriptions-item>
+      <el-descriptions-item label="充值人">
+        {{ rechargeDetail.rechargeUserName || '-' }}
+      </el-descriptions-item>
+      <el-descriptions-item label="支付时间">
+        {{ rechargeDetail.payTime || '-' }}
+      </el-descriptions-item>
       <el-descriptions-item label="退款状态">
-        <el-tag :type="rechargeDetail.refundStatus === 2 ? 'success' : 'info'" size="small">
+        <el-tag
+          :type="rechargeDetail.refundStatus === 2 ? 'success' : 'info'"
+          size="small"
+        >
           {{ rechargeDetail.refundStatus === 2 ? '已退款' : '未退款' }}
         </el-tag>
       </el-descriptions-item>
       <el-descriptions-item label="退款金额">
-        {{ rechargeDetail.totalRefundAmount > 0 ? `¥ ${(rechargeDetail.totalRefundAmount || 0).toFixed(2)}` : '-' }}
+        {{
+          rechargeDetail.totalRefundAmount > 0
+            ? `¥ ${(rechargeDetail.totalRefundAmount || 0).toFixed(2)}`
+            : '-'
+        }}
       </el-descriptions-item>
-      <el-descriptions-item label="退款时间">{{ rechargeDetail.refundTime || '-' }}</el-descriptions-item>
-      <el-descriptions-item label="支付请求ID" :span="2">{{ rechargeDetail.payRequestId || '-' }}</el-descriptions-item>
-      <el-descriptions-item label="退款请求ID" :span="2">{{ rechargeDetail.refundRequestId || '-' }}</el-descriptions-item>
+      <el-descriptions-item label="退款时间">
+        {{ rechargeDetail.refundTime || '-' }}
+      </el-descriptions-item>
+      <el-descriptions-item label="支付请求ID" :span="2">
+        {{ rechargeDetail.payRequestId || '-' }}
+      </el-descriptions-item>
+      <el-descriptions-item label="退款请求ID" :span="2">
+        {{ rechargeDetail.refundRequestId || '-' }}
+      </el-descriptions-item>
     </el-descriptions>
     <template #footer>
       <el-button @click="rechargeDetailVisible = false">关闭</el-button>

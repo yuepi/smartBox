@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { computed, nextTick, onMounted, reactive, ref } from "vue";
+import { computed, nextTick, onMounted, reactive, ref } from 'vue';
 
-import { Page } from "@vben/common-ui";
+import { Page } from '@vben/common-ui';
 
 import {
   Delete,
@@ -10,11 +10,11 @@ import {
   Plus,
   Refresh,
   Search,
-} from "@element-plus/icons-vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+} from '@element-plus/icons-vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
-import { type Dept, getMerchantDeptListApi } from "#/api/system/dept";
-import { getMerchantMenuListApi } from "#/api/system/menu";
+import { type Dept, getMerchantDeptListApi } from '#/api/system/dept';
+import { getMerchantMenuListApi } from '#/api/system/menu';
 import {
   addMerchantRoleApi,
   deleteMerchantRoleApi,
@@ -23,14 +23,14 @@ import {
   getMerchantRolePageApi,
   type Role,
   type RolePageParams,
-} from "#/api/system/role";
-import MemberSelector from "#/components/MemberSelector/index.vue";
+} from '#/api/system/role';
+import MemberSelector from '#/components/MemberSelector/index.vue';
 import {
   defaultRoleColumns,
   ROLE_STORAGE_KEY,
   type TableColumnConfig,
-} from "#/constants/tableColumns";
-import { ModuleCodeMap } from "#/hooks/useExport";
+} from '#/constants/tableColumns';
+import { ModuleCodeMap } from '#/hooks/useExport';
 // 表格列配置
 const columnConfig = ref<TableColumnConfig[]>([...defaultRoleColumns]);
 
@@ -49,13 +49,13 @@ const selectedIds = ref<number[]>([]);
 
 // 表单弹窗控制
 const formVisible = ref(false);
-const formTitle = ref("");
+const formTitle = ref('');
 const formData = ref<Partial<Role>>({});
 const formSubmitting = ref(false);
 const formRef = ref();
 
 // Tab 切换
-const activeTab = ref("basic");
+const activeTab = ref('basic');
 
 // 菜单树相关
 const menuTreeRef = ref();
@@ -69,14 +69,14 @@ const deptLoading = ref(false);
 
 // 状态选项
 const statusOptions = [
-  { label: "启用", value: 0 },
-  { label: "禁用", value: 1 },
+  { label: '启用', value: 0 },
+  { label: '禁用', value: 1 },
 ];
 
 // 数据权限选项
 const scopeOptions = [
-  { label: "全部数据权限", value: 1 },
-  { label: "自定数据权限", value: 2 },
+  { label: '全部数据权限', value: 1 },
+  { label: '自定数据权限', value: 2 },
 ];
 
 // 查询参数
@@ -90,7 +90,7 @@ const queryParams = reactive<RolePageParams>({
 
 // --- 辅助函数 ---
 function getStatusText(status: number): string {
-  return status === 0 ? "启用" : "禁用";
+  return status === 0 ? '启用' : '禁用';
 }
 
 // --- 数据加载 ---
@@ -102,7 +102,7 @@ async function loadData() {
     total.value = res.total || 0;
   } catch (error) {
     console.error(error);
-    ElMessage.error("加载数据失败");
+    ElMessage.error('加载数据失败');
   } finally {
     loading.value = false;
   }
@@ -186,14 +186,14 @@ async function loadMenuTree() {
       // 只传叶子节点
       const leafKeys = filterLeafIds(
         menuTreeData.value,
-        formData.value.menuIds
+        formData.value.menuIds,
       );
       menuTreeRef.value.setCheckedKeys(leafKeys);
-      console.log("菜单叶子节点回显:", leafKeys);
+      console.log('菜单叶子节点回显:', leafKeys);
     }
   } catch (error) {
-    console.error("加载菜单失败：", error);
-    ElMessage.error("加载菜单权限失败");
+    console.error('加载菜单失败：', error);
+    ElMessage.error('加载菜单权限失败');
   } finally {
     menuLoading.value = false;
   }
@@ -212,14 +212,14 @@ async function loadDeptTree() {
       // 只传叶子节点
       const leafKeys = filterLeafIds(
         deptTreeData.value,
-        formData.value.deptIds
+        formData.value.deptIds,
       );
       deptTreeRef.value.setCheckedKeys(leafKeys);
-      console.log("部门叶子节点回显:", leafKeys);
+      console.log('部门叶子节点回显:', leafKeys);
     }
   } catch (error) {
-    console.error("加载部门树失败：", error);
-    ElMessage.error("加载部门树失败");
+    console.error('加载部门树失败：', error);
+    ElMessage.error('加载部门树失败');
   } finally {
     deptLoading.value = false;
   }
@@ -231,7 +231,7 @@ function handleMenuTreeCheck() {
     const checkedKeys = menuTreeRef.value.getCheckedKeys();
     const halfCheckedKeys = menuTreeRef.value.getHalfCheckedKeys();
     formData.value.menuIds = [...checkedKeys, ...halfCheckedKeys];
-    console.log("菜单权限已更新:", formData.value.menuIds);
+    console.log('菜单权限已更新:', formData.value.menuIds);
   }
 }
 
@@ -241,7 +241,7 @@ function handleDeptTreeCheck() {
     const checkedKeys = deptTreeRef.value.getCheckedKeys();
     const halfCheckedKeys = deptTreeRef.value.getHalfCheckedKeys();
     formData.value.deptIds = [...checkedKeys, ...halfCheckedKeys];
-    console.log("部门权限已更新:", formData.value.deptIds);
+    console.log('部门权限已更新:', formData.value.deptIds);
   }
 }
 
@@ -258,10 +258,10 @@ function handleScopeChange(scope: number) {
 
 // --- Tab 点击事件 ---
 const handleTabClick = async (tab: any) => {
-  if (tab.paneName === "menu" && menuTreeData.value.length === 0) {
+  if (tab.paneName === 'menu' && menuTreeData.value.length === 0) {
     await loadMenuTree();
   }
-  if (tab.paneName === "dataScope" && deptTreeData.value.length === 0) {
+  if (tab.paneName === 'dataScope' && deptTreeData.value.length === 0) {
     await loadDeptTree();
   }
 };
@@ -273,8 +273,8 @@ function handleMemberChange(members: any[]) {
 
 // --- 新增/编辑 ---
 function handleAdd() {
-  formTitle.value = "新增角色";
-  activeTab.value = "basic";
+  formTitle.value = '新增角色';
+  activeTab.value = 'basic';
   formData.value = {
     status: 0,
     sort: 0,
@@ -290,8 +290,8 @@ function handleAdd() {
 
 async function handleEdit(row: Role) {
   try {
-    formTitle.value = "编辑角色";
-    activeTab.value = "basic";
+    formTitle.value = '编辑角色';
+    activeTab.value = 'basic';
     const res = await getMerchantRoleDetailApi(row.roleId);
     formData.value = res || {};
     formData.value.menuIds = res.menuIds || [];
@@ -301,17 +301,17 @@ async function handleEdit(row: Role) {
     deptTreeData.value = [];
     formVisible.value = true;
   } catch {
-    ElMessage.error("获取角色信息失败");
+    ElMessage.error('获取角色信息失败');
   }
 }
 
 async function handleSubmit() {
   if (!formData.value.roleName?.trim()) {
-    ElMessage.warning("请输入角色名称");
+    ElMessage.warning('请输入角色名称');
     return;
   }
   if (!formData.value.roleCode?.trim()) {
-    ElMessage.warning("请输入角色编码");
+    ElMessage.warning('请输入角色编码');
     return;
   }
 
@@ -321,11 +321,11 @@ async function handleSubmit() {
       ? editMerchantRoleApi
       : addMerchantRoleApi;
     await api(formData.value);
-    ElMessage.success(formData.value.roleId ? "修改成功" : "新增成功");
+    ElMessage.success(formData.value.roleId ? '修改成功' : '新增成功');
     formVisible.value = false;
     handleQuery();
   } catch {
-    ElMessage.error("操作失败");
+    ElMessage.error('操作失败');
   } finally {
     formSubmitting.value = false;
   }
@@ -339,7 +339,7 @@ async function handleDelete(row?: Role) {
     ids = [row.roleId];
   } else {
     if (selectedIds.value.length === 0) {
-      ElMessage.warning("请选择要删除的记录");
+      ElMessage.warning('请选择要删除的记录');
       return;
     }
     ids = selectedIds.value;
@@ -348,8 +348,8 @@ async function handleDelete(row?: Role) {
   try {
     await ElMessageBox.confirm(
       `确定要删除选中的 ${ids.length} 条角色吗？`,
-      "提示",
-      { type: "warning" }
+      '提示',
+      { type: 'warning' },
     );
 
     for (const id of ids) {
@@ -707,7 +707,7 @@ onMounted(() => {
               <div class="flex items-center gap-2">
                 <span class="font-semibold text-gray-400 w-16">创建人:</span>
                 <span class="text-gray-700 dark:text-gray-300 font-medium">{{
-                  formData.createBy || "-"
+                  formData.createBy || '-'
                 }}</span>
               </div>
               <div class="flex items-center gap-2">
@@ -719,7 +719,7 @@ onMounted(() => {
               <div class="flex items-center gap-2">
                 <span class="font-semibold text-gray-400 w-16">更新人:</span>
                 <span class="text-gray-700 dark:text-gray-300 font-medium">{{
-                  formData.updateBy || "-"
+                  formData.updateBy || '-'
                 }}</span>
               </div>
               <div class="flex items-center gap-2">
@@ -742,7 +742,9 @@ onMounted(() => {
               class="flex items-center gap-2 px-4 py-2.5 mb-4 text-xs text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-950/40 rounded-lg"
             >
               <el-icon class="text-base"><InfoFilled /></el-icon>
-              <span>提示：勾选下方菜单，设置角色可访问的菜单页面及按钮权限</span>
+              <span
+                >提示：勾选下方菜单，设置角色可访问的菜单页面及按钮权限</span
+              >
             </div>
 
             <div
@@ -802,7 +804,9 @@ onMounted(() => {
                 class="flex items-center gap-2 px-4 py-2.5 mb-4 text-xs text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/40 rounded-lg"
               >
                 <el-icon class="text-base"><InfoFilled /></el-icon>
-                <span>提示：勾选下方组织架构部门，角色的数据查看权限将严格限制在所选范围内</span>
+                <span
+                  >提示：勾选下方组织架构部门，角色的数据查看权限将严格限制在所选范围内</span
+                >
               </div>
 
               <div

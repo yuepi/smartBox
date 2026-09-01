@@ -163,17 +163,27 @@ watch(
   <BasicLayout @clear-preferences-and-logout="handleLogout">
     <template #user-dropdown>
       <UserDropdown
-:avatar :menus :text="userStore.userInfo?.realName" description="xxx@gmail.com" tag-text="Pro"
-        @logout="handleLogout" @clear-preferences-and-logout="handleLogout"
-/>
+        :avatar
+        :menus
+        :text="userStore.userInfo?.realName"
+        description="xxx@gmail.com"
+        tag-text="Pro"
+        @logout="handleLogout"
+        @clear-preferences-and-logout="handleLogout"
+      />
     </template>
 
     <template #notification>
       <Notification
-:dot="showDot" :notifications="notifications" @clear="handleNoticeClear"
-        @read="(item) => item.id && markRead(item.id)" @remove="(item) => item.id && remove(item.id)"
-        @make-all="handleMakeAll" @on-click="handleClick" @view-all="viewAll"
-/>
+        :dot="showDot"
+        :notifications="notifications"
+        @clear="handleNoticeClear"
+        @read="(item) => item.id && markRead(item.id)"
+        @remove="(item) => item.id && remove(item.id)"
+        @make-all="handleMakeAll"
+        @on-click="handleClick"
+        @view-all="viewAll"
+      />
     </template>
 
     <template #header-right-150>
@@ -181,7 +191,10 @@ watch(
     </template>
 
     <template #extra>
-      <AuthenticationLoginExpiredModal v-model:open="accessStore.loginExpired" :avatar>
+      <AuthenticationLoginExpiredModal
+        v-model:open="accessStore.loginExpired"
+        :avatar
+      >
         <LoginForm />
       </AuthenticationLoginExpiredModal>
     </template>

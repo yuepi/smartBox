@@ -76,9 +76,6 @@ export function deletePlatDeptApi(deptId: number) {
   return requestClient.post('/plat/dept/delete', { deptId });
 }
 
-
-
-
 /**
  * 商户分页查询部门
  */

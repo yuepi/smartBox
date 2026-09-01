@@ -5,7 +5,7 @@ import { ref } from 'vue';
 
 import { $t } from '@vben/locales';
 
-import { ElMessageBox } from "element-plus";
+import { ElMessageBox } from 'element-plus';
 import { isFunction } from 'lodash-es';
 
 interface BeforeCloseDiffProps {

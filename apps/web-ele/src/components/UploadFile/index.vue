@@ -22,9 +22,9 @@ interface Props {
   isShowTip?: boolean;
   action?: string;
   disabled?: boolean;
-  
+
   // ✨ 新增动态配置属性
-  drag?: boolean;          // 是否启用拖拽上传
+  drag?: boolean; // 是否启用拖拽上传
   webkitdirectory?: boolean; // 是否启用文件夹上传
 }
 
@@ -32,12 +32,23 @@ const props = withDefaults(defineProps<Props>(), {
   modelValue: () => [],
   limit: 5,
   fileSize: 10,
-  fileType: () => ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'zip', 'rar'],
+  fileType: () => [
+    'pdf',
+    'doc',
+    'docx',
+    'xls',
+    'xlsx',
+    'ppt',
+    'pptx',
+    'txt',
+    'zip',
+    'rar',
+  ],
   isShowTip: true,
   action: '/common/upload/uploadFile',
   disabled: false,
-  drag: false,             // 默认关闭拖拽
-  webkitdirectory: false,  // 默认关闭文件夹上传
+  drag: false, // 默认关闭拖拽
+  webkitdirectory: false, // 默认关闭文件夹上传
 });
 
 const emit = defineEmits(['update:modelValue', 'success', 'error']);
@@ -54,7 +65,7 @@ const customUpload = async (options: any) => {
   } catch (error) {
     handleUploadError(error);
     onError(error);
-  } 
+  }
 };
 
 const baseUrl = import.meta.env.VITE_GLOB_API_URL;
@@ -69,8 +80,12 @@ const fileList = ref<UploadFile[]>([]);
 const uploadRef = ref();
 const isInnerChange = ref(false);
 
-const fileAccept = computed(() => props.fileType.map(type => `.${type}`).join(','));
-const showTip = computed(() => props.isShowTip && (props.fileType.length || props.fileSize));
+const fileAccept = computed(() =>
+  props.fileType.map((type) => `.${type}`).join(','),
+);
+const showTip = computed(
+  () => props.isShowTip && (props.fileType.length || props.fileSize),
+);
 
 // 监听外部值变化 [cite: 11]
 watch(
@@ -144,20 +159,29 @@ const handleBeforeUpload = (file: File) => {
     return false;
   }
 
-  ElLoading.service({ lock: true, text: '正在上传...', background: 'rgba(0,0,0,0.7)' });
+  ElLoading.service({
+    lock: true,
+    text: '正在上传...',
+    background: 'rgba(0,0,0,0.7)',
+  });
   return true;
 };
 
-// 上传成功 
+// 上传成功
 const handleUploadSuccess = (res: any, file: any) => {
   ElLoading.service().close();
 
   if (res.code === 200) {
-    const actualUrl = typeof res.data === 'string' ? res.data : (res.data?.url || res.data?.fileUrl);
-    
+    const actualUrl =
+      typeof res.data === 'string'
+        ? res.data
+        : res.data?.url || res.data?.fileUrl;
+
     // ✨ 优化：如果引入了文件夹上传，file.name 会包含相对路径（如 "folder/sub/a.txt"）
     // 我们只需要提取出纯文件名即可
-    const pureName = file.name.includes('/') ? file.name.slice(file.name.lastIndexOf('/') + 1) : file.name;
+    const pureName = file.name.includes('/')
+      ? file.name.slice(file.name.lastIndexOf('/') + 1)
+      : file.name;
 
     const newFile: UploadFile = {
       name: pureName,
@@ -185,7 +209,7 @@ const handleRemove = (index: number) => {
 };
 
 const emitValue = () => {
-  const urls = fileList.value.map(f => f.url).filter(Boolean);
+  const urls = fileList.value.map((f) => f.url).filter(Boolean);
   isInnerChange.value = true;
   emit('update:modelValue', urls);
 };
@@ -206,7 +230,6 @@ const emitValue = () => {
       :http-request="customUpload"
       :show-file-list="false"
       :disabled="fileList.length >= limit"
-      
       :drag="drag"
       :webkitdirectory="webkitdirectory"
     >
@@ -219,9 +242,9 @@ const emitValue = () => {
       </template>
 
       <template v-else>
-        <el-button 
-          type="primary" 
-          :icon="webkitdirectory ? Document : Upload" 
+        <el-button
+          type="primary"
+          :icon="webkitdirectory ? Document : Upload"
           :disabled="fileList.length >= limit"
         >
           {{ webkitdirectory ? '上传文件夹' : '上传文件' }}
@@ -230,7 +253,8 @@ const emitValue = () => {
     </el-upload>
 
     <div v-if="showTip && !disabled" class="upload-tip">
-      支持 {{ fileType.join('/') }} 格式，单个文件不超过 {{ fileSize }}MB，最多 {{ limit }} 个
+      支持 {{ fileType.join('/') }} 格式，单个文件不超过 {{ fileSize }}MB，最多
+      {{ limit }} 个
     </div>
 
     <div v-if="fileList.length > 0" class="file-list">

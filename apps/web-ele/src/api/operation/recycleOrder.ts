@@ -19,13 +19,13 @@ export interface RecycleOrder {
   devicePackageName: string;
   deviceBagId: number;
   deviceBagNo: string;
-  weight: number;           // 投递重量(kg)
-  realWeight: number;       // 实际有效重量(kg)
-  unitPrice: number;        // 回收单价(元/kg)
-  estimateAmount: number;   // 预估金额
-  realAmount: number;       // 实际金额
-  orderStatus: number;      // 0=已投递,1=清运中,2=分拣中,3=审核中,4=已完成,5=已取消,6=异常
-  payStatus: number;        // 0=待支付,1=已支付,2=支付失败
+  weight: number; // 投递重量(kg)
+  realWeight: number; // 实际有效重量(kg)
+  unitPrice: number; // 回收单价(元/kg)
+  estimateAmount: number; // 预估金额
+  realAmount: number; // 实际金额
+  orderStatus: number; // 0=已投递,1=清运中,2=分拣中,3=审核中,4=已完成,5=已取消,6=异常
+  payStatus: number; // 0=待支付,1=已支付,2=支付失败
   payTime: string;
   remark: string;
   status: number;
@@ -81,7 +81,9 @@ export function getRecycleOrderListApi(params?: any) {
 
 /** 3. 详情查询 */
 export function getRecycleOrderDetailApi(recycleOrderId: number) {
-  return requestClient.get('/merchant/recycleOrder/detail', { params: { recycleOrderId } });
+  return requestClient.get('/merchant/recycleOrder/detail', {
+    params: { recycleOrderId },
+  });
 }
 
 /** 4. 修改订单 */
@@ -91,7 +93,9 @@ export function editRecycleOrderApi(data: Partial<RecycleOrder>) {
 
 /** 5. 删除订单 */
 export function deleteRecycleOrderApi(recycleOrderId: number) {
-  return requestClient.post('/merchant/recycleOrder/delete', { recycleOrderId });
+  return requestClient.post('/merchant/recycleOrder/delete', {
+    recycleOrderId,
+  });
 }
 
 /** 补重/扣重参数 */
@@ -126,7 +130,6 @@ export interface DirectCompleteOrderParams {
   remark?: string; // 备注/完成原因
 }
 
-
 /** 6. 标记异常订单 */
 export function abnormalOrderApi(data: AbnormalOrderParams) {
   return requestClient.post('/merchant/recycleOrder/operate/abnormal', data);
@@ -139,7 +142,10 @@ export function cancelOrderApi(data: CancelOrderParams) {
 
 /** 10. 直接完成订单 */
 export function directCompleteOrderApi(data: DirectCompleteOrderParams) {
-  return requestClient.post('/merchant/recycleOrder/operate/directComplete', data);
+  return requestClient.post(
+    '/merchant/recycleOrder/operate/directComplete',
+    data,
+  );
 }
 
 /** 7. 补重/扣重 */
@@ -152,10 +158,12 @@ export function remarkOperateApi(params: RemarkOperateParams) {
   return requestClient.post('/merchant/recycleOrder/operate/remark', params);
 }
 
-
 /** 9.查看订单图片  */
 export function getImageUrlsByRecycleOrderId(recycleOrderId: number) {
-  return requestClient.get('/merchant/recycleOrderImage/queryImageUrlsByRecycleOrderId', { params: { recycleOrderId } });
+  return requestClient.get(
+    '/merchant/recycleOrderImage/queryImageUrlsByRecycleOrderId',
+    { params: { recycleOrderId } },
+  );
 }
 
 /** 10.查询订单处理记录 */

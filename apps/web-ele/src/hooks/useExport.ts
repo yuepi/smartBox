@@ -8,9 +8,9 @@ import { ElMessage } from 'element-plus';
 import { generateExcelApi } from '#/api/common/export';
 
 export interface ExportParams {
+  merchantId?: number;
   moduleCode: number; // 功能模块编码
-  findCond: Record<string, any>; // 查询条件
-  exportCond: Record<string, any>; // 导出配置（选中的字段等）
+  exportCond: string; // 导出配置（选中的字段和筛选条件等）
 }
 
 // 模块编码枚举

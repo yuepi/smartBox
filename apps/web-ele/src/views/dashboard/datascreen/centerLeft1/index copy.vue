@@ -1,10 +1,10 @@
 <script lang="ts">
-import { defineComponent, onMounted, onUnmounted, reactive } from 'vue'
+import { defineComponent, onMounted, onUnmounted, reactive } from 'vue';
 
-import Chart from './chart/index'
+import Chart from './chart/index';
 export default defineComponent({
   components: {
-    Chart
+    Chart,
   },
   setup() {
     // 下层数据
@@ -12,56 +12,56 @@ export default defineComponent({
       { number: 128, text: '总回收箱数' },
       { number: 96, text: '在线设备数' },
       { number: 32, text: '今日投放次数' },
-      { number: 245, text: '今日回收总量(kg)' }
-    ]
+      { number: 245, text: '今日回收总量(kg)' },
+    ];
     // 对应图标
     const iconFont = [
       'icon-diagnose',
       'icon-monitoring',
       'icon-cloudupload',
-      'icon-clouddownload'
-    ]
-    const numberData = reactive([])
-    let intervalInstance = null
+      'icon-clouddownload',
+    ];
+    const numberData = reactive([]);
+    let intervalInstance = null;
     onMounted(() => {
-      setData()
-      changeTiming()
-    })
+      setData();
+      changeTiming();
+    });
 
     const setData = () => {
-      dataArr.forEach(e => {
+      dataArr.forEach((e) => {
         numberData.push({
           config: {
             number: [e.number],
             toFixed: 1,
             content: '{nt}',
             style: {
-              fontSize: 24
-            }
+              fontSize: 24,
+            },
           },
-          text: e.text
-        })
-      })
-    }
+          text: e.text,
+        });
+      });
+    };
 
     const changeTiming = () => {
       intervalInstance = setInterval(() => {
-        changeNumber()
-      }, 2000)
-    }
+        changeNumber();
+      }, 2000);
+    };
     const changeNumber = () => {
       numberData.forEach((item, index) => {
-        item.config.number[0] += ++index
-        item.config = { ...item.config }
-      })
-    }
+        item.config.number[0] += ++index;
+        item.config = { ...item.config };
+      });
+    };
     onUnmounted(() => {
-      clearInterval(intervalInstance)
-    })
+      clearInterval(intervalInstance);
+    });
 
-    return { numberData, iconFont }
-  }
-})
+    return { numberData, iconFont };
+  },
+});
 </script>
 
 <template>
@@ -81,7 +81,11 @@ export default defineComponent({
       </div>
       <!-- 4个主要的数据 -->
       <div class="bottom-data">
-        <div class="item-box mt-2" v-for="(item, index) in numberData" :key="index">
+        <div
+          class="item-box mt-2"
+          v-for="(item, index) in numberData"
+          :key="index"
+        >
           <div class="flex justify-between">
             <i class="iconfont" :class="[iconFont[index]]"></i>
             <dv-digital-flop class="dv-digital-flop" :config="item.config" />
@@ -130,7 +134,7 @@ $box-height: 410px;
       font-size: 14px;
       color: #d3d6dd;
 
-      &>div {
+      & > div {
         padding-right: 5px;
       }
 

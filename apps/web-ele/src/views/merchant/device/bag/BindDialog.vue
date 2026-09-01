@@ -86,7 +86,12 @@ defineExpose({ open });
 </script>
 
 <template>
-  <el-dialog v-model="visible" title="绑定设备仓口" width="450px" append-to-body>
+  <el-dialog
+    v-model="visible"
+    title="绑定设备仓口"
+    width="450px"
+    append-to-body
+  >
     <el-form :model="form" label-width="80px">
       <el-form-item label="选择设备" required>
         <el-select
@@ -96,7 +101,12 @@ defineExpose({ open });
           :loading="deviceLoading"
           @change="onDeviceChange"
         >
-          <el-option v-for="item in deviceOptions" :key="item.deviceId" :label="item.deviceName" :value="item.deviceId" />
+          <el-option
+            v-for="item in deviceOptions"
+            :key="item.deviceId"
+            :label="item.deviceName"
+            :value="item.deviceId"
+          />
         </el-select>
       </el-form-item>
       <el-form-item label="选择仓口" required>
@@ -118,7 +128,9 @@ defineExpose({ open });
     </el-form>
     <template #footer>
       <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :loading="loading" @click="handleSubmit">确定绑定</el-button>
+      <el-button type="primary" :loading="loading" @click="handleSubmit"
+        >确定绑定</el-button
+      >
     </template>
   </el-dialog>
 </template>

@@ -2,6 +2,8 @@
 import type { Dept } from '#/api/system/dept';
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
+import { computed, onMounted, reactive, ref, watch } from 'vue';
+
 import { useAccess } from '@vben/access';
 import { Page } from '@vben/common-ui';
 
@@ -179,57 +181,100 @@ onMounted(() => {
 <template>
   <Page auto-content-height>
     <BaseTableLayout
-:total="0" v-model:query-params="queryParams" v-model:more-params="moreParams" :loading="loading"
-      :is-virtual-table="true" @search="loadData" @reset="resetQuery"
->
+      :total="0"
+      v-model:query-params="queryParams"
+      v-model:more-params="moreParams"
+      :loading="loading"
+      :is-virtual-table="true"
+      @search="loadData"
+      @reset="resetQuery"
+    >
       <template #search-basic>
         <el-form-item>
           <el-input
-v-model="queryParams.deptName" placeholder="请输入" clearable style="width: 200px"
+            v-model="queryParams.deptName"
+            placeholder="请输入"
+            clearable
+            style="width: 200px"
             @keyup.enter="handleQuery"
->
-            <template #prefix><span class="text-sm text-gray-400 mr-0.5">部门名称:</span></template>
+          >
+            <template #prefix>
+              <span class="text-sm text-gray-400 mr-0.5">部门名称:</span>
+            </template>
           </el-input>
         </el-form-item>
       </template>
 
       <template #search-advanced>
         <el-form-item>
-          <el-select v-model="queryParams.deptType" clearable style="width: 200px" placeholder="请选择">
-            <template #prefix><span class="text-sm text-gray-400 mr-0.5">部门类型:</span></template>
+          <el-select
+            v-model="queryParams.deptType"
+            clearable
+            style="width: 200px"
+            placeholder="请选择"
+          >
+            <template #prefix>
+              <span class="text-sm text-gray-400 mr-0.5">部门类型:</span>
+            </template>
             <el-option
-              v-for="item in [{ label: '顶级部门', value: 0 }, { label: '部门', value: 1 }, { label: '小区', value: 2 }]"
-              :key="item.value" :label="item.label" :value="item.value"
-/>
+              v-for="item in [
+                { label: '顶级部门', value: 0 },
+                { label: '部门', value: 1 },
+                { label: '小区', value: 2 },
+              ]"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
 
         <el-form-item>
-          <el-select v-model="queryParams.status" clearable style="width: 200px" placeholder="请选择">
-            <template #prefix><span class="text-sm text-gray-400 mr-0.5">状态:</span></template>
+          <el-select
+            v-model="queryParams.status"
+            clearable
+            style="width: 200px"
+            placeholder="请选择"
+          >
+            <template #prefix>
+              <span class="text-sm text-gray-400 mr-0.5">状态:</span>
+            </template>
             <el-option
-v-for="item in [{ label: '启用', value: 0 }, { label: '禁用', value: 1 }]" :key="item.value"
-              :label="item.label" :value="item.value"
-/>
+              v-for="item in [
+                { label: '启用', value: 0 },
+                { label: '禁用', value: 1 },
+              ]"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
       </template>
 
       <template #toolbar-left>
         <ElButton
-type="primary" plain icon="Plus" @click="handleOpenModal()"
+          type="primary"
+          plain
+          icon="Plus"
+          @click="handleOpenModal()"
           v-access:code="[PERMISSIONS.PLAT.USER_GROUP.DEPT.ADD]"
->
+        >
           新增部门
         </ElButton>
-        <ExportButton :module-code="ModuleCodeMap.DEPT" :fields="visibleColumns" :find-cond="queryParams" />
+        <ExportButton
+          :module-code="ModuleCodeMap.DEPT"
+          :fields="visibleColumns"
+          :find-cond="queryParams"
+        />
       </template>
 
       <template #toolbar-right>
         <ColumnSelector
-:storage-key="DEPT_STORAGE_KEY" :default-columns="defaultDeptColumns"
+          :storage-key="DEPT_STORAGE_KEY"
+          :default-columns="defaultDeptColumns"
           @update:columns="handleColumnsUpdate"
-/>
+        />
       </template>
 
       <template #table>
@@ -237,9 +282,15 @@ type="primary" plain icon="Plus" @click="handleOpenModal()"
           <el-auto-resizer>
             <template #default="{ height, width }">
               <el-table-v2
-:key="tableKey" :columns="tableColumns" :data="tableData" :width="width" :height="height"
-                :row-key="rowKey" expand-column-key="deptName" fixed
-/>
+                :key="tableKey"
+                :columns="tableColumns"
+                :data="tableData"
+                :width="width"
+                :height="height"
+                :row-key="rowKey"
+                expand-column-key="deptName"
+                fixed
+              />
             </template>
           </el-auto-resizer>
         </div>

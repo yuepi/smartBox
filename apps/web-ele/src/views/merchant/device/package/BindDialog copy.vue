@@ -42,9 +42,11 @@ async function loadHatchList() {
   try {
     hatchLoading.value = true;
     const res = await getDeviceHatchListApi({ status: 0 });
-    const boundIds = new Set(boundHatchList.value.map((item) => item.deviceHatchId));
+    const boundIds = new Set(
+      boundHatchList.value.map((item) => item.deviceHatchId),
+    );
     hatchList.value = (res || []).filter(
-      (hatch: DeviceHatch) => !boundIds.has(hatch.deviceHatchId)
+      (hatch: DeviceHatch) => !boundIds.has(hatch.deviceHatchId),
     );
   } finally {
     hatchLoading.value = false;
@@ -102,7 +104,7 @@ async function handleUnbindHatch(record: HatchBindPackageRecord) {
     await ElMessageBox.confirm(
       `确定要解除【${record.deviceName}】-【${record.hatchName}】的计费标准绑定吗？`,
       '提示',
-      { type: 'warning' }
+      { type: 'warning' },
     );
     await hatchUnBindPackageApi({
       deviceHatchIds: [record.deviceHatchId],
@@ -154,12 +156,28 @@ defineExpose({ open });
       <el-col :span="12">
         <div class="bind-section">
           <div class="bind-title">已绑定仓口</div>
-          <el-table v-loading="boundHatchLoading" :data="boundHatchList" border style="width: 100%">
-            <el-table-column prop="deviceName" label="设备名称" min-width="120" show-overflow-tooltip />
+          <el-table
+            v-loading="boundHatchLoading"
+            :data="boundHatchList"
+            border
+            style="width: 100%"
+          >
+            <el-table-column
+              prop="deviceName"
+              label="设备名称"
+              min-width="120"
+              show-overflow-tooltip
+            />
             <el-table-column prop="hatchName" label="仓口名称" width="180" />
             <el-table-column label="操作" width="80" align="center">
               <template #default="{ row }">
-                <el-button link type="danger" size="small" @click="handleUnbindHatch(row)">解绑</el-button>
+                <el-button
+                  link
+                  type="danger"
+                  size="small"
+                  @click="handleUnbindHatch(row)"
+                  >解绑</el-button
+                >
               </template>
             </el-table-column>
           </el-table>
@@ -180,7 +198,9 @@ defineExpose({ open });
     </el-row>
     <template #footer>
       <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :loading="loading" @click="handleBindSubmit">确定绑定</el-button>
+      <el-button type="primary" :loading="loading" @click="handleBindSubmit"
+        >确定绑定</el-button
+      >
     </template>
   </el-dialog>
 </template>
