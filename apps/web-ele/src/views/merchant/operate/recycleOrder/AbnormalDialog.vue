@@ -256,18 +256,16 @@ defineExpose({ open });
             <InfoFilled />
           </el-icon>
           本单投递单价
-          <strong class="text-gray-700 ml-1"
-            >{{ orderInfo.unitPrice }} 元/kg</strong
-          >
+          <strong class="text-gray-700 ml-1">{{ orderInfo.unitPrice }} 元/kg</strong>
         </span>
       </div>
     </el-form>
 
     <template #footer>
       <el-button @click="handleClose">取消</el-button>
-      <el-button type="primary" :loading="loading" @click="handleSubmit"
-        >确定</el-button
-      >
+      <el-button type="primary" :loading="loading" @click="handleSubmit">
+        确定
+      </el-button>
     </template>
   </el-dialog>
 </template>

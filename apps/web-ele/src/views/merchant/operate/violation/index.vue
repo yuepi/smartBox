@@ -368,14 +368,14 @@ onMounted(() => {
               </template>
 
               <!-- 图片列表展示 -->
-              <template v-else-if="col.key === 'images'">
+              <template v-else-if="col.key === 'violationImages'">
                 <div class="flex items-center gap-1 justify-center">
-                  <template v-if="row.images && row.images.length > 0">
+                  <template v-if="row.violationImages && row.violationImages.length > 0">
                     <el-image
-                      v-for="(url, idx) in row.images.slice(0, 5)"
+                      v-for="(url, idx) in row.violationImages.slice(0, 5)"
                       :key="idx"
                       :src="url"
-                      :preview-src-list="row.images"
+                      :preview-src-list="row.violationImages"
                       :initial-index="Number(idx)"
                       show-progress
                       fit="cover"
@@ -389,11 +389,11 @@ onMounted(() => {
                       preview-teleported
                     />
                     <el-tag
-                      v-if="row.images.length > 5"
+                      v-if="row.violationImages.length > 5"
                       size="small"
                       type="info"
                     >
-                      +{{ row.images.length - 5 }}
+                      +{{ row.violationImages.length - 5 }}
                     </el-tag>
                   </template>
                   <span v-else class="text-gray-400">-</span>
@@ -419,7 +419,6 @@ onMounted(() => {
                 <el-button
                   size="small"
                   type="primary"
-                  link
                   @click="handleView(row)"
                 >
                   详情
@@ -427,7 +426,6 @@ onMounted(() => {
                 <el-button
                   size="small"
                   type="primary"
-                  link
                   @click="handleEdit(row)"
                 >
                   编辑
@@ -435,7 +433,6 @@ onMounted(() => {
                 <el-button
                   size="small"
                   type="danger"
-                  link
                   @click="handleDelete(row)"
                 >
                   删除
