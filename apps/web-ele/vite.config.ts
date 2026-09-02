@@ -1,3 +1,5 @@
+import path from 'node:path';
+
 import { defineConfig } from '@vben/vite-config';
 
 import AutoImport from 'unplugin-auto-import/vite';
@@ -26,7 +28,9 @@ export default defineConfig(async () => {
             './src/hooks/**', // 自定义 hooks
             './src/stores/**', // Pinia stores
           ],
-          dts: 'auto-imports.d.ts',
+          // eslint-disable-next-line n/prefer-global/process
+          dts: path.resolve(process.cwd(), 'types', 'auto-imports.d.ts'),
+          vueTemplate: true,
           eslintrc: {
             enabled: true, // 开启生成
             filepath: './.eslintrc-auto-import.json', // 生成路径
@@ -42,7 +46,8 @@ export default defineConfig(async () => {
           ],
         }),
         Components({
-          dts: 'components.d.ts',
+          // eslint-disable-next-line n/prefer-global/process
+          dts: path.resolve(process.cwd(), 'types', 'components.d.ts'),
           resolvers: [
             // Auto register icon components
             // 自动注册图标组件

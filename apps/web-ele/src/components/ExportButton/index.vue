@@ -115,12 +115,10 @@ async function handleStartExport() {
           <el-checkbox
             :model-value="isAllChecked"
             :indeterminate="isIndeterminate"
-            @change="(val) => handleCheckAllChange(val as boolean)"
+            @change="(val: boolean) => handleCheckAllChange(val as boolean)"
             class="!h-auto"
           >
-            <span class="text-sm font-bold text-gray-700 dark:text-gray-200"
-              >全选所有字段</span
-            >
+            <span class="text-sm font-bold text-gray-700 dark:text-gray-200">全选所有字段</span>
           </el-checkbox>
           <span class="text-xs text-gray-400">
             已选择 {{ selectedFields.length }} / {{ fields.length }}
@@ -142,7 +140,7 @@ async function handleStartExport() {
               <el-checkbox
                 :model-value="selectedFields.includes(field.key)"
                 @update:model-value="
-                  (val) => {
+                  (val: any) => {
                     if (val) {
                       selectedFields.push(field.key);
                     } else {

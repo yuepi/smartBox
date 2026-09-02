@@ -65,6 +65,9 @@ export const MERCHANT_PERMISSIONS = {
     CLEAN_TASK: {
       ROUTE: 'merchant:recycle:cleanTask',
     },
+    VIOLATION: {
+      ROUTE: 'merchant:recycle:violation',
+    },
     SORT_TASK: {
       ROUTE: 'merchant:recycle:sortTask',
     },

@@ -50,6 +50,7 @@
     "title": "运营管理",
     "recycleOrder": "回收订单",
     "cleanTask": "清运任务",
+    "violation": "违规记录",
     "sortTask": "分拣任务"
   },
   "member": {

@@ -25,16 +25,15 @@ const emit = defineEmits([
 const pageNo = computed({
   get: () => props.queryParams.pageNo,
   set: (val) => {
-    // eslint-disable-next-line vue/no-mutating-props
-    props.queryParams.pageNo = val;
+    // 依然修改整个 queryParams 并发出 update
+    emit('update:queryParams', { ...props.queryParams, pageNo: val });
   },
 });
 
 const pageSize = computed({
   get: () => props.queryParams.pageSize,
   set: (val) => {
-    // eslint-disable-next-line vue/no-mutating-props
-    props.queryParams.pageSize = val;
+    emit('update:queryParams', { ...props.queryParams, pageSize: val });
   },
 });
 

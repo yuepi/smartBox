@@ -22,21 +22,6 @@ const emit = defineEmits([
   'reset',
 ]);
 
-const pageNo = computed({
-  get: () => props.queryParams.pageNo,
-  set: (val) => {
-    // 依然修改整个 queryParams 并发出 update
-    emit('update:queryParams', { ...props.queryParams, pageNo: val });
-  },
-});
-
-const pageSize = computed({
-  get: () => props.queryParams.pageSize,
-  set: (val) => {
-    emit('update:queryParams', { ...props.queryParams, pageSize: val });
-  },
-});
-
 // 🌟 1. 获取全局插槽对象
 const slots = useSlots();
 const hasAdvancedSearch = computed(() => !!slots['search-advanced']);
@@ -47,8 +32,10 @@ const isExpanded = computed({
 });
 
 function handleSearchClick() {
-  const newQueryParams = { ...props.queryParams, pageNo: 1 };
-  emit('update:queryParams', newQueryParams);
+  if (props.queryParams && 'pageNo' in props.queryParams) {
+    // eslint-disable-next-line vue/no-mutating-props
+    props.queryParams.pageNo = 1;
+  }
   emit('search');
 }
 </script>
@@ -120,8 +107,8 @@ function handleSearchClick() {
 
       <div class="pagination-footer-box" v-if="total > 0">
         <el-pagination
-          v-model:current-page="pageNo"
-          v-model:page-size="pageSize"
+          v-model:current-page="queryParams.pageNo"
+          v-model:page-size="queryParams.pageSize"
           :total="total"
           :page-sizes="[10, 20, 50, 100]"
           layout="?, sizes, prev, pager, next, jumper"

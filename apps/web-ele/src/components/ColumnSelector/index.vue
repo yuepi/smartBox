@@ -4,6 +4,8 @@ import type { TableColumnConfig } from '#/constants/tableColumns';
 import { computed, ref, watch } from 'vue';
 
 import { LucidePin } from '@vben/icons';
+
+import { ElMessage } from 'element-plus';
 // 定义置顶/固定方向类型
 type PinDirection = 'left' | 'right' | false;
 
@@ -83,7 +85,7 @@ function loadFromLocalStorage() {
           return defaultCol;
         });
 
-        columns.value = sortColumns(merged);
+        columns.value = sortColumns(merged as ExtendedColumnConfig[]);
         return;
       }
     }
@@ -220,9 +222,7 @@ init();
         class="flex items-center justify-between px-4 py-3 bg-gray-50/50 dark:bg-zinc-800/50 border-b border-gray-100 dark:border-zinc-700"
       >
         <div class="flex items-center gap-2">
-          <span class="text-sm font-semibold text-gray-700 dark:text-gray-200"
-            >表格列配置</span
-          >
+          <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">表格列配置</span>
           <span
             v-if="hiddenCount > 0"
             class="text-xs text-orange-500 bg-orange-50 dark:bg-orange-900/20 px-1.5 py-0.5 rounded"

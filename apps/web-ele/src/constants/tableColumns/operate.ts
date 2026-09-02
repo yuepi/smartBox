@@ -460,6 +460,20 @@ export const defaultCleanTaskColumns: TableColumnConfig[] = [
   },
 ];
 
+// ========== 违规记录 ==========
+export const VIOLATION_STORAGE_KEY = 'violation_table_columns';
+export const defaultViolationColumns: TableColumnConfig[] = [
+  { key: 'sortViolationId', label: '违规编号', visible: true, width: 150, align: 'center' },
+  { key: 'cleanTaskId', label: '清运任务ID', visible: false, width: 100, align: 'center' },
+  { key: 'merchantId', label: '商户ID', visible: false, width: 120, align: 'center' },
+  { key: 'violationType', label: '违规类型', visible: true, width: 120, align: 'center' },
+  { key: 'violationDesc', label: '违规描述', visible: true, minWidth: 250, align: 'center' },
+  { key: 'status', label: '状态', visible: false, width: 80, align: 'center' },
+  { key: 'violationImages', label: '违规图片', visible: true, minWidth: 250, align: 'center' },
+  { key: 'createdTime', label: '创建时间', visible: true, width: 160, align: 'center' },
+  { key: 'updatedTime', label: '更新时间', visible: true, width: 160, align: 'center' },
+];
+
 // ========== 分拣任务 ==========
 export const SORT_TASK_STORAGE_KEY = 'sort_task_table_columns';
 

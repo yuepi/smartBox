@@ -1,38 +1,43 @@
 <script lang="ts" setup>
 import type { Device } from '#/api/device/device';
-import type { CleanTask, CleanTaskPageParams } from '#/api/operation/cleanTask';
+import type {
+  SortViolation,
+  ViolationPageParams,
+} from '#/api/operation/violation';
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
 import { computed, onMounted, reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
 
 import { Page } from '@vben/common-ui';
 
+import { ElMessage, ElMessageBox } from 'element-plus';
+
 import { getDeviceListApi } from '#/api/device/device';
 import {
-  deleteCleanTaskApi,
-  getCleanTaskPageApi,
-} from '#/api/operation/cleanTask';
+  delSortViolationApi,
+  getSortViolationPageApi,
+} from '#/api/operation/violation';
 import { getMerchantDeptListApi } from '#/api/system/dept';
 import {
-  CLEAN_TASK_STORAGE_KEY,
-  defaultCleanTaskColumns,
+  defaultViolationColumns,
+  VIOLATION_STORAGE_KEY,
 } from '#/constants/tableColumns';
 import { ModuleCodeMap } from '#/hooks/useExport';
 
-import TaskDetail from './TaskDetail.vue';
-import TaskForm from './TaskForm.vue';
-import ViolationAndOrderModal from './ViolationAndOrderModal.vue';
+import ViolationDetail from './ViolationDetail.vue';
+import ViolationForm from './ViolationForm.vue';
 
-const router = useRouter();
-
-const { task_status } = useDicts(['task_status']);
+// 字典与选项
+// const { violation_type, violation_status } = useDicts([
+//   'violation_type',
+//   'violation_status',
+// ]);
 const deviceOptions = ref<Device[]>([]);
+const deptOptions = ref<any[]>([]);
 
-// 级联选择器绑定值
+// 级联选择器绑定
 const cascaderValue = ref<Array<number | string>>([]);
 
-// 组合 [小区 -> 设备] 树形结构选项
 const cascaderOptions = computed(() => {
   return deptOptions.value.map((dept) => {
     const childrenDevices = deviceOptions.value
@@ -54,8 +59,8 @@ const cascaderOptions = computed(() => {
   });
 });
 
-// --- 表格列配置 ---
-const columnConfig = ref<TableColumnConfig[]>([...defaultCleanTaskColumns]);
+// --- 表格动态列 ---
+const columnConfig = ref<TableColumnConfig[]>([...defaultViolationColumns]);
 
 function handleColumnsUpdate(newColumns: TableColumnConfig[]) {
   columnConfig.value = newColumns;
@@ -65,72 +70,49 @@ const visibleColumns = computed(() => {
   return columnConfig.value.filter((col) => col.visible);
 });
 
-// --- 引用 ---
-const taskFormRef = ref();
-const taskDetailRef = ref();
-const violationModalRef = ref();
+// --- 引用与状态 ---
+const violationFormRef = ref();
+const violationDetailRef = ref();
 
-// --- 状态变量 ---
 const loading = ref(false);
-const tableData = ref<CleanTask[]>([]);
+const tableData = ref<SortViolation[]>([]);
 const total = ref(0);
 const selectedIds = ref<number[]>([]);
 const moreParams = ref(false);
 
-// 下拉选项
-const deptOptions = ref<any[]>([]);
-
 // 查询参数
-const queryParams = reactive<CleanTaskPageParams>({
+const queryParams = reactive<ViolationPageParams>({
   pageNo: 1,
   pageSize: 10,
-  taskNo: undefined,
   deptId: undefined,
   deviceId: undefined,
-  taskStatus: undefined,
+  violationType: undefined,
+  status: undefined,
   bagQrCode: undefined,
 });
 
-// --- 级联选择切换回调 ---
+// --- 级联联动 ---
 function handleCascaderChange(val: any) {
   if (!val || val.length === 0) {
     queryParams.deptId = undefined;
     queryParams.deviceId = undefined;
   } else {
     const lastSelected = val[val.length - 1];
-
     if (typeof lastSelected === 'string' && lastSelected.startsWith('dev_')) {
-      const devId = Number(lastSelected.replace('dev_', ''));
-      const parentDeptId = Number(val[0].replace('dept_', ''));
-      queryParams.deptId = parentDeptId;
-      queryParams.deviceId = devId;
+      queryParams.deptId = Number(val[0].replace('dept_', ''));
+      queryParams.deviceId = Number(lastSelected.replace('dev_', ''));
     } else if (
       typeof lastSelected === 'string' &&
       lastSelected.startsWith('dept_')
     ) {
-      const deptId = Number(lastSelected.replace('dept_', ''));
-      queryParams.deptId = deptId;
+      queryParams.deptId = Number(lastSelected.replace('dept_', ''));
       queryParams.deviceId = undefined;
     }
   }
   handleQuery();
 }
 
-function openViolationModal(cleanTaskId: number) {
-  violationModalRef.value?.open(cleanTaskId);
-}
-
-function handleViewOrders(row: CleanTask) {
-  router.push({
-    path: '/recycleOrder', // 回收订单的路由地址
-    query: {
-      cleanTaskId: row.cleanTaskId,
-      taskNo: row.taskNo, // 可选：用于页面顶部提示或展示
-    },
-  });
-}
-
-// --- 加载选项 ---
+// --- 数据交互 ---
 async function loadOptions() {
   try {
     const [deptRes, deviceRes] = await Promise.all([
@@ -144,42 +126,37 @@ async function loadOptions() {
   }
 }
 
-// --- 数据加载 ---
 async function loadData() {
   try {
     loading.value = true;
-    const res = await getCleanTaskPageApi(queryParams);
+    const res = await getSortViolationPageApi(queryParams);
     tableData.value = res.records || [];
     total.value = res.total || 0;
   } catch (error) {
     console.error(error);
-    ElMessage.error('加载数据失败');
+    ElMessage.error('加载违规记录数据失败');
   } finally {
     loading.value = false;
   }
 }
 
-// --- 新增 ---
+// --- 操作句柄 ---
 function handleAdd() {
-  taskFormRef.value?.open();
+  violationFormRef.value?.open();
 }
 
-// --- 编辑 ---
-function handleEdit(row: CleanTask) {
-  taskFormRef.value?.open(row);
+function handleEdit(row: ViolationRecord) {
+  violationFormRef.value?.open(row);
 }
 
-// --- 详情 ---
-function handleView(row: CleanTask) {
-  taskDetailRef.value?.open(row);
+function handleView(row: ViolationRecord) {
+  violationDetailRef.value?.open(row);
 }
 
-// --- 删除 ---
-async function handleDelete(row?: CleanTask) {
-  // eslint-disable-next-line no-useless-assignment
+async function handleDelete(row?: ViolationRecord) {
   let ids: number[] = [];
   if (row) {
-    ids = [row.cleanTaskId];
+    ids = [row.id];
   } else {
     if (selectedIds.value.length === 0) {
       ElMessage.warning('请选择要删除的记录');
@@ -189,23 +166,23 @@ async function handleDelete(row?: CleanTask) {
   }
   try {
     await ElMessageBox.confirm(
-      `确定要删除选中的 ${ids.length} 条任务吗？`,
+      `确定要删除选中的 ${ids.length} 条违规记录吗？`,
       '提示',
       { type: 'warning' },
     );
     for (const id of ids) {
-      await deleteCleanTaskApi(id);
+      await delSortViolationApi(id);
     }
-    ElMessage.success(`成功删除 ${ids.length} 条任务`);
+    ElMessage.success(`成功删除 ${ids.length} 条记录`);
     selectedIds.value = [];
     handleQuery();
   } catch {
-    // 取消删除
+    // 取消
   }
 }
 
-function handleSelectionChange(selection: CleanTask[]) {
-  selectedIds.value = selection.map((item) => item.cleanTaskId);
+function handleSelectionChange(selection: ViolationRecord[]) {
+  selectedIds.value = selection.map((item) => item.id);
 }
 
 function handleQuery() {
@@ -214,10 +191,11 @@ function handleQuery() {
 }
 
 function resetQuery() {
-  queryParams.taskNo = undefined;
+  cascaderValue.value = [];
   queryParams.deptId = undefined;
   queryParams.deviceId = undefined;
-  queryParams.taskStatus = undefined;
+  queryParams.violationType = undefined;
+  queryParams.status = undefined;
   queryParams.bagQrCode = undefined;
   queryParams.pageNo = 1;
   loadData();
@@ -239,32 +217,23 @@ onMounted(() => {
       @search="loadData"
       @reset="resetQuery"
     >
-      <!-- 📥 基础筛选项 -->
+      <!-- 📥 基础筛选 -->
       <template #search-basic>
         <!-- <el-form-item>
-          <el-input
-v-model="queryParams.taskNo" placeholder="请输入" clearable style="width: 200px"
-            @keyup.enter="handleQuery"
->
-            <template #prefix>
-              <span class="text-sm text-gray-400 mr-0.5">任务单号:</span>
-            </template>
-</el-input>
-</el-form-item> -->
-        <el-form-item>
           <el-input
             v-model="queryParams.bagQrCode"
             clearable
             style="width: 220px"
-            placeholder="请输入后四位"
+            placeholder="请输入包袋二维码"
             @keyup.enter="handleQuery"
           >
             <template #prefix>
               <span class="text-sm text-gray-400 mr-0.5">包袋二维码:</span>
             </template>
           </el-input>
-        </el-form-item>
-        <el-form-item>
+        </el-form-item> -->
+
+        <!-- <el-form-item>
           <el-cascader
             v-model="cascaderValue"
             :options="cascaderOptions"
@@ -283,38 +252,54 @@ v-model="queryParams.taskNo" placeholder="请输入" clearable style="width: 200
               <span class="text-sm text-gray-400 mr-0.5">小区/设备:</span>
             </template>
           </el-cascader>
-        </el-form-item>
+        </el-form-item> -->
 
-        <el-form-item>
+        <!-- <el-form-item>
           <el-select
-            v-model="queryParams.taskStatus"
+            v-model="queryParams.violationType"
             clearable
             style="width: 200px"
+            placeholder="请选择"
           >
             <template #prefix>
-              <span class="text-sm text-gray-400 mr-0.5">任务状态:</span>
+              <span class="text-sm text-gray-400 mr-0.5">违规类型:</span>
             </template>
             <el-option
-              v-for="item in task_status"
+              v-for="item in violation_type"
               :key="item.value"
               :label="item.label"
               :value="item.value"
             />
           </el-select>
-        </el-form-item>
-      </template>
+        </el-form-item> -->
 
-      <!-- 📥 高级筛选项 -->
-      <!-- <template #search-advanced>
-      </template> -->
+        <!-- <el-form-item>
+          <el-select
+            v-model="queryParams.status"
+            clearable
+            style="width: 180px"
+            placeholder="请选择"
+          >
+            <template #prefix>
+              <span class="text-sm text-gray-400 mr-0.5">处理状态:</span>
+            </template>
+            <el-option
+              v-for="item in violation_status"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item> -->
+      </template>
 
       <!-- 📥 工具栏左侧 -->
       <template #toolbar-left>
         <el-button type="primary" plain icon="Plus" @click="handleAdd">
-          新增任务
+          登记违规
         </el-button>
         <ExportButton
-          :module-code="ModuleCodeMap.CLEAN_TASK"
+          :module-code="ModuleCodeMap.VIOLATION_RECORD"
           :fields="visibleColumns"
           :find-cond="queryParams"
         />
@@ -344,13 +329,13 @@ v-model="queryParams.taskNo" placeholder="请输入" clearable style="width: 200
       <!-- 📥 工具栏右侧 -->
       <template #toolbar-right>
         <ColumnSelector
-          :storage-key="CLEAN_TASK_STORAGE_KEY"
-          :default-columns="defaultCleanTaskColumns"
+          :storage-key="VIOLATION_STORAGE_KEY"
+          :default-columns="defaultViolationColumns"
           @update:columns="handleColumnsUpdate"
         />
       </template>
 
-      <!-- 📥 表格 -->
+      <!-- 📥 数据表格 -->
       <template #table>
         <el-table
           :data="tableData"
@@ -372,20 +357,25 @@ v-model="queryParams.taskNo" placeholder="请输入" clearable style="width: 200
             :show-overflow-tooltip="col.showOverflowTooltip || false"
           >
             <template #default="{ row }">
-              <template v-if="col.key === 'taskStatus'">
-                <DictTag :options="task_status" :value="row.taskStatus" />
+              <!-- 违规类型 -->
+              <template v-if="col.key === 'violationType'">
+                <DictTag :options="violation_type" :value="row.violationType" />
               </template>
-              <template v-else-if="col.key === 'fullWeight'">
-                {{ row.fullWeight?.toFixed(2) || 0 }} kg
+
+              <!-- 处理状态 -->
+              <template v-else-if="col.key === 'status'">
+                <DictTag :options="violation_status" :value="row.status" />
               </template>
+
+              <!-- 图片列表展示 -->
               <template v-else-if="col.key === 'images'">
                 <div class="flex items-center gap-1 justify-center">
                   <template v-if="row.images && row.images.length > 0">
                     <el-image
                       v-for="(url, idx) in row.images.slice(0, 5)"
                       :key="idx"
-                      :src="url.url"
-                      :preview-src-list="row.images.map((item) => item.url)"
+                      :src="url"
+                      :preview-src-list="row.images"
                       :initial-index="Number(idx)"
                       show-progress
                       fit="cover"
@@ -409,42 +399,47 @@ v-model="queryParams.taskNo" placeholder="请输入" clearable style="width: 200
                   <span v-else class="text-gray-400">-</span>
                 </div>
               </template>
+
+              <!-- 默认属性 -->
               <template v-else>
                 {{ (row as any)[col.key] ?? '-' }}
               </template>
             </template>
           </el-table-column>
 
+          <!-- 操作栏 -->
           <el-table-column
             label="操作"
-            width="200"
+            width="220"
             fixed="right"
             align="center"
           >
             <template #default="{ row }">
-              <div class="action-buttons">
-                <el-button size="small" type="primary" @click="handleView(row)">
+              <div class="action-buttons flex justify-center gap-1">
+                <el-button
+                  size="small"
+                  type="primary"
+                  link
+                  @click="handleView(row)"
+                >
                   详情
-                </el-button>
-                <el-button size="small" type="primary" @click="handleEdit(row)">
-                  编辑
                 </el-button>
                 <el-button
                   size="small"
                   type="primary"
-                  @click="handleViewOrders(row)"
+                  link
+                  @click="handleEdit(row)"
                 >
-                  查看订单
+                  编辑
                 </el-button>
                 <el-button
-                  type="warning"
-                  @click="openViolationModal(row.cleanTaskId)"
+                  size="small"
+                  type="danger"
+                  link
+                  @click="handleDelete(row)"
                 >
-                  违规情况
-                </el-button>
-                <!-- <el-button size="small" type="danger" @click="handleDelete(row)">
                   删除
-                </el-button> -->
+                </el-button>
               </div>
             </template>
           </el-table-column>
@@ -452,10 +447,9 @@ v-model="queryParams.taskNo" placeholder="请输入" clearable style="width: 200
       </template>
     </BaseTableLayout>
 
-    <!-- ===== 弹窗们 ===== -->
-    <TaskForm ref="taskFormRef" @success="loadData" />
-    <TaskDetail ref="taskDetailRef" />
-    <ViolationAndOrderModal ref="violationModalRef" />
+    <!-- ===== 拆分弹窗 ===== -->
+    <ViolationForm ref="violationFormRef" @success="loadData" />
+    <ViolationDetail ref="violationDetailRef" />
   </Page>
 </template>
 

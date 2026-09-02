@@ -27,6 +27,7 @@
     "title": "Operation Management",
     "recycleOrder": "Recycling Order",
     "cleanTask": "Clean Task",
+    "violation": "Violation Task",
     "sortTask": "Sort Task"
   },
   "member": {

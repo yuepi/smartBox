@@ -37,6 +37,16 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        name: 'Violation',
+        path: '/violation',
+        component: () => import('#/views/merchant/operate/violation/index.vue'),
+        meta: {
+          icon: 'lucide:alert-triangle',
+          title: $t('page.operate.violation') || '违规记录',
+          // authority: [PERMISSIONS.MERCHANT.OPERATE.VIOLATION.ROUTE],
+        },
+      },
+      {
         name: 'SortTask',
         path: '/sortTask',
         component: () => import('#/views/merchant/operate/sortTask/index.vue'),
