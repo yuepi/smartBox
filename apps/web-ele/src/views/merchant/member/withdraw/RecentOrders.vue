@@ -61,9 +61,9 @@ defineExpose({ open });
           width="110"
           align="center"
         >
-          <template #default="{ row }"
-            >{{ row.weight?.toFixed(2) || 0 }} kg</template
-          >
+          <template #default="{ row }">
+            {{ row.weight?.toFixed(2) || 0 }} kg
+          </template>
         </el-table-column>
         <el-table-column
           prop="realAmount"
@@ -72,9 +72,7 @@ defineExpose({ open });
           align="center"
         >
           <template #default="{ row }">
-            <span class="font-medium text-primary"
-              >¥ {{ (row.realAmount || 0).toFixed(2) }}</span
-            >
+            <span class="font-medium text-primary">¥ {{ (row.realAmount || 0).toFixed(2) }}</span>
           </template>
         </el-table-column>
         <el-table-column

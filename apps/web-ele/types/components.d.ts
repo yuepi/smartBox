@@ -12,10 +12,11 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    2: typeof import('./../src/components/BaseTableLayout/index copy 2.vue')['default']
     AreaCascader: typeof import('./../src/components/AreaCascader/index.vue')['default']
     BaseTableLayout: typeof import('./../src/components/BaseTableLayout/index.vue')['default']
     ColumnSelector: typeof import('./../src/components/ColumnSelector/index.vue')['default']
-    copy: typeof import('./../src/components/UploadFile/index copy.vue')['default']
+    copy: typeof import('./../src/components/BaseTableLayout/index copy.vue')['default']
     Cropper: typeof import('./../src/components/cropper/src/cropper.vue')['default']
     CropperAvatar: typeof import('./../src/components/cropper/src/cropper-avatar.vue')['default']
     CropperModal: typeof import('./../src/components/cropper/src/cropper-modal.vue')['default']
@@ -71,7 +72,7 @@ declare module 'vue' {
     FileUpload: typeof import('./../src/components/FileUpload/index.vue')['default']
     FileUpload2: typeof import('./../src/components/tool/FileUpload2.vue')['default']
     FilterContainer: typeof import('./../src/components/FilterContainer/index.vue')['default']
-    'Index copy': typeof import('./../src/components/UploadFile/index copy.vue')['default']
+    'Index copy': typeof import('./../src/components/BaseTableLayout/index copy.vue')['default']
     MapPicker: typeof import('./../src/components/MapPicker/index.vue')['default']
     MemberSelector: typeof import('./../src/components/MemberSelector/index.vue')['default']
     MerchantConfigForm: typeof import('./../src/components/MerchantConfigForm/index.vue')['default']
@@ -94,10 +95,11 @@ declare module 'vue' {
 
 // For TSX support
 declare global {
+  const 2: typeof import('./../src/components/BaseTableLayout/index copy 2.vue')['default']
   const AreaCascader: typeof import('./../src/components/AreaCascader/index.vue')['default']
   const BaseTableLayout: typeof import('./../src/components/BaseTableLayout/index.vue')['default']
   const ColumnSelector: typeof import('./../src/components/ColumnSelector/index.vue')['default']
-  const copy: typeof import('./../src/components/UploadFile/index copy.vue')['default']
+  const copy: typeof import('./../src/components/BaseTableLayout/index copy.vue')['default']
   const Cropper: typeof import('./../src/components/cropper/src/cropper.vue')['default']
   const CropperAvatar: typeof import('./../src/components/cropper/src/cropper-avatar.vue')['default']
   const CropperModal: typeof import('./../src/components/cropper/src/cropper-modal.vue')['default']
@@ -153,7 +155,7 @@ declare global {
   const FileUpload: typeof import('./../src/components/FileUpload/index.vue')['default']
   const FileUpload2: typeof import('./../src/components/tool/FileUpload2.vue')['default']
   const FilterContainer: typeof import('./../src/components/FilterContainer/index.vue')['default']
-  const 'Index copy': typeof import('./../src/components/UploadFile/index copy.vue')['default']
+  const 'Index copy': typeof import('./../src/components/BaseTableLayout/index copy.vue')['default']
   const MapPicker: typeof import('./../src/components/MapPicker/index.vue')['default']
   const MemberSelector: typeof import('./../src/components/MemberSelector/index.vue')['default']
   const MerchantConfigForm: typeof import('./../src/components/MerchantConfigForm/index.vue')['default']
