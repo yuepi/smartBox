@@ -116,8 +116,8 @@ export function getPlatMerchantMenuListApi(params?: MerchantMenuListParams) {
  * @param data.menuIds 系统菜单IDs数组
  */
 export function addPlatMerchantMenuApi(data: {
-  merchantId: number;
   menuIds: number[];
+  merchantId: number;
 }) {
   return requestClient.post('/plat/merchantMenu/add', data);
 }
@@ -129,14 +129,14 @@ export function addPlatMerchantMenuApi(data: {
  * @param data.menuIds 系统菜单IDs数组
  */
 export function editPlatMerchantMenuApi(data: {
-  merchantMenuId: number;
-  merchantId: number;
   menuIds: number[];
+  merchantId: number;
+  merchantMenuId: number;
 }) {
   return requestClient.post('/plat/merchantMenu/edit', data);
 }
 
-//通用接口
+// 通用接口
 
 /**
  * 刷新菜单缓存

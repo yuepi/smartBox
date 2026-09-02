@@ -25,7 +25,7 @@ const currentMerchantId = computed(() => {
 // 支持搜索过滤后的商户列表
 const filteredMerchantList = computed(() => {
   if (!searchKeyword.value.trim()) return merchantList.value;
-  return merchantList.value.filter((item) =>
+  return merchantList.value.filter((item: { merchantName: string; }) =>
     item.merchantName
       .toLowerCase()
       .includes(searchKeyword.value.trim().toLowerCase()),

@@ -63,7 +63,8 @@
   "monitor": {
     "title": "日志管理",
     "loginLog": "登录日志",
-    "operationLog": "操作日志"
+    "operationLog": "操作日志",
+    "versionLog": "版本更新日志"
   },
   "stock": {
     "title": "库存管理",

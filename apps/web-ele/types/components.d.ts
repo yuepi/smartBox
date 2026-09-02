@@ -34,6 +34,7 @@ declare module 'vue' {
     ElDescriptions: typeof import('element-plus/es')['ElDescriptions']
     ElDescriptionsItem: typeof import('element-plus/es')['ElDescriptionsItem']
     ElDialog: typeof import('element-plus/es')['ElDialog']
+    ElDivider: typeof import('element-plus/es')['ElDivider']
     ElDropdown: typeof import('element-plus/es')['ElDropdown']
     ElDropdownItem: typeof import('element-plus/es')['ElDropdownItem']
     ElDropdownMenu: typeof import('element-plus/es')['ElDropdownMenu']
@@ -86,6 +87,7 @@ declare module 'vue' {
     Src: typeof import('./../src/components/RePhoneInput/src/index.vue')['default']
     UploadFile: typeof import('./../src/components/UploadFile/index.vue')['default']
     UploadImage: typeof import('./../src/components/UploadImage/index.vue')['default']
+    VersionUpdateModal: typeof import('./../src/components/VersionUpdateModal/index.vue')['default']
     ViewTree: typeof import('./../src/components/tree/ViewTree.vue')['default']
   }
   export interface GlobalDirectives {
@@ -117,6 +119,7 @@ declare global {
   const ElDescriptions: typeof import('element-plus/es')['ElDescriptions']
   const ElDescriptionsItem: typeof import('element-plus/es')['ElDescriptionsItem']
   const ElDialog: typeof import('element-plus/es')['ElDialog']
+  const ElDivider: typeof import('element-plus/es')['ElDivider']
   const ElDropdown: typeof import('element-plus/es')['ElDropdown']
   const ElDropdownItem: typeof import('element-plus/es')['ElDropdownItem']
   const ElDropdownMenu: typeof import('element-plus/es')['ElDropdownMenu']
@@ -169,5 +172,6 @@ declare global {
   const Src: typeof import('./../src/components/RePhoneInput/src/index.vue')['default']
   const UploadFile: typeof import('./../src/components/UploadFile/index.vue')['default']
   const UploadImage: typeof import('./../src/components/UploadImage/index.vue')['default']
+  const VersionUpdateModal: typeof import('./../src/components/VersionUpdateModal/index.vue')['default']
   const ViewTree: typeof import('./../src/components/tree/ViewTree.vue')['default']
 }

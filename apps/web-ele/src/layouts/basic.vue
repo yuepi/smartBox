@@ -48,7 +48,8 @@ const showMerchantDialogVisible = ref(false);
 const merchantList = computed(() => userStore.userInfo?.userMerchant || []);
 const currentMerchantName = computed(() => {
   const current = merchantList.value.find(
-    (item) => item.merchantId === userStore.userInfo?.merchantId,
+    (item: { merchantId: any }) =>
+      item.merchantId === userStore.userInfo?.merchantId,
   );
   return current?.merchantName || '';
 });
@@ -205,4 +206,6 @@ watch(
   </BasicLayout>
 
   <MerchantSelectModal v-model:open="showMerchantDialogVisible" />
+  <!-- 挂载版本更新弹窗 -->
+  <VersionUpdateModal />
 </template>

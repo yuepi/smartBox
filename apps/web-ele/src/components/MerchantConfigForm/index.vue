@@ -148,8 +148,9 @@ defineExpose({
           type="primary"
           :loading="submitting"
           @click="handleSave"
-          >保存配置</el-button
         >
+          保存配置
+        </el-button>
         <el-button v-else type="info" disabled>只读模式</el-button>
       </el-form-item>
     </el-form>

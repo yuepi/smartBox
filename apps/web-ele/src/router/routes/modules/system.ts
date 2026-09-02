@@ -57,6 +57,17 @@ const routes: RouteRecordRaw[] = [
               authority: [PERMISSIONS.PLAT.SYSTEM.LOG.OPERATE.ROUTE],
             },
           },
+          {
+            name: 'VersionLog',
+            path: '/version-log',
+            component: () =>
+              import('#/views/plat/system/log/version/index.vue'),
+            meta: {
+              icon: 'lucide:clipboard-list',
+              title: $t('page.monitor.versionLog') || '更新日志',
+              // authority: [PERMISSIONS.PLAT.SYSTEM.LOG.VERSION.ROUTE],
+            },
+          },
         ],
       },
       {

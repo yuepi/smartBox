@@ -173,3 +173,40 @@ export const defaultOperLogColumns: TableColumnConfig[] = [
     align: 'center',
   },
 ];
+
+export const VERSION_STORAGE_KEY = 'plat_version_update_columns';
+
+export const defaultVersionColumns: TableColumnConfig[] = [
+  {
+    key: 'version',
+    label: '版本号',
+    width: 110,
+    align: 'center',
+    visible: true,
+  },
+  {
+    key: 'title',
+    label: '更新标题',
+    minWidth: 200,
+    align: 'center',
+    showOverflowTooltip: true,
+    visible: true,
+  },
+  { key: 'newCount', label: '新增', width: 80, align: 'center', visible: true },
+  {
+    key: 'optimizeCount',
+    label: '优化',
+    width: 80,
+    align: 'center',
+    visible: true,
+  },
+  { key: 'fixCount', label: '修复', width: 80, align: 'center', visible: true },
+  { key: 'status', label: '状态', width: 100, align: 'center', visible: true },
+  {
+    key: 'publishTime',
+    label: '发布时间',
+    width: 170,
+    align: 'center',
+    visible: true,
+  },
+];

@@ -429,14 +429,12 @@ onMounted(() => {
           <el-descriptions-item label="请求参数" :span="2">
             <pre
               class="whitespace-pre-wrap break-all max-h-48 overflow-auto bg-gray-50 dark:bg-zinc-900 p-3 rounded text-sm font-mono"
-              >{{ detailData.operParam || '-' }}</pre
-            >
+              >{{ detailData.operParam || '-' }}</pre>
           </el-descriptions-item>
           <el-descriptions-item label="返回结果" :span="2">
             <pre
               class="whitespace-pre-wrap break-all max-h-48 overflow-auto bg-gray-50 dark:bg-zinc-900 p-3 rounded text-sm font-mono"
-              >{{ detailData.operResultData || '-' }}</pre
-            >
+              >{{ detailData.operResultData || '-' }}</pre>
           </el-descriptions-item>
           <el-descriptions-item
             v-if="detailData.errorMsg"
@@ -445,8 +443,7 @@ onMounted(() => {
           >
             <pre
               class="whitespace-pre-wrap break-all text-red-500 bg-red-50 dark:bg-red-900/20 p-3 rounded text-sm font-mono"
-              >{{ detailData.errorMsg }}</pre
-            >
+              >{{ detailData.errorMsg }}</pre>
           </el-descriptions-item>
         </el-descriptions>
       </template>
