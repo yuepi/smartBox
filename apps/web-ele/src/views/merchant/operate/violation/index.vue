@@ -145,15 +145,16 @@ function handleAdd() {
   violationFormRef.value?.open();
 }
 
-function handleEdit(row: ViolationRecord) {
+function handleEdit(row: SortViolation) {
   violationFormRef.value?.open(row);
 }
 
-function handleView(row: ViolationRecord) {
+function handleView(row: SortViolation) {
+  console.log(row);
   violationDetailRef.value?.open(row);
 }
 
-async function handleDelete(row?: ViolationRecord) {
+async function handleDelete(row?: SortViolation) {
   let ids: number[] = [];
   if (row) {
     ids = [row.id];
@@ -181,7 +182,7 @@ async function handleDelete(row?: ViolationRecord) {
   }
 }
 
-function handleSelectionChange(selection: ViolationRecord[]) {
+function handleSelectionChange(selection: SortViolation[]) {
   selectedIds.value = selection.map((item) => item.id);
 }
 

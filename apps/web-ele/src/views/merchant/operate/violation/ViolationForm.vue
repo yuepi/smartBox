@@ -14,8 +14,8 @@ const loading = ref(false);
 const formRef = ref<FormInstance>();
 
 const formData = reactive({
-  id: undefined as number | undefined,
-  description: '',
+  cleanTaskId: undefined as number | undefined,
+  violationDesc: '',
   violationImages: [] as string[],
 });
 
@@ -25,13 +25,13 @@ function open(row?: any) {
   visible.value = true;
   if (row) {
     Object.assign(formData, {
-      id: row.id,
-      description: row.description,
+      cleanTaskId: row.cleanTaskId,
+      violationDesc: row.violationDesc,
       violationImages: row.violationImages || [],
     });
   } else {
-    formData.id = undefined;
-    formData.description = '';
+    formData.cleanTaskId = undefined;
+    formData.violationDesc = '';
     formData.violationImages = [];
   }
 }
@@ -42,7 +42,7 @@ async function handleSubmit() {
     if (!valid) return;
     try {
       loading.value = true;
-      if (formData.id) {
+      if (formData.cleanTaskId) {
         await editSortViolationApi(formData);
         ElMessage.success('更新违规记录成功');
       } else {
@@ -65,13 +65,13 @@ defineExpose({ open });
 <template>
   <el-dialog
     v-model="visible"
-    :title="formData.id ? '编辑违规记录' : '新增违规记录'"
+    :title="formData.cleanTaskId ? '编辑违规记录' : '新增违规记录'"
     width="600px"
     destroy-on-close
   >
     <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px">
-      <el-form-item label="违规描述" prop="description">
-        <el-input v-model="formData.description" type="textarea" :rows="3" placeholder="请输入详细描述" />
+      <el-form-item label="违规描述" prop="violationDesc">
+        <el-input v-model="formData.violationDesc" type="textarea" :rows="3" placeholder="请输入详细描述" />
       </el-form-item>
     </el-form>
     <template #footer>

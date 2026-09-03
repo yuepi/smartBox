@@ -235,7 +235,7 @@ defineExpose({ open });
               <div class="flex items-center gap-1 justify-center">
                 <template v-if="row.imageUrls && row.imageUrls.length > 0">
                   <el-image
-                    v-for="(url, idx) in row.imageUrls.slice(0, 3)"
+                    v-for="(url, idx) in row.imageUrls.slice(0, 5)"
                     :key="idx"
                     :src="url"
                     :preview-src-list="row.imageUrls"
