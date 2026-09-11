@@ -26,6 +26,9 @@ const initialized = ref(false); // 添加初始化状态
 const rechargeTableRef = ref();
 const flowTableRef = ref();
 
+
+
+
 function refreshRechargeData() {
   rechargeTableRef.value?.loadData();
 }
@@ -88,6 +91,7 @@ onMounted(async () => {
 
 <template>
   <Page auto-content-height>
+    <div class="p-4">
       <!-- 顶部余额卡片 -->
       <div
         class="flex flex-wrap items-center justify-between gap-4 mb-4 p-4 bg-white rounded-xl border border-blue-100/50 dark:border-blue-800/30"
@@ -140,7 +144,7 @@ onMounted(async () => {
         </div>
       </div>
       <!-- Tabs - 等初始化完成后再显示 -->
-      <el-card shadow="never" v-if="initialized" class="merchant-card">
+      <el-card shadow="never" v-if="initialized">
         <el-tabs v-model="activeTab">
           <el-tab-pane label="基本信息" name="basic">
             <MerchantBasicInfo :merchant-id="merchantId" />
@@ -187,21 +191,6 @@ onMounted(async () => {
           <span class="ml-3 text-gray-400">加载商户信息...</span>
         </div>
       </el-card>
+    </div>
   </Page>
 </template>
-<style scoped>
-
-.merchant-card :deep(.el-card__body) {
-  padding: 16px;
-}
-
-.merchant-card :deep(.el-tab-pane) {
-  height: calc(100vh - 320px);
-  min-height: 400px;
-  overflow: auto;
-}
-
-.merchant-card :deep(.el-tab-pane > div) {
-  height: 100%;
-}
-</style>

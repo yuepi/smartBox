@@ -1,7 +1,11 @@
 <script lang="ts" setup>
 import type { VbenFormProps } from '#/adapter/form';
 import type { VxeTableGridOptions } from '#/adapter/vxe-table';
-import type { HomeOrder, HomeOrderQueryParams, HomeOrderStatus } from '#/api/system/housekeeping';
+import type {
+  HomeOrder,
+  HomeOrderQueryParams,
+  HomeOrderStatus,
+} from '#/api/system/housekeeping';
 
 import { h, ref } from 'vue';
 
@@ -55,7 +59,8 @@ const formOptions: VbenFormProps = {
       fieldName: 'memberName',
       labelWidth: 0,
       renderComponentContent: () => ({
-        prefix: () => h('span', { class: 'text-sm text-gray-400 mr-1' }, '客户姓名:'),
+        prefix: () =>
+          h('span', { class: 'text-sm text-gray-400 mr-1' }, '客户姓名:'),
       }),
       componentProps: {
         placeholder: '请输入客户姓名',
@@ -67,7 +72,8 @@ const formOptions: VbenFormProps = {
       fieldName: 'memberPhone',
       labelWidth: 0,
       renderComponentContent: () => ({
-        prefix: () => h('span', { class: 'text-sm text-gray-400 mr-1' }, '联系电话:'),
+        prefix: () =>
+          h('span', { class: 'text-sm text-gray-400 mr-1' }, '联系电话:'),
       }),
       componentProps: {
         placeholder: '请输入联系电话',
@@ -79,7 +85,8 @@ const formOptions: VbenFormProps = {
       fieldName: 'status',
       labelWidth: 0,
       renderComponentContent: () => ({
-        prefix: () => h('span', { class: 'text-sm text-gray-400 mr-1' }, '订单状态:'),
+        prefix: () =>
+          h('span', { class: 'text-sm text-gray-400 mr-1' }, '订单状态:'),
       }),
       componentProps: {
         options: statusOptions,
@@ -92,9 +99,9 @@ const formOptions: VbenFormProps = {
 
 // 表格配置
 const gridOptions: VxeTableGridOptions<HomeOrder> = {
+  id: 'home_order_grid',
   keepSource: true,
   height: 'auto',
-  id: 'home_order_grid',
   columns: [
     { field: 'homeOrderId', title: '订单ID', width: 90 },
     { field: 'itemName', title: '服务项目', minWidth: 160, align: 'left' },
@@ -158,21 +165,33 @@ async function handleStart(row: HomeOrder) {
 }
 
 async function handleFinish(row: HomeOrder) {
-  await ElMessageBox.confirm('确认已完成服务并结算吗？完成结算后款项将划入账户。', '提示', { type: 'warning' });
+  await ElMessageBox.confirm(
+    '确认已完成服务并结算吗？完成结算后款项将划入账户。',
+    '提示',
+    { type: 'warning' },
+  );
   await finishHomeOrderApi(row.homeOrderId);
   ElMessage.success('订单已完成结算');
   gridApi.query();
 }
 
 async function handleCancel(row: HomeOrder) {
-  await ElMessageBox.confirm('确认取消该订单吗？已支付订单将发起退款。', '警告', { type: 'warning' });
+  await ElMessageBox.confirm(
+    '确认取消该订单吗？已支付订单将发起退款。',
+    '警告',
+    { type: 'warning' },
+  );
   await cancelHomeOrderApi(row.homeOrderId);
   ElMessage.success('订单已取消');
   gridApi.query();
 }
 
 async function handleRefund(row: HomeOrder) {
-  await ElMessageBox.confirm('确认同意并退款给用户吗？退款将直接返还至会员钱包。', '退款确认', { type: 'warning' });
+  await ElMessageBox.confirm(
+    '确认同意并退款给用户吗？退款将直接返还至会员钱包。',
+    '退款确认',
+    { type: 'warning' },
+  );
   await refundHomeOrderApi(row.homeOrderId);
   ElMessage.success('退款成功');
   gridApi.query();
@@ -182,6 +201,8 @@ async function handleRefund(row: HomeOrder) {
 <template>
   <Page auto-content-height>
     <Grid>
+      <template #toolbar-actions> </template>
+
       <!-- 支付金额自定义渲染 -->
       <template #payAmount="{ row }">
         <span class="text-red-500 font-bold">￥{{ row.payAmount ?? 0 }}</span>

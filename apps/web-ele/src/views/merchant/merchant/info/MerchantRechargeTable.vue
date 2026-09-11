@@ -263,7 +263,6 @@ defineExpose({ loadData });
         :data="tableData"
         border
         stripe
-        style="width: 100%"
       >
         <el-table-column
           v-for="col in visibleColumns"
