@@ -65,8 +65,7 @@
     "title": "Log Management",
     "loginLog": "Login Log",
     "operationLog": "Operation Log",
-    "versionLog": "Version Update Log",
-
+    "versionLog": "Version Update Log"
   },
   "stock": {
     "title": "Stock Management",
