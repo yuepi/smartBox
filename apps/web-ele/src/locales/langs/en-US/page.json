@@ -28,7 +28,8 @@
     "recycleOrder": "Recycling Order",
     "cleanTask": "Clean Task",
     "violation": "Violation Task",
-    "sortTask": "Sort Task"
+    "sortTask": "Sort Task",
+    "recycleItem": "Recycling Item Category"
   },
   "member": {
     "title": "Member Finance",

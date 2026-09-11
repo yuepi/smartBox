@@ -56,6 +56,16 @@ const routes: RouteRecordRaw[] = [
           authority: [PERMISSIONS.MERCHANT.OPERATE.SORT_TASK.ROUTE],
         },
       },
+      {
+        name: 'RecycleItem',
+        path: '/recycleItem',
+        component: () => import('#/views/merchant/operate/recycleItem/index.vue'),
+        meta: {
+          icon: 'lucide:recycle', // 子菜单图标
+          title: $t('page.operate.recycleItem') || '回收物品种类',
+          // authority: [PERMISSIONS.MERCHANT.OPERATE.RECYCLE_ITEM.ROUTE],
+        },
+      },
     ],
   },
 ];

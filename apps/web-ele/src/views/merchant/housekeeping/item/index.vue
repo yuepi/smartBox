@@ -7,7 +7,7 @@ import { h, ref } from 'vue';
 
 import { Page } from '@vben/common-ui';
 
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ElButton, ElImage, ElMessage, ElMessageBox, ElTag } from 'element-plus';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
@@ -20,7 +20,7 @@ import HomeItemEditDialog from './HomeItemEditDialog.vue';
 const editDialogRef = ref();
 const queryParams = ref<HomeItemQueryParams>({});
 
-// 简单的搜索表单项
+// 顶部搜索表单配置
 const formOptions: VbenFormProps = {
   wrapperClass: 'grid-cols-1 sm:grid-cols-2 md:grid-cols-4',
   collapsed: false,
@@ -40,16 +40,27 @@ const formOptions: VbenFormProps = {
         clearable: true,
       },
     },
+    {
+      component: 'Input',
+      fieldName: 'categoryId',
+      labelWidth: 0,
+      renderComponentContent: () => ({
+        prefix: () =>
+          h('span', { class: 'text-sm text-gray-400 mr-1' }, '类目ID:'),
+      }),
+      componentProps: {
+        placeholder: '请输入类目ID',
+        clearable: true,
+      },
+    },
   ],
 };
 
-// 工具函数：获取第一张图片
 function getFirstImage(urls?: string): string {
   if (!urls) return '';
   return urls.split(',')[0].trim();
 }
 
-// 工具函数：获取图片数组用于预览
 function getImageList(urls?: string): string[] {
   if (!urls) return [];
   return urls.split(',').map((url) => url.trim()).filter(Boolean);
@@ -61,32 +72,39 @@ const gridOptions: VxeTableGridOptions<HomeItem> = {
   height: 'auto',
   id: 'home_item_grid',
   columns: [
-    { field: 'homeItemId', title: '服务ID', width: 90, align: 'center' },
+    { field: 'homeItemId', title: '服务ID', width: 80, align: 'center' },
     {
       field: 'imageUrls',
       title: '服务图片',
-      width: 100,
+      width: 90,
       align: 'center',
       slots: { default: 'imageUrls' },
     },
-    { field: 'itemName', title: '服务名称', minWidth: 160, align: 'left' },
-    { field: 'categoryId', title: '分类ID', width: 90, align: 'center' },
-    { field: 'unit', title: '单位', width: 80, align: 'center' },
-    { field: 'description', title: '服务描述', minWidth: 200, align: 'left' },
-    { field: 'sort', title: '排序', width: 80, align: 'center' },
+    { field: 'itemName', title: '服务名称', minWidth: 150, align: 'left' },
+    { field: 'categoryId', title: '类目ID', width: 80, align: 'center' },
+    { field: 'unit', title: '单位', width: 70, align: 'center' },
+    {
+      field: 'skuComboList',
+      title: 'SKU规格',
+      width: 110,
+      align: 'center',
+      slots: { default: 'skuComboList' },
+    },
+    { field: 'description', title: '服务描述', minWidth: 160, align: 'left' },
+    { field: 'sort', title: '排序', width: 70, align: 'center' },
     {
       field: 'status',
       title: '状态',
-      width: 90,
+      width: 80,
       align: 'center',
       slots: { default: 'status' },
     },
-    { field: 'createdName', title: '创建人', width: 110, align: 'center' },
-    { field: 'createdTime', title: '创建时间', width: 170, align: 'center' },
+    { field: 'createdName', title: '创建人', width: 100, align: 'center' },
+    { field: 'createdTime', title: '创建时间', width: 160, align: 'center' },
     {
       field: 'action',
       title: '操作',
-      width: 150,
+      width: 140,
       fixed: 'right',
       align: 'center',
       slots: { default: 'action' },
@@ -112,7 +130,6 @@ const [Grid, gridApi] = useVbenVxeGrid<HomeItem>({
   gridOptions,
 });
 
-// 新增 / 编辑 / 删除
 function handleAdd() {
   editDialogRef.value?.open();
 }
@@ -140,17 +157,16 @@ async function handleDelete(row: HomeItem) {
 <template>
   <Page auto-content-height>
     <Grid>
-      <!-- 顶部操作区（放置新增按钮） -->
       <template #toolbar-actions>
-        <el-button type="primary" icon="Plus" @click="handleAdd">
+        <ElButton type="primary" icon="Plus" @click="handleAdd">
           新增服务项
-        </el-button>
+        </ElButton>
       </template>
 
-      <!-- 服务图片预览插槽 -->
+      <!-- 服务图片插槽 -->
       <template #imageUrls="{ row }">
         <div class="flex items-center justify-center py-1">
-          <el-image
+          <ElImage
             v-if="row.imageUrls"
             :src="getFirstImage(row.imageUrls)"
             :preview-src-list="getImageList(row.imageUrls)"
@@ -159,48 +175,43 @@ async function handleDelete(row: HomeItem) {
             class="h-10 w-10 rounded border border-gray-200"
           >
             <template #error>
-              <div
-                class="flex h-full w-full items-center justify-center bg-gray-100 text-xs text-gray-400"
-              >
+              <div class="flex h-full w-full items-center justify-center bg-gray-100 text-xs text-gray-400">
                 无图
               </div>
             </template>
-          </el-image>
+          </ElImage>
           <span v-else class="text-xs text-gray-400">暂无图片</span>
         </div>
       </template>
 
-      <!-- 状态 Tag 渲染 -->
-      <template #status="{ row }">
-        <el-tag :type="row.status === 0 ? 'success' : 'danger'" size="small">
-          {{ row.status === 0 ? '启用' : '禁用' }}
-        </el-tag>
+      <!-- SKU 规格摘要插槽 -->
+      <template #skuComboList="{ row }">
+        <ElTag v-if="row.skuComboList?.length" type="info" size="small">
+          {{ row.skuComboList.length }} 个规格
+        </ElTag>
+        <span v-else class="text-xs text-gray-400">统一规格</span>
       </template>
 
-      <!-- 操作按钮 -->
+      <!-- 状态 Tag 插槽 -->
+      <template #status="{ row }">
+        <ElTag :type="row.status === 0 ? 'success' : 'danger'" size="small">
+          {{ row.status === 0 ? '启用' : '禁用' }}
+        </ElTag>
+      </template>
+
+      <!-- 操作插槽 -->
       <template #action="{ row }">
         <div class="flex items-center justify-center gap-1">
-          <el-button
-            size="small"
-            type="primary"
-            link
-            @click="handleEdit(row)"
-          >
+          <ElButton size="small" type="primary" link @click="handleEdit(row)">
             编辑
-          </el-button>
-          <el-button
-            size="small"
-            type="danger"
-            link
-            @click="handleDelete(row)"
-          >
+          </ElButton>
+          <ElButton size="small" type="danger" link @click="handleDelete(row)">
             删除
-          </el-button>
+          </ElButton>
         </div>
       </template>
     </Grid>
 
-    <!-- 新增 / 编辑弹窗 -->
     <HomeItemEditDialog ref="editDialogRef" @success="() => gridApi.query()" />
   </Page>
 </template>
