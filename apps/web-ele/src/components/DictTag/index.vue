@@ -20,7 +20,7 @@ const props = withDefaults(defineProps<Props>(), {
   options: () => [],
   showValue: true,
   separator: ',',
-  size: 'small',
+  size: 'default',
   effect: 'light',
 });
 
@@ -48,7 +48,7 @@ const matchedOptions = computed(() => {
 const unmatchValues = computed(() => {
   if (!props.showValue) return [];
   const matchedSet = new Set(props.options.map((opt) => String(opt.value)));
-  return [...valuesSet.value].filter((val) => !matchedSet.has(val));
+  return [...valuesSet.value as Set<string>].filter((val) => !matchedSet.has(val));
 });
 </script>
 
@@ -68,7 +68,7 @@ const unmatchValues = computed(() => {
     <template v-if="showValue && unmatchValues.length > 0">
       <el-tag
         v-for="val in unmatchValues"
-        :key="val"
+        :key="String(val)"
         type="info"
         :size="size"
         effect="plain"

@@ -11,7 +11,7 @@ declare global {
   const ElMessage: typeof import('element-plus/es').ElMessage
   const ElMessageBox: typeof import('element-plus/es').ElMessageBox
   const ExportStatusMap: typeof import('../src/hooks/useExport').ExportStatusMap
-  const ModuleCodeMap: typeof import('../src/hooks/useExport').ModuleCodeMap
+  const ModuleCodeMap: typeof import('../src/hooks/useVxeExport').ModuleCodeMap
   const acceptHMRUpdate: typeof import('pinia').acceptHMRUpdate
   const asyncComputed: typeof import('@vueuse/core').asyncComputed
   const autoResetRef: typeof import('@vueuse/core').autoResetRef
@@ -292,6 +292,7 @@ declare global {
   const useVModels: typeof import('@vueuse/core').useVModels
   const useVibrate: typeof import('@vueuse/core').useVibrate
   const useVirtualList: typeof import('@vueuse/core').useVirtualList
+  const useVxeExport: typeof import('../src/hooks/useVxeExport').useVxeExport
   const useWakeLock: typeof import('@vueuse/core').useWakeLock
   const useWebNotification: typeof import('@vueuse/core').useWebNotification
   const useWebSocket: typeof import('@vueuse/core').useWebSocket
@@ -325,6 +326,9 @@ declare global {
   // @ts-ignore
   export type { ExportParams } from '../src/hooks/useExport'
   import('../src/hooks/useExport')
+  // @ts-ignore
+  export type { ModuleCodeType } from '../src/hooks/useVxeExport'
+  import('../src/hooks/useVxeExport')
 }
 
 // for vue template auto import
@@ -333,9 +337,11 @@ declare module 'vue' {
   interface GlobalComponents {}
   interface ComponentCustomProperties {
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
+    readonly ElLoading: UnwrapRef<typeof import('element-plus/es')['ElLoading']>
     readonly ElMessage: UnwrapRef<typeof import('element-plus/es')['ElMessage']>
+    readonly ElMessageBox: UnwrapRef<typeof import('element-plus/es')['ElMessageBox']>
     readonly ExportStatusMap: UnwrapRef<typeof import('../src/hooks/useExport')['ExportStatusMap']>
-    readonly ModuleCodeMap: UnwrapRef<typeof import('../src/hooks/useExport')['ModuleCodeMap']>
+    readonly ModuleCodeMap: UnwrapRef<typeof import('../src/hooks/useVxeExport')['ModuleCodeMap']>
     readonly acceptHMRUpdate: UnwrapRef<typeof import('pinia')['acceptHMRUpdate']>
     readonly asyncComputed: UnwrapRef<typeof import('@vueuse/core')['asyncComputed']>
     readonly autoResetRef: UnwrapRef<typeof import('@vueuse/core')['autoResetRef']>
@@ -616,6 +622,7 @@ declare module 'vue' {
     readonly useVModels: UnwrapRef<typeof import('@vueuse/core')['useVModels']>
     readonly useVibrate: UnwrapRef<typeof import('@vueuse/core')['useVibrate']>
     readonly useVirtualList: UnwrapRef<typeof import('@vueuse/core')['useVirtualList']>
+    readonly useVxeExport: UnwrapRef<typeof import('../src/hooks/useVxeExport')['useVxeExport']>
     readonly useWakeLock: UnwrapRef<typeof import('@vueuse/core')['useWakeLock']>
     readonly useWebNotification: UnwrapRef<typeof import('@vueuse/core')['useWebNotification']>
     readonly useWebSocket: UnwrapRef<typeof import('@vueuse/core')['useWebSocket']>

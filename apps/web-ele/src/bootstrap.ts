@@ -17,7 +17,6 @@ import ColumnSelector from '#/components/ColumnSelector/index.vue';
 import PublicComponent from '#/components/componentInstall';
 import DictTag from '#/components/DictTag/index.vue';
 import ExportButton from '#/components/ExportButton/index.vue';
-import { setupGlobalComponent } from '#/components/global';
 import { $t, setupI18n } from '#/locales';
 
 import { initComponentAdapter } from './adapter/component';

@@ -168,6 +168,7 @@ export const defaultMerchantColumns: TableColumnConfig[] = [
     showOverflowTooltip: true,
   },
   { key: 'status', label: '状态', visible: true, width: 80, align: 'center' },
+  { key: 'merchantType', label: '商户类型', visible: true, width: 120, align: 'center' },
   {
     key: 'createTime',
     label: '创建时间',

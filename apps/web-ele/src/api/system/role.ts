@@ -8,6 +8,10 @@ export interface Role {
   roleCode: string;
   sort: number;
   status: number; // 0=启用,1=禁用
+  scope: number; // 1=全部数据权限,2=自定数据权限
+  menuIds: number[];
+  members: number[];
+  deptIds: number[];
 }
 
 // 分页查询参数

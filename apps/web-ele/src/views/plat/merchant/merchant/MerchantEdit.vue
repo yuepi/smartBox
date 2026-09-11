@@ -39,6 +39,7 @@ const formData = ref<Partial<Merchant>>({
   provinceCode: '',
   cityCode: '',
   districtCode: '',
+  merchantType: 0,
 });
 
 const formRules = reactive({
@@ -143,6 +144,7 @@ async function open(row?: Merchant) {
       provinceCode: '',
       cityCode: '',
       districtCode: '',
+      merchantType: 0,
     };
     location.value = null;
     areaCodes.value = '';
@@ -362,6 +364,13 @@ defineExpose({ open });
                 <el-radio-group v-model="formData.status">
                   <el-radio :value="0">启用</el-radio>
                   <el-radio :value="1">禁用</el-radio>
+                </el-radio-group>
+              </el-form-item>
+
+              <el-form-item label="商户类型" required>
+                <el-radio-group v-model="formData.merchantType">
+                  <el-radio :value="0">普通商户</el-radio>
+                  <el-radio :value="1">家政商户</el-radio>
                 </el-radio-group>
               </el-form-item>
             </el-form>

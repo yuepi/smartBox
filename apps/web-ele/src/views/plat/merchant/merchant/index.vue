@@ -16,6 +16,7 @@ import {
 } from '#/constants/tableColumns';
 import { ModuleCodeMap } from '#/hooks/useExport';
 
+import HomeMerchantManageDialog from './HomeMerchantManageDialog.vue';
 import MerchantAccountDialog from './MerchantAccountDialog.vue';
 import MerchantEdit from './MerchantEdit.vue';
 import MigrationDialog from './MigrationDialog.vue';
@@ -35,6 +36,7 @@ const visibleColumns = computed(() => {
 const merchantFormRef = ref();
 const accountDialogRef = ref();
 const migrationDialogRef = ref();
+const bindHomeMerchantRef = ref();
 
 // --- 状态变量 ---
 const loading = ref(false);
@@ -92,6 +94,11 @@ function handleViewAccount(row: Merchant) {
 // --- 数据迁移 ---
 function handleMigration(row: Merchant) {
   migrationDialogRef.value?.open(row);
+}
+
+// --- 绑定家政商户 ---
+function handleBindHomeMerchant(row: Merchant) {
+  bindHomeMerchantRef.value?.open(row);
 }
 
 // --- 删除 ---
@@ -316,43 +323,46 @@ onMounted(() => {
 
           <el-table-column
             label="操作"
-            width="150"
+            width="200"
             fixed="right"
             align="center"
           >
             <template #default="{ row }">
-              <el-tooltip content="账户" placement="top" :enterable="false">
+              <div class="action-buttons">
                 <el-button
-                  link
+                  size="small"
                   type="primary"
-                  icon="Wallet"
                   @click="handleViewAccount(row)"
-                />
-              </el-tooltip>
-              <el-tooltip content="编辑" placement="top" :enterable="false">
+                >
+                  账户
+                </el-button>
+                <el-button size="small" type="primary" @click="handleEdit(row)">
+                  编辑
+                </el-button>
+                <!-- 商户类型为 0 (回收商户) 时显示 -->
                 <el-button
-                  link
-                  type="primary"
-                  icon="Edit"
-                  @click="handleEdit(row)"
-                />
-              </el-tooltip>
-              <el-tooltip content="数据迁移" placement="top" :enterable="false">
+                  v-if="row.merchantType === 0"
+                  size="small"
+                  type="success"
+                  @click="handleBindHomeMerchant(row)"
+                >
+                  家政
+                </el-button>
                 <el-button
-                  link
+                  size="small"
                   type="warning"
-                  icon="Upload"
                   @click="handleMigration(row)"
-                />
-              </el-tooltip>
-              <el-tooltip content="删除" placement="top" :enterable="false">
+                >
+                  数据迁移
+                </el-button>
                 <el-button
-                  link
+                  size="small"
                   type="danger"
-                  icon="Delete"
                   @click="handleDelete(row)"
-                />
-              </el-tooltip>
+                >
+                  删除
+                </el-button>
+              </div>
             </template>
           </el-table-column>
         </el-table>
@@ -363,6 +373,7 @@ onMounted(() => {
     <MerchantEdit ref="merchantFormRef" @success="handleQuery" />
     <MerchantAccountDialog ref="accountDialogRef" />
     <MigrationDialog ref="migrationDialogRef" @success="handleQuery" />
+    <HomeMerchantManageDialog ref="bindHomeMerchantRef" @success="handleQuery" />
   </Page>
 </template>
 

@@ -12,6 +12,7 @@ import {
 import MerchantAccountInfo from './MerchantAccountInfo.vue';
 import MerchantBasicInfo from './MerchantBasicInfo.vue';
 import MerchantFlowTable from './MerchantFlowTable.vue';
+import MerchantHomeBindTable from './MerchantHomeBindTable.vue';
 import MerchantRechargeTable from './MerchantRechargeTable.vue';
 
 // --- 状态 ---
@@ -25,7 +26,9 @@ const initialized = ref(false); // 添加初始化状态
 const rechargeTableRef = ref();
 const flowTableRef = ref();
 
-// --- 刷新方法 ---
+
+
+
 function refreshRechargeData() {
   rechargeTableRef.value?.loadData();
 }
@@ -152,6 +155,10 @@ onMounted(async () => {
               :merchant-id="merchantId"
               @refresh-balance="loadAccountBalance"
             />
+          </el-tab-pane>
+
+          <el-tab-pane label="家政商户绑定" name="homeBind">
+            <MerchantHomeBindTable :merchant-id="merchantId" />
           </el-tab-pane>
 
           <el-tab-pane label="充值订单" name="recharge">

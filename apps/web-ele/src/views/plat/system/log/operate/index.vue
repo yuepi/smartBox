@@ -1,98 +1,59 @@
 <script lang="ts" setup>
+import type { VbenFormProps } from '#/adapter/form';
+import type { VxeTableGridOptions } from '#/adapter/vxe-table';
 import type { OperLog, OperLogPageParams } from '#/api/monitor/oper';
-import type { TableColumnConfig } from '#/constants/tableColumns';
 
-import { computed, onMounted, reactive, ref } from 'vue';
+import { h, ref } from 'vue';
 
 import { Page } from '@vben/common-ui';
 
+import { ElMessage, ElMessageBox } from 'element-plus';
+
+import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
   deletePlatOperLogApi,
+  getPlatOperLogListApi,
   getPlatOperLogPageApi,
 } from '#/api/monitor/oper';
-import {
-  defaultOperLogColumns,
-  OPER_LOG_STORAGE_KEY,
-} from '#/constants/tableColumns';
-import { ModuleCodeMap } from '#/hooks/useExport';
+import { ModuleCodeMap } from '#/hooks/useVxeExport';
 
+// 加载字典选项
 const { log_business_type, log_account_type, log_oper_status } = useDicts([
   'log_business_type',
   'log_account_type',
   'log_oper_status',
 ]);
 
-// --- 表格列配置 ---
-const columnConfig = ref<TableColumnConfig[]>([...defaultOperLogColumns]);
-
-function handleColumnsUpdate(newColumns: TableColumnConfig[]) {
-  columnConfig.value = newColumns;
-}
-
-const visibleColumns = computed(() => {
-  return columnConfig.value.filter((col) => col.visible);
-});
-
-// --- 状态变量 ---
-const loading = ref(false);
-const tableData = ref<OperLog[]>([]);
-const total = ref(0);
-const selectedIds = ref<number[]>([]);
-const moreParams = ref(false);
-
-// 详情弹窗
+// 详情弹窗状态
 const detailVisible = ref(false);
 const detailData = ref<null | OperLog>(null);
+const queryParams = ref({});
 
-// 查询参数
-const queryParams = reactive<OperLogPageParams>({
-  pageNo: 1,
-  pageSize: 10,
-  title: undefined,
-  businessType: undefined,
-  operAccountType: undefined,
-  operAccountName: undefined,
-  status: undefined,
-});
-
-// --- 辅助函数 ---
+// 辅助格式化
 function formatCostTime(costTime: number): string {
   if (costTime === undefined || costTime === null) return '-';
   return `${costTime}ms`;
 }
 
-// --- 数据加载 ---
-async function loadData() {
-  try {
-    loading.value = true;
-    const res = await getPlatOperLogPageApi(queryParams);
-    tableData.value = res.records || [];
-    total.value = res.total || 0;
-  } catch (error) {
-    console.error(error);
-    ElMessage.error('加载数据失败');
-  } finally {
-    loading.value = false;
-  }
-}
-
-// --- 详情 ---
+// 详情处理
 function handleView(row: OperLog) {
   detailData.value = row;
   detailVisible.value = true;
 }
 
-// --- 删除 ---
+// 批量/单条删除
 async function handleDelete(row?: OperLog) {
-  let ids: number[] = [];
+  let ids: number[];
   if (row) {
     ids = [row.operLogId];
   } else {
-    if (selectedIds.value.length === 0) {
+    // 获取当前勾选的数据行
+    const selectedRows = gridApi.grid?.getCheckboxRecords() || [];
+    if (selectedRows.length === 0) {
       ElMessage.warning('请选择要删除的记录');
       return;
     }
-    ids = selectedIds.value;
+    ids = selectedRows.map((item: OperLog) => item.operLogId);
   }
 
   try {
@@ -105,254 +66,284 @@ async function handleDelete(row?: OperLog) {
       await deletePlatOperLogApi(id);
     }
     ElMessage.success(`成功删除 ${ids.length} 条日志`);
-    selectedIds.value = [];
-    handleQuery();
+    gridApi.query();
   } catch {
     // 取消删除
   }
 }
 
-function handleSelectionChange(selection: OperLog[]) {
-  selectedIds.value = selection.map((item) => item.operLogId);
-}
+const formOptions: VbenFormProps = {
+  wrapperClass: 'grid-cols-1 sm:grid-cols-2 md:grid-cols-6',
+  collapsed: false,
+  showCollapseButton: true,
+  submitOnEnter: true,
+  schema: [
+    {
+      component: 'Input',
+      fieldName: 'title',
+      labelWidth: 0,
+      renderComponentContent: () => ({
+        prefix: () =>
+          h('span', { class: 'text-sm text-gray-400 mr-1' }, '模块标题:'),
+      }),
+      componentProps: {
+        placeholder: '请输入',
+        clearable: true,
+      },
+    },
+    {
+      component: 'Input',
+      fieldName: 'operAccountName',
+      labelWidth: 0,
+      renderComponentContent: () => ({
+        prefix: () =>
+          h('span', { class: 'text-sm text-gray-400 mr-1' }, '操作人:'),
+      }),
+      componentProps: {
+        placeholder: '请输入',
+        clearable: true,
+      },
+    },
+    {
+      component: 'Select',
+      fieldName: 'businessType',
+      labelWidth: 0,
+      renderComponentContent: () => ({
+        prefix: () =>
+          h('span', { class: 'text-sm text-gray-400 mr-1' }, '业务类型:'),
+      }),
+      componentProps: {
+        options: log_business_type,
+        placeholder: '请选择',
+        clearable: true,
+      },
+    },
+    {
+      component: 'Select',
+      fieldName: 'operAccountType',
+      labelWidth: 0,
+      renderComponentContent: () => ({
+        prefix: () =>
+          h('span', { class: 'text-sm text-gray-400 mr-1' }, '操作人类型:'),
+      }),
+      componentProps: {
+        options: log_account_type,
+        placeholder: '请选择',
+        clearable: true,
+      },
+    },
+    {
+      component: 'Select',
+      fieldName: 'status',
+      labelWidth: 0,
+      renderComponentContent: () => ({
+        prefix: () =>
+          h('span', { class: 'text-sm text-gray-400 mr-1' }, '状态:'),
+      }),
+      componentProps: {
+        options: log_oper_status,
+        placeholder: '请选择',
+        clearable: true,
+      },
+    },
+  ],
+};
 
-function handleQuery() {
-  queryParams.pageNo = 1;
-  loadData();
-}
+const gridOptions: VxeTableGridOptions<OperLog> = {
+  keepSource: true,
+  height: 'auto',
+  id: 'oper_log_grid_custom',
+  columns: [
+    {
+      field: 'checkbox',
+      type: 'checkbox',
+      width: 50,
+    },
+    {
+      field: 'operLogId',
+      title: '操作ID',
+      width: 80,
+    },
+    {
+      field: 'title',
+      title: '模块标题',
+      minWidth: 150,
+    },
+    {
+      field: 'businessType',
+      title: '业务类型',
+      width: 120,
+      slots: { default: 'businessType' },
+    },
+    {
+      field: 'operAccountName',
+      title: '操作人',
+      width: 200,
+    },
+    {
+      field: 'operAccountType',
+      title: '操作人类型',
+      width: 150,
+      slots: { default: 'operAccountType' },
+    },
+    { field: 'operIp', title: '操作IP', width: 150 },
+    {
+      field: 'operLocation',
+      title: '操作地点',
+      width: 200,
+    },
+    {
+      field: 'operRequestMethod',
+      title: '请求方式',
+      width: 100,
+      slots: { default: 'operRequestMethod' },
+    },
+    {
+      field: 'status',
+      title: '状态',
+      width: 100,
+      slots: { default: 'status' },
+    },
+    {
+      field: 'costTime',
+      title: '耗时',
+      width: 100,
+      slots: { default: 'costTime' },
+    },
+    {
+      field: 'operUrl',
+      title: '请求URL',
+      visible: false,
+      minWidth: 200,
+      align: 'left',
+    },
+    {
+      field: 'operParam',
+      title: '请求参数',
+      visible: false,
+      minWidth: 200,
+      align: 'left',
+    },
+    {
+      field: 'operResultData',
+      title: '返回结果',
+      visible: false,
+      minWidth: 200,
+      align: 'left',
+    },
+    {
+      field: 'errorMsg',
+      title: '异常信息',
+      visible: false,
+      minWidth: 200,
+      align: 'left',
+    },
+    {
+      field: 'createTime',
+      title: '操作时间',
+      visible: false,
+      width: 160,
+    },
+    {
+      field: 'action',
+      title: '操作',
+      width: 200,
+      fixed: 'right',
+      slots: { default: 'action' },
+    },
+  ],
+  proxyConfig: {
+    ajax: {
+      query: async ({ page }, formValues) => {
+        const params: OperLogPageParams = {
+          pageNo: page.currentPage,
+          pageSize: page.pageSize,
+          ...formValues,
+        };
+        queryParams.value = params;
+        return await getPlatOperLogPageApi(params);
+      },
+      queryAll: () => {
+        return getPlatOperLogListApi({
+          pageNo: 1,
+          pageSize: 10_000,
+        });
+      },
+    },
+  },
+};
 
-function resetQuery() {
-  queryParams.title = undefined;
-  queryParams.businessType = undefined;
-  queryParams.operAccountType = undefined;
-  queryParams.operAccountName = undefined;
-  queryParams.status = undefined;
-  queryParams.pageNo = 1;
-  loadData();
-}
-
-onMounted(() => {
-  loadData();
+const [Grid, gridApi] = useVbenVxeGrid<OperLog>({
+  formOptions,
+  gridOptions,
 });
 </script>
 
 <template>
   <Page auto-content-height>
-    <BaseTableLayout
-      v-model:query-params="queryParams"
-      v-model:more-params="moreParams"
-      :loading="loading"
-      :total="total"
-      @search="loadData"
-      @reset="resetQuery"
-    >
-      <!-- 📥 基础筛选项 -->
-      <template #search-basic>
-        <el-form-item>
-          <el-input
-            v-model="queryParams.title"
-            placeholder="请输入"
-            clearable
-            style="width: 200px"
-            @keyup.enter="handleQuery"
-          >
-            <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">模块标题:</span>
-            </template>
-          </el-input>
-        </el-form-item>
-
-        <el-form-item>
-          <el-input
-            v-model="queryParams.operAccountName"
-            placeholder="请输入"
-            clearable
-            style="width: 200px"
-            @keyup.enter="handleQuery"
-          >
-            <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">操作人:</span>
-            </template>
-          </el-input>
-        </el-form-item>
-      </template>
-
-      <!-- 📥 高级筛选项 -->
-      <template #search-advanced>
-        <el-form-item>
-          <el-select
-            v-model="queryParams.businessType"
-            clearable
-            style="width: 200px"
-          >
-            <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">业务类型:</span>
-            </template>
-            <el-option
-              v-for="item in log_business_type"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item>
-          <el-select
-            v-model="queryParams.operAccountType"
-            clearable
-            style="width: 200px"
-          >
-            <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">操作人类型:</span>
-            </template>
-            <el-option
-              v-for="item in log_account_type"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item>
-          <el-select
-            v-model="queryParams.status"
-            clearable
-            style="width: 200px"
-          >
-            <template #prefix>
-              <span class="text-xs text-gray-400 mr-0.5">状态:</span>
-            </template>
-            <el-option
-              v-for="item in log_oper_status"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
-      </template>
-
-      <!-- 📥 工具栏左侧 -->
-      <template #toolbar-left>
-        <ExportButton
-          :module-code="ModuleCodeMap.OPER_LOG"
-          :fields="visibleColumns"
-          :find-cond="queryParams"
-        />
+    <Grid>
+      <template #toolbar-actions>
         <el-button
           type="danger"
           plain
           icon="Delete"
-          :disabled="selectedIds.length === 0"
-          @click="handleDelete"
+          @click="() => handleDelete()"
         >
           批量删除
         </el-button>
-        <transition name="el-fade-in">
-          <span
-            v-if="selectedIds.length > 0"
-            class="selected-alert-badge ml-2 text-xs text-gray-400"
-          >
-            已选
-            <span class="text-red-500 font-medium">{{
-              selectedIds.length
-            }}</span>
-            项
-          </span>
-        </transition>
-      </template>
-
-      <!-- 📥 工具栏右侧 -->
-      <template #toolbar-right>
-        <ColumnSelector
-          :storage-key="OPER_LOG_STORAGE_KEY"
-          :default-columns="defaultOperLogColumns"
-          @update:columns="handleColumnsUpdate"
+        <VxeExportButton
+          :module-code="ModuleCodeMap.OPERATE_LOG"
+          :find-cond="queryParams"
+          :grid-api="gridApi"
         />
       </template>
 
-      <!-- 📥 表格 -->
-      <template #table>
-        <el-table
-          :data="tableData"
-          border
-          stripe
-          style="width: 100%; height: 100%"
-          @selection-change="handleSelectionChange"
-        >
-          <el-table-column type="selection" width="50" align="center" />
-
-          <el-table-column
-            v-for="col in visibleColumns"
-            :key="col.key"
-            :prop="col.key"
-            :label="col.label"
-            :width="col.width"
-            :min-width="col.minWidth"
-            :align="col.align"
-            :show-overflow-tooltip="col.showOverflowTooltip"
-          >
-            <template #default="{ row }">
-              <template v-if="col.key === 'businessType'">
-                <DictTag
-                  :options="log_business_type"
-                  :value="row.businessType"
-                />
-              </template>
-              <template v-else-if="col.key === 'operAccountType'">
-                <DictTag
-                  :options="log_account_type"
-                  :value="row.operAccountType"
-                />
-              </template>
-              <template v-else-if="col.key === 'status'">
-                <DictTag :options="log_oper_status" :value="row.status" />
-              </template>
-              <template v-else-if="col.key === 'operRequestMethod'">
-                <el-tag
-                  :type="
-                    row.operRequestMethod === 'GET' ? 'success' : 'primary'
-                  "
-                  size="small"
-                  round
-                  effect="light"
-                >
-                  {{ row.operRequestMethod || '-' }}
-                </el-tag>
-              </template>
-              <template v-else-if="col.key === 'costTime'">
-                <span :class="row.costTime > 1000 ? 'text-danger' : ''">
-                  {{ formatCostTime(row.costTime) }}
-                </span>
-              </template>
-              <template v-else>
-                {{ (row as any)[col.key] ?? '-' }}
-              </template>
-            </template>
-          </el-table-column>
-
-          <el-table-column
-            label="操作"
-            width="100"
-            fixed="right"
-            align="center"
-          >
-            <template #default="{ row }">
-              <el-tooltip content="详情" placement="top" :enterable="false">
-                <el-button
-                  link
-                  type="primary"
-                  icon="View"
-                  @click="handleView(row)"
-                />
-              </el-tooltip>
-            </template>
-          </el-table-column>
-        </el-table>
+      <template #businessType="{ row }">
+        <DictTag :options="log_business_type" :value="row.businessType" />
       </template>
-    </BaseTableLayout>
+
+      <template #operAccountType="{ row }">
+        <DictTag :options="log_account_type" :value="row.operAccountType" />
+      </template>
+
+      <template #status="{ row }">
+        <DictTag :options="log_oper_status" :value="row.status" />
+      </template>
+
+      <template #operRequestMethod="{ row }">
+        <el-tag
+          :type="row.operRequestMethod === 'GET' ? 'success' : 'primary'"
+          size="small"
+          round
+          effect="light"
+        >
+          {{ row.operRequestMethod || '-' }}
+        </el-tag>
+      </template>
+
+      <template #costTime="{ row }">
+        <span :class="row.costTime > 1000 ? 'text-danger font-bold' : ''">
+          {{ formatCostTime(row.costTime) }}
+        </span>
+      </template>
+
+      <template #action="{ row }">
+        <div class="action-buttons">
+          <el-button
+            type="primary"
+            @click="handleView(row)"
+          >
+            详情
+          </el-button>
+          <el-button
+            type="danger"
+            @click="handleDelete(row)"
+          >
+            删除
+          </el-button>
+        </div>
+      </template>
+    </Grid>
 
     <!-- ===== 详情弹窗 ===== -->
     <el-dialog
@@ -396,11 +387,11 @@ onMounted(() => {
         </div>
 
         <!-- 详细信息 -->
-        <el-descriptions :column="2" border>
+        <el-descriptions :column="2" border label-width="120px">
           <el-descriptions-item label="模块标题" :span="2">
             <span class="font-medium">{{ detailData.title }}</span>
           </el-descriptions-item>
-          <el-descriptions-item label="业务类型">
+          <el-descriptions-item label="业务类型" :span="1">
             <DictTag
               :options="log_business_type"
               :value="detailData.businessType"
@@ -453,9 +444,3 @@ onMounted(() => {
     </el-dialog>
   </Page>
 </template>
-
-<style scoped>
-.selected-alert-badge {
-  display: inline-block;
-}
-</style>

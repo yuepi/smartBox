@@ -2,6 +2,12 @@ import { requestClient } from '#/api/request';
 
 /** 回收订单类型定义 */
 export interface RecycleOrder {
+  deductWeight: number;
+  deductAmount(deductAmount: any): unknown;
+  afterWeight: number;
+  beforeWeight: number;
+  imageUrls: boolean;
+  memberPhone: any;
   recycleOrderId: number;
   orderNo: string;
   merchantId: number;

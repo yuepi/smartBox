@@ -389,7 +389,7 @@ defineExpose({ open });
             <el-table-column
               prop="orderStatus"
               label="状态"
-              width="90"
+              width="100"
               align="center"
             >
               <template #default="{ row }">

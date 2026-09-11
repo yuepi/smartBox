@@ -150,12 +150,11 @@ function handleEdit(row: SortViolation) {
 }
 
 function handleView(row: SortViolation) {
-  console.log(row);
   violationDetailRef.value?.open(row);
 }
 
 async function handleDelete(row?: SortViolation) {
-  let ids: number[] = [];
+  let ids: number[];
   if (row) {
     ids = [row.id];
   } else {

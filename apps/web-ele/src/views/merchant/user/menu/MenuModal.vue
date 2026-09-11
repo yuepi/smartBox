@@ -160,7 +160,7 @@ async function handleSubmit() {
         <el-tree-select
           v-model="formData.parentId"
           :data="parentMenuOptions"
-          :props="{ value: 'menuId', label: 'menuName', children: 'children' }"
+          :props="{ label: 'menuName', children: 'children' }"
           value-key="menuId"
           placeholder="请选择上级菜单"
           check-strictly
@@ -245,8 +245,9 @@ async function handleSubmit() {
           type="primary"
           :loading="formSubmitting"
           @click="handleSubmit"
-          >确定</el-button
         >
+          确定
+        </el-button>
       </div>
     </template>
   </el-dialog>

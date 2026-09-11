@@ -6,13 +6,19 @@ import { usePreferences } from '@vben/preferences';
 
 import {
   VxeButton,
+  VxeButtonGroup,
   VxeCheckbox,
+  VxeCheckboxGroup,
+  VxeDrawer,
   VxeIcon,
   VxeInput,
   VxeLoading,
   VxeModal,
   VxeNumberInput,
   VxePager,
+  VxePrint,
+  VxeRadio,
+  VxeRadioButton,
   VxeRadioGroup,
   VxeSelect,
   VxeTooltip,
@@ -80,10 +86,12 @@ export function initVxeTable() {
   VxeUI.component(VxeToolbar);
 
   VxeUI.component(VxeButton);
-  // VxeUI.component(VxeButtonGroup);
+  VxeUI.component(VxeButtonGroup);
   VxeUI.component(VxeCheckbox);
-  // VxeUI.component(VxeCheckboxGroup);
+  VxeUI.component(VxeCheckboxGroup);
   VxeUI.component(createVirtualComponent('VxeForm'));
+  VxeUI.component(VxeDrawer);
+  VxeUI.component(VxePrint);
   // VxeUI.component(VxeFormGather);
   // VxeUI.component(VxeFormItem);
   VxeUI.component(VxeIcon);
@@ -96,8 +104,8 @@ export function initVxeTable() {
   // VxeUI.component(VxeOption);
   VxeUI.component(VxePager);
   // VxeUI.component(VxePulldown);
-  // VxeUI.component(VxeRadio);
-  // VxeUI.component(VxeRadioButton);
+  VxeUI.component(VxeRadio);
+  VxeUI.component(VxeRadioButton);
   VxeUI.component(VxeRadioGroup);
   VxeUI.component(VxeSelect);
   // VxeUI.component(VxeSwitch);

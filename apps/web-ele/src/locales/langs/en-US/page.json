@@ -45,7 +45,8 @@
     "dept": "Department Management",
     "dict": "Data Dictionary",
     "log": "Operation Log",
-    "oss": "Object Storage"
+    "oss": "Object Storage",
+    "homeCategory": "Home Category Management"
   },
   "merchant": {
     "title": "Merchant Management",
@@ -64,7 +65,8 @@
     "title": "Log Management",
     "loginLog": "Login Log",
     "operationLog": "Operation Log",
-    "versionLog": "Version Update Log"
+    "versionLog": "Version Update Log",
+
   },
   "stock": {
     "title": "Stock Management",
@@ -74,5 +76,10 @@
     "out": "Outbound Management",
     "current": "Stock Query",
     "check": "Stock Check"
+  },
+  "housekeeping": {
+    "title": "Housekeeping Management",
+    "order": "Housekeeping Order",
+    "item": "Service Item Configuration"
   }
 }

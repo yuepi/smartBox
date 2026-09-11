@@ -356,26 +356,22 @@ async function handleSubmit() {
             class="mt-6 p-4 bg-slate-50 dark:bg-zinc-900 rounded-xl grid grid-cols-2 gap-4 text-xs text-gray-500"
           >
             <div class="flex items-center gap-2">
-              <span class="font-semibold text-gray-400 w-16">创建人:</span
-              ><span class="text-gray-700 dark:text-gray-300 font-medium">{{
+              <span class="font-semibold text-gray-400 w-16">创建人:</span><span class="text-gray-700 dark:text-gray-300 font-medium">{{
                 formData.createBy || '-'
               }}</span>
             </div>
             <div class="flex items-center gap-2">
-              <span class="font-semibold text-gray-400 w-16">创建时间:</span
-              ><span class="text-gray-700 dark:text-gray-300 font-mono">{{
+              <span class="font-semibold text-gray-400 w-16">创建时间:</span><span class="text-gray-700 dark:text-gray-300 font-mono">{{
                 formData.createTime
               }}</span>
             </div>
             <div class="flex items-center gap-2">
-              <span class="font-semibold text-gray-400 w-16">更新人:</span
-              ><span class="text-gray-700 dark:text-gray-300 font-medium">{{
+              <span class="font-semibold text-gray-400 w-16">更新人:</span><span class="text-gray-700 dark:text-gray-300 font-medium">{{
                 formData.updateBy || '-'
               }}</span>
             </div>
             <div class="flex items-center gap-2">
-              <span class="font-semibold text-gray-400 w-16">更新时间:</span
-              ><span class="text-gray-700 dark:text-gray-300 font-mono">{{
+              <span class="font-semibold text-gray-400 w-16">更新时间:</span><span class="text-gray-700 dark:text-gray-300 font-mono">{{
                 formData.updateTime
               }}</span>
             </div>
@@ -454,9 +450,7 @@ async function handleSubmit() {
               class="flex items-center gap-2 px-4 py-2.5 mb-4 text-xs text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/40 rounded-lg"
             >
               <el-icon class="text-base"><InfoFilled /></el-icon>
-              <span
-                >提示：勾选下方组织架构部门，角色的数据查看权限将严格限制在所选范围内</span
-              >
+              <span>提示：勾选下方组织架构部门，角色的数据查看权限将严格限制在所选范围内</span>
             </div>
             <div
               class="flex-1 max-h-[350px] overflow-y-auto p-3 border border-slate-100 dark:border-zinc-800 rounded-xl shadow-inner bg-slate-50/50 dark:bg-zinc-900/30"
@@ -486,16 +480,17 @@ async function handleSubmit() {
       <div
         class="flex justify-end gap-2 px-2 pt-2 border-t border-gray-100 dark:border-zinc-800"
       >
-        <el-button class="rounded-lg px-5" @click="formVisible = false"
-          >取消</el-button
-        >
+        <el-button class="rounded-lg px-5" @click="formVisible = false">
+          取消
+        </el-button>
         <el-button
           type="primary"
           class="rounded-lg px-5 shadow-sm"
           :loading="formSubmitting"
           @click="handleSubmit"
-          >保存提交</el-button
         >
+          保存提交
+        </el-button>
       </div>
     </template>
   </el-dialog>

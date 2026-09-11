@@ -177,8 +177,9 @@ async function handleSubmit() {
           type="primary"
           :loading="formSubmitting"
           @click="handleSubmit"
-          >确定</el-button
         >
+          确定
+        </el-button>
       </div>
     </template>
   </el-dialog>

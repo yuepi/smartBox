@@ -21,6 +21,7 @@ export interface Merchant {
   latitude: number;
   status: number; // 0=启用,1=禁用
   merchantMenuIds: number[]; // 商户下的菜单IDs
+  merchantType: number; // 0=普通商户,1=家政商户
 }
 
 // 分页查询参数

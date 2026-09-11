@@ -21,7 +21,8 @@
     "dept": "部门管理",
     "dict": "数据字典",
     "log": "操作日志",
-    "oss": "对象存储"
+    "oss": "对象存储",
+    "homeCategory": "类目管理"
   },
   "user": {
     "title": "用户管理",
@@ -64,7 +65,8 @@
     "title": "日志管理",
     "loginLog": "登录日志",
     "operationLog": "操作日志",
-    "versionLog": "版本更新日志"
+    "versionLog": "版本更新日志",
+    "homeCategory": "类目管理"
   },
   "stock": {
     "title": "库存管理",
@@ -74,5 +76,10 @@
     "out": "出库管理",
     "current": "库存查询",
     "check": "库存盘点"
+  },
+  "housekeeping": {
+    "title": "家政管理",
+    "order": "家政订单",
+    "item": "服务项配置"
   }
 }

@@ -123,7 +123,7 @@ const tableColumns = computed(() => {
             2: { text: '按钮', type: 'info' },
           };
           const config = typeMap[rowData.menuType] || { text: '未知', type: 'danger' };
-          return <ElTag size="small" type={config.type}>{config.text}</ElTag>;
+          return <ElTag size="small" type={config.type as 'danger' | 'info' | 'primary' | 'success' | 'warning'}>{config.text}</ElTag>;
         }
         case 'platformType': {
           return (

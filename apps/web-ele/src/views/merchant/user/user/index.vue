@@ -18,12 +18,11 @@ import { PERMISSIONS } from '#/constants/auth';
 import { defaultUserColumns, USER_STORAGE_KEY } from '#/constants/tableColumns';
 import { ModuleCodeMap } from '#/hooks/useExport';
 
-const { member_sex, member_status } = useDicts(['member_sex', 'member_status']);
-
 import UserModal from './UserModal.vue';
 
 import 'splitpanes/dist/splitpanes.css';
 
+const { member_sex, member_status } = useDicts(['member_sex', 'member_status']);
 // 表格列配置
 const columnConfig = ref<TableColumnConfig[]>([...defaultUserColumns]);
 function handleColumnsUpdate(newColumns: TableColumnConfig[]) {

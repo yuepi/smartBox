@@ -80,6 +80,16 @@ const routes: RouteRecordRaw[] = [
           authority: [PERMISSIONS.PLAT.SYSTEM.OSS.ROUTE],
         },
       },
+      {
+        name: 'HomeCategoryManagement',
+        path: '/home-category',
+        component: () => import('#/views/plat/system/homeCategory/index.vue'),
+        meta: {
+          icon: 'lucide:book-open',
+          title: $t('page.system.homeCategory') || '类目管理',
+          // authority: [PERMISSIONS.PLAT.SYSTEM.HOME_CATEGORY.ROUTE],
+        },
+      },
     ],
   },
   {
