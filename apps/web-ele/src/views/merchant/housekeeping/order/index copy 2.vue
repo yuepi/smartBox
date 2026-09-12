@@ -11,7 +11,7 @@ import { h, ref } from 'vue';
 
 import { Page } from '@vben/common-ui';
 
-import { ElButton, ElMessage, ElMessageBox, ElTag } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
@@ -36,7 +36,7 @@ const statusOptions = [
   { label: '退款中', value: 7 },
 ];
 
-// 状态 Tag 配置
+// 状态 Tag 颜色映射
 const statusConfig: Record<HomeOrderStatus, { label: string; type: any }> = {
   0: { label: '未支付', type: 'info' },
   1: { label: '待接单', type: 'warning' },
@@ -56,7 +56,7 @@ const formOptions: VbenFormProps = {
   schema: [
     {
       component: 'Input',
-      fieldName: 'contactName',
+      fieldName: 'memberName',
       labelWidth: 0,
       renderComponentContent: () => ({
         prefix: () =>
@@ -69,7 +69,7 @@ const formOptions: VbenFormProps = {
     },
     {
       component: 'Input',
-      fieldName: 'contactPhone',
+      fieldName: 'memberPhone',
       labelWidth: 0,
       renderComponentContent: () => ({
         prefix: () =>
@@ -97,62 +97,36 @@ const formOptions: VbenFormProps = {
   ],
 };
 
-// 解析快照中的服务名称
-function getItemNameFromSnapshot(row: HomeOrder): string {
-  if (row.itemSnapshotJson) {
-    try {
-      const snap = typeof row.itemSnapshotJson === 'string' 
-        ? JSON.parse(row.itemSnapshotJson) 
-        : row.itemSnapshotJson;
-      return snap.itemName || '-';
-    } catch {
-      // 解析失败降级处理
-    }
-  }
-  return (row as any).itemName || '-';
-}
-
-// 表格列列名重新对齐打印出的 JSON 字段
+// 表格配置
 const gridOptions: VxeTableGridOptions<HomeOrder> = {
   id: 'home_order_grid',
   keepSource: true,
   height: 'auto',
+  pagerConfig: { enabled: false },
   columns: [
-    { field: 'homeOrderId', title: '订单ID', width: 80, align: 'center' },
-    { field: 'orderNo', title: '订单编号', width: 180, align: 'center' },
-    {
-      field: 'itemName',
-      title: '服务项目',
-      minWidth: 150,
-      align: 'left',
-      formatter: ({ row }) => getItemNameFromSnapshot(row),
-    },
-    { field: 'comboName', title: '服务规格/组合', minWidth: 180, align: 'left' },
-    { field: 'contactName', title: '客户姓名', width: 110, align: 'center' },
-    { field: 'contactPhone', title: '联系电话', width: 130, align: 'center' },
+    { field: 'homeOrderId', title: '订单ID', width: 90 },
+    { field: 'itemName', title: '服务项目', minWidth: 160, align: 'left' },
+    { field: 'memberName', title: '客户', width: 120 },
+    { field: 'memberPhone', title: '联系电话', width: 130 },
     {
       field: 'payAmount',
-      title: '实付金额',
-      width: 100,
-      align: 'center',
+      title: '支付金额',
+      width: 110,
       slots: { default: 'payAmount' },
     },
     {
       field: 'status',
-      title: '订单状态',
-      width: 100,
-      align: 'center',
+      title: '状态',
+      width: 110,
       slots: { default: 'status' },
     },
-    { field: 'appointTime', title: '预约上门时间', width: 160, align: 'center' },
-    { field: 'address', title: '服务地址', minWidth: 220, align: 'left' },
-    { field: 'createdTime', title: '下单时间', width: 160, align: 'center' },
+    { field: 'appointTime', title: '预约时间', width: 170 },
+    { field: 'address', title: '服务地址', minWidth: 200, align: 'left' },
     {
       field: 'action',
       title: '操作',
-      width: 200,
+      width: 220,
       fixed: 'right',
-      align: 'center',
       slots: { default: 'action' },
     },
   ],
@@ -166,11 +140,14 @@ const gridOptions: VxeTableGridOptions<HomeOrder> = {
         };
         queryParams.value = params;
         const res = await getHomeOrderPageApi(params);
-        
-        // 兼容后端直接返回数组，以及带 records/data/total 的对象格式
-        const list = Array.isArray(res) ? res : (res?.data || res?.records || []);
-        const total = Array.isArray(res) ? res.length : (res?.total ?? list.length);
+        console.log(res);
+        // 判断返回数据格式
+        const list = Array.isArray(res) ? res : res?.data || res?.records || [];
+        const total = Array.isArray(res)
+          ? res.length
+          : (res?.total ?? list.length);
 
+        // 兼容 vxe-table 默认格式以及你的全局配置格式 (result/records)
         return {
           records: list,
           items: list,
@@ -242,68 +219,68 @@ async function handleRefund(row: HomeOrder) {
 
       <!-- 支付金额自定义渲染 -->
       <template #payAmount="{ row }">
-        <span class="font-bold text-red-500">￥{{ row.payAmount ?? 0 }}</span>
+        <span class="text-red-500 font-bold">￥{{ row.payAmount ?? 0 }}</span>
       </template>
 
       <!-- 状态 Tag 渲染 -->
       <template #status="{ row }">
-        <ElTag :type="statusConfig[row.status]?.type" size="small">
+        <el-tag :type="statusConfig[row.status]?.type" size="small">
           {{ statusConfig[row.status]?.label ?? '未知' }}
-        </ElTag>
+        </el-tag>
       </template>
 
-      <!-- 操作按钮 -->
+      <!-- 操作按钮（统一样式） -->
       <template #action="{ row }">
-        <div class="action-buttons flex items-center justify-center gap-1">
+        <div class="action-buttons">
           <!-- 待接单：状态 1 -->
-          <ElButton
+          <el-button
             v-if="row.status === 1"
             size="small"
             type="primary"
             @click="handleAccept(row)"
           >
             接单
-          </ElButton>
+          </el-button>
 
           <!-- 已接单：状态 2 -->
-          <ElButton
+          <el-button
             v-if="row.status === 2"
             size="small"
             type="primary"
             @click="handleStart(row)"
           >
             开始服务
-          </ElButton>
+          </el-button>
 
           <!-- 服务中：状态 3 -->
-          <ElButton
+          <el-button
             v-if="row.status === 3"
             size="small"
             type="success"
             @click="handleFinish(row)"
           >
             完成结算
-          </ElButton>
+          </el-button>
 
           <!-- 退款中：状态 7 -->
-          <ElButton
+          <el-button
             v-if="row.status === 7"
             size="small"
             type="danger"
             @click="handleRefund(row)"
           >
             退款
-          </ElButton>
+          </el-button>
 
           <!-- 待接单/处理中允许取消：状态 1, 2, 3 -->
-          <ElButton
+          <el-button
             v-if="[1, 2, 3].includes(row.status)"
             size="small"
             type="warning"
             @click="handleCancel(row)"
           >
             取消
-          </ElButton>
+          </el-button>
         </div>
       </template>
     </Grid>

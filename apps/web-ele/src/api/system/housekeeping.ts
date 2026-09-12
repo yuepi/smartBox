@@ -30,8 +30,10 @@ export interface HomeOrderQueryParams {
 }
 
 /** 4.1 待接/进行中订单列表 */
-export function getHomeOrderListApi() {
-  return requestClient.get<HomeOrder[]>('/restful/merchant/homeOrder/list');
+export function getHomeOrderPageApi(params: HomeOrderQueryParams) {
+  return requestClient.get<PageResult<HomeOrder>>('/restful/merchant/homeOrder/list', {
+    params,
+  });
 }
 
 /** 4.2 接单 (1 -> 2) */
