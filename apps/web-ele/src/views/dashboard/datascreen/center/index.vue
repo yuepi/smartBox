@@ -8,18 +8,20 @@ export default defineComponent({
   setup() {
     // ===== 卡片数据 =====
     const titleDate = [
-      // 本年汇总
-      { number: 12_580, text: '本年累计投递(次)' },
-      { number: 8760, text: '本年回收总量(kg)' },
-      { number: 26_340, text: '本年回收金额(元)' },
-      // 本月汇总
-      { number: 3220, text: '本月累计投递(次)' },
-      { number: 2150, text: '本月回收总量(kg)' },
-      { number: 6450, text: '本月回收金额(元)' },
-      // 今日数据（当日实时）
-      { number: 89, text: '今日累计投递(次)' },
-      { number: 62, text: '今日回收总量(kg)' },
-      { number: 186, text: '今日回收金额(元)' },
+      // 本年汇总（模拟）
+      { number: 158_420, text: '本年累计投递(次)' },
+      { number: 96_850, text: '本年回收总量(kg)' },
+      { number: 328_760, text: '本年回收金额(元)' },
+
+      // 本月汇总（保留原数据）
+      { number: 26_120, text: '本月累计投递(次)' },
+      { number: 72_530, text: '本月回收总量(kg)' },
+      { number: 36_741, text: '本月回收金额(元)' },
+
+      // 今日数据（模拟）
+      { number: 1024, text: '今日累计投递(次)' },
+      { number: 2386, text: '今日回收总量(kg)' },
+      { number: 1263, text: '今日回收金额(元)' },
     ];
 
     const titleItem = reactive([]);
