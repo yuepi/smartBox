@@ -1,10 +1,13 @@
 <script lang="ts" setup>
+import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
+
 import * as echarts from 'echarts';
 
 import { getRankingApi } from '#/api/common/workspace';
 
 const chartRef = ref<HTMLDivElement | null>(null);
 let chartInstance: echarts.ECharts | null = null;
+let resizeObserver: null | ResizeObserver = null; // 保存 observer 引用以便销毁
 
 const rankingConfig = {
   memberWeight: { name: '投递重量 (kg)', unit: 'kg' },
@@ -33,11 +36,18 @@ async function fetchData() {
   const list = res.rankingList || [];
 
   await nextTick();
-  renderChart(list);
+  // 使用 setTimeout(0) 确保 flex 布局分配好确切 px 高度后再渲染图表
+  setTimeout(() => {
+    renderChart(list);
+  }, 0);
 }
 
 function renderChart(list: { name: string; phone: string; value: number }[]) {
   if (!chartRef.value) return;
+  
+  // 如果容器高度为 0，暂不初始化，避免生成 0px 画布
+  if (chartRef.value.clientHeight === 0) return;
+
   if (!chartInstance) {
     chartInstance = echarts.init(chartRef.value);
   }
@@ -56,10 +66,10 @@ function renderChart(list: { name: string; phone: string; value: number }[]) {
       },
     },
     grid: {
-      top: '12%',
+      top: '5%',
       left: '2%',
       right: '3%',
-      bottom: '12%',
+      bottom: '5%',
       containLabel: true,
     },
     xAxis: {
@@ -117,27 +127,32 @@ watch([type, dateRange], fetchData);
 
 onMounted(() => {
   fetchData();
-  const observer = new ResizeObserver(() => chartInstance?.resize());
-  if (chartRef.value) observer.observe(chartRef.value);
+  // 监听容器 DOM 尺寸，变化时自动 resize 图表
+  if (chartRef.value) {
+    resizeObserver = new ResizeObserver(() => {
+      chartInstance?.resize();
+    });
+    resizeObserver.observe(chartRef.value);
+  }
 });
 
 onUnmounted(() => {
+  resizeObserver?.disconnect();
   chartInstance?.dispose();
+  chartInstance = null;
 });
 </script>
 
 <template>
   <div
-    class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-zinc-700/80 flex flex-col min-h-0 min-w-0"
+    class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-zinc-700/80 flex flex-col h-full min-h-0 min-w-0 overflow-hidden"
   >
     <div
       class="flex items-center justify-between mb-2 shrink-0 gap-2 flex-wrap"
     >
       <div class="flex items-center gap-1.5 shrink-0">
         <span class="w-1 h-3.5 bg-rose-500 rounded-full"></span>
-        <span class="font-bold text-sm text-gray-800 dark:text-gray-100"
-          >聚合排行榜</span
-        >
+        <span class="font-bold text-sm text-gray-800 dark:text-gray-100">聚合排行榜</span>
       </div>
       <div class="flex items-center gap-2 flex-wrap justify-end">
         <el-date-picker
@@ -158,8 +173,9 @@ onUnmounted(() => {
         </el-select>
       </div>
     </div>
-    <div class="relative flex-1 min-h-0 w-full">
-      <div ref="chartRef" class="absolute inset-0 w-full h-full"></div>
+    <!-- 调整容器：去除 absolute 陷阱，直接让容器接管 flex-1 和 h-full -->
+    <div class="flex-1 w-full min-h-0 min-w-0">
+      <div ref="chartRef" class="w-full h-full"></div>
     </div>
   </div>
 </template>

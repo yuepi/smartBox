@@ -1,10 +1,13 @@
 <script lang="ts" setup>
+import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
+
 import * as echarts from 'echarts';
 
 import { getDataTrendApi } from '#/api/common/workspace';
 
 const chartRef = ref<HTMLDivElement | null>(null);
 let chartInstance: echarts.ECharts | null = null;
+let resizeObserver: null | ResizeObserver = null;
 
 const typeConfig = {
   weight: { name: '投递重量 (kg)', color: '#EF4444', unit: 'kg' },
@@ -29,11 +32,15 @@ async function fetchData() {
   totalValue.value = list.reduce((acc, cur) => acc + (cur.value || 0), 0);
 
   await nextTick();
-  renderChart(list);
+  setTimeout(() => {
+    renderChart(list);
+  }, 0);
 }
 
 function renderChart(list: { date: string; value: number }[]) {
   if (!chartRef.value) return;
+  if (chartRef.value.clientHeight === 0) return;
+
   if (!chartInstance) {
     chartInstance = echarts.init(chartRef.value);
   }
@@ -48,10 +55,10 @@ function renderChart(list: { date: string; value: number }[]) {
       },
     },
     grid: {
-      top: '12%',
+      top: '5%',
       left: '2%',
       right: '3%',
-      bottom: '8%',
+      bottom: '5%',
       containLabel: true,
     },
     xAxis: {
@@ -99,18 +106,22 @@ watch([type, rangeDays, dateRange], fetchData);
 
 onMounted(() => {
   fetchData();
-  const observer = new ResizeObserver(() => chartInstance?.resize());
-  if (chartRef.value) observer.observe(chartRef.value);
+  if (chartRef.value) {
+    resizeObserver = new ResizeObserver(() => chartInstance?.resize());
+    resizeObserver.observe(chartRef.value);
+  }
 });
 
 onUnmounted(() => {
+  resizeObserver?.disconnect();
   chartInstance?.dispose();
+  chartInstance = null;
 });
 </script>
 
 <template>
   <div
-    class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-zinc-700/80 flex flex-col min-h-0 min-w-0"
+    class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-zinc-700/80 flex flex-col h-full min-h-0 min-w-0 overflow-hidden"
   >
     <div
       class="flex items-center justify-between mb-2 shrink-0 gap-2 flex-wrap"
@@ -119,8 +130,7 @@ onUnmounted(() => {
         <span class="w-1 h-3.5 bg-rose-500 rounded-full"></span>
         <span
           class="font-bold text-sm text-gray-800 dark:text-gray-100 truncate"
-          >聚合数据概览</span
-        >
+          >聚合数据概览</span>
       </div>
       <div class="flex items-center gap-2 flex-wrap justify-end">
         <el-select v-model="type" style="width: 100px">
@@ -129,9 +139,9 @@ onUnmounted(() => {
           <el-option label="环保金" value="earnings" />
         </el-select>
         <el-radio-group v-model="rangeDays">
-          <el-radio-button :label="7">7天</el-radio-button>
-          <el-radio-button :label="15">15天</el-radio-button>
-          <el-radio-button :label="30">30天</el-radio-button>
+          <el-radio-button :value="7">7天</el-radio-button>
+          <el-radio-button :value="15">15天</el-radio-button>
+          <el-radio-button :value="30">30天</el-radio-button>
         </el-radio-group>
       </div>
     </div>
@@ -142,8 +152,9 @@ onUnmounted(() => {
       }}</strong>
       {{ typeConfig[type].unit }}
     </div>
-    <div class="relative flex-1 min-h-0 w-full">
-      <div ref="chartRef" class="absolute inset-0 w-full h-full"></div>
+    <!-- 去除 relative/absolute，直接使用 flex-1 撑开容器 -->
+    <div class="flex-1 w-full min-h-0 min-w-0">
+      <div ref="chartRef" class="w-full h-full"></div>
     </div>
   </div>
 </template>

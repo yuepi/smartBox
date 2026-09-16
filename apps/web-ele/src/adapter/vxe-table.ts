@@ -37,7 +37,7 @@ setupVbenVxeTable({
           enabled: false,
         },
         pagerConfig: {
-          pageSize: 10,
+          pageSize: 20,
           pageSizes: [10, 20, 50, 100, 200, 500],
         },
         proxyConfig: {
@@ -52,7 +52,6 @@ setupVbenVxeTable({
         },
         rowConfig: {},
         checkboxConfig: {
-          labelField: 'id',
           highlight: true,
           range: true,
         },
