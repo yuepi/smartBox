@@ -86,7 +86,7 @@ const items = computed(() => {
 });
 
 onMounted(() => {
-  fetchData();
+  // fetchData();
 });
 </script>
 

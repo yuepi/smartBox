@@ -15,7 +15,7 @@ async function fetchDeviceStatus() {
 
 function handleNavigate(status?: number) {
   router.push({
-    name: 'Device',
+    name: 'DeviceList',
     query: status === undefined ? {} : { onlineStatus: status },
   });
 }
