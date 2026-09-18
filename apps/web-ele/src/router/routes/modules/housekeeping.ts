@@ -15,6 +15,17 @@ const housekeepingRoutes: RouteRecordRaw[] = [
     },
     children: [
       {
+        name: 'OnsiteRecycleOrder',
+        path: '/housekeeping/onsite-recycle',
+        component: () => import('#/views/merchant/housekeeping/onsite/index.vue'),
+        meta: {
+          icon: 'lucide:recycle',
+          title: '上门回收',
+          order: 5,
+          authority: ['merchant:onsiteRecycleOrder:view'],
+        },
+      },
+      {
         name: 'HousekeepingOrder',
         path: '/housekeeping/order',
         component: () => import('#/views/merchant/housekeeping/order/index.vue'),
