@@ -11,6 +11,7 @@ import {
   ElInput,
   ElInputNumber,
   ElMessage,
+  ElMessageBox,
   ElOption,
   ElSelect,
   ElTable,
@@ -31,6 +32,7 @@ interface Category {
   level?: number;
   imageUrl?: string;
   pricingUnit?: string;
+  defaultPrice?: number;
 }
 const { hasAccessByCodes } = useAccess();
 const rows = ref<Category[]>([]);
@@ -38,6 +40,44 @@ const busy = ref(false);
 const visible = ref(false);
 const error = ref(false);
 const images = ref<string[]>([]);
+const changedPrices = ref<Record<number, number | undefined>>({});
+function markPrice(row: Category) {
+  if (row.recycleItemId != null)
+    changedPrices.value[row.recycleItemId] = row.defaultPrice;
+}
+async function savePrices() {
+  if (busy.value) return;
+  const changes = Object.entries(changedPrices.value).map(([id, price]) => ({
+    recycleItemId: Number(id),
+    defaultPrice: price,
+  }));
+  if (!changes.length) {
+    ElMessage.warning('请先在表格修改默认价格');
+    return;
+  }
+  if (changes.some((row) => !(row.defaultPrice! > 0))) {
+    ElMessage.warning('默认价格须大于0');
+    return;
+  }
+  busy.value = true;
+  try {
+    await ElMessageBox.confirm(
+      `将更新 ${changes.length} 个品类的默认价，未自定义价格的商户将跟随调整，历史订单报价不变。是否提交？`,
+      '批量提交默认价格',
+      { type: 'warning' },
+    );
+    await requestClient.post(
+      '/restful/plat/onsiteRecycleItem/defaultPrices',
+      changes,
+    );
+    changedPrices.value = {};
+    ElMessage.success('默认价格已批量保存，未自定义的商户将使用新价格');
+  } catch {
+    /* 整批失败保留修改内容。 */
+  } finally {
+    busy.value = false;
+  }
+}
 const form = ref<Category>({
   parentId: 0,
   name: '',
@@ -53,6 +93,8 @@ async function load() {
     rows.value = await requestClient.get<Category[]>(
       '/restful/plat/onsiteRecycleItem/list',
     );
+    // 刷新成功后丢弃旧的编辑记录，避免提交与当前表格不一致的价格。
+    changedPrices.value = {};
   } catch {
     error.value = true;
   } finally {
@@ -96,8 +138,14 @@ onMounted(load);
 <template>
   <Page title="回收类目管理">
     <ElAlert
-      title="平台维护品类、图片与单位，各商户自行定价。已有商户报价后不能直接更换单位。"
+      title="平台维护品类、图片、单位和默认价。默认价可在表格多行编辑后一次提交；商户自定义价优先，未修改的商户跟随默认价。"
       type="info"
+      :closable="false"
+      class="mb-3"
+    />
+    <ElAlert
+      title="廊坊小件初始价为试行估算价，非实时市场成交价；正式接单前请复核本地收购、搬运及运输成本。"
+      type="warning"
       :closable="false"
       class="mb-3"
     />
@@ -113,6 +161,19 @@ onMounted(load);
       :closable="false"
     />
     <ElTable :data="rows" row-key="recycleItemId" border>
+      <ElTableColumn label="默认价格" width="200"
+        ><template #default="{ row }"
+          ><ElInputNumber
+            v-if="canEdit()"
+            v-model="row.defaultPrice"
+            :min="0.01"
+            :max="999999.99"
+            :precision="2"
+            :disabled="busy"
+            @change="markPrice(row)"
+          /><span v-else>{{ row.defaultPrice ?? '未配置' }}</span></template
+        ></ElTableColumn
+      >
       <ElTableColumn label="品类图片" width="110"
         ><template #default="{ row }"
           ><ElImage
@@ -164,6 +225,14 @@ onMounted(load);
         ></ElTableColumn
       >
     </ElTable>
+    <ElButton
+      v-if="canEdit()"
+      class="mt-3"
+      type="primary"
+      :loading="busy"
+      @click="savePrices"
+      >批量提交默认价格</ElButton
+    >
     <ElDialog
       v-model="visible"
       :title="form.recycleItemId ? '编辑类目' : '新增类目'"
@@ -194,6 +263,15 @@ onMounted(load);
         ></ElFormItem>
         <ElFormItem label="名称" required
           ><ElInput v-model="form.name" :maxlength="100" :disabled="busy"
+        /></ElFormItem>
+        <ElFormItem label="默认价格"
+          ><ElInputNumber
+            v-model="form.defaultPrice"
+            :min="0.01"
+            :max="999999.99"
+            :precision="2"
+            :disabled="busy"
+            placeholder="可在表格批量配置"
         /></ElFormItem>
         <ElFormItem label="唯一编码" required
           ><ElInput v-model="form.code" :maxlength="32" :disabled="busy"

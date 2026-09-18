@@ -20,10 +20,10 @@ import {
   saveOnsiteScope,
 } from '#/api/system/onsiteRecycle';
 
-/** 平台只读目录 + 登录商户自己的报价；不读取或保存平台旧 price。 */
+/** 自定义价留空即跟随平台默认价；多行编辑后只提交一次，不展示重复价格列。 */
 const options = ref<(OnsiteCategory & { label: string })[]>([]);
 const ids = ref<number[]>([]);
-const prices = ref<Record<number, number>>({});
+const prices = ref<Record<number, number | undefined>>({});
 const busy = ref(false);
 const loaded = ref(false);
 function leaves(
@@ -83,8 +83,18 @@ async function load() {
 }
 async function save() {
   if (busy.value || !loaded.value) return;
-  if (ids.value.some((id) => !(prices.value[id]! > 0))) {
-    ElMessage.warning('请为每个可收品类填写单价');
+  if (
+    ids.value.some(
+      (id) =>
+        !(
+          (prices.value[id] ??
+            options.value.find((row) => row.recycleItemId === id)
+              ?.defaultPrice ??
+            0) > 0
+        ),
+    )
+  ) {
+    ElMessage.warning('没有默认价的品类，请填写自定义价格');
     return;
   }
   busy.value = true;
@@ -97,7 +107,7 @@ async function save() {
     );
     await saveOnsiteScope(
       ids.value,
-      Object.fromEntries(ids.value.map((id) => [id, prices.value[id]!])),
+      Object.fromEntries(ids.value.map((id) => [id, prices.value[id] ?? null])),
     );
     ElMessage.success('本商户范围与报价已保存');
   } catch {
@@ -111,12 +121,29 @@ onMounted(load);
 <template>
   <Page title="可收品类与商户报价">
     <ElAlert
-      title="平台维护图片及单位，商户自行填写每种品类的参考回收单价。未定价不能承接新预约；现场成交价另行确认，不覆盖下单报价。"
+      title="自定义价格留空使用平台默认价，填写后以自定义价为准。可多行修改后一次提交；采用默认价的品类会跟随平台调价，历史订单不变。"
       type="info"
       :closable="false"
       class="mb-5"
     />
     <ElButton :loading="busy" @click="load">刷新 / 重试</ElButton>
+    <ElButton
+      :disabled="busy || !loaded"
+      @click="
+        ids = options
+          .filter(
+            (row) =>
+              row.imageUrl && row.pricingUnit && (row.defaultPrice ?? 0) > 0,
+          )
+          .map((row) => row.recycleItemId)
+      "
+      >全选有默认价的品类</ElButton
+    >
+    <ElButton
+      :disabled="busy || !loaded"
+      @click="ids.forEach((id) => (prices[id] = undefined))"
+      >所选品类全部采用默认价</ElButton
+    >
     <ElSelect
       v-model="ids"
       multiple
@@ -149,13 +176,19 @@ onMounted(load);
         ></ElTableColumn
       >
       <ElTableColumn prop="label" label="回收品类" />
-      <ElTableColumn label="本商户参考单价" width="230"
+      <ElTableColumn label="默认价格" width="130"
+        ><template #default="{ row }">{{
+          row.defaultPrice ?? '未配置'
+        }}</template></ElTableColumn
+      >
+      <ElTableColumn label="自定义价格" width="230"
         ><template #default="{ row }"
           ><ElInputNumber
             v-model="prices[row.recycleItemId]"
             :min="0.01"
             :max="999999.99"
             :precision="2"
+            placeholder="留空按默认价"
             :disabled="busy" /></template
       ></ElTableColumn>
       <ElTableColumn label="单位" width="140"
@@ -170,7 +203,7 @@ onMounted(load);
       :loading="busy"
       :disabled="!loaded"
       @click="save"
-      >保存范围与报价</ElButton
+      >一次提交全部配置</ElButton
     >
   </Page>
 </template>

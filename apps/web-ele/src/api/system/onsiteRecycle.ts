@@ -38,6 +38,7 @@ export interface OnsiteCategory {
   name: string;
   imageUrl?: string;
   pricingUnit?: string;
+  defaultPrice?: number;
   children?: OnsiteCategory[];
 }
 
@@ -98,7 +99,7 @@ export function getOnsiteScope() {
 
 export function saveOnsiteScope(
   recycleItemIds: number[],
-  prices?: Record<number, number>,
+  prices?: Record<number, number | null>,
 ) {
   return requestClient.post<boolean>(`${base}/scope`, {
     recycleItemIds,
