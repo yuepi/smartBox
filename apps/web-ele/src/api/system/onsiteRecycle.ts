@@ -26,6 +26,12 @@ export interface OnsiteOrder {
   contactPhone: string;
   pickupAddress: string;
   reserveTime: string;
+  assignedUserId?: number;
+  assignedUserName?: string;
+  assignedUserPhone?: string;
+  sceneImageUrls?: string[];
+  paymentImageUrls?: string[];
+  completionNote?: string;
   realAmount: number;
   remark?: string;
   closeReason?: string;
@@ -74,11 +80,17 @@ export function finishOnsite(
   onsiteOrderId: number,
   items: OnsiteItem[],
   offlinePaid: boolean,
+  proof: {
+    sceneImageUrls: string[];
+    paymentImageUrls: string[];
+    completionNote: string;
+  },
 ) {
   // 不传前端总金额，不回传类目快照；由服务端校验明细归属并计算成交款。
   return requestClient.post<boolean>(`${base}/finish`, {
     onsiteOrderId,
     offlinePaid,
+    ...proof,
     items: items.map((item) => ({
       orderItemId: item.orderItemId,
       pricingType: item.pricingType,
@@ -91,6 +103,30 @@ export function finishOnsite(
 
 export function getOnsiteCategories() {
   return requestClient.get<OnsiteCategory[]>(`${base}/categories`);
+}
+
+export function getOnsiteWorkers() {
+  return requestClient.get<{ userId: number; name: string; phone?: string }[]>(
+    `${base}/workers`,
+  );
+}
+
+export function assignOnsiteWorker(data: {
+  onsiteOrderId: number;
+  expectedAssignedUserId: number | null;
+  assignedUserId: number;
+  reason: string;
+}) {
+  return requestClient.post<boolean>(`${base}/assignWorker`, data);
+}
+
+export function rescheduleOnsite(data: {
+  onsiteOrderId: number;
+  expectedReserveTime: string;
+  reserveTime: string;
+  reason: string;
+}) {
+  return requestClient.post<boolean>(`${base}/reschedule`, data);
 }
 
 export function getOnsiteScope() {

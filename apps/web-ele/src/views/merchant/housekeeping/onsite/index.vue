@@ -15,6 +15,10 @@ import {
   ElDescriptionsItem,
   ElDialog,
   ElInputNumber,
+  ElInput,
+  ElImage,
+  ElForm,
+  ElFormItem,
   ElMessage,
   ElMessageBox,
   ElOption,
@@ -32,6 +36,8 @@ import {
   getOnsitePage,
   operateOnsite,
 } from '#/api/system/onsiteRecycle';
+import UploadImage from '#/components/UploadImage/index.vue';
+import OnsiteWorkDialog from './OnsiteWorkDialog.vue';
 
 /** 家政菜单下的独立上门回收订单；不展示或操作旧设备表里的历史预约。 */
 const { hasAccessByCodes } = useAccess();
@@ -49,6 +55,10 @@ const detail = ref<OnsiteOrder>();
 const finishVisible = ref(false);
 const finishItems = ref<OnsiteItem[]>([]);
 const offlinePaid = ref(false);
+const sceneImages = ref<string[]>([]);
+const paymentImages = ref<string[]>([]);
+const completionNote = ref('');
+const workDialog = ref<InstanceType<typeof OnsiteWorkDialog>>();
 
 const formOptions: VbenFormProps = {
   wrapperClass: 'grid-cols-1 md:grid-cols-3',
@@ -81,6 +91,7 @@ const gridOptions: VxeTableGridOptions<OnsiteOrder> = {
     { field: 'contactPhone', title: '联系电话', width: 140 },
     { field: 'pickupAddress', title: '上门地址', minWidth: 200 },
     { field: 'reserveTime', title: '预约时间', width: 170 },
+    { field: 'assignedUserName', title: '回收人员', width: 120 },
     {
       field: 'orderStatus',
       title: '状态',
@@ -129,6 +140,9 @@ async function showDetail(row: OnsiteOrder, finishing = false) {
         pricingType: item.quoteUnit === 'piece' ? 2 : 1,
       }));
       offlinePaid.value = false;
+      sceneImages.value = [];
+      paymentImages.value = [];
+      completionNote.value = '';
       finishVisible.value = true;
     } else {
       detailVisible.value = true;
@@ -179,6 +193,14 @@ async function operate(
 async function submitFinish() {
   if (busy.value || !detail.value) return;
   if (
+    !sceneImages.value.length ||
+    !paymentImages.value.length ||
+    !completionNote.value.trim()
+  ) {
+    ElMessage.warning('请上传现场照片、线下付款凭证并填写成交说明');
+    return;
+  }
+  if (
     !offlinePaid.value ||
     finishItems.value.length === 0 ||
     finishItems.value.some(
@@ -203,6 +225,11 @@ async function submitFinish() {
       detail.value.onsiteOrderId,
       finishItems.value,
       offlinePaid.value,
+      {
+        sceneImageUrls: sceneImages.value,
+        paymentImageUrls: paymentImages.value,
+        completionNote: completionNote.value.trim(),
+      },
     );
     finishVisible.value = false;
     ElMessage.success('上门回收已完成');
@@ -247,6 +274,22 @@ function showScope() {
           link
           type="primary"
           :disabled="busy"
+          @click="workDialog?.open(row.onsiteOrderId, 'reschedule')"
+          >改约</ElButton
+        >
+        <ElButton
+          v-if="row.orderStatus === 0 && can('start')"
+          link
+          type="primary"
+          :disabled="busy"
+          @click="workDialog?.open(row.onsiteOrderId, 'assign')"
+          >{{ row.assignedUserId ? '改派' : '派工' }}</ElButton
+        >
+        <ElButton
+          v-if="row.orderStatus === 0 && can('start')"
+          link
+          type="primary"
+          :disabled="busy"
           @click="operate(row, 'start')"
           >开始上门</ElButton
         >
@@ -276,6 +319,7 @@ function showScope() {
         >
       </template>
     </Grid>
+    <OnsiteWorkDialog ref="workDialog" @success="gridApi.query()" />
 
     <ElDialog v-model="detailVisible" title="上门回收详情" width="850px">
       <template v-if="detail">
@@ -295,6 +339,13 @@ function showScope() {
           }}</ElDescriptionsItem>
           <ElDescriptionsItem label="地址">{{
             detail.pickupAddress
+          }}</ElDescriptionsItem>
+          <ElDescriptionsItem label="回收人员"
+            >{{ detail.assignedUserName || '未指派' }} /
+            {{ detail.assignedUserPhone || '-' }}</ElDescriptionsItem
+          >
+          <ElDescriptionsItem label="成交说明">{{
+            detail.completionNote || '-'
           }}</ElDescriptionsItem>
           <ElDescriptionsItem label="备注">{{
             detail.remark || '-'
@@ -322,6 +373,29 @@ function showScope() {
           <ElTableColumn prop="unitPrice" label="单价（元/公斤或件）" />
           <ElTableColumn prop="realAmount" label="成交金额（元）" />
         </ElTable>
+        <div
+          v-for="group in [
+            { title: '现场照片', urls: detail.sceneImageUrls },
+            { title: '线下付款凭证', urls: detail.paymentImageUrls },
+          ]"
+          :key="group.title"
+          class="mb-4"
+        >
+          <template v-if="group.urls?.length">
+            <p class="mb-2">{{ group.title }}</p>
+            <ElImage
+              v-for="(url, index) in group.urls"
+              :key="url"
+              :src="url"
+              :preview-src-list="group.urls"
+              :initial-index="index"
+              preview-teleported
+              fit="cover"
+              class="mr-3"
+              style="width: 100px; height: 100px"
+            />
+          </template>
+        </div>
         <ElTimeline>
           <ElTimelineItem
             v-for="(flow, index) in detail.flows"
@@ -388,6 +462,29 @@ function showScope() {
           /></template>
         </ElTableColumn>
       </ElTable>
+      <ElForm label-width="110px" :disabled="busy" class="mt-4">
+        <ElFormItem label="现场照片" required
+          ><div :style="busy ? { pointerEvents: 'none' } : undefined">
+            <UploadImage v-model="sceneImages" :limit="9" /></div
+        ></ElFormItem>
+        <ElFormItem label="付款凭证" required
+          ><div :style="busy ? { pointerEvents: 'none' } : undefined">
+            <UploadImage v-model="paymentImages" :limit="9" /></div
+        ></ElFormItem>
+        <ElFormItem label="成交说明" required
+          ><ElInput
+            v-model="completionNote"
+            type="textarea"
+            :maxlength="100"
+            show-word-limit
+            :rows="3"
+        /></ElFormItem>
+      </ElForm>
+      <ElAlert
+        title="请上传实际现场及付款凭证，并遮挡与本订单无关的信息。现金支付可上传客户确认的收款凭据；上传凭证不会发起转账。"
+        type="info"
+        :closable="false"
+      />
       <ElCheckbox v-model="offlinePaid" :disabled="busy" class="mt-4"
         >我已向会员线下付清全部回收款</ElCheckbox
       >
