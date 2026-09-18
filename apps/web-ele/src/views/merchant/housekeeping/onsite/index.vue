@@ -38,6 +38,7 @@ import {
 } from '#/api/system/onsiteRecycle';
 import UploadImage from '#/components/UploadImage/index.vue';
 import OnsiteWorkDialog from './OnsiteWorkDialog.vue';
+import { statusStyle } from '../statusColors';
 
 /** 家政菜单下的独立上门回收订单；不展示或操作旧设备表里的历史预约。 */
 const { hasAccessByCodes } = useAccess();
@@ -261,7 +262,7 @@ function showScope() {
         >
       </template>
       <template #status="{ row }"
-        ><ElTag>{{
+        ><ElTag :style="statusStyle('onsite', row.orderStatus)">{{
           statusLabels[row.orderStatus] ?? '未知状态'
         }}</ElTag></template
       >
@@ -341,8 +342,8 @@ function showScope() {
             detail.pickupAddress
           }}</ElDescriptionsItem>
           <ElDescriptionsItem label="回收人员"
-            >{{ detail.assignedUserName || '未指派' }} /
-            {{ detail.assignedUserPhone || '-' }}</ElDescriptionsItem
+            >{{ detail.assignedUserName || '未指派' }}
+            <span v-if="detail.assignedUserPhone?.trim()"> / {{ detail.assignedUserPhone.trim() }}</span></ElDescriptionsItem
           >
           <ElDescriptionsItem label="成交说明">{{
             detail.completionNote || '-'

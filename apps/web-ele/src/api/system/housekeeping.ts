@@ -15,8 +15,15 @@ export interface HomeOrder {
   housekeepingMerchantName?: string;
   homeItemId?: number;
   itemName?: string;
+  /** 下单时确定的应付金额，不代表已经收款，也不包含后续维修补款。 */
   payAmount?: number;
+  repairSupplementAmount?: number;
+  repairQuoteStatus?: number | null;
+  optionAmount?: number;
+  totalAmount?: number;
   status: HomeOrderStatus;
+  settlementStatus?: number | null;
+  serviceCompletedTime?: string;
   address?: string;
   appointmentTime?: string;
   createdTime?: string;
@@ -34,6 +41,7 @@ export interface HomeOrder {
   refundStatus?: string;
   refundTime?: string;
   paidTime?: string;
+  wxTransactionId?: string;
   commissionAmount?: number;
 }
 
@@ -88,6 +96,38 @@ export interface HomeWorker {
   phone?: string;
 }
 
+export interface HomeRepairLine {
+  type: 'DETECTION' | 'LABOR' | 'PART' | 'EXTRA';
+  name: string;
+  quantity: number;
+  unit: string;
+  unitPrice: number;
+}
+export interface HomeRepairQuote {
+  quoteId: number;
+  version: number;
+  status: number;
+  linesJson: string;
+  description: string;
+  totalAmount: number;
+  deductionAmount: number;
+  supplementAmount: number;
+  createdTime: string;
+  decidedTime?: string;
+}
+/** 报价记录不触发支付；金额和版本由后端核验。 */
+export function saveHomeRepairQuoteApi(data: {
+  homeOrderId: number;
+  expectedVersion: number;
+  description: string;
+  lines: HomeRepairLine[];
+}) {
+  return requestClient.post<HomeRepairQuote>('/restful/merchant/homeOrder/repairQuote', data);
+}
+export function getHomeRepairQuotesApi(homeOrderId: number) {
+  return requestClient.get<HomeRepairQuote[]>('/restful/merchant/homeOrder/repairQuotes', { params: { homeOrderId } });
+}
+
 export function getHomeWorkersApi() {
   return requestClient.get<HomeWorker[]>('/restful/merchant/homeOrder/workers');
 }
@@ -104,14 +144,16 @@ export function assignHomeOrderApi(data: {
   );
 }
 
-/** 凭证与结算一次提交，不先保存照片再单独调用无凭证完成接口。 */
+/** 仅记录履约完成和凭证，不触发支付、退款或账本结算。 */
 export function completeHomeOrderApi(data: {
   homeOrderId: number;
+  expectedQuoteVersion?: number;
   note: string;
   imageUrls: string[];
 }) {
   return requestClient.post<boolean>(
-    '/restful/merchant/homeOrder/complete',
+    // 专用别名让新PC连到旧接口时安全失败，不能误调用旧版自动结算。
+    '/restful/merchant/homeOrder/completeFulfillment',
     data,
   );
 }
@@ -189,6 +231,7 @@ export function refundHomeOrderApi(homeOrderId: number) {
 
 export interface HomeItem {
   skuComboCount?: number;
+  optionValueCount?: number;
   homeItemId?: number;
   merchantId?: number;
   categoryId?: number;

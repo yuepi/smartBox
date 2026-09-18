@@ -32,6 +32,8 @@ import {
   startHomeOrderApi,
 } from '#/api/system/housekeeping';
 import HomeOrderWorkDialog from './HomeOrderWorkDialog.vue';
+import HomeRepairQuoteDialog from './HomeRepairQuoteDialog.vue';
+import { statusStyle } from '../statusColors';
 
 /** 退款作为服务订单筛选项，详情中处理；平台监管只读，不渲染履约操作。 */
 const props = withDefaults(
@@ -52,6 +54,23 @@ function refundStatusText(status?: string) {
   };
   return status ? labels[status] || status : '未提交';
 }
+/** 历史无标记不能推断已结清；商户账本入账也不等于微信收款。 */
+function settlementStatusText(status?: number | null) {
+  return status === 0 ? '未入账' : status === 1 ? '已入账' : '入账情况待核对';
+}
+/** 只展示原订单支付记录，不从履约状态推断收款，也不将报价应补金额算作实收。 */
+function paymentRecordText(order: HomeOrder) {
+  if (order.paidTime?.trim() && order.wxTransactionId?.trim()) return '有支付记录';
+  if (order.paidTime?.trim() || order.wxTransactionId?.trim()) return '支付记录待核实';
+  return '无支付记录';
+}
+/** 后续加价是报价差额而非实收；保留确认状态，避免将客户拒绝的报价算入应收。 */
+function repairAmountText(order: HomeOrder) {
+  if (order.repairSupplementAmount == null) return '待更新接口';
+  const suffix: Record<number, string> = { 0: '待确认', 1: '已确认，非收款记录', 2: '报价已拒绝', 3: '报价已失效' };
+  const label = order.repairQuoteStatus == null ? '' : suffix[order.repairQuoteStatus];
+  return `${order.repairSupplementAmount}${label ? `（${label}）` : ''}`;
+}
 const { hasAccessByCodes } = useAccess();
 const can = (action: string) =>
   !props.platform && hasAccessByCodes([`merchant:homeOrder:${action}`]);
@@ -69,7 +88,23 @@ const states = [
 const busy = ref(false);
 const visible = ref(false);
 const workDialog = ref<InstanceType<typeof HomeOrderWorkDialog>>();
+const repairDialog = ref<InstanceType<typeof HomeRepairQuoteDialog>>();
 const detail = ref<Awaited<ReturnType<typeof getHomeOrderDetailApi>>>();
+/** 使用下单快照展示附加项，不用当前目录价格改写历史费用。旧单无快照时明确提示。 */
+const orderExtras = computed(() => {
+  try {
+    const snapshot = JSON.parse(detail.value?.order.itemSnapshotJson || '{}');
+    if (!Array.isArray(snapshot.options)) return [];
+    return snapshot.options.filter((item: unknown): item is { optionName: string; valueName: string; priceDelta: number | string } =>
+      !!item && typeof item === 'object' &&
+      'optionName' in item && typeof item.optionName === 'string' &&
+      'valueName' in item && typeof item.valueName === 'string' &&
+      'priceDelta' in item && (typeof item.priceDelta === 'number' || typeof item.priceDelta === 'string'),
+    );
+  } catch {
+    return [];
+  }
+});
 const rescheduleVisible = ref(false);
 const rescheduleOrder = ref<HomeOrder>();
 const nextAppointTime = ref('');
@@ -164,7 +199,10 @@ const [Grid, gridApi] = useVbenVxeGrid<HomeOrder>({
       { field: 'comboName', title: '服务规格', minWidth: 150 },
       { field: 'contactName', title: '联系人', width: 110 },
       { field: 'contactPhone', title: '联系电话', width: 140 },
-      { field: 'payAmount', title: '实付（元）', width: 110 },
+      { field: 'payAmount', title: '订单金额（元）', width: 140 },
+      { field: 'repairSupplementAmount', title: '后续加价（元）', minWidth: 210, showOverflow: false, formatter: ({ row }) => repairAmountText(row) },
+      { field: 'paidTime', title: '支付记录', width: 150, slots: { default: 'paymentRecord' } },
+      { field: 'settlementStatus', title: '商户余额入账', width: 150, slots: { default: 'settlement' } },
       {
         field: 'status',
         title: '状态',
@@ -172,7 +210,7 @@ const [Grid, gridApi] = useVbenVxeGrid<HomeOrder>({
         slots: { default: 'status' },
       },
       { field: 'refundStatus', title: '退款状态', width: 140,
-        formatter: ({ row }: { row: HomeOrder }) => refundStatusText(row.refundStatus) },
+        slots: { default: 'refundStatus' } },
       { field: 'appointTime', title: '预约时间', width: 170 },
       { field: 'assignedUserName', title: '服务人员', width: 120 },
       { field: 'address', title: '服务地址', minWidth: 200 },
@@ -181,6 +219,8 @@ const [Grid, gridApi] = useVbenVxeGrid<HomeOrder>({
         title: '操作',
         width: props.platform ? 80 : 280,
         fixed: 'right',
+        // 操作按钮允许折行，不继承全局单行省略，避免隐藏后续操作。
+        showOverflow: false,
         slots: { default: 'action' },
       },
     ],
@@ -287,9 +327,20 @@ async function operate(row: HomeOrder, action: keyof typeof actions) {
         </ElButton>
       </template>
       <template #status="{ row }"
-        ><ElTag>{{ states[row.status] ?? '未知状态' }}</ElTag></template
+        ><ElTag :style="statusStyle('home', row.status)">{{ states[row.status] ?? '未知状态' }}</ElTag></template
       >
+      <template #paymentRecord="{ row }">
+        <ElTag :style="statusStyle('payment', paymentRecordText(row))">{{ paymentRecordText(row) }}</ElTag>
+      </template>
+      <template #settlement="{ row }">
+        <ElTag :style="statusStyle('settlement', row.settlementStatus)" :title="row.settlementStatus == null ? '旧订单缺少入账标记，需要核对商户余额收支明细；不能据此判断已入账或未入账。' : '表示这笔订单收入是否已记入商户余额，不代表用户付款或银行到账。'">{{ settlementStatusText(row.settlementStatus) }}</ElTag>
+      </template>
+      <template #refundStatus="{ row }">
+        <ElTag :style="statusStyle('refund', row.refundStatus)">{{ refundStatusText(row.refundStatus) }}</ElTag>
+      </template>
       <template #action="{ row }">
+        <div class="order-actions">
+        <ElButton v-if="can('view')" link type="primary" :disabled="busy" @click="repairDialog?.open(row.homeOrderId, can('accept'))">维修报价</ElButton>
         <ElButton link type="primary" :disabled="busy" @click="showDetail(row)"
           >详情</ElButton
         >
@@ -331,7 +382,7 @@ async function operate(row: HomeOrder, action: keyof typeof actions) {
           type="success"
           :disabled="busy"
           @click="workDialog?.open(row.homeOrderId, 'complete')"
-          >完工凭证 / 结算</ElButton
+          >记录履约完成</ElButton
         >
         <ElButton
           v-if="[0, 1, 2, 3].includes(row.status) && can('cancel')"
@@ -341,9 +392,11 @@ async function operate(row: HomeOrder, action: keyof typeof actions) {
           @click="operate(row, 'cancel')"
           >取消</ElButton
         >
+        </div>
       </template>
     </Grid>
     <HomeOrderWorkDialog ref="workDialog" @success="gridApi.query()" />
+    <HomeRepairQuoteDialog ref="repairDialog" @success="gridApi.query()" />
     <ElDialog
       v-model="rescheduleVisible"
       title="修改预约时间"
@@ -412,19 +465,34 @@ async function operate(row: HomeOrder, action: keyof typeof actions) {
             detail.order.appointTime
           }}</ElDescriptionsItem>
           <ElDescriptionsItem label="服务人员"
-            >{{ detail.order.assignedUserName || '未指派' }} /
-            {{ detail.order.assignedUserPhone || '-' }}</ElDescriptionsItem
+            >{{ detail.order.assignedUserName || '未指派' }}
+            <span v-if="detail.order.assignedUserPhone?.trim()"> / {{ detail.order.assignedUserPhone.trim() }}</span></ElDescriptionsItem
           >
           <ElDescriptionsItem label="服务地址">{{
             detail.order.address
           }}</ElDescriptionsItem>
-          <ElDescriptionsItem label="实付/抽佣（元）"
-            >{{ detail.order.payAmount }} /
-            {{ detail.order.commissionAmount ?? 0 }}</ElDescriptionsItem
-          >
+          <ElDescriptionsItem label="订单金额（元）">{{ detail.order.payAmount ?? '-' }}</ElDescriptionsItem>
+          <ElDescriptionsItem label="后续加价（元）">{{ repairAmountText(detail.order) }}</ElDescriptionsItem>
+          <ElDescriptionsItem label="支付记录">{{ paymentRecordText(detail.order) }}</ElDescriptionsItem>
           <ElDescriptionsItem label="支付时间">{{
             detail.order.paidTime || '-'
           }}</ElDescriptionsItem>
+          <ElDescriptionsItem label="账面抽佣（元）">{{ detail.order.commissionAmount ?? 0 }}</ElDescriptionsItem>
+          <ElDescriptionsItem label="金额说明" :span="2">订单金额为下单金额，包含下单时已选加价项目；后续加价为最新有效维修报价扣除下单已付金额后的应补金额，不代表已收款。支付记录不包含后续补款，也不代表退款后净收款或商户余额已入账。</ElDescriptionsItem>
+          <ElDescriptionsItem label="履约完成时间">{{ detail.order.serviceCompletedTime || '-' }}</ElDescriptionsItem>
+          <ElDescriptionsItem label="商户余额入账">{{ settlementStatusText(detail.order.settlementStatus) }}</ElDescriptionsItem>
+          <ElDescriptionsItem label="入账说明" :span="2">{{ detail.order.settlementStatus == null ? '旧订单缺少入账标记，需要核对商户余额收支明细；不能据此判断已入账或未入账。' : '表示这笔订单收入是否已记入商户余额，不代表用户付款或银行到账。' }}</ElDescriptionsItem>
+          <ElDescriptionsItem label="附加费用合计（元）">{{
+            detail.order.optionAmount ?? '-'
+          }}</ElDescriptionsItem>
+          <ElDescriptionsItem label="附加费用明细" :span="2">
+            <div v-for="(extra, index) in orderExtras" :key="index">
+              {{ extra.optionName }}：{{ extra.valueName }}（{{ extra.priceDelta }} 元）
+            </div>
+            <span v-if="!orderExtras.length">{{
+              detail.order.optionAmount ? '历史订单未记录附加项明细' : '无附加项'
+            }}</span>
+          </ElDescriptionsItem>
           <ElDescriptionsItem label="退款原因">{{
             detail.order.refundReason || '-'
           }}</ElDescriptionsItem>
@@ -470,3 +538,19 @@ async function operate(row: HomeOrder, action: keyof typeof actions) {
     </ElDialog>
   </Page>
 </template>
+
+<style scoped>
+.order-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 12px;
+  padding: 4px 0;
+}
+
+/* 按钮间距由容器统一控制，换行后不保留相邻按钮的左边距。 */
+.order-actions :deep(.el-button) {
+  margin-left: 0;
+}
+</style>

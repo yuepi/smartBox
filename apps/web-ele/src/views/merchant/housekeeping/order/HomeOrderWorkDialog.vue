@@ -18,6 +18,7 @@ import {
   completeHomeOrderApi,
   getHomeOrderDetailApi,
   getHomeWorkersApi,
+  getHomeRepairQuotesApi,
 } from '#/api/system/housekeeping';
 import UploadImage from '#/components/UploadImage/index.vue';
 
@@ -30,6 +31,8 @@ const workers = ref<HomeWorker[]>([]);
 const workerId = ref<number>();
 const note = ref('');
 const images = ref<string[]>([]);
+const quoteVersion = ref<number>();
+const completionScope = ref('');
 
 /** 打开时读取最新订单和本商户人员，不从列表复制可能过期的指派信息。 */
 async function open(id: number, action: 'assign' | 'complete') {
@@ -43,6 +46,20 @@ async function open(id: number, action: 'assign' | 'complete') {
       return;
     }
     workers.value = action === 'assign' ? await getHomeWorkersApi() : [];
+    quoteVersion.value = undefined;
+    completionScope.value = '';
+    if (action === 'complete') {
+      const quotes = await getHomeRepairQuotesApi(id);
+      const latest = quotes[0];
+      if (latest && ![1, 2].includes(latest.status)) {
+        ElMessage.warning('请等待用户确认或拒绝维修报价后再记录完工');
+        return;
+      }
+      quoteVersion.value = latest?.version;
+      completionScope.value = latest?.status === 2
+        ? '用户已拒绝维修，本次仅记录检测服务完成，不退款。'
+        : '本次仅记录服务完成，不代表费用已收齐或账本已结算。';
+    }
     order.value = detail.order;
     mode.value = action;
     workerId.value = detail.order.assignedUserId;
@@ -80,18 +97,19 @@ async function save() {
       });
     } else {
       await ElMessageBox.confirm(
-        '确认凭证真实且服务完成？提交后按订单金额结算，不能直接撤销。',
-        '完工结算确认',
+        '确认凭证真实且服务完成？仅保存履约记录，不扣款、不退款、不增加商户余额。',
+        '履约完成确认',
         { type: 'warning' },
       );
       await completeHomeOrderApi({
         homeOrderId: order.value.homeOrderId,
+        expectedQuoteVersion: quoteVersion.value,
         note: note.value.trim(),
         imageUrls: images.value,
       });
     }
     ElMessage.success(
-      mode.value === 'assign' ? '派工已保存' : '凭证已保存，服务已完成结算',
+      mode.value === 'assign' ? '派工已保存' : '履约已完成，未执行资金结算',
     );
     visible.value = false;
     emit('success');
@@ -107,7 +125,7 @@ defineExpose({ open });
 <template>
   <ElDialog
     v-model="visible"
-    :title="mode === 'assign' ? '指派服务人员' : '完工凭证与结算'"
+    :title="mode === 'assign' ? '指派服务人员' : '记录履约完成'"
     width="620px"
     :close-on-click-modal="false"
     :show-close="!busy"
@@ -120,7 +138,7 @@ defineExpose({ open });
       :title="
         mode === 'assign'
           ? '仅选择本商户现有启用人员；服务开始前可改派，当前不会自动发送派工通知。'
-          : '上传实际服务后的现场照片。已开始服务的历史订单无需补派工，也可补凭证完工。'
+          : completionScope
       "
     />
     <ElForm label-width="100px" :disabled="busy">
@@ -165,7 +183,7 @@ defineExpose({ open });
     <template #footer>
       <ElButton :disabled="busy" @click="visible = false">取消</ElButton>
       <ElButton type="primary" :loading="busy" @click="save">{{
-        mode === 'assign' ? '保存派工' : '提交凭证并结算'
+        mode === 'assign' ? '保存派工' : '提交凭证并记录完工'
       }}</ElButton>
     </template>
   </ElDialog>

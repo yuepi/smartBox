@@ -140,8 +140,8 @@ const gridOptions: VxeTableGridOptions<HomeOrder> = {
     { field: 'contactPhone', title: '联系电话', width: 130, align: 'center' },
     {
       field: 'payAmount',
-      title: '实付金额',
-      width: 100,
+      title: '订单金额（元）',
+      width: 150,
       align: 'center',
       slots: { default: 'payAmount' },
     },

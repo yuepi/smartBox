@@ -169,6 +169,13 @@ const gridOptions: VxeTableGridOptions<HomeItem> = {
       align: 'center',
       slots: { default: 'skuComboList' },
     },
+    {
+      field: 'optionValueCount',
+      title: '加价选项',
+      width: 130,
+      align: 'center',
+      slots: { default: 'optionValueCount' },
+    },
     { field: 'description', title: '服务描述', minWidth: 160, align: 'left' },
     { field: 'sort', title: '排序', width: 70, align: 'center' },
     {
@@ -281,6 +288,13 @@ async function handleDelete(row: HomeItem) {
       </template>
 
       <!-- 状态 Tag 插槽 -->
+      <template #optionValueCount="{ row }">
+        <ElTag v-if="row.optionValueCount" type="info" size="small">
+          {{ row.optionValueCount }} 个加价选项
+        </ElTag>
+        <span v-else class="text-xs text-gray-400">{{ row.optionValueCount == null ? '待更新接口' : '暂无加价选项' }}</span>
+      </template>
+
       <template #status="{ row }">
         <ElTag :type="row.status === 0 ? 'success' : 'danger'" size="small">
           {{ row.status === 0 ? '启用' : '禁用' }}
