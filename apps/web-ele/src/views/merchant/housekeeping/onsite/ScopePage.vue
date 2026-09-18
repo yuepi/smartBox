@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { Page } from '@vben/common-ui';
+import DefaultConfigCopyButton from '#/components/DefaultConfigCopyButton/index.vue';
 import {
   ElAlert,
   ElButton,
@@ -127,6 +128,7 @@ onMounted(load);
       class="mb-5"
     />
     <ElButton :loading="busy" @click="load">刷新 / 重试</ElButton>
+    <DefaultConfigCopyButton @success="load" />
     <ElButton
       :disabled="busy || !loaded"
       @click="

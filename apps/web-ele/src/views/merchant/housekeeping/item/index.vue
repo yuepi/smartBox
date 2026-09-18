@@ -2,6 +2,7 @@
 import type { VbenFormProps } from '#/adapter/form';
 import type { VxeTableGridOptions } from '#/adapter/vxe-table';
 import type { HomeItem, HomeItemQueryParams } from '#/api/system/housekeeping';
+import type { HomeCategory } from '#/api/system/homeCategory';
 
 import { h, ref } from 'vue';
 
@@ -19,12 +20,56 @@ import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
   deleteHomeItemApi,
   getHomeItemPageApi,
+  getHomeItemCategoriesApi,
 } from '#/api/system/housekeeping';
 
 import HomeItemEditDialog from './HomeItemEditDialog.vue';
+import DefaultConfigCopyButton from '#/components/DefaultConfigCopyButton/index.vue';
 
 const editDialogRef = ref();
 const queryParams = ref<HomeItemQueryParams>({});
+const categories = ref<HomeCategory[]>([]);
+let categoryLoading: Promise<HomeCategory[]> | undefined;
+function loadCategories() {
+  if (!categoryLoading) {
+    categoryLoading = getHomeItemCategoriesApi()
+      .then((rows) => {
+        categories.value = rows;
+        return rows;
+      })
+      .catch((error) => {
+        categoryLoading = undefined;
+        throw error;
+      });
+  }
+  return categoryLoading;
+}
+function categoryName(id?: number) {
+  const names: string[] = [];
+  const visited = new Set<number>();
+  while (id && !visited.has(id)) {
+    visited.add(id);
+    const category = categories.value.find((row) => row.categoryId === id);
+    if (!category) break;
+    names.unshift(category.categoryName);
+    id = category.parentId;
+  }
+  return names.join(' / ') || '类目已停用或不存在';
+}
+function unitName(unit: string) {
+  return (
+    (
+      {
+        time: '次',
+        pcs: '台',
+        hour: '小时',
+        kg: '公斤',
+        piece: '件',
+        sqm: '平方米',
+      } as Record<string, string>
+    )[unit] || (/^[\u4e00-\u9fa5]+$/.test(unit) ? unit : '待配置')
+  );
+}
 
 // 顶部搜索表单配置
 const formOptions: VbenFormProps = {
@@ -47,15 +92,25 @@ const formOptions: VbenFormProps = {
       },
     },
     {
-      component: 'Input',
+      component: 'ApiSelect',
       fieldName: 'categoryId',
-      labelWidth: 0,
-      renderComponentContent: () => ({
-        prefix: () =>
-          h('span', { class: 'text-sm text-gray-400 mr-1' }, '类目ID:'),
-      }),
+      label: '服务类目',
       componentProps: {
-        placeholder: '请输入类目ID',
+        api: async () => {
+          const rows = await loadCategories();
+          return rows
+            .filter(
+              (row) => !rows.some((child) => child.parentId === row.categoryId),
+            )
+            .map((row) => ({
+              label: categoryName(row.categoryId),
+              value: row.categoryId,
+            }));
+        },
+        labelField: 'label',
+        valueField: 'value',
+        placeholder: '选择中文服务类目',
+        filterable: true,
         clearable: true,
       },
     },
@@ -89,8 +144,20 @@ const gridOptions: VxeTableGridOptions<HomeItem> = {
       slots: { default: 'imageUrls' },
     },
     { field: 'itemName', title: '服务名称', minWidth: 150, align: 'left' },
-    { field: 'categoryId', title: '类目ID', width: 80, align: 'center' },
-    { field: 'unit', title: '单位', width: 70, align: 'center' },
+    {
+      field: 'categoryId',
+      title: '服务类目',
+      minWidth: 240,
+      align: 'left',
+      formatter: ({ row }) => categoryName(row.categoryId),
+    },
+    {
+      field: 'unit',
+      title: '单位',
+      width: 70,
+      align: 'center',
+      formatter: ({ row }) => unitName(row.unit),
+    },
     {
       field: 'skuComboList',
       title: 'SKU规格',
@@ -121,6 +188,7 @@ const gridOptions: VxeTableGridOptions<HomeItem> = {
   proxyConfig: {
     ajax: {
       query: async ({ page }, formValues) => {
+        await loadCategories();
         const params: HomeItemQueryParams = {
           current: page.currentPage,
           size: page.pageSize,
@@ -166,6 +234,7 @@ async function handleDelete(row: HomeItem) {
   <Page auto-content-height>
     <Grid>
       <template #toolbar-actions>
+        <DefaultConfigCopyButton @success="() => gridApi.query()" />
         <ElButton type="primary" icon="Plus" @click="handleAdd">
           新增服务项
         </ElButton>
