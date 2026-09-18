@@ -19,7 +19,16 @@ import {
   getHomeBookingRuleApi,
   saveHomeBookingRuleApi,
 } from '#/api/system/homeBookingRule';
+import {
+  getOnsiteRecycleBookingRuleApi,
+  saveOnsiteRecycleBookingRuleApi,
+} from '#/api/system/onsiteRecycleBookingRule';
 
+// 复用规则表单，业务接口和权限独立；上门回收不读取或写入家政配置。
+const props = withDefaults(defineProps<{ onsite?: boolean }>(), { onsite: false });
+const editPermission = props.onsite
+  ? 'merchant:onsiteRecycleOrder:scope'
+  : 'merchant:homeItem:edit';
 const { hasAccessByCodes } = useAccess();
 const form = ref<HomeBookingRule>();
 const busy = ref(false);
@@ -27,7 +36,7 @@ async function load() {
   if (busy.value) return;
   busy.value = true;
   try {
-    form.value = await getHomeBookingRuleApi();
+    form.value = await (props.onsite ? getOnsiteRecycleBookingRuleApi() : getHomeBookingRuleApi());
   } catch {
     /* 加载失败不填充假默认值，避免误覆盖线上配置。 */
   } finally {
@@ -64,7 +73,8 @@ async function save() {
       status,
       version,
     } = form.value;
-    await saveHomeBookingRuleApi({
+    const saveApi = props.onsite ? saveOnsiteRecycleBookingRuleApi : saveHomeBookingRuleApi;
+    await saveApi({
       startTime,
       endTime,
       advanceMinutes,
@@ -85,18 +95,29 @@ onMounted(load);
 </script>
 
 <template>
-  <Page title="家政预约规则">
+  <Page :title="props.onsite ? '上门回收预约规则' : '家政预约规则'">
     <ElAlert
       type="info"
       :closable="false"
       class="mb-4"
-      title="按实际服务商校验，自营与合作订单均适用。北京时间、每天同一营业时段，仅限制预约开始时间；暂不限制接单数量，不自动修改历史订单。"
+      :title="props.onsite
+        ? '仅用于上门回收，与家政规则独立。新下单和拒单转派按接单商户规则筛选，改约按当前商户规则校验；无合适商户时拒绝新预约，拒单后无法转派则取消。北京时间、每天同一时段，不限制接单数量，不自动修改历史订单。'
+        : '按实际服务商校验，自营与合作订单均适用。北京时间、每天同一营业时段，仅限制预约开始时间；暂不限制接单数量，不自动修改历史订单。'"
     />
     <ElCard v-loading="busy">
+      <ElAlert
+        v-if="props.onsite && form"
+        type="info"
+        :closable="false"
+        class="mb-4"
+        :title="form.version === 0
+          ? '当前使用系统默认：已启用，每天08:00–18:00，提前60分钟，含今天7天。修改并保存后采用本商户配置。'
+          : '当前使用本商户配置，与家政预约规则互不影响。'"
+      />
       <ElForm
         v-if="form"
         label-width="140px"
-        :disabled="busy || !hasAccessByCodes(['merchant:homeItem:edit'])"
+        :disabled="busy || !hasAccessByCodes([editPermission])"
         style="max-width: 640px"
       >
         <ElFormItem label="启用预约规则"
@@ -146,7 +167,7 @@ onMounted(load);
         >重新加载</ElButton
       >
       <ElButton
-        v-if="hasAccessByCodes(['merchant:homeItem:edit'])"
+        v-if="hasAccessByCodes([editPermission])"
         type="primary"
         :disabled="!form || busy"
         @click="save"

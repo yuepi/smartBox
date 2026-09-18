@@ -30,6 +30,17 @@ const housekeepingRoutes: RouteRecordRaw[] = [
         },
       },
       {
+        name: 'OnsiteRecycleBookingRule',
+        path: '/housekeeping/onsite-booking-rule',
+        component: () =>
+          import('#/views/merchant/housekeeping/onsite/BookingRulePage.vue'),
+        meta: {
+          title: '预约规则',
+          order: 25,
+          authority: ['merchant:onsiteRecycleOrder:scope'],
+        },
+      },
+      {
         name: 'OnsiteRecycleCatalog',
         path: '/plat/onsite-recycle/catalog',
         component: () => import('#/views/plat/onsite/CatalogPage.vue'),
