@@ -206,6 +206,5 @@ watch(
   </BasicLayout>
 
   <MerchantSelectModal v-model:open="showMerchantDialogVisible" />
-  <!-- 挂载版本更新弹窗 -->
-  <VersionUpdateModal />
+  <!-- 当前后端尚未提供版本通知接口，暂不挂载；接口上线后再启用自动检查。 -->
 </template>
