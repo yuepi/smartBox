@@ -201,6 +201,13 @@ export const defaultRecycleOrderColumns: TableColumnConfig[] = [
     align: 'center',
   },
   {
+    key: 'needSecondaryReview',
+    label: '需要二次审核',
+    visible: true,
+    width: 140,
+    align: 'center',
+  },
+  {
     key: 'remark',
     label: '备注',
     visible: false,
