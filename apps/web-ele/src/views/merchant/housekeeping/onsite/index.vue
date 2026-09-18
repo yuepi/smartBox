@@ -1,13 +1,10 @@
 <script lang="ts" setup>
 import type { VbenFormProps } from '#/adapter/form';
 import type { VxeTableGridOptions } from '#/adapter/vxe-table';
-import type {
-  OnsiteCategory,
-  OnsiteItem,
-  OnsiteOrder,
-} from '#/api/system/onsiteRecycle';
+import type { OnsiteItem, OnsiteOrder } from '#/api/system/onsiteRecycle';
 
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { useAccess } from '@vben/access';
 import { Page } from '@vben/common-ui';
 import {
@@ -31,16 +28,14 @@ import {
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
   finishOnsite,
-  getOnsiteCategories,
   getOnsiteDetail,
   getOnsitePage,
-  getOnsiteScope,
   operateOnsite,
-  saveOnsiteScope,
 } from '#/api/system/onsiteRecycle';
 
 /** 家政菜单下的独立上门回收订单；不展示或操作旧设备表里的历史预约。 */
 const { hasAccessByCodes } = useAccess();
+const router = useRouter();
 const props = withDefaults(defineProps<{ platform?: boolean }>(), {
   platform: false,
 });
@@ -54,9 +49,6 @@ const detail = ref<OnsiteOrder>();
 const finishVisible = ref(false);
 const finishItems = ref<OnsiteItem[]>([]);
 const offlinePaid = ref(false);
-const scopeVisible = ref(false);
-const scopeIds = ref<number[]>([]);
-const categories = ref<{ label: string; value: number }[]>([]);
 
 const formOptions: VbenFormProps = {
   wrapperClass: 'grid-cols-1 md:grid-cols-3',
@@ -133,7 +125,8 @@ async function showDetail(row: OnsiteOrder, finishing = false) {
       }
       finishItems.value = (detail.value.items ?? []).map((item) => ({
         ...item,
-        pricingType: 1,
+        // 只预选原报价单位，成交单价仍由商户现场确认填写，不自动视为已成交。
+        pricingType: item.quoteUnit === 'piece' ? 2 : 1,
       }));
       offlinePaid.value = false;
       finishVisible.value = true;
@@ -221,63 +214,8 @@ async function submitFinish() {
   }
 }
 
-function leafOptions(
-  nodes: OnsiteCategory[],
-  parent = '',
-): { label: string; value: number }[] {
-  return nodes.flatMap((node) => {
-    const label = parent ? `${parent} / ${node.name}` : node.name;
-    return node.children?.length
-      ? leafOptions(node.children, label)
-      : [{ label, value: node.recycleItemId }];
-  });
-}
-
-async function showScope() {
-  if (busy.value) return;
-  busy.value = true;
-  try {
-    const [tree, ids] = await Promise.all([
-      getOnsiteCategories(),
-      getOnsiteScope(),
-    ]);
-    categories.value = leafOptions(tree);
-    // 已停用类目仍显示已选项，允许商户明确移除，不能静默丢弃旧配置。
-    for (const id of ids) {
-      if (!categories.value.some((item) => item.value === id)) {
-        categories.value.push({
-          label: `已停用或不可选类目（${id}），请移除`,
-          value: id,
-        });
-      }
-    }
-    scopeIds.value = ids;
-    scopeVisible.value = true;
-  } catch {
-    /* 失败不打开空配置，避免误清空已有范围。 */
-  } finally {
-    busy.value = false;
-  }
-}
-
-async function submitScope() {
-  if (busy.value) return;
-  busy.value = true;
-  try {
-    if (scopeIds.value.length === 0) {
-      await ElMessageBox.confirm(
-        '清空后将不再承接新的上门预约，已有订单仍需处理。',
-        '暂停承接',
-      );
-    }
-    await saveOnsiteScope(scopeIds.value);
-    scopeVisible.value = false;
-    ElMessage.success('可收范围已保存');
-  } catch {
-    /* 保存失败保留用户选择。 */
-  } finally {
-    busy.value = false;
-  }
+function showScope() {
+  router.push('/housekeeping/onsite-scope');
 }
 </script>
 
@@ -370,6 +308,15 @@ async function submitScope() {
         </ElDescriptions>
         <ElTable :data="detail.items" class="my-4">
           <ElTableColumn prop="itemName" label="回收类目" />
+          <ElTableColumn label="下单参考价"
+            ><template #default="{ row }">{{
+              row.quotePrice == null
+                ? '历史订单未记录'
+                : row.quotePrice +
+                  (row.quoteUnit === 'kg' ? ' 元/公斤' : ' 元/件')
+            }}</template></ElTableColumn
+          >
+          <ElTableColumn prop="quoteMerchantId" label="原报价商户ID" />
           <ElTableColumn prop="realWeight" label="实际重量（公斤）" />
           <ElTableColumn prop="quantity" label="实际件数" />
           <ElTableColumn prop="unitPrice" label="单价（元/公斤或件）" />
@@ -449,43 +396,6 @@ async function submitScope() {
           >取消</ElButton
         ><ElButton type="primary" :loading="busy" @click="submitFinish"
           >确认成交</ElButton
-        ></template
-      >
-    </ElDialog>
-
-    <ElDialog
-      v-model="scopeVisible"
-      title="本商户可收类目"
-      width="650px"
-      :close-on-click-modal="false"
-      :show-close="!busy"
-      :close-on-press-escape="!busy"
-    >
-      <ElAlert
-        title="只选择实际可以承接的末级类目。一个订单的全部类目都在范围内，才会分配给本商户。"
-        type="info"
-        :closable="false"
-        class="mb-4"
-      />
-      <ElSelect
-        v-model="scopeIds"
-        multiple
-        filterable
-        class="w-full"
-        :disabled="busy"
-        placeholder="选择可收类目"
-      >
-        <ElOption
-          v-for="item in categories"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value"
-        />
-      </ElSelect>
-      <template #footer
-        ><ElButton :disabled="busy" @click="scopeVisible = false">取消</ElButton
-        ><ElButton type="primary" :loading="busy" @click="submitScope"
-          >保存</ElButton
         ></template
       >
     </ElDialog>

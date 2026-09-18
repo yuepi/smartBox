@@ -7,6 +7,10 @@ export interface OnsiteItem {
   orderItemId: number;
   recycleItemId: number;
   itemName: string;
+  quoteImageUrl?: string;
+  quotePrice?: number;
+  quoteUnit?: string;
+  quoteMerchantId?: number;
   pricingType?: number;
   realWeight?: number;
   quantity?: number;
@@ -32,6 +36,8 @@ export interface OnsiteOrder {
 export interface OnsiteCategory {
   recycleItemId: number;
   name: string;
+  imageUrl?: string;
+  pricingUnit?: string;
   children?: OnsiteCategory[];
 }
 
@@ -90,6 +96,18 @@ export function getOnsiteScope() {
   return requestClient.get<number[]>(`${base}/scope`);
 }
 
-export function saveOnsiteScope(recycleItemIds: number[]) {
-  return requestClient.post<boolean>(`${base}/scope`, { recycleItemIds });
+export function saveOnsiteScope(
+  recycleItemIds: number[],
+  prices?: Record<number, number>,
+) {
+  return requestClient.post<boolean>(`${base}/scope`, {
+    recycleItemIds,
+    prices,
+  });
+}
+
+export function getOnsiteScopePrices() {
+  return requestClient.get<
+    { recycleItemId: number; referencePrice?: number; status: number }[]
+  >(`${base}/scopePrices`);
 }

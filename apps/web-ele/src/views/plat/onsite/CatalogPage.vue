@@ -16,8 +16,10 @@ import {
   ElTable,
   ElTableColumn,
   ElTag,
+  ElImage,
 } from 'element-plus';
 import { requestClient } from '#/api/request';
+import UploadImage from '#/components/UploadImage/index.vue';
 
 interface Category {
   recycleItemId?: number;
@@ -27,12 +29,15 @@ interface Category {
   status: number;
   sort: number;
   level?: number;
+  imageUrl?: string;
+  pricingUnit?: string;
 }
 const { hasAccessByCodes } = useAccess();
 const rows = ref<Category[]>([]);
 const busy = ref(false);
 const visible = ref(false);
 const error = ref(false);
+const images = ref<string[]>([]);
 const form = ref<Category>({
   parentId: 0,
   name: '',
@@ -59,19 +64,24 @@ function edit(row?: Category) {
     ? { ...row }
     : { parentId: 0, name: '', code: '', status: 0, sort: 0 };
   visible.value = true;
+  images.value = row?.imageUrl ? [row.imageUrl] : [];
 }
 async function save() {
   if (busy.value) return;
+  if (!images.value[0] || !form.value.pricingUnit) {
+    ElMessage.warning('请上传品类图片并选择计价单位');
+    return;
+  }
   if (!form.value.name.trim() || !/^[\w-]{1,32}$/.test(form.value.code)) {
     ElMessage.warning('填写名称及1至32位字母数字编码');
     return;
   }
   busy.value = true;
   try {
-    await requestClient.post(
-      '/restful/plat/onsiteRecycleItem/save',
-      form.value,
-    );
+    await requestClient.post('/restful/plat/onsiteRecycleItem/save', {
+      ...form.value,
+      imageUrl: images.value[0],
+    });
     visible.value = false;
     ElMessage.success('类目已保存');
   } catch {
@@ -86,7 +96,7 @@ onMounted(load);
 <template>
   <Page title="回收类目管理">
     <ElAlert
-      title="复用上门回收公共目录。停用代替删除；已有类目不能移动父级，订单历史快照不会改变。"
+      title="平台维护品类、图片与单位，各商户自行定价。已有商户报价后不能直接更换单位。"
       type="info"
       :closable="false"
       class="mb-3"
@@ -103,6 +113,27 @@ onMounted(load);
       :closable="false"
     />
     <ElTable :data="rows" row-key="recycleItemId" border>
+      <ElTableColumn label="品类图片" width="110"
+        ><template #default="{ row }"
+          ><ElImage
+            v-if="row.imageUrl"
+            :src="row.imageUrl"
+            :preview-src-list="[row.imageUrl]"
+            preview-teleported
+            fit="cover"
+            style="width: 64px; height: 64px"
+          /><span v-else>待配置</span></template
+        ></ElTableColumn
+      >
+      <ElTableColumn label="报价单位" width="110"
+        ><template #default="{ row }">{{
+          row.pricingUnit === 'kg'
+            ? '元/公斤'
+            : row.pricingUnit === 'piece'
+              ? '元/件'
+              : '待配置'
+        }}</template></ElTableColumn
+      >
       <ElTableColumn prop="recycleItemId" label="ID" width="90" /><ElTableColumn
         prop="name"
         label="名称"
@@ -141,6 +172,15 @@ onMounted(load);
       :show-close="!busy"
     >
       <ElForm label-width="90px">
+        <ElFormItem label="品类图片" required
+          ><UploadImage v-model="images" :limit="1"
+        /></ElFormItem>
+        <ElFormItem label="计价单位" required
+          ><ElSelect v-model="form.pricingUnit" :disabled="busy"
+            ><ElOption label="元/公斤（按重量）" value="kg" /><ElOption
+              label="元/件（按数量）"
+              value="piece" /></ElSelect
+        ></ElFormItem>
         <ElFormItem label="父级"
           ><ElSelect
             v-model="form.parentId"
