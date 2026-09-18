@@ -35,19 +35,39 @@ export interface OnsiteCategory {
   children?: OnsiteCategory[];
 }
 
-export function getOnsitePage(params: Record<string, unknown>) {
-  return requestClient.get<{ records: OnsiteOrder[]; total: number }>(`${base}/page`, { params });
+export function getOnsitePage(
+  params: Record<string, unknown>,
+  platform = false,
+) {
+  return requestClient.get<{ records: OnsiteOrder[]; total: number }>(
+    `${platform ? '/restful/plat/onsiteRecycleOrder' : base}/page`,
+    { params },
+  );
 }
 
-export function getOnsiteDetail(onsiteOrderId: number) {
-  return requestClient.get<OnsiteOrder>(`${base}/detail`, { params: { onsiteOrderId } });
+export function getOnsiteDetail(onsiteOrderId: number, platform = false) {
+  return requestClient.get<OnsiteOrder>(
+    `${platform ? '/restful/plat/onsiteRecycleOrder' : base}/detail`,
+    { params: { onsiteOrderId } },
+  );
 }
 
-export function operateOnsite(action: 'cancel' | 'reject' | 'start', onsiteOrderId: number, reason?: string) {
-  return requestClient.post<boolean>(`${base}/${action}`, { onsiteOrderId, reason });
+export function operateOnsite(
+  action: 'cancel' | 'reject' | 'start',
+  onsiteOrderId: number,
+  reason?: string,
+) {
+  return requestClient.post<boolean>(`${base}/${action}`, {
+    onsiteOrderId,
+    reason,
+  });
 }
 
-export function finishOnsite(onsiteOrderId: number, items: OnsiteItem[], offlinePaid: boolean) {
+export function finishOnsite(
+  onsiteOrderId: number,
+  items: OnsiteItem[],
+  offlinePaid: boolean,
+) {
   // 不传前端总金额，不回传类目快照；由服务端校验明细归属并计算成交款。
   return requestClient.post<boolean>(`${base}/finish`, {
     onsiteOrderId,

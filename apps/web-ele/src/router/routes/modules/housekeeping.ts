@@ -1,39 +1,84 @@
 import type { RouteRecordRaw } from 'vue-router';
 
-import { $t } from '#/locales';
-
+/** 两个独立业务菜单组；保留原订单URL，平台功能按平台权限单独过滤。 */
 const housekeepingRoutes: RouteRecordRaw[] = [
   {
-    name: 'Housekeeping',
-    path: '/housekeeping',
-    redirect: '/housekeeping/order',
-    meta: {
-      icon: 'lucide:home',
-      title: $t('page.housekeeping.title') || '家政服务',
-      order: 30,
-      // authority: [PERMISSIONS.MERCHANT.HOUSEKEEPING.MANAGE],
-    },
+    name: 'OnsiteRecycle',
+    path: '/onsite-recycle',
+    meta: { icon: 'lucide:home', title: '上门回收', order: 29 },
     children: [
       {
         name: 'OnsiteRecycleOrder',
         path: '/housekeeping/onsite-recycle',
-        component: () => import('#/views/merchant/housekeeping/onsite/index.vue'),
+        component: () =>
+          import('#/views/merchant/housekeeping/onsite/index.vue'),
         meta: {
-          icon: 'lucide:recycle',
-          title: '上门回收',
-          order: 5,
+          title: '预约订单',
+          order: 10,
           authority: ['merchant:onsiteRecycleOrder:view'],
         },
       },
       {
+        name: 'OnsiteRecycleScope',
+        path: '/housekeeping/onsite-scope',
+        component: () =>
+          import('#/views/merchant/housekeeping/onsite/ScopePage.vue'),
+        meta: {
+          title: '可收类目配置',
+          order: 20,
+          authority: ['merchant:onsiteRecycleOrder:scope'],
+        },
+      },
+      {
+        name: 'OnsiteRecycleCatalog',
+        path: '/plat/onsite-recycle/catalog',
+        component: () => import('#/views/plat/onsite/CatalogPage.vue'),
+        meta: {
+          title: '回收类目管理',
+          order: 30,
+          authority: ['plat:onsiteRecycleItem:view'],
+        },
+      },
+      {
+        name: 'OnsiteRecycleSupervision',
+        path: '/plat/onsite-recycle/orders',
+        component: () =>
+          import('#/views/merchant/housekeeping/onsite/index.vue'),
+        props: { platform: true },
+        meta: {
+          title: '订单监管',
+          order: 40,
+          authority: ['plat:onsiteRecycleOrder:view'],
+        },
+      },
+    ],
+  },
+  {
+    name: 'Housekeeping',
+    path: '/housekeeping',
+    meta: { icon: 'lucide:home', title: '上门家政', order: 30 },
+    children: [
+      {
         name: 'HousekeepingOrder',
         path: '/housekeeping/order',
-        component: () => import('#/views/merchant/housekeeping/order/index.vue'),
+        component: () =>
+          import('#/views/merchant/housekeeping/order/OrderPage.vue'),
         meta: {
-          icon: 'lucide:file-text',
-          title: $t('page.housekeeping.order') || '家政订单',
+          title: '服务订单',
           order: 10,
-          // authority: [PERMISSIONS.MERCHANT.HOUSEKEEPING.ORDER.ROUTE],
+          authority: ['merchant:homeOrder:view'],
+        },
+      },
+      {
+        name: 'HousekeepingRefund',
+        path: '/housekeeping/refund',
+        component: () =>
+          import('#/views/merchant/housekeeping/order/OrderPage.vue'),
+        props: { refundOnly: true },
+        meta: {
+          title: '退款处理',
+          order: 20,
+          authority: ['merchant:homeOrder:view'],
         },
       },
       {
@@ -41,14 +86,67 @@ const housekeepingRoutes: RouteRecordRaw[] = [
         path: '/housekeeping/item',
         component: () => import('#/views/merchant/housekeeping/item/index.vue'),
         meta: {
-          icon: 'lucide:layers',
-          title: $t('page.housekeeping.item') || '服务项配置',
-          order: 20,
-          // authority: [PERMISSIONS.MERCHANT.HOUSEKEEPING.ITEM.ROUTE],
+          title: '服务项目与规格',
+          order: 30,
+          authority: ['merchant:homeItem:view'],
+        },
+      },
+      {
+        name: 'HousekeepingPartners',
+        path: '/housekeeping/partners',
+        component: () =>
+          import('#/views/merchant/housekeeping/partners/PartnersPage.vue'),
+        meta: {
+          title: '合作家政商户',
+          order: 40,
+          authority: ['merchant:homeMerchant:view'],
+        },
+      },
+      {
+        name: 'HousekeepingCategoryManagement',
+        path: '/plat/housekeeping/categories',
+        component: () => import('#/views/plat/system/homeCategory/index.vue'),
+        meta: {
+          title: '服务类目',
+          order: 50,
+          authority: ['plat:homeCategory:view'],
+        },
+      },
+      {
+        name: 'HousekeepingMerchants',
+        path: '/plat/housekeeping/merchants',
+        component: () => import('#/views/plat/onsite/HomeMerchantsPage.vue'),
+        meta: {
+          title: '家政商户',
+          order: 60,
+          authority: ['plat:homeMerchant:view'],
+        },
+      },
+      {
+        name: 'HousekeepingRelations',
+        path: '/plat/housekeeping/relations',
+        component: () =>
+          import('#/views/merchant/housekeeping/partners/PartnersPage.vue'),
+        props: { platform: true },
+        meta: {
+          title: '商户合作关系',
+          order: 70,
+          authority: ['plat:homeMerchant:view'],
+        },
+      },
+      {
+        name: 'HousekeepingSupervision',
+        path: '/plat/housekeeping/orders',
+        component: () =>
+          import('#/views/merchant/housekeeping/order/OrderPage.vue'),
+        props: { platform: true },
+        meta: {
+          title: '订单监管',
+          order: 80,
+          authority: ['plat:homeOrder:view'],
         },
       },
     ],
   },
 ];
-
 export default housekeepingRoutes;

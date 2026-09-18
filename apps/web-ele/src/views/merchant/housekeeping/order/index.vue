@@ -43,8 +43,10 @@ const statusConfig: Record<HomeOrderStatus, { label: string; type: any }> = {
   2: { label: '已接单', type: 'primary' },
   3: { label: '服务中', type: 'primary' },
   4: { label: '已完成', type: 'success' },
+  5: { label: '已评价', type: 'success' },
   6: { label: '已取消', type: 'info' },
   7: { label: '退款中', type: 'danger' },
+  8: { label: '异常', type: 'danger' },
 };
 
 // 筛选表单配置
@@ -101,9 +103,10 @@ const formOptions: VbenFormProps = {
 function getItemNameFromSnapshot(row: HomeOrder): string {
   if (row.itemSnapshotJson) {
     try {
-      const snap = typeof row.itemSnapshotJson === 'string' 
-        ? JSON.parse(row.itemSnapshotJson) 
-        : row.itemSnapshotJson;
+      const snap =
+        typeof row.itemSnapshotJson === 'string'
+          ? JSON.parse(row.itemSnapshotJson)
+          : row.itemSnapshotJson;
       return snap.itemName || '-';
     } catch {
       // 解析失败降级处理
@@ -127,7 +130,12 @@ const gridOptions: VxeTableGridOptions<HomeOrder> = {
       align: 'left',
       formatter: ({ row }) => getItemNameFromSnapshot(row),
     },
-    { field: 'comboName', title: '服务规格/组合', minWidth: 180, align: 'left' },
+    {
+      field: 'comboName',
+      title: '服务规格/组合',
+      minWidth: 180,
+      align: 'left',
+    },
     { field: 'contactName', title: '客户姓名', width: 110, align: 'center' },
     { field: 'contactPhone', title: '联系电话', width: 130, align: 'center' },
     {
@@ -144,7 +152,12 @@ const gridOptions: VxeTableGridOptions<HomeOrder> = {
       align: 'center',
       slots: { default: 'status' },
     },
-    { field: 'appointTime', title: '预约上门时间', width: 160, align: 'center' },
+    {
+      field: 'appointTime',
+      title: '预约上门时间',
+      width: 160,
+      align: 'center',
+    },
     { field: 'address', title: '服务地址', minWidth: 220, align: 'left' },
     { field: 'createdTime', title: '下单时间', width: 160, align: 'center' },
     {
@@ -166,10 +179,12 @@ const gridOptions: VxeTableGridOptions<HomeOrder> = {
         };
         queryParams.value = params;
         const res = await getHomeOrderPageApi(params);
-        
+
         // 兼容后端直接返回数组，以及带 records/data/total 的对象格式
-        const list = Array.isArray(res) ? res : (res?.data || res?.records || []);
-        const total = Array.isArray(res) ? res.length : (res?.total ?? list.length);
+        const list = Array.isArray(res) ? res : res?.records || [];
+        const total = Array.isArray(res)
+          ? res.length
+          : (res?.total ?? list.length);
 
         return {
           records: list,

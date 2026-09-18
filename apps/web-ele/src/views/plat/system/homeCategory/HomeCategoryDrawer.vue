@@ -1,5 +1,8 @@
 <script lang="ts" setup>
-import type { HomeCategory, HomeCategorySaveParams } from '#/api/system/homeCategory';
+import type {
+  HomeCategory,
+  HomeCategorySaveParams,
+} from '#/api/system/homeCategory';
 
 import { computed, nextTick, reactive, ref } from 'vue';
 
@@ -30,7 +33,9 @@ const formData = reactive<HomeCategorySaveParams>({
 });
 
 const rules = {
-  categoryName: [{ required: true, message: '请输入类目名称', trigger: 'blur' }],
+  categoryName: [
+    { required: true, message: '请输入类目名称', trigger: 'blur' },
+  ],
   parentId: [{ required: true, message: '请选择上级类目', trigger: 'change' }],
   sort: [{ required: true, message: '请输入排序值', trigger: 'blur' }],
 };
@@ -71,7 +76,7 @@ function handleParentChange(parentId: number) {
 async function open(row?: Partial<HomeCategory>, optionsTree: any[] = []) {
   categoryOptions.value = optionsTree;
   visible.value = true;
-  
+
   // 重置表单
   Object.assign(formData, {
     categoryId: undefined,
@@ -142,8 +147,9 @@ defineExpose({ open });
         <el-tree-select
           v-model="formData.parentId"
           :data="treeOptions"
-          :props="{ label: 'categoryName', value: 'categoryId', children: 'children' }"
-          value-key="categoryId"
+          :props="{ label: 'categoryName', children: 'children' }"
+          node-key="categoryId"
+          :disabled="isEdit"
           placeholder="请选择上级类目"
           check-strictly
           default-expand-all
@@ -157,11 +163,21 @@ defineExpose({ open });
       </el-form-item>
 
       <el-form-item label="类目名称" prop="categoryName">
-        <el-input v-model="formData.categoryName" placeholder="请输入类目名称" maxlength="20" show-word-limit />
+        <el-input
+          v-model="formData.categoryName"
+          placeholder="请输入类目名称"
+          maxlength="20"
+          show-word-limit
+        />
       </el-form-item>
 
       <el-form-item label="显示排序" prop="sort">
-        <el-input-number v-model="formData.sort" :min="0" :max="9999" class="!w-full" />
+        <el-input-number
+          v-model="formData.sort"
+          :min="0"
+          :max="9999"
+          class="!w-full"
+        />
       </el-form-item>
 
       <el-form-item label="状态" prop="status">
@@ -174,7 +190,9 @@ defineExpose({ open });
 
     <template #footer>
       <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :loading="loading" @click="handleSubmit">确定</el-button>
+      <el-button type="primary" :loading="loading" @click="handleSubmit"
+        >确定</el-button
+      >
     </template>
   </el-dialog>
 </template>

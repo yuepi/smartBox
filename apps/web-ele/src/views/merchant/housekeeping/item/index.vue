@@ -7,7 +7,13 @@ import { h, ref } from 'vue';
 
 import { Page } from '@vben/common-ui';
 
-import { ElButton, ElImage, ElMessage, ElMessageBox, ElTag } from 'element-plus';
+import {
+  ElButton,
+  ElImage,
+  ElMessage,
+  ElMessageBox,
+  ElTag,
+} from 'element-plus';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
@@ -56,14 +62,16 @@ const formOptions: VbenFormProps = {
   ],
 };
 
-function getFirstImage(urls?: string): string {
+function getFirstImage(urls?: string | string[]): string {
   if (!urls) return '';
-  return urls.split(',')[0].trim();
+  return getImageList(urls)[0] || '';
 }
 
-function getImageList(urls?: string): string[] {
+function getImageList(urls?: string | string[]): string[] {
   if (!urls) return [];
-  return urls.split(',').map((url) => url.trim()).filter(Boolean);
+  return (Array.isArray(urls) ? urls : urls.split(','))
+    .map((url) => url.trim())
+    .filter(Boolean);
 }
 
 // 表格配置
@@ -175,7 +183,9 @@ async function handleDelete(row: HomeItem) {
             class="h-10 w-10 rounded border border-gray-200"
           >
             <template #error>
-              <div class="flex h-full w-full items-center justify-center bg-gray-100 text-xs text-gray-400">
+              <div
+                class="flex h-full w-full items-center justify-center bg-gray-100 text-xs text-gray-400"
+              >
                 无图
               </div>
             </template>
@@ -186,10 +196,10 @@ async function handleDelete(row: HomeItem) {
 
       <!-- SKU 规格摘要插槽 -->
       <template #skuComboList="{ row }">
-        <ElTag v-if="row.skuComboList?.length" type="info" size="small">
-          {{ row.skuComboList.length }} 个规格
+        <ElTag v-if="row.skuComboCount" type="info" size="small">
+          {{ row.skuComboCount }} 个可售规格
         </ElTag>
-        <span v-else class="text-xs text-gray-400">统一规格</span>
+        <span v-else class="text-xs text-gray-400">暂无可售规格</span>
       </template>
 
       <!-- 状态 Tag 插槽 -->

@@ -30,29 +30,41 @@ export interface HomeMerchantRelationParams {
 /**
  * 分页查询关联列表（含双方商户名称）
  */
-export function getHomeMerchantRelationPageApi(params: HomeMerchantRelationParams) {
-  return requestClient.get('/restful/plat/homeMerchant/page', { params });
+export function getHomeMerchantRelationPageApi(
+  params: HomeMerchantRelationParams,
+) {
+  return requestClient.get('/restful/plat/homeMerchant/relationList', {
+    params,
+  });
 }
 
 /**
  * 查询家政商户详情
  */
 export function getHomeMerchantDetailApi(relationId: number) {
-  return requestClient.get<HomeMerchantRelation>('/restful/plat/homeMerchant/detail', { params: { relationId } });
+  return requestClient.get<HomeMerchantRelation>(
+    '/restful/plat/homeMerchant/relationDetail',
+    { params: { relationId } },
+  );
 }
 
 /**
  * 绑定商户关联
  */
 export function bindHomeMerchantRelationApi(data: HomeMerchantRelation) {
-  return requestClient.post<number>('/restful/plat/homeMerchant/bindRelation', data);
+  return requestClient.post<number>(
+    '/restful/plat/homeMerchant/bindRelation',
+    data,
+  );
 }
 
 /**
  * 解除商户关联
  */
 export function unbindHomeMerchantRelationApi(relationId: number) {
-  return requestClient.post('/restful/plat/homeMerchant/unbindRelation', { relationId });
+  return requestClient.post('/restful/plat/homeMerchant/unbindRelation', {
+    relationId,
+  });
 }
 
 /**
@@ -66,16 +78,20 @@ export function getHomeMerchantListApi() {
  * 查询回收商户关联的家政商户列表
  */
 export function getHomeMerchantRelationListApi(recycleMerchantId: number) {
-  return requestClient.get('/restful/plat/homeMerchant/relationList', { params: { recycleMerchantId } });
+  return requestClient.get('/restful/plat/homeMerchant/relationList', {
+    params: { recycleMerchantId },
+  });
 }
 
 /**
  * 查询回收商户关联的家政商户详情
  */
 export function getHomeMerchantRelationDetailApi(relationId: number) {
-  return requestClient.get<HomeMerchantRelation>('/restful/plat/homeMerchant/relationDetail', { params: { relationId } });
+  return requestClient.get<HomeMerchantRelation>(
+    '/restful/plat/homeMerchant/relationDetail',
+    { params: { relationId } },
+  );
 }
-
 
 /** 家政商户绑定关系结构 */
 export interface MerchantHomeBindRelation {
@@ -108,11 +124,12 @@ export function bindHomeMerchantSelfApi(data: BindHomeMerchantParams) {
 }
 
 /** 2. 回收商户视角查看「我绑定的家政商户列表」 */
-export function getMyHomeMerchantRelationListApi(params: MerchantHomeBindQueryParams) {
-  return requestClient.get(
-    '/restful/merchant/homeMerchant/relationList',
-    { params },
-  );
+export function getMyHomeMerchantRelationListApi(
+  params: MerchantHomeBindQueryParams,
+) {
+  return requestClient.get('/restful/merchant/homeMerchant/relationList', {
+    params,
+  });
 }
 
 /** 3. 解绑（物理删除） */

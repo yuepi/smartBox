@@ -8,6 +8,7 @@ export interface HomeCategory {
   categoryName: string;
   sort: number;
   status: number;
+  children?: HomeCategory[];
 }
 
 /** 新增 / 编辑 请求参数 */
@@ -54,7 +55,9 @@ export function editHomeCategoryApi(data: HomeCategorySaveParams) {
  * 6.2.3 类目详情
  */
 export function getHomeCategoryDetailApi(categoryId: number) {
-  return requestClient.get<HomeCategory>(Api.Detail, { params: { categoryId } });
+  return requestClient.get<HomeCategory>(Api.Detail, {
+    params: { categoryId },
+  });
 }
 
 /**

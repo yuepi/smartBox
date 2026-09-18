@@ -1,25 +1,52 @@
 <script lang="ts" setup>
 import type { VbenFormProps } from '#/adapter/form';
 import type { VxeTableGridOptions } from '#/adapter/vxe-table';
-import type { OnsiteCategory, OnsiteItem, OnsiteOrder } from '#/api/system/onsiteRecycle';
+import type {
+  OnsiteCategory,
+  OnsiteItem,
+  OnsiteOrder,
+} from '#/api/system/onsiteRecycle';
 
 import { ref } from 'vue';
 import { useAccess } from '@vben/access';
 import { Page } from '@vben/common-ui';
 import {
-  ElAlert, ElButton, ElCheckbox, ElDescriptions, ElDescriptionsItem,
-  ElDialog, ElInputNumber, ElMessage, ElMessageBox, ElOption, ElSelect,
-  ElTable, ElTableColumn, ElTag, ElTimeline, ElTimelineItem,
+  ElAlert,
+  ElButton,
+  ElCheckbox,
+  ElDescriptions,
+  ElDescriptionsItem,
+  ElDialog,
+  ElInputNumber,
+  ElMessage,
+  ElMessageBox,
+  ElOption,
+  ElSelect,
+  ElTable,
+  ElTableColumn,
+  ElTag,
+  ElTimeline,
+  ElTimelineItem,
 } from 'element-plus';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
-  finishOnsite, getOnsiteCategories, getOnsiteDetail, getOnsitePage,
-  getOnsiteScope, operateOnsite, saveOnsiteScope,
+  finishOnsite,
+  getOnsiteCategories,
+  getOnsiteDetail,
+  getOnsitePage,
+  getOnsiteScope,
+  operateOnsite,
+  saveOnsiteScope,
 } from '#/api/system/onsiteRecycle';
 
 /** 家政菜单下的独立上门回收订单；不展示或操作旧设备表里的历史预约。 */
 const { hasAccessByCodes } = useAccess();
-const can = (action: string) => hasAccessByCodes([`merchant:onsiteRecycleOrder:${action}`]);
+const props = withDefaults(defineProps<{ platform?: boolean }>(), {
+  platform: false,
+});
+const can = (action: string) =>
+  !props.platform &&
+  hasAccessByCodes([`merchant:onsiteRecycleOrder:${action}`]);
 const statusLabels = ['预约中', '上门中', '已完成', '已取消'];
 const busy = ref(false);
 const detailVisible = ref(false);
@@ -36,10 +63,21 @@ const formOptions: VbenFormProps = {
   showCollapseButton: false,
   submitOnEnter: true,
   schema: [
-    { component: 'Input', fieldName: 'orderNo', label: '订单号', componentProps: { clearable: true } },
-    { component: 'Select', fieldName: 'orderStatus', label: '状态', componentProps: {
-      clearable: true, options: statusLabels.map((label, value) => ({ label, value })),
-    } },
+    {
+      component: 'Input',
+      fieldName: 'orderNo',
+      label: '订单号',
+      componentProps: { clearable: true },
+    },
+    {
+      component: 'Select',
+      fieldName: 'orderStatus',
+      label: '状态',
+      componentProps: {
+        clearable: true,
+        options: statusLabels.map((label, value) => ({ label, value })),
+      },
+    },
   ],
 };
 const gridOptions: VxeTableGridOptions<OnsiteOrder> = {
@@ -51,87 +89,147 @@ const gridOptions: VxeTableGridOptions<OnsiteOrder> = {
     { field: 'contactPhone', title: '联系电话', width: 140 },
     { field: 'pickupAddress', title: '上门地址', minWidth: 200 },
     { field: 'reserveTime', title: '预约时间', width: 170 },
-    { field: 'orderStatus', title: '状态', width: 100, slots: { default: 'status' } },
+    {
+      field: 'orderStatus',
+      title: '状态',
+      width: 100,
+      slots: { default: 'status' },
+    },
     { field: 'realAmount', title: '成交金额（元）', width: 140 },
     { title: '操作', width: 280, fixed: 'right', slots: { default: 'action' } },
   ],
   proxyConfig: {
     ajax: {
       query: async ({ page }, values) => {
-        const result = await getOnsitePage({ ...values, pageNo: page.currentPage, pageSize: page.pageSize });
-        return { items: result.records, records: result.records, total: result.total };
+        const result = await getOnsitePage(
+          { ...values, pageNo: page.currentPage, pageSize: page.pageSize },
+          props.platform,
+        );
+        return {
+          items: result.records,
+          records: result.records,
+          total: result.total,
+        };
       },
     },
   },
 };
-const [Grid, gridApi] = useVbenVxeGrid<OnsiteOrder>({ formOptions, gridOptions });
+const [Grid, gridApi] = useVbenVxeGrid<OnsiteOrder>({
+  formOptions,
+  gridOptions,
+});
 
 /** 请求拦截器统一显示接口错误；弹窗取消不作为异常提示，finally 必须释放提交锁。 */
 async function showDetail(row: OnsiteOrder, finishing = false) {
   if (busy.value) return;
   busy.value = true;
   try {
-    detail.value = await getOnsiteDetail(row.onsiteOrderId);
+    detail.value = await getOnsiteDetail(row.onsiteOrderId, props.platform);
     if (finishing) {
       if (detail.value.orderStatus !== 1) {
         ElMessage.warning('订单状态已变化，请刷新列表');
         await gridApi.query();
         return;
       }
-      finishItems.value = (detail.value.items ?? []).map((item) => ({ ...item, pricingType: 1 }));
+      finishItems.value = (detail.value.items ?? []).map((item) => ({
+        ...item,
+        pricingType: 1,
+      }));
       offlinePaid.value = false;
       finishVisible.value = true;
     } else {
       detailVisible.value = true;
     }
-  } catch { /* 接口失败保留列表，用户可以重新查看。 */ }
-  finally { busy.value = false; }
+  } catch {
+    /* 接口失败保留列表，用户可以重新查看。 */
+  } finally {
+    busy.value = false;
+  }
 }
 
-async function operate(row: OnsiteOrder, action: 'cancel' | 'reject' | 'start') {
+async function operate(
+  row: OnsiteOrder,
+  action: 'cancel' | 'reject' | 'start',
+) {
   if (busy.value) return;
   busy.value = true;
   try {
     let reason: string | undefined;
     if (action === 'start') {
-      await ElMessageBox.confirm('确认开始上门？开始后会员不能自行取消。', '开始上门');
+      await ElMessageBox.confirm(
+        '确认开始上门？开始后会员不能自行取消。',
+        '开始上门',
+      );
     } else {
       const result = await ElMessageBox.prompt(
-        action === 'reject' ? '拒单后转派给其他可承接商户；无人可接时自动取消。' : '请填写取消原因。',
+        action === 'reject'
+          ? '拒单后转派给其他可承接商户；无人可接时自动取消。'
+          : '请填写取消原因。',
         action === 'reject' ? '拒单转派' : '取消预约',
-        { inputValidator: (value) => !!value?.trim() && value.length <= 255 || '请填写1至255字原因' },
+        {
+          inputValidator: (value) =>
+            (!!value?.trim() && value.length <= 255) || '请填写1至255字原因',
+        },
       );
       reason = result.value.trim();
     }
     await operateOnsite(action, row.onsiteOrderId, reason);
     ElMessage.success('操作成功');
     await gridApi.query();
-  } catch { /* 用户取消不提交，接口错误由统一拦截器展示。 */ }
-  finally { busy.value = false; }
+  } catch {
+    /* 用户取消不提交，接口错误由统一拦截器展示。 */
+  } finally {
+    busy.value = false;
+  }
 }
 
 async function submitFinish() {
   if (busy.value || !detail.value) return;
-  if (!offlinePaid.value || finishItems.value.length === 0 || finishItems.value.some((item) =>
-    !(Number(item.unitPrice) > 0) || !(item.pricingType === 1 ? Number(item.realWeight) > 0 : Number(item.quantity) > 0))) {
+  if (
+    !offlinePaid.value ||
+    finishItems.value.length === 0 ||
+    finishItems.value.some(
+      (item) =>
+        !(Number(item.unitPrice) > 0) ||
+        !(item.pricingType === 1
+          ? Number(item.realWeight) > 0
+          : Number(item.quantity) > 0),
+    )
+  ) {
     ElMessage.warning('请完整填写每项成交信息，并确认已经线下付款');
     return;
   }
   busy.value = true;
   try {
-    await ElMessageBox.confirm('确认逐项成交信息及线下付款？完成后不可修改成交金额。', '确认成交', { type: 'warning' });
-    await finishOnsite(detail.value.onsiteOrderId, finishItems.value, offlinePaid.value);
+    await ElMessageBox.confirm(
+      '确认逐项成交信息及线下付款？完成后不可修改成交金额。',
+      '确认成交',
+      { type: 'warning' },
+    );
+    await finishOnsite(
+      detail.value.onsiteOrderId,
+      finishItems.value,
+      offlinePaid.value,
+    );
     finishVisible.value = false;
     ElMessage.success('上门回收已完成');
     await gridApi.query();
-  } catch { /* 失败保留表单，可使用相同内容安全重试。 */ }
-  finally { busy.value = false; }
+  } catch {
+    /* 失败保留表单，可使用相同内容安全重试。 */
+  } finally {
+    busy.value = false;
+  }
 }
 
-function leafOptions(nodes: OnsiteCategory[], parent = ''): { label: string; value: number }[] {
+function leafOptions(
+  nodes: OnsiteCategory[],
+  parent = '',
+): { label: string; value: number }[] {
   return nodes.flatMap((node) => {
     const label = parent ? `${parent} / ${node.name}` : node.name;
-    return node.children?.length ? leafOptions(node.children, label) : [{ label, value: node.recycleItemId }];
+    return node.children?.length
+      ? leafOptions(node.children, label)
+      : [{ label, value: node.recycleItemId }];
   });
 }
 
@@ -139,18 +237,27 @@ async function showScope() {
   if (busy.value) return;
   busy.value = true;
   try {
-    const [tree, ids] = await Promise.all([getOnsiteCategories(), getOnsiteScope()]);
+    const [tree, ids] = await Promise.all([
+      getOnsiteCategories(),
+      getOnsiteScope(),
+    ]);
     categories.value = leafOptions(tree);
     // 已停用类目仍显示已选项，允许商户明确移除，不能静默丢弃旧配置。
     for (const id of ids) {
       if (!categories.value.some((item) => item.value === id)) {
-        categories.value.push({ label: `已停用或不可选类目（${id}），请移除`, value: id });
+        categories.value.push({
+          label: `已停用或不可选类目（${id}），请移除`,
+          value: id,
+        });
       }
     }
     scopeIds.value = ids;
     scopeVisible.value = true;
-  } catch { /* 失败不打开空配置，避免误清空已有范围。 */ }
-  finally { busy.value = false; }
+  } catch {
+    /* 失败不打开空配置，避免误清空已有范围。 */
+  } finally {
+    busy.value = false;
+  }
 }
 
 async function submitScope() {
@@ -158,44 +265,108 @@ async function submitScope() {
   busy.value = true;
   try {
     if (scopeIds.value.length === 0) {
-      await ElMessageBox.confirm('清空后将不再承接新的上门预约，已有订单仍需处理。', '暂停承接');
+      await ElMessageBox.confirm(
+        '清空后将不再承接新的上门预约，已有订单仍需处理。',
+        '暂停承接',
+      );
     }
     await saveOnsiteScope(scopeIds.value);
     scopeVisible.value = false;
     ElMessage.success('可收范围已保存');
-  } catch { /* 保存失败保留用户选择。 */ }
-  finally { busy.value = false; }
+  } catch {
+    /* 保存失败保留用户选择。 */
+  } finally {
+    busy.value = false;
+  }
 }
 </script>
 
 <template>
   <Page auto-content-height>
-    <ElAlert title="此页面仅管理独立上门回收新单；历史预约暂保留原入口，不包含回收箱订单。" type="info" :closable="false" class="mb-3" />
+    <ElAlert
+      title="此页面仅管理独立上门回收新单；历史预约暂保留原入口，不包含回收箱订单。"
+      type="info"
+      :closable="false"
+      class="mb-3"
+    />
     <Grid>
       <template #toolbar-actions>
-        <ElButton v-if="can('scope')" :disabled="busy" @click="showScope">配置可收类目</ElButton>
+        <ElButton v-if="can('scope')" :disabled="busy" @click="showScope"
+          >配置可收类目</ElButton
+        >
       </template>
-      <template #status="{ row }"><ElTag>{{ statusLabels[row.orderStatus] ?? '未知状态' }}</ElTag></template>
+      <template #status="{ row }"
+        ><ElTag>{{
+          statusLabels[row.orderStatus] ?? '未知状态'
+        }}</ElTag></template
+      >
       <template #action="{ row }">
-        <ElButton link type="primary" :disabled="busy" @click="showDetail(row)">详情</ElButton>
-        <ElButton v-if="row.orderStatus === 0 && can('start')" link type="primary" :disabled="busy" @click="operate(row, 'start')">开始上门</ElButton>
-        <ElButton v-if="row.orderStatus === 0 && can('reject')" link type="warning" :disabled="busy" @click="operate(row, 'reject')">拒单</ElButton>
-        <ElButton v-if="row.orderStatus === 1 && can('finish')" link type="success" :disabled="busy" @click="showDetail(row, true)">确认成交</ElButton>
-        <ElButton v-if="[0, 1].includes(row.orderStatus) && can('cancel')" link type="danger" :disabled="busy" @click="operate(row, 'cancel')">取消</ElButton>
+        <ElButton link type="primary" :disabled="busy" @click="showDetail(row)"
+          >详情</ElButton
+        >
+        <ElButton
+          v-if="row.orderStatus === 0 && can('start')"
+          link
+          type="primary"
+          :disabled="busy"
+          @click="operate(row, 'start')"
+          >开始上门</ElButton
+        >
+        <ElButton
+          v-if="row.orderStatus === 0 && can('reject')"
+          link
+          type="warning"
+          :disabled="busy"
+          @click="operate(row, 'reject')"
+          >拒单</ElButton
+        >
+        <ElButton
+          v-if="row.orderStatus === 1 && can('finish')"
+          link
+          type="success"
+          :disabled="busy"
+          @click="showDetail(row, true)"
+          >确认成交</ElButton
+        >
+        <ElButton
+          v-if="[0, 1].includes(row.orderStatus) && can('cancel')"
+          link
+          type="danger"
+          :disabled="busy"
+          @click="operate(row, 'cancel')"
+          >取消</ElButton
+        >
       </template>
     </Grid>
 
     <ElDialog v-model="detailVisible" title="上门回收详情" width="850px">
       <template v-if="detail">
         <ElDescriptions :column="2" border>
-          <ElDescriptionsItem label="订单号">{{ detail.orderNo }}</ElDescriptionsItem>
-          <ElDescriptionsItem label="状态">{{ statusLabels[detail.orderStatus] }}</ElDescriptionsItem>
-          <ElDescriptionsItem label="联系人">{{ detail.contactName }} / {{ detail.contactPhone }}</ElDescriptionsItem>
-          <ElDescriptionsItem label="预约时间">{{ detail.reserveTime }}</ElDescriptionsItem>
-          <ElDescriptionsItem label="地址">{{ detail.pickupAddress }}</ElDescriptionsItem>
-          <ElDescriptionsItem label="备注">{{ detail.remark || '-' }}</ElDescriptionsItem>
-          <ElDescriptionsItem label="成交总额">{{ detail.realAmount }} 元</ElDescriptionsItem>
-          <ElDescriptionsItem label="取消原因">{{ detail.closeReason || '-' }}</ElDescriptionsItem>
+          <ElDescriptionsItem label="订单号">{{
+            detail.orderNo
+          }}</ElDescriptionsItem>
+          <ElDescriptionsItem label="状态">{{
+            statusLabels[detail.orderStatus]
+          }}</ElDescriptionsItem>
+          <ElDescriptionsItem label="联系人"
+            >{{ detail.contactName }} /
+            {{ detail.contactPhone }}</ElDescriptionsItem
+          >
+          <ElDescriptionsItem label="预约时间">{{
+            detail.reserveTime
+          }}</ElDescriptionsItem>
+          <ElDescriptionsItem label="地址">{{
+            detail.pickupAddress
+          }}</ElDescriptionsItem>
+          <ElDescriptionsItem label="备注">{{
+            detail.remark || '-'
+          }}</ElDescriptionsItem>
+          <ElDescriptionsItem label="成交总额"
+            >{{ detail.realAmount }} 元</ElDescriptionsItem
+          >
+          <ElDescriptionsItem label="取消原因">{{
+            detail.closeReason || '-'
+          }}</ElDescriptionsItem>
         </ElDescriptions>
         <ElTable :data="detail.items" class="my-4">
           <ElTableColumn prop="itemName" label="回收类目" />
@@ -205,40 +376,118 @@ async function submitScope() {
           <ElTableColumn prop="realAmount" label="成交金额（元）" />
         </ElTable>
         <ElTimeline>
-          <ElTimelineItem v-for="(flow, index) in detail.flows" :key="index" :timestamp="flow.createdTime">
+          <ElTimelineItem
+            v-for="(flow, index) in detail.flows"
+            :key="index"
+            :timestamp="flow.createdTime"
+          >
             {{ flow.operatorRole }}：{{ flow.description }}
           </ElTimelineItem>
         </ElTimeline>
       </template>
     </ElDialog>
 
-    <ElDialog v-model="finishVisible" title="逐项确认成交" width="900px" :close-on-click-modal="false" :show-close="!busy" :close-on-press-escape="!busy">
-      <ElAlert title="金额按实际重量或件数 × 单价计算；每项截取至分后汇总。此操作不发起在线付款。" type="warning" :closable="false" />
+    <ElDialog
+      v-model="finishVisible"
+      title="逐项确认成交"
+      width="900px"
+      :close-on-click-modal="false"
+      :show-close="!busy"
+      :close-on-press-escape="!busy"
+    >
+      <ElAlert
+        title="金额按实际重量或件数 × 单价计算；每项截取至分后汇总。此操作不发起在线付款。"
+        type="warning"
+        :closable="false"
+      />
       <ElTable :data="finishItems">
         <ElTableColumn prop="itemName" label="回收类目" />
         <ElTableColumn label="计价" width="130">
-          <template #default="{ row }"><ElSelect v-model="row.pricingType" :disabled="busy"><ElOption :value="1" label="按重量" /><ElOption :value="2" label="按件" /></ElSelect></template>
+          <template #default="{ row }"
+            ><ElSelect v-model="row.pricingType" :disabled="busy"
+              ><ElOption :value="1" label="按重量" /><ElOption
+                :value="2"
+                label="按件" /></ElSelect
+          ></template>
         </ElTableColumn>
         <ElTableColumn label="重量（公斤）/件数" width="200">
           <template #default="{ row }">
-            <ElInputNumber v-if="row.pricingType === 1" v-model="row.realWeight" :min="0.001" :max="100000" :precision="3" :disabled="busy" />
-            <ElInputNumber v-else v-model="row.quantity" :min="1" :max="100000" :precision="0" :disabled="busy" />
+            <ElInputNumber
+              v-if="row.pricingType === 1"
+              v-model="row.realWeight"
+              :min="0.001"
+              :max="100000"
+              :precision="3"
+              :disabled="busy"
+            />
+            <ElInputNumber
+              v-else
+              v-model="row.quantity"
+              :min="1"
+              :max="100000"
+              :precision="0"
+              :disabled="busy"
+            />
           </template>
         </ElTableColumn>
         <ElTableColumn label="单价（元/公斤或件）" width="200">
-          <template #default="{ row }"><ElInputNumber v-model="row.unitPrice" :min="0.01" :max="999999.99" :precision="2" :disabled="busy" /></template>
+          <template #default="{ row }"
+            ><ElInputNumber
+              v-model="row.unitPrice"
+              :min="0.01"
+              :max="999999.99"
+              :precision="2"
+              :disabled="busy"
+          /></template>
         </ElTableColumn>
       </ElTable>
-      <ElCheckbox v-model="offlinePaid" :disabled="busy" class="mt-4">我已向会员线下付清全部回收款</ElCheckbox>
-      <template #footer><ElButton :disabled="busy" @click="finishVisible = false">取消</ElButton><ElButton type="primary" :loading="busy" @click="submitFinish">确认成交</ElButton></template>
+      <ElCheckbox v-model="offlinePaid" :disabled="busy" class="mt-4"
+        >我已向会员线下付清全部回收款</ElCheckbox
+      >
+      <template #footer
+        ><ElButton :disabled="busy" @click="finishVisible = false"
+          >取消</ElButton
+        ><ElButton type="primary" :loading="busy" @click="submitFinish"
+          >确认成交</ElButton
+        ></template
+      >
     </ElDialog>
 
-    <ElDialog v-model="scopeVisible" title="本商户可收类目" width="650px" :close-on-click-modal="false" :show-close="!busy" :close-on-press-escape="!busy">
-      <ElAlert title="只选择实际可以承接的末级类目。一个订单的全部类目都在范围内，才会分配给本商户。" type="info" :closable="false" class="mb-4" />
-      <ElSelect v-model="scopeIds" multiple filterable class="w-full" :disabled="busy" placeholder="选择可收类目">
-        <ElOption v-for="item in categories" :key="item.value" :label="item.label" :value="item.value" />
+    <ElDialog
+      v-model="scopeVisible"
+      title="本商户可收类目"
+      width="650px"
+      :close-on-click-modal="false"
+      :show-close="!busy"
+      :close-on-press-escape="!busy"
+    >
+      <ElAlert
+        title="只选择实际可以承接的末级类目。一个订单的全部类目都在范围内，才会分配给本商户。"
+        type="info"
+        :closable="false"
+        class="mb-4"
+      />
+      <ElSelect
+        v-model="scopeIds"
+        multiple
+        filterable
+        class="w-full"
+        :disabled="busy"
+        placeholder="选择可收类目"
+      >
+        <ElOption
+          v-for="item in categories"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value"
+        />
       </ElSelect>
-      <template #footer><ElButton :disabled="busy" @click="scopeVisible = false">取消</ElButton><ElButton type="primary" :loading="busy" @click="submitScope">保存</ElButton></template>
+      <template #footer
+        ><ElButton :disabled="busy" @click="scopeVisible = false">取消</ElButton
+        ><ElButton type="primary" :loading="busy" @click="submitScope"
+          >保存</ElButton
+        ></template
+      >
     </ElDialog>
   </Page>
 </template>

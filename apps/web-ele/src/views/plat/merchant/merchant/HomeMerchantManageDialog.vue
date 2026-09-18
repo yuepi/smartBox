@@ -1,5 +1,8 @@
 <script lang="ts" setup>
-import type { HomeMerchantRelation, RelationType } from '#/api/system/homeMerchant';
+import type {
+  HomeMerchantRelation,
+  RelationType,
+} from '#/api/system/homeMerchant';
 import type { Merchant } from '#/api/system/merchant';
 
 import { reactive, ref } from 'vue';
@@ -59,7 +62,7 @@ function getRelationTagType(type: RelationType) {
 // 刷新数据（绑定列表 + 家政商户下拉）
 async function loadData() {
   if (!currentMerchant.value?.merchantId) return;
-  
+
   loading.value = true;
   try {
     const [boundData, optionsData] = await Promise.all([
@@ -163,11 +166,19 @@ defineExpose({ open });
                 :key="item.merchantId"
                 :label="item.merchantName"
                 :value="item.merchantId"
-                :disabled="boundList.some((b) => b.homeMerchantId === item.merchantId)"
+                :disabled="
+                  boundList.some(
+                    (b) => b.housekeepingMerchantId === item.merchantId,
+                  )
+                "
               >
                 <span>{{ item.merchantName }}</span>
                 <span
-                  v-if="boundList.some((b) => b.homeMerchantId === item.merchantId)"
+                  v-if="
+                    boundList.some(
+                      (b) => b.housekeepingMerchantId === item.merchantId,
+                    )
+                  "
                   class="float-right text-gray-400 text-xs"
                 >
                   已绑定
@@ -208,14 +219,24 @@ defineExpose({ open });
             min-width="160"
             show-overflow-tooltip
           />
-          <el-table-column prop="relationType" label="合作类型" width="120" align="center">
+          <el-table-column
+            prop="relationType"
+            label="合作类型"
+            width="120"
+            align="center"
+          >
             <template #default="{ row }">
               <el-tag :type="getRelationTagType(row.relationType)" size="small">
                 {{ getRelationTypeText(row.relationType) }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="100" fixed="right" align="center">
+          <el-table-column
+            label="操作"
+            width="100"
+            fixed="right"
+            align="center"
+          >
             <template #default="{ row }">
               <div class="action-buttons">
                 <el-button
