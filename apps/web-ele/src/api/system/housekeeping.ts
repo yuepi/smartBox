@@ -26,6 +26,9 @@ export interface HomeOrder {
   contactName?: string;
   contactPhone?: string;
   appointTime?: string;
+  assignedUserId?: number;
+  assignedUserName?: string;
+  assignedUserPhone?: string;
   refundReason?: string;
   refundNo?: string;
   refundStatus?: string;
@@ -63,10 +66,12 @@ export function getHomeOrderPageApi(
 export function getHomeOrderDetailApi(homeOrderId: number, platform = false) {
   return requestClient.get<{
     order: HomeOrder;
+    images: { orderImageId: number; imageType: number; imageUrl: string }[];
     flows: {
       flowId: number;
       createdTime: string;
       operatorType: string;
+      operatorName?: string;
       remark: string;
     }[];
   }>(
@@ -74,6 +79,40 @@ export function getHomeOrderDetailApi(homeOrderId: number, platform = false) {
       ? '/restful/plat/homeOrder/detail'
       : '/restful/merchant/homeOrder/detail',
     { params: { homeOrderId } },
+  );
+}
+
+export interface HomeWorker {
+  userId: number;
+  name: string;
+  phone?: string;
+}
+
+export function getHomeWorkersApi() {
+  return requestClient.get<HomeWorker[]>('/restful/merchant/homeOrder/workers');
+}
+
+export function assignHomeOrderApi(data: {
+  homeOrderId: number;
+  expectedAssignedUserId: number | null;
+  assignedUserId: number;
+  reason: string;
+}) {
+  return requestClient.post<boolean>(
+    '/restful/merchant/homeOrder/assign',
+    data,
+  );
+}
+
+/** 凭证与结算一次提交，不先保存照片再单独调用无凭证完成接口。 */
+export function completeHomeOrderApi(data: {
+  homeOrderId: number;
+  note: string;
+  imageUrls: string[];
+}) {
+  return requestClient.post<boolean>(
+    '/restful/merchant/homeOrder/complete',
+    data,
   );
 }
 

@@ -13,6 +13,7 @@ import {
   ElForm,
   ElFormItem,
   ElInput,
+  ElImage,
   ElMessage,
   ElMessageBox,
   ElTag,
@@ -23,13 +24,13 @@ import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
   acceptHomeOrderApi,
   cancelHomeOrderApi,
-  finishHomeOrderApi,
   getHomeOrderDetailApi,
   getHomeOrderPageApi,
   refundHomeOrderApi,
   rescheduleHomeOrderApi,
   startHomeOrderApi,
 } from '#/api/system/housekeeping';
+import HomeOrderWorkDialog from './HomeOrderWorkDialog.vue';
 
 /** 服务订单、退款处理、平台监管复用同一查询组件；监管页只读，不渲染履约操作。 */
 const props = withDefaults(
@@ -52,6 +53,7 @@ const states = [
 ];
 const busy = ref(false);
 const visible = ref(false);
+const workDialog = ref<InstanceType<typeof HomeOrderWorkDialog>>();
 const detail = ref<Awaited<ReturnType<typeof getHomeOrderDetailApi>>>();
 const rescheduleVisible = ref(false);
 const rescheduleOrder = ref<HomeOrder>();
@@ -156,6 +158,7 @@ const [Grid, gridApi] = useVbenVxeGrid<HomeOrder>({
       },
       { field: 'refundStatus', title: '微信退款状态', width: 140 },
       { field: 'appointTime', title: '预约时间', width: 170 },
+      { field: 'assignedUserName', title: '服务人员', width: 120 },
       { field: 'address', title: '服务地址', minWidth: 200 },
       { field: 'createdTime', title: '下单时间', width: 170 },
       {
@@ -208,11 +211,6 @@ const actions = {
     api: startHomeOrderApi,
     prompt: '确认开始服务？',
     success: '已开始服务',
-  },
-  finish: {
-    api: finishHomeOrderApi,
-    prompt: '确认服务完成？完成后按订单金额结算，不可直接取消退款。',
-    success: '服务已完成',
   },
   cancel: {
     api: cancelHomeOrderApi,
@@ -283,6 +281,14 @@ async function operate(row: HomeOrder, action: keyof typeof actions) {
           >接单</ElButton
         >
         <ElButton
+          v-if="row.status === 2 && can('accept')"
+          link
+          type="primary"
+          :disabled="busy"
+          @click="workDialog?.open(row.homeOrderId, 'assign')"
+          >{{ row.assignedUserId ? '改派' : '派工' }}</ElButton
+        >
+        <ElButton
           v-if="row.status === 2 && can('start')"
           link
           type="primary"
@@ -295,8 +301,8 @@ async function operate(row: HomeOrder, action: keyof typeof actions) {
           link
           type="success"
           :disabled="busy"
-          @click="operate(row, 'finish')"
-          >完成结算</ElButton
+          @click="workDialog?.open(row.homeOrderId, 'complete')"
+          >完工凭证 / 结算</ElButton
         >
         <ElButton
           v-if="[0, 1, 2, 3].includes(row.status) && can('cancel')"
@@ -316,6 +322,7 @@ async function operate(row: HomeOrder, action: keyof typeof actions) {
         >
       </template>
     </Grid>
+    <HomeOrderWorkDialog ref="workDialog" @success="gridApi.query()" />
     <ElDialog
       v-model="rescheduleVisible"
       title="修改预约时间"
@@ -383,6 +390,10 @@ async function operate(row: HomeOrder, action: keyof typeof actions) {
           <ElDescriptionsItem label="预约时间">{{
             detail.order.appointTime
           }}</ElDescriptionsItem>
+          <ElDescriptionsItem label="服务人员"
+            >{{ detail.order.assignedUserName || '未指派' }} /
+            {{ detail.order.assignedUserPhone || '-' }}</ElDescriptionsItem
+          >
           <ElDescriptionsItem label="服务地址">{{
             detail.order.address
           }}</ElDescriptionsItem>
@@ -406,12 +417,26 @@ async function operate(row: HomeOrder, action: keyof typeof actions) {
             detail.order.refundTime || '-'
           }}</ElDescriptionsItem>
         </ElDescriptions>
+        <div v-if="detail.images?.length" class="mt-4 flex flex-wrap gap-3">
+          <ElImage
+            v-for="(photo, index) in detail.images"
+            :key="photo.orderImageId"
+            :src="photo.imageUrl"
+            :preview-src-list="detail.images.map((item) => item.imageUrl)"
+            :initial-index="index"
+            preview-teleported
+            fit="cover"
+            style="width: 100px; height: 100px"
+          />
+        </div>
         <ElTimeline class="mt-5">
           <ElTimelineItem
             v-for="flow in detail.flows"
             :key="flow.flowId"
             :timestamp="flow.createdTime"
-            >{{ flow.operatorType }}：{{ flow.remark }}</ElTimelineItem
+            >{{ flow.operatorName || flow.operatorType }}：{{
+              flow.remark
+            }}</ElTimelineItem
           >
         </ElTimeline>
       </template>

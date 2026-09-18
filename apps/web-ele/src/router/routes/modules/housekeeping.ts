@@ -103,6 +103,17 @@ const housekeepingRoutes: RouteRecordRaw[] = [
         },
       },
       {
+        name: 'HousekeepingBookingRule',
+        path: '/housekeeping/booking-rule',
+        component: () =>
+          import('#/views/merchant/housekeeping/order/BookingRulePage.vue'),
+        meta: {
+          title: '预约规则',
+          order: 45,
+          authority: ['merchant:homeItem:view'],
+        },
+      },
+      {
         name: 'HousekeepingCategoryManagement',
         path: '/plat/housekeeping/categories',
         component: () => import('#/views/plat/system/homeCategory/index.vue'),
