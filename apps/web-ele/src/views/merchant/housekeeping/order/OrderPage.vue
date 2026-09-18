@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type { HomeOrder } from '#/api/system/housekeeping';
-import { ref } from 'vue';
+import { computed, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useAccess } from '@vben/access';
 import { Page } from '@vben/common-ui';
 import {
@@ -32,11 +33,25 @@ import {
 } from '#/api/system/housekeeping';
 import HomeOrderWorkDialog from './HomeOrderWorkDialog.vue';
 
-/** 服务订单、退款处理、平台监管复用同一查询组件；监管页只读，不渲染履约操作。 */
+/** 退款作为服务订单筛选项，详情中处理；平台监管只读，不渲染履约操作。 */
 const props = withDefaults(
-  defineProps<{ platform?: boolean; refundOnly?: boolean }>(),
-  { platform: false, refundOnly: false },
+  defineProps<{ platform?: boolean }>(),
+  { platform: false },
 );
+const route = useRoute();
+const router = useRouter();
+const refundOnly = computed(() => !props.platform && route.query.refundOnly === '1');
+async function selectOrderScope(onlyRefund: boolean) {
+  if (busy.value || refundOnly.value === onlyRefund) return;
+  await router.replace({ query: { ...route.query, refundOnly: onlyRefund ? '1' : undefined } });
+}
+function refundStatusText(status?: string) {
+  const labels: Record<string, string> = {
+    '0': '未提交', '1': '处理中', '2': '退款成功', '3': '退款失败',
+    PROCESSING: '处理中', SUCCESS: '退款成功', CLOSED: '退款关闭', ABNORMAL: '退款异常',
+  };
+  return status ? labels[status] || status : '未提交';
+}
 const { hasAccessByCodes } = useAccess();
 const can = (action: string) =>
   !props.platform && hasAccessByCodes([`merchant:homeOrder:${action}`]);
@@ -156,7 +171,8 @@ const [Grid, gridApi] = useVbenVxeGrid<HomeOrder>({
         width: 100,
         slots: { default: 'status' },
       },
-      { field: 'refundStatus', title: '微信退款状态', width: 140 },
+      { field: 'refundStatus', title: '退款状态', width: 140,
+        formatter: ({ row }: { row: HomeOrder }) => refundStatusText(row.refundStatus) },
       { field: 'appointTime', title: '预约时间', width: 170 },
       { field: 'assignedUserName', title: '服务人员', width: 120 },
       { field: 'address', title: '服务地址', minWidth: 200 },
@@ -179,7 +195,7 @@ const [Grid, gridApi] = useVbenVxeGrid<HomeOrder>({
               ...filters,
               pageNo: page.currentPage,
               pageSize: page.pageSize,
-              refundOnly: props.refundOnly,
+              refundOnly: refundOnly.value,
             },
             props.platform,
           );
@@ -193,6 +209,8 @@ const [Grid, gridApi] = useVbenVxeGrid<HomeOrder>({
     },
   },
 });
+// 切换筛选时回到第一页；退款详情操作不改变当前筛选范围。
+watch(refundOnly, () => gridApi.reload());
 async function showDetail(row: HomeOrder) {
   if (busy.value) return;
   busy.value = true;
@@ -235,6 +253,9 @@ async function operate(row: HomeOrder, action: keyof typeof actions) {
     await actions[action].api(row.homeOrderId);
     ElMessage.success(actions[action].success);
     await gridApi.query();
+    if (visible.value && detail.value?.order.homeOrderId === row.homeOrderId) {
+      detail.value = await getHomeOrderDetailApi(row.homeOrderId, props.platform);
+    }
   } catch {
     /* 用户取消不发送请求，失败不伪造成功状态。 */
   } finally {
@@ -257,6 +278,14 @@ async function operate(row: HomeOrder, action: keyof typeof actions) {
       class="mb-3"
     />
     <Grid>
+      <template v-if="!platform" #toolbar-tools>
+        <ElButton :type="!refundOnly ? 'primary' : 'default'" :disabled="busy" @click="selectOrderScope(false)">
+          全部订单
+        </ElButton>
+        <ElButton :type="refundOnly ? 'primary' : 'default'" :disabled="busy" @click="selectOrderScope(true)">
+          退款订单
+        </ElButton>
+      </template>
       <template #status="{ row }"
         ><ElTag>{{ states[row.status] ?? '未知状态' }}</ElTag></template
       >
@@ -311,14 +340,6 @@ async function operate(row: HomeOrder, action: keyof typeof actions) {
           :disabled="busy"
           @click="operate(row, 'cancel')"
           >取消</ElButton
-        >
-        <ElButton
-          v-if="row.status === 7 && can('refund')"
-          link
-          type="warning"
-          :disabled="busy"
-          @click="operate(row, 'refund')"
-          >{{ row.refundNo ? '重试原退款单' : '执行退款' }}</ElButton
         >
       </template>
     </Grid>
@@ -411,12 +432,18 @@ async function operate(row: HomeOrder, action: keyof typeof actions) {
             detail.order.refundNo || '-'
           }}</ElDescriptionsItem>
           <ElDescriptionsItem label="微信退款状态">{{
-            detail.order.refundStatus || '未提交'
+            refundStatusText(detail.order.refundStatus)
           }}</ElDescriptionsItem>
           <ElDescriptionsItem label="退款成功时间">{{
             detail.order.refundTime || '-'
           }}</ElDescriptionsItem>
         </ElDescriptions>
+        <div v-if="detail.order.status === 7 && can('refund')" class="mt-4">
+          <ElButton type="warning" :disabled="busy" @click="operate(detail.order, 'refund')">
+            {{ detail.order.refundNo ? '重试原退款单' : '执行退款' }}
+          </ElButton>
+          <span class="ml-3 text-gray-500">提交退款不等于退款成功，请以最终结果为准。</span>
+        </div>
         <div v-if="detail.images?.length" class="mt-4 flex flex-wrap gap-3">
           <ElImage
             v-for="(photo, index) in detail.images"

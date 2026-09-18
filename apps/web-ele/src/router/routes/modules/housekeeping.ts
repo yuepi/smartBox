@@ -76,6 +76,8 @@ const housekeepingRoutes: RouteRecordRaw[] = [
           import('#/views/merchant/housekeeping/order/OrderPage.vue'),
         meta: {
           title: '服务订单',
+          // 快捷筛选只改变查询参数，不新增一张服务订单标签页。
+          fullPathKey: false,
           order: 10,
           authority: ['merchant:homeOrder:view'],
         },
@@ -83,11 +85,12 @@ const housekeepingRoutes: RouteRecordRaw[] = [
       {
         name: 'HousekeepingRefund',
         path: '/housekeeping/refund',
-        component: () =>
-          import('#/views/merchant/housekeeping/order/OrderPage.vue'),
-        props: { refundOnly: true },
+        // 兼容旧书签，退款统一进入服务订单，不再保留独立菜单和标签页。
+        redirect: { path: '/housekeeping/order', query: { refundOnly: '1' } },
         meta: {
-          title: '退款处理',
+          title: '服务订单',
+          hideInMenu: true,
+          hideInTab: true,
           order: 20,
           authority: ['merchant:homeOrder:view'],
         },
