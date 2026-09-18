@@ -7,6 +7,8 @@ import type { HomeCategory } from '#/api/system/homeCategory';
 import { h, ref } from 'vue';
 
 import { Page } from '@vben/common-ui';
+import { useAccess } from '@vben/access';
+import HomeItemBatchDialog from './HomeItemBatchDialog.vue';
 
 import {
   ElButton,
@@ -27,6 +29,8 @@ import HomeItemEditDialog from './HomeItemEditDialog.vue';
 import DefaultConfigCopyButton from '#/components/DefaultConfigCopyButton/index.vue';
 
 const editDialogRef = ref();
+const batchDialogRef = ref();
+const { hasAccessByCodes } = useAccess();
 const queryParams = ref<HomeItemQueryParams>({});
 const categories = ref<HomeCategory[]>([]);
 let categoryLoading: Promise<HomeCategory[]> | undefined;
@@ -235,6 +239,11 @@ async function handleDelete(row: HomeItem) {
     <Grid>
       <template #toolbar-actions>
         <DefaultConfigCopyButton @success="() => gridApi.query()" />
+        <ElButton
+          v-if="hasAccessByCodes(['merchant:homeItem:edit'])"
+          @click="batchDialogRef.open()"
+          >批量改价 / 上下架</ElButton
+        >
         <ElButton type="primary" icon="Plus" @click="handleAdd">
           新增服务项
         </ElButton>
@@ -292,5 +301,11 @@ async function handleDelete(row: HomeItem) {
     </Grid>
 
     <HomeItemEditDialog ref="editDialogRef" @success="() => gridApi.query()" />
+    <HomeItemBatchDialog
+      ref="batchDialogRef"
+      :category-name="categoryName"
+      :unit-name="unitName"
+      @success="() => gridApi.query()"
+    />
   </Page>
 </template>
