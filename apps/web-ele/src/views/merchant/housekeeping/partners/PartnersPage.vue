@@ -56,7 +56,7 @@ const [Grid, gridApi] = useVbenVxeGrid<Partner>({
     height: 'auto',
     pagerConfig: { enabled: true },
     columns: [
-      { field: 'recycleMerchantName', title: '合作回收商户', minWidth: 180 },
+      { field: 'recycleMerchantName', title: '经营商户', minWidth: 180 },
       { field: 'housekeepingMerchantName', title: '家政服务商', minWidth: 180 },
       {
         field: 'relationType',
@@ -150,8 +150,8 @@ async function unbind(row: Partner) {
     <ElAlert
       :title="
         platform
-          ? '平台维护回收商户与家政服务商的合作关系。'
-          : '仅管理本商户合作关系，不开放平台商户资料维护权限。'
+          ? '平台维护经营商户与家政服务商的合作关系；自营服务无需绑定自己。'
+          : '本商户可以自营，也可选择已有家政服务商合作。订单由实际服务方履约，不需要新增自己的商户账号。'
       "
       type="info"
       :closable="false"
@@ -181,7 +181,7 @@ async function unbind(row: Partner) {
       :show-close="!busy"
     >
       <ElForm label-width="100px">
-        <ElFormItem v-if="platform" label="回收商户" required
+        <ElFormItem v-if="platform" label="经营商户" required
           ><ElSelect
             v-model="form.recycleMerchantId"
             filterable
