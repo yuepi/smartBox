@@ -9,6 +9,10 @@ import {
   ElDescriptions,
   ElDescriptionsItem,
   ElDialog,
+  ElDatePicker,
+  ElForm,
+  ElFormItem,
+  ElInput,
   ElMessage,
   ElMessageBox,
   ElTag,
@@ -23,6 +27,7 @@ import {
   getHomeOrderDetailApi,
   getHomeOrderPageApi,
   refundHomeOrderApi,
+  rescheduleHomeOrderApi,
   startHomeOrderApi,
 } from '#/api/system/housekeeping';
 
@@ -48,6 +53,57 @@ const states = [
 const busy = ref(false);
 const visible = ref(false);
 const detail = ref<Awaited<ReturnType<typeof getHomeOrderDetailApi>>>();
+const rescheduleVisible = ref(false);
+const rescheduleOrder = ref<HomeOrder>();
+const nextAppointTime = ref('');
+const rescheduleReason = ref('');
+
+/** 打开时重新读取订单，提交旧时间和旧状态，失败后保留用户输入。 */
+async function showReschedule(row: HomeOrder) {
+  if (busy.value) return;
+  busy.value = true;
+  try {
+    const result = await getHomeOrderDetailApi(row.homeOrderId);
+    if (![0, 1, 2].includes(result.order.status)) {
+      ElMessage.warning('订单状态已变化，当前不能改约');
+      await gridApi.query();
+      return;
+    }
+    rescheduleOrder.value = result.order;
+    nextAppointTime.value = result.order.appointTime || '';
+    rescheduleReason.value = '';
+    rescheduleVisible.value = true;
+  } catch {
+    /* 不使用过期列表数据打开弹窗，接口错误由统一拦截器提示。 */
+  } finally {
+    busy.value = false;
+  }
+}
+
+async function saveReschedule() {
+  if (busy.value || !rescheduleOrder.value) return;
+  if (!nextAppointTime.value || !rescheduleReason.value.trim()) {
+    ElMessage.warning('请填写新预约时间和改约原因');
+    return;
+  }
+  busy.value = true;
+  try {
+    await rescheduleHomeOrderApi({
+      homeOrderId: rescheduleOrder.value.homeOrderId,
+      expectedStatus: rescheduleOrder.value.status,
+      expectedAppointTime: rescheduleOrder.value.appointTime || null,
+      appointTime: nextAppointTime.value,
+      reason: rescheduleReason.value.trim(),
+    });
+    rescheduleVisible.value = false;
+    ElMessage.success('预约时间已修改');
+    await gridApi.query();
+  } catch {
+    /* 冲突或校验失败时保留输入，具体原因由统一拦截器提示。 */
+  } finally {
+    busy.value = false;
+  }
+}
 function itemName(row: HomeOrder) {
   try {
     return (
@@ -211,6 +267,14 @@ async function operate(row: HomeOrder, action: keyof typeof actions) {
           >详情</ElButton
         >
         <ElButton
+          v-if="[0, 1, 2].includes(row.status) && can('accept')"
+          link
+          type="primary"
+          :disabled="busy"
+          @click="showReschedule(row)"
+          >改约</ElButton
+        >
+        <ElButton
           v-if="row.status === 1 && can('accept')"
           link
           type="primary"
@@ -252,6 +316,51 @@ async function operate(row: HomeOrder, action: keyof typeof actions) {
         >
       </template>
     </Grid>
+    <ElDialog
+      v-model="rescheduleVisible"
+      title="修改预约时间"
+      width="540px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="!busy"
+      :show-close="!busy"
+    >
+      <ElAlert
+        title="请先与客户协商确认；本次仅修改预约时间，不调整费用，也不会自动通知客户。"
+        type="info"
+        :closable="false"
+        class="mb-4"
+      />
+      <ElForm label-width="100px" :disabled="busy">
+        <ElFormItem label="原预约时间">{{
+          rescheduleOrder?.appointTime || '未填写'
+        }}</ElFormItem>
+        <ElFormItem label="新预约时间" required>
+          <ElDatePicker
+            v-model="nextAppointTime"
+            type="datetime"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            placeholder="选择北京时间"
+          />
+        </ElFormItem>
+        <ElFormItem label="改约原因" required>
+          <ElInput
+            v-model="rescheduleReason"
+            type="textarea"
+            :maxlength="100"
+            show-word-limit
+            :rows="3"
+          />
+        </ElFormItem>
+      </ElForm>
+      <template #footer>
+        <ElButton :disabled="busy" @click="rescheduleVisible = false"
+          >取消</ElButton
+        >
+        <ElButton type="primary" :loading="busy" @click="saveReschedule"
+          >确认改约</ElButton
+        >
+      </template>
+    </ElDialog>
     <ElDialog v-model="visible" title="家政订单详情" width="850px">
       <template v-if="detail">
         <ElDescriptions :column="2" border>

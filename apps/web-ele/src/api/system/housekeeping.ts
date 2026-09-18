@@ -77,6 +77,20 @@ export function getHomeOrderDetailApi(homeOrderId: number, platform = false) {
   );
 }
 
+/** 商户改约携带弹窗打开时的旧值，服务端拒绝覆盖其他人的修改。 */
+export function rescheduleHomeOrderApi(data: {
+  homeOrderId: number;
+  expectedStatus: number;
+  expectedAppointTime: string | null;
+  appointTime: string;
+  reason: string;
+}) {
+  return requestClient.post<boolean>(
+    '/restful/merchant/homeOrder/reschedule',
+    data,
+  );
+}
+
 /** 4.2 接单 (1 -> 2) */
 export function acceptHomeOrderApi(homeOrderId: number) {
   return requestClient.post<boolean>(
