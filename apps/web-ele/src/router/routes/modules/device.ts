@@ -9,11 +9,10 @@ const routes: RouteRecordRaw[] = [
       icon: 'lucide:cpu',
       title: $t('page.device.title') || '设备管理',
       order: 10,
-      authority: [PERMISSIONS.MERCHANT.DEVICE.MANAGE],
+      authority: [PERMISSIONS.MERCHANT.DEVICE.MANAGE]
     },
     name: 'DeviceManagement',
-    path: 'merchant/device',
-    redirect: '/device',
+    path: '/merchant/device',
     children: [
       {
         name: 'DeviceList',
@@ -53,6 +52,16 @@ const routes: RouteRecordRaw[] = [
           icon: 'lucide:shopping-bag',
           title: $t('page.device.bag') || '包袋管理',
           authority: [PERMISSIONS.MERCHANT.DEVICE.BAG.ROUTE],
+        },
+      },
+      {
+        name: 'DeviceGroup',
+        path: '/deviceGroup',
+        component: () => import('#/views/merchant/device/group/index.vue'),
+        meta: {
+          icon: 'lucide:group',
+          title: $t('page.device.group') || '设备分组',
+          // authority: [PERMISSIONS.MERCHANT.DEVICE.GROUP.ROUTE],
         },
       },
       {

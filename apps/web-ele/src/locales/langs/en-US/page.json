@@ -19,6 +19,7 @@
     "list": "Device List",
     "hatch": "Hatch List",
     "bag": "Bag List",
+    "group": "Device Group",
     "package": "Billing Package",
     "fault": "Device Fault",
     "qrcode": "QR Code"

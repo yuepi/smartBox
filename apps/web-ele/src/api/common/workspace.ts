@@ -78,3 +78,13 @@ export function getRankingApi(params?: {
 }) {
   return requestClient.get<RankingData>('/plat/statistics/ranking', { params });
 }
+
+/** 待办事项 */
+export interface TodoData {
+  todoCount: number;
+  todoList: TodoItem[];
+}
+
+export function getTodoApi() {
+  return requestClient.get<TodoData>('/plat/statistics/todo');
+}

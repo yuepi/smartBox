@@ -38,7 +38,10 @@ import OrderWeight from './OrderWeight.vue';
 const route = useRoute();
 const router = useRouter();
 
-const { order_status } = useDicts(['order_status']);
+const { order_status, order_need_secondary_review } = useDicts([
+  'order_status',
+  'order_need_secondary_review',
+]);
 
 // --- 表格列配置 ---
 const columnConfig = ref<TableColumnConfig[]>([...defaultRecycleOrderColumns]);
@@ -122,6 +125,7 @@ const queryParams = reactive<RecycleOrderPageParams>({
   deviceNo: undefined,
   deviceName: undefined,
   cleanTaskId: undefined,
+  needSecondaryReview: undefined,
 });
 
 // --- 操作弹窗 ---
@@ -507,6 +511,25 @@ onMounted(() => {
           </el-select>
         </el-form-item>
 
+        <!-- 是否需要二次审核 -->
+        <el-form-item>
+          <el-select
+            v-model="queryParams.needSecondaryReview"
+            clearable
+            style="width: 200px"
+          >
+            <template #prefix>
+              <span class="text-sm text-gray-400 mr-0.5">是否需要二次审核:</span>
+            </template>
+            <el-option
+              v-for="item in order_need_secondary_review"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+
         <!-- 日期范围 -->
         <el-form-item>
           <el-date-picker
@@ -617,6 +640,10 @@ onMounted(() => {
               <!-- 订单状态 -->
               <template v-if="col.key === 'orderStatus'">
                 <DictTag :options="order_status" :value="row.orderStatus" />
+              </template>
+              <!-- 是否需要二次审核 -->
+              <template v-else-if="col.key === 'needSecondaryReview'">
+                <DictTag :options="order_need_secondary_review" :value="row.needSecondaryReview" />
               </template>
               <!-- 投递重量 -->
               <template v-else-if="col.key === 'weight'">
@@ -764,6 +791,8 @@ onMounted(() => {
                   </el-button>
                 </div>
               </template>
+
+
 
               <template v-else>
                 {{ (row as any)[col.key] ?? '-' }}

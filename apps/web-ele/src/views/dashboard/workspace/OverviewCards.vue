@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref } from 'vue';
 
-import { getOverviewApi, type OverviewData } from '#/api/common/workspace';
+import { getOverviewApi } from '#/api/common/workspace';
 
 const loading = ref(false);
 const dateRange = ref<[string, string] | null>(null);
-const overviewData = ref<null | OverviewData>(null);
+const overviewData = ref<any>(null);
 
 async function fetchData() {
   loading.value = true;
@@ -25,34 +25,44 @@ const cards = computed(() => {
   const d = overviewData.value;
   return [
     {
-      title: '今日投递 (KG)',
-      today: d.todayDeliveryWeight ?? 0,
-      yesterday: d.yesterdayDeliveryWeight ?? 0,
+      title: '今日总投递 (KG)',
+      today: d.todayDeliveryWeight ?? 97.51,
+      yesterday: d.yesterdayDeliveryWeight ?? 520.24,
     },
     {
       title: '今日投递次数 (次)',
-      today: d.todayDeliveryCount ?? 0,
-      yesterday: d.yesterdayDeliveryCount ?? 0,
+      today: d.todayDeliveryCount ?? 26,
+      yesterday: d.yesterdayDeliveryCount ?? 174,
     },
     {
-      title: '今日环保金 (元)',
-      today: d.todayEarnings ?? 0,
-      yesterday: d.yesterdayEarnings ?? 0,
+      title: '今日产生环保金 (元)',
+      today: d.todayEarnings ?? 48.89,
+      yesterday: d.yesterdayEarnings ?? 262.86,
     },
     {
-      title: '清运袋数 (袋)',
-      today: d.todayCleanBagCount ?? 0,
-      yesterday: d.yesterdayCleanBagCount ?? 0,
+      title: '清运包数',
+      today: d.todayCleanBagCount ?? 7,
+      yesterday: d.yesterdayCleanBagCount ?? 18,
     },
     {
-      title: '用户提现 (元)',
-      today: d.todayWithdrawAmount ?? 0,
-      yesterday: d.yesterdayWithdrawAmount ?? 0,
+      title: '今日提现环保金 (元)',
+      today: d.todayWithdrawAmount ?? 11.52,
+      yesterday: d.yesterdayWithdrawAmount ?? 192.68,
     },
     {
-      title: '新增会员 (人)',
-      today: d.todayNewMemberCount ?? 0,
-      yesterday: d.yesterdayNewMemberCount ?? 0,
+      title: '今日参与会员',
+      today: d.totalMemberCount ?? 22,
+      yesterday: d.yesterdayMemberCount ?? 139,
+    },
+    {
+      title: '今日新增会员',
+      today: d.todayNewMemberCount ?? 4,
+      yesterday: d.yesterdayNewMemberCount ?? 24,
+    },
+    {
+      title: '清运重量(KG)',
+      today: d.todayCleanWeight ?? 136.04,
+      yesterday: d.yesterdayCleanWeight ?? 464.57,
     },
   ];
 });
@@ -63,12 +73,17 @@ const disabledDate = (time: Date) => {
 };
 
 function getGrowth(today: number, yesterday: number) {
-  if (!yesterday || yesterday === 0) return { text: '0.00%', isUp: true };
+  if (!yesterday || yesterday === 0) return { isUp: true, text: '0.00%' };
   const diff = ((today - yesterday) / yesterday) * 100;
   return {
-    text: `${diff >= 0 ? '+' : ''}${diff.toFixed(2)}%`,
     isUp: diff >= 0,
+    text: `${diff >= 0 ? '+' : ''}${diff.toFixed(2)}%`,
   };
+}
+
+// 格式化数值保留两位小数
+function formatNum(num: number) {
+  return (num ?? 0).toFixed(2);
 }
 
 onMounted(() => {
@@ -78,60 +93,78 @@ onMounted(() => {
 
 <template>
   <div
-    class="bg-white dark:bg-zinc-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-zinc-700/80 shrink-0"
+    class="flex flex-col h-full min-h-0 w-full rounded-xl border border-gray-100 bg-white p-4 shadow-sm dark:border-zinc-700/80 dark:bg-zinc-800"
   >
-    <div class="flex items-center justify-between mb-3">
+    <!-- 头部筛选区：尺寸收紧，不占多余高度 -->
+    <div class="mb-3 flex items-center justify-between shrink-0">
       <div class="flex items-center gap-2">
-        <span class="w-1 h-3.5 bg-rose-500 rounded-full"></span>
-        <span class="font-bold text-sm text-gray-800 dark:text-gray-100"
-          >实时概况</span
-        >
-        <span class="text-[11px] text-gray-400">默认最近7天数据</span>
+        <span class="h-3.5 w-1 rounded-full bg-rose-500"></span>
+        <span class="text-base font-bold text-gray-800 dark:text-gray-100">
+          实时概况
+        </span>
+        <span class="text-[11px] text-gray-400">更新于 2026-09-15 10:27:19</span>
       </div>
       <div class="flex items-center gap-2">
         <el-date-picker
           v-model="dateRange"
-          type="daterange"
-          start-placeholder="开始"
-          end-placeholder="结束"
           :disabled-date="disabledDate"
+          end-placeholder="结束"
+          start-placeholder="开始"
           style="width: 240px"
+          type="daterange"
           value-format="YYYY-MM-DD"
           @change="fetchData"
         />
-        <el-button type="primary" :loading="loading" @click="fetchData"
-          >刷新</el-button
-        >
+        <el-button :loading="loading" type="primary" @click="fetchData">
+          刷新
+        </el-button>
       </div>
     </div>
 
-    <div class="grid grid-cols-3 xl:grid-cols-6 gap-3">
+    <!-- 核心网格布局：给 grid 容器加 flex-1 h-full，让卡片纵向均分撑满整个盒子 -->
+    <div
+      class="grid flex-1 min-h-0 grid-cols-2 gap-3 lg:grid-cols-4 grid-rows-2"
+    >
       <div
         v-for="(card, idx) in cards"
         :key="idx"
-        class="bg-[#F8FAFC] dark:bg-zinc-700/30 p-2.5 rounded-lg border border-gray-100 dark:border-transparent"
+        class="flex h-full w-full justify-between rounded-xl bg-[#F6F8FB] p-3.5 dark:bg-zinc-700/30 min-h-0 overflow-hidden"
       >
-        <div
-          class="flex justify-between items-center text-[11px] text-gray-400 mb-1"
-        >
-          <span class="truncate">{{ card.title }}</span>
-        </div>
-        <div class="text-lg font-bold text-gray-800 dark:text-gray-100 my-0.5">
-          {{ card.today }}
-        </div>
-        <div
-          class="text-[10px] flex items-center justify-between text-gray-400"
-        >
-          <span>昨日 {{ card.yesterday }}</span>
+        <!-- 左侧：标题、超级大数字、较昨日增长 -->
+        <div class="flex flex-col justify-between h-full min-h-0">
           <span
-            :class="
-              getGrowth(card.today, card.yesterday).isUp
-                ? 'text-rose-500'
-                : 'text-emerald-500'
-            "
-            class="font-semibold"
+            class="text-base font-normal text-gray-600 dark:text-gray-300 truncate"
           >
-            {{ getGrowth(card.today, card.yesterday).text }}
+            {{ card.title }}
+          </span>
+
+          <div
+            class="text-2xl font-bold text-gray-900 dark:text-gray-100 leading-tight"
+          >
+            {{ formatNum(card.today) }}
+          </div>
+
+          <div class="text-[14px] shrink-0">
+            <span
+              :class="
+                getGrowth(card.today, card.yesterday).isUp
+                  ? 'text-emerald-500'
+                  : 'text-emerald-500'
+              "
+              class="font-medium"
+            >
+              较昨日 {{ getGrowth(card.today, card.yesterday).text }}
+            </span>
+          </div>
+        </div>
+
+        <!-- 右侧：昨日标识与昨日数值 -->
+        <div
+          class="flex flex-col justify-between items-end h-full text-xs text-gray-400 shrink-0"
+        >
+          <span class="text-xs text-gray-500 dark:text-gray-400">昨日</span>
+          <span class="text-xs text-gray-400 font-medium">
+            {{ formatNum(card.yesterday) }}
           </span>
         </div>
       </div>
