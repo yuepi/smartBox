@@ -181,8 +181,9 @@ export const useAuthStore = defineStore('auth', () => {
       userStore.setUserInfo(userInfo);
       accessStore.setAccessCodes(accessCodes);
 
+      // 先替换旧商户地址，再刷新重建权限路由，避免刷新抢先执行而停在旧页面的404。
+      await router.replace(preferences.app.defaultHomePath);
       window.location.reload();
-      await router.push(preferences.app.defaultHomePath);
     } catch (error) {
       console.error('切换商户失败', error);
       throw error;

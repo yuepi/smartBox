@@ -245,7 +245,7 @@ async function handleDelete(row: HomeItem) {
   <Page auto-content-height>
     <Grid>
       <template #toolbar-actions>
-        <DefaultConfigCopyButton @success="() => gridApi.query()" />
+        <DefaultConfigCopyButton business="housekeeping" @success="() => gridApi.query()" />
         <ElButton
           v-if="hasAccessByCodes(['merchant:homeItem:edit'])"
           @click="batchDialogRef.open()"

@@ -1,4 +1,5 @@
 import { requestClient } from '#/api/request';
+import type { HomeItem } from '#/api/system/housekeeping';
 
 /** 类目对象数据类型 */
 export interface HomeCategory {
@@ -8,11 +9,29 @@ export interface HomeCategory {
   categoryName: string;
   sort: number;
   status: number;
+  defaultServiceConfigured?: boolean;
+  imageUrl?: string;
+  defaultPrice?: number;
+  pricingUnit?: string;
   children?: HomeCategory[];
+}
+
+/** 平台末级分类完整默认服务，与商户配置独立。 */
+export function getDefaultHomeServiceApi(categoryId: number) {
+  return requestClient.get<HomeItem | null>('/restful/plat/homeCategory/defaultService/detail', {
+    params: { categoryId },
+  });
+}
+
+export function saveDefaultHomeServiceApi(data: HomeItem) {
+  return requestClient.post<boolean>('/restful/plat/homeCategory/defaultService/save', data);
 }
 
 /** 新增 / 编辑 请求参数 */
 export interface HomeCategorySaveParams {
+  imageUrl?: string;
+  defaultPrice?: number;
+  pricingUnit?: string;
   categoryId?: number;
   parentId: number;
   level: number;
@@ -49,6 +68,11 @@ export function addHomeCategoryApi(data: HomeCategorySaveParams) {
  */
 export function editHomeCategoryApi(data: HomeCategorySaveParams) {
   return requestClient.post<boolean>(Api.Edit, data);
+}
+
+/** 分类和默认服务一次提交，服务端同一事务，防止只保存了一半。 */
+export function editHomeCategoryWithDefaultApi(category: HomeCategorySaveParams, defaultService?: HomeItem) {
+  return requestClient.post<boolean>('/restful/plat/homeCategory/editWithDefault', { category, defaultService });
 }
 
 /**

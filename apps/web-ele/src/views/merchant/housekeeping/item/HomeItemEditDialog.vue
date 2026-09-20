@@ -11,6 +11,13 @@ import {
   getHomeItemCategoriesApi,
 } from '#/api/system/housekeeping';
 import UploadImage from '#/components/UploadImage/index.vue';
+import { editHomeCategoryWithDefaultApi, getHomeCategoryDetailApi, getDefaultHomeServiceApi, getHomeCategoryListApi, saveDefaultHomeServiceApi } from '#/api/system/homeCategory';
+import { categoryImage } from '#/views/plat/system/homeCategory/defaultImages';
+
+// 平台模板复用同一服务编辑器，仅切换接口，避免规格和加价项维护规则产生分叉。
+const props = defineProps<{ platformDefault?: boolean; categoryEdit?: boolean }>();
+const category = ref<HomeCategory>();
+const categoryImages = ref<string[]>([]);
 
 const emit = defineEmits<{
   (e: 'success'): void;
@@ -20,6 +27,7 @@ const visible = ref(false);
 const loading = ref(false);
 const submitLoading = ref(false);
 const isEdit = ref(false);
+const loadFailed = ref(false);
 const formRef = ref();
 
 const categoryTreeOptions = ref<HomeCategory[]>([]);
@@ -78,7 +86,7 @@ watch(
 
 async function loadCategories() {
   try {
-    const list = await getHomeItemCategoriesApi();
+    const list = await (props.platformDefault ? getHomeCategoryListApi() : getHomeItemCategoriesApi());
     categoryTreeOptions.value =
       Array.isArray(list) && list.length > 0
         ? list[0]?.children
@@ -227,7 +235,29 @@ async function open(row?: HomeItem) {
   visible.value = true;
   isEdit.value = !!row?.homeItemId;
   resetForm();
+  loadFailed.value = false;
+  category.value = undefined;
+  categoryImages.value = [];
   loadCategories();
+
+  if (props.platformDefault && row?.categoryId) {
+    loading.value = true;
+    try {
+      if (props.categoryEdit) {
+        category.value = await getHomeCategoryDetailApi(row.categoryId);
+        categoryImages.value = category.value.imageUrl ? [category.value.imageUrl] : [];
+      }
+      const detail = await getDefaultHomeServiceApi(row.categoryId);
+      Object.assign(formData, detail ?? row);
+      const images = formData.imageUrls;
+      imageFileList.value = typeof images === 'string' ? images.split(',').filter(Boolean) : images ?? [];
+    } catch {
+      loadFailed.value = true;
+    } finally {
+      loading.value = false;
+    }
+    return;
+  }
 
   if (isEdit.value && row?.homeItemId) {
     loading.value = true;
@@ -249,12 +279,24 @@ async function open(row?: HomeItem) {
 }
 
 async function handleSubmit() {
-  if (submitLoading.value || loading.value) return;
+  if (submitLoading.value || loading.value || loadFailed.value) return;
   await formRef.value?.validate();
+  if (props.categoryEdit && (!category.value || !category.value.categoryName.trim() || category.value.categoryName.trim().length > 100)) {
+    ElMessage.error('请填写1至100字的类目名称');
+    return;
+  }
   submitLoading.value = true;
   try {
     const payload = { ...formData };
-    if (isEdit.value) {
+    if (props.categoryEdit && category.value) {
+      // 以原服务编辑器为主体保留完整规格和附加项，仅把类目资料并入同一次提交。
+      await editHomeCategoryWithDefaultApi({ ...category.value, categoryName: category.value.categoryName.trim(),
+        imageUrl: categoryImages.value[0] || '', defaultPrice: undefined, pricingUnit: undefined }, payload);
+      ElMessage.success('类目、默认规格及附加项已保存');
+    } else if (props.platformDefault) {
+      await saveDefaultHomeServiceApi(payload);
+      ElMessage.success('平台默认配置已保存，不影响商户已有配置');
+    } else if (isEdit.value) {
       await editHomeItemApi(payload);
       ElMessage.success('保存成功');
     } else {
@@ -274,7 +316,7 @@ defineExpose({ open });
 <template>
   <el-dialog
     v-model="visible"
-    :title="isEdit ? '编辑服务项' : '新增服务项'"
+    :title="categoryEdit ? '编辑类目及默认服务' : platformDefault ? '平台默认服务配置' : isEdit ? '编辑服务项' : '新增服务项'"
     width="860px"
     append-to-body
     destroy-on-close
@@ -288,6 +330,20 @@ defineExpose({ open });
       class="max-h-[72vh] overflow-y-auto pr-3"
     >
       <!-- 基本信息 -->
+      <el-alert v-if="platformDefault" title="平台维护默认服务、规格价格、图片和加价项。商户使用后独立维护，平台后续改价不覆盖商户。" type="info" :closable="false" class="mb-4" />
+      <el-alert v-if="loadFailed" title="默认配置加载失败，请关闭后重试，当前不能保存。" type="error" :closable="false" />
+      <template v-if="categoryEdit && category">
+        <div class="mb-3 border-b pb-1 font-bold text-gray-800">分类资料</div>
+        <el-form-item label="类目名称" required><el-input v-model="category.categoryName" maxlength="100" /></el-form-item>
+        <el-form-item label="分类导航图">
+          <el-image v-if="!categoryImages.length" :src="categoryImage({ categoryName: category.categoryName })" fit="contain" style="width: 64px; height: 64px; margin-right: 12px" />
+          <UploadImage v-model="categoryImages" :limit="1" />
+        </el-form-item>
+        <div class="grid grid-cols-2 gap-2">
+          <el-form-item label="类目排序"><el-input-number v-model="category.sort" :min="0" :max="9999" /></el-form-item>
+          <el-form-item label="类目状态"><el-radio-group v-model="category.status"><el-radio :value="0">正常</el-radio><el-radio :value="1">停用</el-radio></el-radio-group></el-form-item>
+        </div>
+      </template>
       <div class="mb-3 border-b pb-1 font-bold text-gray-800">1. 基本信息</div>
 
       <el-form-item label="服务名称" prop="itemName">
@@ -300,6 +356,7 @@ defineExpose({ open });
       <div class="grid grid-cols-2 gap-2">
         <el-form-item label="服务分类" prop="categoryId">
           <el-tree-select
+            :disabled="platformDefault"
             v-model="formData.categoryId"
             :data="categoryTreeOptions"
             :props="{ label: 'categoryName', children: 'children' }"

@@ -51,6 +51,15 @@ const can = (action: string) =>
   hasAccessByCodes([`merchant:onsiteRecycleOrder:${action}`]);
 const statusLabels = ['预约中', '上门中', '已完成', '已取消'];
 const busy = ref(false);
+// 展开状态筛选只负责传递后端状态值，不在前端过滤当前页；undefined 表示全部。
+const selectedStatus = ref<number>();
+function selectStatus(status?: number) {
+  if (busy.value || selectedStatus.value === status) return;
+  if (status !== undefined && (!Number.isInteger(status) || status < 0 || status >= statusLabels.length)) return;
+  selectedStatus.value = status;
+  // 重置到第一页，同时保留订单号搜索条件。
+  void gridApi.reload();
+}
 const detailVisible = ref(false);
 const detail = ref<OnsiteOrder>();
 const finishVisible = ref(false);
@@ -71,15 +80,6 @@ const formOptions: VbenFormProps = {
       fieldName: 'orderNo',
       label: '订单号',
       componentProps: { clearable: true },
-    },
-    {
-      component: 'Select',
-      fieldName: 'orderStatus',
-      label: '状态',
-      componentProps: {
-        clearable: true,
-        options: statusLabels.map((label, value) => ({ label, value })),
-      },
     },
   ],
 };
@@ -106,7 +106,7 @@ const gridOptions: VxeTableGridOptions<OnsiteOrder> = {
     ajax: {
       query: async ({ page }, values) => {
         const result = await getOnsitePage(
-          { ...values, pageNo: page.currentPage, pageSize: page.pageSize },
+          { ...values, orderStatus: selectedStatus.value, pageNo: page.currentPage, pageSize: page.pageSize },
           props.platform,
         );
         return {
@@ -249,6 +249,13 @@ function showScope() {
 
 <template>
   <Page auto-content-height>
+    <section class="order-status-filter" aria-label="上门回收订单状态筛选">
+      <span class="filter-label">订单状态</span>
+      <div class="status-options">
+        <button type="button" :class="{ active: selectedStatus === undefined }" :aria-pressed="selectedStatus === undefined" :disabled="busy" @click="selectStatus()">全部状态</button>
+        <button v-for="(label, value) in statusLabels" :key="value" type="button" :class="{ active: selectedStatus === value }" :aria-pressed="selectedStatus === value" :disabled="busy" @click="selectStatus(value)">{{ label }}</button>
+      </div>
+    </section>
     <ElAlert
       title="此页面仅管理独立上门回收新单；历史预约暂保留原入口，不包含回收箱订单。"
       type="info"
@@ -499,3 +506,39 @@ function showScope() {
     </ElDialog>
   </Page>
 </template>
+
+<style scoped>
+/* 与家政订单展开筛选保持一致，仅作用于上门回收列表，不改变业务状态或操作权限。 */
+.order-status-filter {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  border: 1px solid var(--el-border-color-light);
+  border-radius: 10px;
+  background: var(--el-bg-color);
+}
+.filter-label { flex-shrink: 0; line-height: 36px; color: var(--el-text-color-secondary); }
+.status-options { display: flex; flex-wrap: wrap; gap: 8px; }
+.status-options button {
+  padding: 7px 16px;
+  border: 1px solid var(--el-border-color-light);
+  border-radius: 6px;
+  background: var(--el-fill-color-light);
+  color: var(--el-text-color-regular);
+  cursor: pointer;
+}
+.status-options button:hover, .status-options button.active {
+  color: var(--el-color-primary);
+  background: var(--el-color-primary-light-9);
+  border-color: var(--el-color-primary);
+}
+.status-options button.active { font-weight: 600; }
+.status-options button:focus-visible { outline: 2px solid var(--el-color-primary); outline-offset: 2px; }
+.status-options button:disabled { cursor: not-allowed; opacity: .6; }
+@media (max-width: 768px) {
+  .order-status-filter { flex-direction: column; gap: 8px; padding: 12px; }
+  .status-options button { padding: 7px 12px; }
+}
+</style>

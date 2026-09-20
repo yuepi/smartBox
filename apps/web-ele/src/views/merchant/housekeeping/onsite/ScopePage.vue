@@ -128,7 +128,7 @@ onMounted(load);
       class="mb-5"
     />
     <ElButton :loading="busy" @click="load">刷新 / 重试</ElButton>
-    <DefaultConfigCopyButton @success="load" />
+    <DefaultConfigCopyButton business="onsiteRecycle" @success="load" />
     <ElButton
       :disabled="busy || !loaded"
       @click="

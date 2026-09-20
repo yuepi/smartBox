@@ -9,6 +9,7 @@ import { accessRoutes, coreRouteNames } from '#/router/routes';
 import { useAuthStore } from '#/store';
 
 import { generateAccess } from './access';
+import { resolveAccessibleLocation } from './fallback';
 
 /**
  * 通用守卫配置
@@ -87,6 +88,15 @@ function setupAccessGuard(router: Router) {
 
     // 是否已经生成过动态路由
     if (accessStore.isAccessChecked) {
+      if (!to.matched.length || to.name === 'FallbackNotFound') {
+        const target = resolveAccessibleLocation(router, to.fullPath, [
+          userStore.userInfo?.homePath,
+          preferences.app.defaultHomePath,
+        ]);
+        if (target.fullPath !== to.fullPath) {
+          return { path: target.fullPath, replace: true };
+        }
+      }
       return true;
     }
 
@@ -113,7 +123,10 @@ function setupAccessGuard(router: Router) {
         : to.fullPath)) as string;
 
     return {
-      ...router.resolve(decodeURIComponent(redirectPath)),
+      ...resolveAccessibleLocation(router, decodeURIComponent(redirectPath), [
+        userInfo.homePath,
+        preferences.app.defaultHomePath,
+      ]),
       replace: true,
     };
   });

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useAccess } from '@vben/access';
 import { Page } from '@vben/common-ui';
 import {
@@ -21,6 +21,7 @@ import {
 } from 'element-plus';
 import { requestClient } from '#/api/request';
 import UploadImage from '#/components/UploadImage/index.vue';
+import { buildCatalogTree } from './catalogTree';
 
 interface Category {
   recycleItemId?: number;
@@ -33,17 +34,34 @@ interface Category {
   imageUrl?: string;
   pricingUnit?: string;
   defaultPrice?: number;
+  brand?: string;
+  spec?: string;
 }
 const { hasAccessByCodes } = useAccess();
 const rows = ref<Category[]>([]);
+const treeRows = computed(() => buildCatalogTree(rows.value));
+const table = ref<InstanceType<typeof ElTable>>();
+function expandAll(expanded: boolean) {
+  function visit(nodes: ReturnType<typeof buildCatalogTree<Category>>) {
+    nodes.forEach((node) => {
+      table.value?.toggleRowExpansion(node, expanded);
+      visit(node.children);
+    });
+  }
+  visit(treeRows.value);
+}
 const busy = ref(false);
 const visible = ref(false);
 const error = ref(false);
 const images = ref<string[]>([]);
 const changedPrices = ref<Record<number, number | undefined>>({});
 function markPrice(row: Category) {
-  if (row.recycleItemId != null)
+  if (row.recycleItemId != null) {
     changedPrices.value[row.recycleItemId] = row.defaultPrice;
+    // 树节点是展示副本，同步到原列表，展开收起或重新计算时不丢失未提交的价格。
+    const original = rows.value.find((item) => item.recycleItemId === row.recycleItemId);
+    if (original) original.defaultPrice = row.defaultPrice;
+  }
 }
 async function savePrices() {
   if (busy.value) return;
@@ -86,6 +104,22 @@ const form = ref<Category>({
   sort: 0,
 });
 const canEdit = () => hasAccessByCodes(['plat:onsiteRecycleItem:edit']);
+// 一级目录仅分组；具体品类优先沿用已有单位，再按所属目录给出默认值。
+function defaultUnit(parentId: number): string {
+  const visited = new Set<number>();
+  let parent = rows.value.find((item) => item.recycleItemId === parentId);
+  while (parent && !visited.has(parent.recycleItemId!)) {
+    visited.add(parent.recycleItemId!);
+    if (parent.pricingUnit) return parent.pricingUnit;
+    if (/家电|数码|厨卫/.test(parent.name)) return 'piece';
+    parent = rows.value.find((item) => item.recycleItemId === parent!.parentId);
+  }
+  return 'kg';
+}
+function changeParent() {
+  form.value.pricingUnit = form.value.parentId ? defaultUnit(form.value.parentId) : undefined;
+  form.value.defaultPrice = undefined;
+}
 async function load() {
   busy.value = true;
   error.value = false;
@@ -103,14 +137,17 @@ async function load() {
 }
 function edit(row?: Category) {
   form.value = row
-    ? { ...row }
+    ? { ...rows.value.find((item) => item.recycleItemId === row.recycleItemId)! }
     : { parentId: 0, name: '', code: '', status: 0, sort: 0 };
   visible.value = true;
+  if (form.value.parentId && !form.value.pricingUnit) {
+    form.value.pricingUnit = defaultUnit(form.value.parentId);
+  }
   images.value = row?.imageUrl ? [row.imageUrl] : [];
 }
 async function save() {
   if (busy.value) return;
-  if (!images.value[0] || !form.value.pricingUnit) {
+  if (!images.value[0] || (form.value.parentId !== 0 && !form.value.pricingUnit)) {
     ElMessage.warning('请上传品类图片并选择计价单位');
     return;
   }
@@ -122,6 +159,8 @@ async function save() {
   try {
     await requestClient.post('/restful/plat/onsiteRecycleItem/save', {
       ...form.value,
+      defaultPrice: form.value.parentId === 0 ? undefined : form.value.defaultPrice,
+      pricingUnit: form.value.parentId === 0 ? undefined : form.value.pricingUnit,
       imageUrl: images.value[0],
     });
     visible.value = false;
@@ -138,13 +177,13 @@ onMounted(load);
 <template>
   <Page title="回收类目管理">
     <ElAlert
-      title="平台维护品类、图片、单位和默认价。默认价可在表格多行编辑后一次提交；商户自定义价优先，未修改的商户跟随默认价。"
+      title="一级目录仅用于分组，不填写价格和单位。具体品类默认按所属目录带出单位，默认价可多行编辑后一次提交；商户自定义价优先。"
       type="info"
       :closable="false"
       class="mb-3"
     />
     <ElAlert
-      title="廊坊小件初始价为试行估算价，非实时市场成交价；正式接单前请复核本地收购、搬运及运输成本。"
+      title="系统默认价为试行参考价，不是廊坊实时市场成交价。家电数码需按型号、成色和功能复核，其他品类需核实材质、收购渠道和运输成本后再接单。"
       type="warning"
       :closable="false"
       class="mb-3"
@@ -153,6 +192,9 @@ onMounted(load);
       <ElButton v-if="canEdit()" type="primary" :disabled="busy" @click="edit()"
         >新增类目</ElButton
       ><ElButton :loading="busy" @click="load">刷新 / 重试</ElButton>
+      <ElButton :disabled="busy" @click="expandAll(true)">全部展开</ElButton>
+      <ElButton :disabled="busy" @click="expandAll(false)">全部收起</ElButton>
+      <span class="ml-3 text-sm text-gray-500">点击名称左侧箭头查看下级类目，共 {{ rows.length }} 个类目</span>
     </div>
     <ElAlert
       v-if="error"
@@ -160,11 +202,18 @@ onMounted(load);
       type="error"
       :closable="false"
     />
-    <ElTable :data="rows" row-key="recycleItemId" border>
+    <ElTable ref="table" :data="treeRows" row-key="recycleItemId" :tree-props="{ children: 'children' }" :indent="24" default-expand-all border>
+      <ElTableColumn prop="name" label="类目名称 / 层级" min-width="280" fixed="left">
+        <template #default="{ row }">
+          <span :class="{ 'font-semibold': row.children.length }">{{ row.name }}</span>
+          <span v-if="row.children.length" class="ml-2 text-xs text-gray-500">（{{ row.children.length }} 个下级）</span>
+          <div v-if="row.brand || row.spec" class="ml-6 mt-1 text-xs text-gray-500">{{ [row.brand, row.spec].filter(Boolean).join(' / ') }}</div>
+        </template>
+      </ElTableColumn>
       <ElTableColumn label="默认价格" width="200"
         ><template #default="{ row }"
-          ><ElInputNumber
-            v-if="canEdit()"
+          ><span v-if="row.parentId === 0">仅分组，不定价</span><ElInputNumber
+            v-else-if="canEdit()"
             v-model="row.defaultPrice"
             :min="0.01"
             :max="999999.99"
@@ -188,24 +237,20 @@ onMounted(load);
       >
       <ElTableColumn label="报价单位" width="110"
         ><template #default="{ row }">{{
-          row.pricingUnit === 'kg'
+          row.parentId === 0 ? '—' : row.pricingUnit === 'kg'
             ? '元/公斤'
             : row.pricingUnit === 'piece'
               ? '元/件'
               : '待配置'
         }}</template></ElTableColumn
       >
-      <ElTableColumn prop="recycleItemId" label="ID" width="90" /><ElTableColumn
-        prop="name"
-        label="名称"
-      />
-      <ElTableColumn prop="code" label="编码" /><ElTableColumn label="父级"
+      <ElTableColumn prop="code" label="编码" min-width="130" /><ElTableColumn label="上级类目" min-width="140"
         ><template #default="{ row }">{{
           rows.find((item) => item.recycleItemId === row.parentId)?.name ||
-          '顶级目录'
+          (row.parentId === 0 ? '一级类目' : '上级缺失，请核对')
         }}</template></ElTableColumn
       >
-      <ElTableColumn prop="level" label="层级" width="80" /><ElTableColumn
+      <ElTableColumn
         prop="sort"
         label="排序"
         width="80"
@@ -244,7 +289,7 @@ onMounted(load);
         <ElFormItem label="品类图片" required
           ><UploadImage v-model="images" :limit="1"
         /></ElFormItem>
-        <ElFormItem label="计价单位" required
+        <ElFormItem v-if="form.parentId !== 0" label="计价单位" required
           ><ElSelect v-model="form.pricingUnit" :disabled="busy"
             ><ElOption label="元/公斤（按重量）" value="kg" /><ElOption
               label="元/件（按数量）"
@@ -255,6 +300,7 @@ onMounted(load);
             v-model="form.parentId"
             filterable
             :disabled="!!form.recycleItemId || busy"
+            @change="changeParent"
             ><ElOption label="顶级目录" :value="0" /><ElOption
               v-for="item in rows.filter((row) => row.status === 0)"
               :key="item.recycleItemId"
@@ -264,7 +310,7 @@ onMounted(load);
         <ElFormItem label="名称" required
           ><ElInput v-model="form.name" :maxlength="100" :disabled="busy"
         /></ElFormItem>
-        <ElFormItem label="默认价格"
+        <ElFormItem v-if="form.parentId !== 0" label="默认价格"
           ><ElInputNumber
             v-model="form.defaultPrice"
             :min="0.01"

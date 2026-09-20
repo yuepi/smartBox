@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { HomeBookingRule } from '#/api/system/homeBookingRule';
+import ServiceAreaCard from './ServiceAreaCard.vue';
 import { onMounted, ref } from 'vue';
 import { useAccess } from '@vben/access';
 import { Page } from '@vben/common-ui';
@@ -96,6 +97,7 @@ onMounted(load);
 
 <template>
   <Page :title="props.onsite ? '上门回收预约规则' : '家政预约规则'">
+    <ServiceAreaCard :onsite="props.onsite" />
     <ElAlert
       type="info"
       :closable="false"

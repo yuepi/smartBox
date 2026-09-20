@@ -15,13 +15,18 @@ import {
 } from '#/api/system/homeCategory';
 
 import HomeCategoryDrawer from './HomeCategoryDrawer.vue';
+import HomeItemEditDialog from '#/views/merchant/housekeeping/item/HomeItemEditDialog.vue';
+import { categoryImage } from './defaultImages';
 
 const drawerRef = ref();
+const serviceEditorRef = ref<InstanceType<typeof HomeItemEditDialog>>();
+const isLeaf = (row: HomeCategory) => !categoryTreeData.value.some((item) => item.parentId === row.categoryId);
 const categoryTreeData = ref<HomeCategory[]>([]);
 const isExpanded = ref(true); // 记录当前展开/收起状态
 
 // 表格列定义
 const defaultColumns: VxeGridProps<HomeCategory>['columns'] = [
+  { field: 'categoryId', title: '类目ID', width: 100, align: 'center' },
   {
     field: 'categoryName',
     title: '类目名称',
@@ -29,7 +34,8 @@ const defaultColumns: VxeGridProps<HomeCategory>['columns'] = [
     minWidth: 220,
     align: 'left',
   },
-  { field: 'categoryId', title: '类目ID', width: 100, align: 'center' },
+  { field: 'imageUrl', title: '默认图片', width: 100, slots: { default: 'image' } },
+  { field: 'defaultPrice', title: '默认起价', width: 140, slots: { default: 'price' } },
   {
     field: 'level',
     title: '层级',
@@ -48,7 +54,7 @@ const defaultColumns: VxeGridProps<HomeCategory>['columns'] = [
   {
     field: 'action',
     title: '操作',
-    width: 200,
+    width: 300,
     fixed: 'right',
     align: 'center',
     slots: { default: 'action' },
@@ -101,10 +107,16 @@ function handleAdd(parentId = 0) {
 }
 
 function handleEdit(row: HomeCategory) {
-  drawerRef.value?.open(row, categoryTreeData.value);
+  if (row.level > 1 && isLeaf(row)) {
+    // 末级始终打开完整服务编辑器，不依赖历史配置标记隐藏规格/附加项。
+    serviceEditorRef.value?.open({ categoryId: row.categoryId, itemName: row.categoryName, unit: 'time', status: 0 });
+  } else {
+    drawerRef.value?.open(row, categoryTreeData.value);
+  }
 }
 
 function handleAddChild(row: HomeCategory) {
+  if (row.level >= 3 || row.defaultServiceConfigured) return;
   drawerRef.value?.open({ parentId: row.categoryId }, categoryTreeData.value);
 }
 
@@ -130,6 +142,7 @@ async function handleDelete(row: HomeCategory) {
     <Grid>
       <!-- 工具栏按钮 -->
       <template #toolbar-actions>
+        <span class="mr-3 text-sm text-gray-500">各级类目可维护图片，具体末级类目可配置默认价格</span>
         <el-button type="primary" icon="Plus" @click="handleAdd(0)">
           新增类目
         </el-button>
@@ -139,6 +152,14 @@ async function handleDelete(row: HomeCategory) {
       </template>
 
       <!-- 层级标签插槽 -->
+      <template #image="{ row }">
+        <el-image :src="categoryImage(row)" fit="contain" style="width: 48px; height: 48px" :preview-src-list="[categoryImage(row)]" preview-teleported />
+      </template>
+      <template #price="{ row }">
+        <span v-if="row.level === 1 || !isLeaf(row)">不定价</span>
+        <span v-else-if="row.defaultPrice != null">¥{{ Number(row.defaultPrice).toFixed(2) }}/{{ { time: '次', pcs: '台', hour: '小时' }[row.pricingUnit || 'time'] }}</span>
+        <span v-else>{{ row.defaultServiceConfigured ? '查看规格价格' : '未配置' }}</span>
+      </template>
       <template #level="{ row }">
         <el-tag
           :type="
@@ -162,11 +183,12 @@ async function handleDelete(row: HomeCategory) {
 
       <!-- 操作列插槽 -->
       <template #action="{ row }">
-        <div class="flex items-center justify-center gap-1">
-          <el-button size="small" type="primary" link @click="handleEdit(row)">
+        <div class="flex flex-wrap items-center justify-center gap-1">
+          <el-button v-access:code="['plat:homeCategory:edit']" size="small" type="primary" link @click="handleEdit(row)">
             编辑
           </el-button>
           <el-button
+            v-if="row.level < 3 && !row.defaultServiceConfigured"
             size="small"
             type="primary"
             link
@@ -188,5 +210,6 @@ async function handleDelete(row: HomeCategory) {
 
     <!-- 抽屉/弹窗组件 -->
     <HomeCategoryDrawer ref="drawerRef" @success="gridApi.reload()" />
+    <HomeItemEditDialog ref="serviceEditorRef" platform-default category-edit @success="gridApi.reload()" />
   </Page>
 </template>

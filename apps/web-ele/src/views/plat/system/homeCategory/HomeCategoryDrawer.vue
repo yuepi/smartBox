@@ -10,15 +10,19 @@ import { ElMessage } from 'element-plus';
 
 import {
   addHomeCategoryApi,
-  editHomeCategoryApi,
+  editHomeCategoryWithDefaultApi,
   getHomeCategoryDetailApi,
 } from '#/api/system/homeCategory';
+import UploadImage from '#/components/UploadImage/index.vue';
+import { categoryImage } from './defaultImages';
 
 const emit = defineEmits(['success']);
 
 const visible = ref(false);
 const loading = ref(false);
 const formRef = ref();
+const images = ref<string[]>([]);
+const canPrice = computed(() => formData.level > 1 && !categoryOptions.value.some(item => item.parentId === formData.categoryId));
 
 // 存储扁平数据转成的下拉树
 const categoryOptions = ref<any[]>([]);
@@ -43,14 +47,24 @@ const rules = {
 const isEdit = computed(() => !!formData.categoryId);
 
 // 树形下拉选项（包含“顶级类目”）
-const treeOptions = computed(() => [
+const treeOptions = computed(() => {
+  const nodes = categoryOptions.value.map(item => ({ ...item, children: [], disabled: item.level >= 3 || item.defaultServiceConfigured }));
+  const map = new Map(nodes.map(item => [item.categoryId, item]));
+  const roots: any[] = [];
+  for (const item of nodes) {
+    const parent = map.get(item.parentId);
+    if (parent) parent.children.push(item);
+    else roots.push(item);
+  }
+  return [
   {
     categoryId: 0,
     categoryName: '顶级类目',
     level: 0,
-    children: categoryOptions.value,
+    children: roots,
   },
-]);
+];
+});
 
 // 监听上级类目切换，自动计算层级 level
 function handleParentChange(parentId: number) {
@@ -79,6 +93,9 @@ async function open(row?: Partial<HomeCategory>, optionsTree: any[] = []) {
 
   // 重置表单
   Object.assign(formData, {
+    imageUrl: '',
+    defaultPrice: undefined,
+    pricingUnit: 'time',
     categoryId: undefined,
     parentId: 0,
     level: 1,
@@ -86,6 +103,7 @@ async function open(row?: Partial<HomeCategory>, optionsTree: any[] = []) {
     sort: 1,
     status: 0,
   });
+  images.value = [];
 
   await nextTick();
   formRef.value?.clearValidate();
@@ -96,6 +114,8 @@ async function open(row?: Partial<HomeCategory>, optionsTree: any[] = []) {
     try {
       const res = await getHomeCategoryDetailApi(row.categoryId);
       Object.assign(formData, res);
+      images.value = res.imageUrl ? [res.imageUrl] : [];
+      formData.pricingUnit = res.pricingUnit || 'time';
     } finally {
       loading.value = false;
     }
@@ -108,11 +128,16 @@ async function open(row?: Partial<HomeCategory>, optionsTree: any[] = []) {
 
 // 提交表单
 async function handleSubmit() {
+  if (loading.value) return;
   await formRef.value?.validate();
   loading.value = true;
   try {
+    // 只上传一张平台分类图；不定价的分组不提交价格字段。
+    formData.imageUrl = images.value[0] || '';
+    if (!canPrice.value) { formData.defaultPrice = undefined; formData.pricingUnit = undefined; }
     if (isEdit.value) {
-      await editHomeCategoryApi(formData);
+      // 此窗口只编辑分组，末级服务由完整服务编辑器处理。
+      await editHomeCategoryWithDefaultApi({ ...formData, defaultPrice: undefined, pricingUnit: undefined });
       ElMessage.success('修改成功');
     } else {
       await addHomeCategoryApi(formData);
@@ -132,7 +157,7 @@ defineExpose({ open });
   <el-dialog
     v-model="visible"
     :title="isEdit ? '编辑类目' : '新增类目'"
-    width="500px"
+    :width="isEdit && canPrice ? '900px' : '500px'"
     append-to-body
     destroy-on-close
   >
@@ -179,6 +204,24 @@ defineExpose({ open });
           class="!w-full"
         />
       </el-form-item>
+
+      <el-form-item label="默认图片">
+        <div v-if="!images.length" class="mr-3 text-center">
+          <el-image :src="categoryImage({ categoryName: formData.categoryName })" fit="contain" style="width: 72px; height: 72px" />
+          <div class="text-xs text-gray-500">系统默认</div>
+        </div>
+        <UploadImage v-model="images" :limit="1" />
+        <div class="text-xs text-gray-500">未上传时按类目使用系统默认图；上传后优先使用自定义图片。</div>
+      </el-form-item>
+      <template v-if="canPrice && !isEdit">
+        <el-form-item label="默认价格">
+          <el-input-number v-model="formData.defaultPrice" :min="0.01" :max="999999.99" :precision="2" />
+          <div class="text-xs text-gray-500">新商户复制默认配置时使用，不覆盖商户已有价格。</div>
+        </el-form-item>
+        <el-form-item label="报价单位">
+          <el-select v-model="formData.pricingUnit"><el-option label="次" value="time" /><el-option label="台" value="pcs" /><el-option label="小时" value="hour" /></el-select>
+        </el-form-item>
+      </template>
 
       <el-form-item label="状态" prop="status">
         <el-radio-group v-model="formData.status">

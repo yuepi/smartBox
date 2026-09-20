@@ -12,6 +12,7 @@ const order = ref<HomeOrder>();
 const history = ref<HomeRepairQuote[]>([]);
 const lines = ref<HomeRepairLine[]>([]);
 const description = ref('');
+const pricingMode = ref<'ADDITIONAL' | 'TOTAL'>('ADDITIONAL');
 const mayEdit = ref(false);
 const orderExtras = computed(() => readOrderExtras(order.value));
 /** 下单应付不等于实付；仅有完整支付标记时展示可抵扣金额，最终仍由后端校验。 */
@@ -38,6 +39,7 @@ async function open(id: number, canEdit: boolean) {
     mayEdit.value = canEdit;
     description.value = quotes[0]?.description || '';
     lines.value = quotes[0] ? snapshot(quotes[0]) : [];
+    pricingMode.value = quotes[0] ? 'TOTAL' : 'ADDITIONAL';
     visible.value = true;
   } finally { busy.value = false; }
 }
@@ -51,7 +53,7 @@ async function save() {
   }
   busy.value = true;
   try {
-    await saveHomeRepairQuoteApi({ homeOrderId: order.value.homeOrderId, expectedVersion: history.value[0]?.version || 0, description: description.value.trim(), lines: lines.value });
+    await saveHomeRepairQuoteApi({ homeOrderId: order.value.homeOrderId, expectedVersion: history.value[0]?.version || 0, description: description.value.trim(), pricingMode: pricingMode.value, lines: lines.value });
     // 保存失败保留输入；成功后读服务端金额，不用前端金额当成已收款。
     history.value = await getHomeRepairQuotesApi(order.value.homeOrderId);
     ElMessage.success('报价已记录，未发起支付或退款');
@@ -63,7 +65,7 @@ defineExpose({ open });
 
 <template>
   <ElDialog v-model="visible" title="维修报价与费用记录" width="1000px" :close-on-click-modal="false" :show-close="!busy" :close-on-press-escape="!busy">
-    <ElAlert title="请填写整单最终总价，包含已付费用及下单时已选的加价项目，同一项费用只计一次。应补金额 = 最终总价 − 已付金额。后台只记录，不代替用户确认，不调起支付或退款。" type="info" :closable="false" class="mb-4" />
+    <ElAlert :title="pricingMode === 'ADDITIONAL' ? '只填写本次新增费用，原单已付费用由后端自动计入，请勿重复添加。例如原单89元、新增5元，整单总价94元、用户补款5元。保存后须由用户确认并支付。' : '当前编辑整单费用明细，包含原单已付费用。应补金额由后端按整单总价减去已付金额计算，保存后须由用户确认。'" type="info" :closable="false" class="mb-4" />
     <div class="mb-4">
       <div class="mb-2">下单金额：{{ order?.payAmount ?? '-' }} 元 · 已付金额：{{ paidAmount == null ? '支付记录待核对' : `${paidAmount} 元` }}</div>
       <div class="mb-2">下单时已选加价明细（已包含在下单金额内，请勿重复计费）</div>
@@ -77,7 +79,7 @@ defineExpose({ open });
       <div class="mt-2">下单加价合计：{{ order?.optionAmount ?? '-' }} 元</div>
     </div>
     <template v-if="editable">
-      <div class="mb-2">检测结果及维修范围</div>
+      <div class="mb-2">{{ pricingMode === 'ADDITIONAL' ? '新增费用说明及服务范围' : '检测结果及维修范围' }}</div>
       <ElInput v-model="description" type="textarea" :maxlength="500" :disabled="busy" placeholder="说明检测结果、维修内容和费用范围" />
       <ElTable :data="lines" class="my-3">
         <ElTableColumn label="费用类型" width="145"><template #default="{ row }"><ElSelect v-model="row.type" :disabled="busy"><ElOption v-for="type in types" :key="type.value" :label="type.label" :value="type.value" /></ElSelect></template></ElTableColumn>
@@ -88,7 +90,7 @@ defineExpose({ open });
         <ElTableColumn label="操作" width="75"><template #default="{ $index }"><ElButton link type="danger" :disabled="busy" @click="lines.splice($index, 1)">移除</ElButton></template></ElTableColumn>
       </ElTable>
       <ElButton :disabled="busy || lines.length >= 50" @click="addLine">添加费用项</ElButton>
-      <ElButton type="primary" :loading="busy" @click="save">保存报价记录</ElButton>
+      <ElButton type="primary" :loading="busy" @click="save">保存并等待用户确认</ElButton>
     </template>
     <div v-if="!history.length" class="my-4">暂无报价记录</div>
     <div v-for="quote in history" :key="quote.quoteId" class="mt-5">

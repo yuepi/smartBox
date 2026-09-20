@@ -22,6 +22,7 @@ export interface HomeOrder {
   optionAmount?: number;
   totalAmount?: number;
   status: HomeOrderStatus;
+  statusText?: string;
   settlementStatus?: number | null;
   serviceCompletedTime?: string;
   address?: string;
@@ -117,6 +118,7 @@ export interface HomeRepairQuote {
 }
 /** 报价记录不触发支付；金额和版本由后端核验。 */
 export function saveHomeRepairQuoteApi(data: {
+  pricingMode?: 'ADDITIONAL' | 'TOTAL';
   homeOrderId: number;
   expectedVersion: number;
   description: string;
