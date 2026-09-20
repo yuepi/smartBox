@@ -8,18 +8,20 @@ export default defineComponent({
   setup() {
     // ===== 卡片数据 =====
     const titleDate = [
-      // 本年汇总
-      { number: 12_580, text: '本年累计投递(次)' },
-      { number: 8760, text: '本年回收总量(kg)' },
-      { number: 26_340, text: '本年回收金额(元)' },
-      // 本月汇总
-      { number: 3220, text: '本月累计投递(次)' },
-      { number: 2150, text: '本月回收总量(kg)' },
-      { number: 6450, text: '本月回收金额(元)' },
-      // 今日数据（当日实时）
-      { number: 89, text: '今日累计投递(次)' },
-      { number: 62, text: '今日回收总量(kg)' },
-      { number: 186, text: '今日回收金额(元)' },
+      // 本年汇总（模拟）
+      { number: 158_420, text: '本年累计投递(次)' },
+      { number: 96_850, text: '本年回收总量(kg)' },
+      { number: 328_760, text: '本年回收金额(元)' },
+
+      // 本月汇总（保留原数据）
+      { number: 26_120, text: '本月累计投递(次)' },
+      { number: 72_530, text: '本月回收总量(kg)' },
+      { number: 36_741, text: '本月回收金额(元)' },
+
+      // 今日数据（模拟）
+      { number: 1024, text: '今日累计投递(次)' },
+      { number: 2386, text: '今日回收总量(kg)' },
+      { number: 1263, text: '今日回收金额(元)' },
     ];
 
     const titleItem = reactive([]);
@@ -46,26 +48,26 @@ export default defineComponent({
     // ===== 排行榜数据 =====
     const ranking = reactive({
       data: [
-        { name: '138****1234', value: 156 },
-        { name: '159****5678', value: 132 },
-        { name: '177****9012', value: 98 },
-        { name: '136****3456', value: 87 },
-        { name: '188****7890', value: 76 },
-        { name: '150****2345', value: 65 },
-        { name: '139****6789', value: 54 },
-        { name: '158****0123', value: 43 },
-        { name: '176****4567', value: 32 },
-        { name: '137****8901', value: 21 },
-        { name: '152****3456', value: 18 },
-        { name: '186****7890', value: 15 },
-        { name: '131****2345', value: 12 },
-        { name: '189****6789', value: 9 },
-        { name: '135****0123', value: 7 },
-        { name: '187****4567', value: 5 },
-        { name: '153****8901', value: 4 },
-        { name: '130****2345', value: 3 },
-        { name: '185****6789', value: 2 },
-        { name: '156****0123', value: 1 },
+        { name: '138****6721', value: 156 },
+        { name: '159****3084', value: 132 },
+        { name: '177****9452', value: 98 },
+        { name: '136****5173', value: 87 },
+        { name: '188****2608', value: 76 },
+        { name: '150****7841', value: 65 },
+        { name: '139****0396', value: 54 },
+        { name: '158****4127', value: 43 },
+        { name: '176****8530', value: 32 },
+        { name: '137****2965', value: 21 },
+        { name: '152****6418', value: 18 },
+        { name: '186****1704', value: 15 },
+        { name: '131****5289', value: 12 },
+        { name: '189****9073', value: 9 },
+        { name: '135****3642', value: 7 },
+        { name: '187****7315', value: 5 },
+        { name: '153****0856', value: 4 },
+        { name: '130****4920', value: 3 },
+        { name: '185****6187', value: 2 },
+        { name: '156****2439', value: 1 },
       ],
       carousel: 'single',
       unit: '次',

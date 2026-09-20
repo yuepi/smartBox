@@ -51,8 +51,8 @@ const cards = computed(() => {
     },
     {
       title: '今日参与会员',
-      today: d.todayParticipateMember ?? 22,
-      yesterday: d.yesterdayParticipateMember ?? 139,
+      today: d.totalMemberCount ?? 22,
+      yesterday: d.yesterdayMemberCount ?? 139,
     },
     {
       title: '今日新增会员',
@@ -122,7 +122,9 @@ onMounted(() => {
     </div>
 
     <!-- 核心网格布局：给 grid 容器加 flex-1 h-full，让卡片纵向均分撑满整个盒子 -->
-    <div class="grid flex-1 min-h-0 grid-cols-2 gap-3 lg:grid-cols-4 grid-rows-2">
+    <div
+      class="grid flex-1 min-h-0 grid-cols-2 gap-3 lg:grid-cols-4 grid-rows-2"
+    >
       <div
         v-for="(card, idx) in cards"
         :key="idx"
@@ -130,11 +132,15 @@ onMounted(() => {
       >
         <!-- 左侧：标题、超级大数字、较昨日增长 -->
         <div class="flex flex-col justify-between h-full min-h-0">
-          <span class="text-base font-normal text-gray-600 dark:text-gray-300 truncate">
+          <span
+            class="text-base font-normal text-gray-600 dark:text-gray-300 truncate"
+          >
             {{ card.title }}
           </span>
 
-          <div class="text-2xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
+          <div
+            class="text-2xl font-bold text-gray-900 dark:text-gray-100 leading-tight"
+          >
             {{ formatNum(card.today) }}
           </div>
 
@@ -153,7 +159,9 @@ onMounted(() => {
         </div>
 
         <!-- 右侧：昨日标识与昨日数值 -->
-        <div class="flex flex-col justify-between items-end h-full text-xs text-gray-400 shrink-0">
+        <div
+          class="flex flex-col justify-between items-end h-full text-xs text-gray-400 shrink-0"
+        >
           <span class="text-xs text-gray-500 dark:text-gray-400">昨日</span>
           <span class="text-xs text-gray-400 font-medium">
             {{ formatNum(card.yesterday) }}
