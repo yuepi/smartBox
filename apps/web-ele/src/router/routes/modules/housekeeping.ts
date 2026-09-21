@@ -105,17 +105,7 @@ const housekeepingRoutes: RouteRecordRaw[] = [
           authority: ['merchant:homeItem:view'],
         },
       },
-      {
-        name: 'HousekeepingPartners',
-        path: '/housekeeping/partners',
-        component: () =>
-          import('#/views/merchant/housekeeping/partners/PartnersPage.vue'),
-        meta: {
-          title: '合作家政商户',
-          order: 40,
-          authority: ['merchant:homeMerchant:view'],
-        },
-      },
+      // 合作配置入口仅保留平台“商户合作关系”，商户侧不再展示自助绑定菜单。
       {
         name: 'HousekeepingBookingRule',
         path: '/housekeeping/booking-rule',
