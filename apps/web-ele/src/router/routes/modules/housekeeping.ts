@@ -5,7 +5,18 @@ const housekeepingRoutes: RouteRecordRaw[] = [
   {
     name: 'OnsiteRecycle',
     path: '/onsite-recycle',
-    meta: { icon: 'lucide:home', title: '上门回收', order: 29 },
+    meta: {
+      icon: 'lucide:home',
+      title: '上门回收',
+      order: 29,
+      // 一级菜单与实际可见页面使用同一组权限，避免无权限账号只看到空菜单。
+      authority: [
+        'merchant:onsiteRecycleOrder:view',
+        'merchant:onsiteRecycleOrder:scope',
+        'plat:onsiteRecycleItem:view',
+        'plat:onsiteRecycleOrder:view',
+      ],
+    },
     children: [
       {
         name: 'OnsiteRecycleOrder',
