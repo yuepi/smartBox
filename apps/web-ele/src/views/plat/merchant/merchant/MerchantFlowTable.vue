@@ -7,6 +7,7 @@ import type {
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
 import { getPlatMerchantAccountFlowPageApi } from '#/api/system/merchant';
+import { getMerchantAccountFlowLabel as getChangeTypeText, merchantAccountFlowOptions as changeTypeOptions } from '#/constants/merchantAccountFlow';
 import {
   defaultMerchantFlowColumns,
   MERCHANT_FLOW_STORAGE_KEY,
@@ -39,11 +40,6 @@ const loading = ref(false);
 const tableData = ref<MerchantAccountFlow[]>([]);
 const total = ref(0);
 
-const changeTypeOptions = [
-  { label: '充值到账', value: 0, type: 'success' },
-  { label: '平台服务费扣减', value: 1, type: 'danger' },
-  { label: '会员提现扣款', value: 2, type: 'warning' },
-];
 
 watch(dateRange, (newVal) => {
   if (newVal?.length === 2) {
@@ -67,22 +63,9 @@ function formatAmount(amount: number): string {
   return `¥ ${(amount || 0).toFixed(2)}`;
 }
 
-function getChangeTypeText(type: number): string {
-  const map: Record<number, string> = {
-    0: '充值到账',
-    1: '平台服务费扣减',
-    2: '会员提现扣款',
-  };
-  return map[type] || '未知';
-}
-
+// 标签颜色只表示业务类型，不代表最终支付结果；金额仍以接口流水为准。
 function getChangeTypeType(type: number): string {
-  const map: Record<number, string> = {
-    0: 'success',
-    1: 'danger',
-    2: 'warning',
-  };
-  return map[type] || 'info';
+  return changeTypeOptions.find((item) => String(item.value) === String(type))?.type ?? 'info';
 }
 
 async function loadData() {

@@ -6,6 +6,7 @@ import type {
 import type { TableColumnConfig } from '#/constants/tableColumns';
 
 import { getMerchantAccountFlowPageApi } from '#/api/system/merchant';
+import { getMerchantAccountFlowLabel, merchantAccountFlowOptions } from '#/constants/merchantAccountFlow';
 import {
   defaultMerchantFlowColumns,
   MERCHANT_FLOW_STORAGE_KEY,
@@ -14,7 +15,7 @@ import { ModuleCodeMap } from '#/hooks/useExport';
 
 const props = defineProps<{ merchantId: number }>();
 
-const { flow_change_type } = useDicts(['flow_change_type']);
+// 固定资金协议使用统一枚举，避免缺失或陈旧运营字典误标收支类型。
 
 // 表格列配置
 const columnConfig = ref<TableColumnConfig[]>([...defaultMerchantFlowColumns]);
@@ -108,7 +109,7 @@ defineExpose({ loadData });
               ><span class="text-xs text-gray-400">变动类型:</span></template
             >
             <el-option
-              v-for="item in flow_change_type"
+              v-for="item in merchantAccountFlowOptions"
               :key="item.value"
               :label="item.label"
               :value="item.value"
@@ -175,7 +176,7 @@ defineExpose({ loadData });
         >
           <template #default="{ row }">
             <template v-if="col.key === 'changeType'">
-              <DictTag :options="flow_change_type" :value="row.changeType" />
+              {{ getMerchantAccountFlowLabel(row.changeType) }}
             </template>
             <template v-else-if="col.key === 'changeAmount'">
               <span
