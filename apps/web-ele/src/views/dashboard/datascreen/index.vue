@@ -36,12 +36,49 @@ const timeInfo = reactive({
 const { appRef, calcRate, windowDraw, unWindowDraw } = useDraw();
 
 // 歌单
+const OSS_BASE =
+  'https://smart-box-test-2026-04-02.oss-cn-beijing.aliyuncs.com/mp3/dataScreen/';
+
+// 拼 URL（自动处理空格等特殊字符）
+const ossUrl = (filename: string) => OSS_BASE + encodeURIComponent(filename);
+
+// 歌单
 const bgmList = [
+  {
+    id: 'decay',
+    name: 'Decay',
+    src: ossUrl('Decay - Kevin MacLeod.mp3'),
+    // 这首如果不需要循环片段，把 loopStart/loopEnd 删掉即可
+  },
+  {
+    id: 'gathering-darkness',
+    name: 'Gathering Darkness',
+    src: ossUrl('Gathering Darkness - Kevin MacLeod.mp3'),
+  },
+  {
+    id: 'halloween-dawn',
+    name: 'The Halloween Dawn',
+    src: ossUrl('The Halloween Dawn - Twin Musicom.mp3'),
+  },
   {
     id: 'hakishuo',
     name: '哈基说',
-    src: '/hajishuo.mp3',
+    src: ossUrl('hajishuo.mp3'),
     loopStart: 0,
+    loopEnd: 60,
+  },
+  {
+    id: 'hakimi',
+    name: '哈基米之歌 (Happy Haki)',
+    src: ossUrl('hajimi.mp3'),
+    loopStart: 5,
+    loopEnd: 35,
+  },
+  {
+    id: 'ksl',
+    name: '圣诞',
+    src: ossUrl('ksl.mp3'),
+    loopStart: 30,
     loopEnd: 60,
   },
 ];
@@ -55,11 +92,11 @@ function generateMockPoints() {
 }
 
 const handleTime = () => {
-  timeInfo.setInterval = setInterval(() => {
+  timeInfo.setInterval = window.setInterval(() => {
     const date = new Date();
     timeInfo.dateDay = formatTime(date, 'HH: mm: ss');
     timeInfo.dateYear = formatTime(date, 'yyyy-MM-dd');
-    timeInfo.dateWeek = WEEK[date.getDay()];
+    timeInfo.dateWeek = WEEK[date.getDay()] ?? '';
   }, 1000);
 };
 
@@ -253,7 +290,8 @@ onUnmounted(() => {
       position: absolute;
       bottom: 0;
       left: 50%;
-      font-size: 24px;
+      width: 100%;
+      font-size: 32px;
       font-weight: bold;
       color: #00d8ff;
       letter-spacing: 2px;

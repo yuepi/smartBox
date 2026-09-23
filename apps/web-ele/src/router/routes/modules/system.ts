@@ -77,7 +77,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           icon: 'lucide:cloud-upload',
           title: $t('page.system.oss') || '对象存储',
-          authority: [PERMISSIONS.PLAT.SYSTEM.OSS.ROUTE],
+          // authority: [PERMISSIONS.PLAT.SYSTEM.OSS.ROUTE],
         },
       },
       {

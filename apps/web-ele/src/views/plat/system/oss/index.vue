@@ -393,7 +393,6 @@ async function handleDownload(row: OssItem) {
 
 // 7. 删除文件或文件夹
 function handleDelete(row: OssItem) {
-  console.log(row, '删除文件');
 
   ElMessageBox.confirm(
     `确定要删除 ${row.isFolder ? '文件夹' : '文件'} "${row.name}" 吗？`,
@@ -436,7 +435,7 @@ function formatSize(bytes?: number) {
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return (
-    Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+    `${Number.parseFloat((bytes / k ** i).toFixed(2))  } ${  sizes[i]}`
   );
 }
 
@@ -507,7 +506,7 @@ function traverseFileTree(item: any, path: string, fileListResult: File[]) {
     dirReader.readEntries((entries: any[]) => {
       for (const entry of entries) {
         // 拼接路径，如: "assets/" + "images/"
-        traverseFileTree(entry, path + item.name + '/', fileListResult);
+        traverseFileTree(entry, `${path + item.name  }/`, fileListResult);
       }
     });
   }
@@ -657,16 +656,12 @@ onMounted(() => {
                   class="table-data-row"
                 >
                   <span class="col-name truncate" :title="file.ossPath">
-                    <el-icon style="margin-right: 4px; color: #909399"
-                      ><Document
-                    /></el-icon>
+                    <el-icon style="margin-right: 4px; color: #909399"><Document /></el-icon>
                     /{{ file.ossPath }}
                   </span>
                   <span class="col-size">{{ formatSize(file.size) }}</span>
                   <span class="col-status">
-                    <span v-if="file.status === 'ready'" class="status-ready"
-                      >等待上传</span
-                    >
+                    <span v-if="file.status === 'ready'" class="status-ready">等待上传</span>
                     <div
                       v-else-if="file.status === 'uploading'"
                       class="status-uploading-box"
@@ -680,11 +675,8 @@ onMounted(() => {
                     <span
                       v-else-if="file.status === 'success'"
                       class="status-success"
-                      >✓ 成功</span
-                    >
-                    <span v-else-if="file.status === 'fail'" class="status-fail"
-                      >✕ 失败</span
-                    >
+                      >✓ 成功</span>
+                    <span v-else-if="file.status === 'fail'" class="status-fail">✕ 失败</span>
                   </span>
                   <span class="col-action">
                     <el-button
@@ -709,8 +701,7 @@ onMounted(() => {
           <el-button
             @click="uploadDialogVisible = false"
             :disabled="isUploading"
-            >关闭</el-button
-          >
+            >关闭</el-button>
           <el-button
             type="success"
             :loading="isUploading"
@@ -788,7 +779,7 @@ onMounted(() => {
     <el-drawer
       v-model="detailDrawerVisible"
       title="文件详情面板"
-      size="550px"
+      size="800px"
       destroy-on-close
     >
       <div class="file-detail-drawer-content" style="padding: 0 10px">
@@ -797,7 +788,7 @@ onMounted(() => {
           :column="1"
           border
           size="small"
-          label-width="120px"
+          label-width="160px"
         >
           <el-descriptions-item label="文件名称">
             <b style="color: #409eff">{{ activeFileDetail.name }}</b>
@@ -816,8 +807,7 @@ onMounted(() => {
           <el-descriptions-item label="OSS 完整路径 Key">
             <code
               style="font-size: 12px; color: #606266; word-break: break-all"
-              >{{ activeFileDetail.fullPath }}</code
-            >
+              >{{ activeFileDetail.fullPath }}</code>
           </el-descriptions-item>
         </el-descriptions>
 
@@ -875,8 +865,7 @@ onMounted(() => {
                 color: #2f3542;
                 text-align: left;
               "
-              >{{ activeFileDetail.previewTextContent }}</pre
-            >
+              >{{ activeFileDetail.previewTextContent }}</pre>
 
             <el-empty
               v-else

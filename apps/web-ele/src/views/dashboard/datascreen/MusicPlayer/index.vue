@@ -69,7 +69,8 @@ const loadAndPlay = (index: number) => {
   currentTime.value = 0;
 
   audio.currentTime =
-    targetSong.loopStart && targetSong.loopStart < (targetSong.loopEnd || 9999)
+    targetSong.loopStart !== undefined &&
+    targetSong.loopStart < (targetSong.loopEnd ?? Infinity)
       ? targetSong.loopStart
       : 0;
 
@@ -160,21 +161,30 @@ const handleVisibilityChange = () => {
   }
 };
 
+// 新增这两个具名处理函数
+const handlePlay = () => {
+  isPlaying.value = true;
+};
+
+const handlePause = () => {
+  isPlaying.value = false;
+};
+
 // ===== 绑定与解绑 =====
 const bindAudioEvents = () => {
   audio.addEventListener('timeupdate', handleTimeUpdate);
   audio.addEventListener('loadedmetadata', handleLoadedMetadata);
   audio.addEventListener('ended', handleAudioEnded);
-  audio.addEventListener('play', () => (isPlaying.value = true));
-  audio.addEventListener('pause', () => (isPlaying.value = false));
+  audio.addEventListener('play', handlePlay);
+  audio.addEventListener('pause', handlePause);
 };
 
 const unbindAudioEvents = () => {
   audio.removeEventListener('timeupdate', handleTimeUpdate);
   audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
   audio.removeEventListener('ended', handleAudioEnded);
-  audio.removeEventListener('play', () => (isPlaying.value = true));
-  audio.removeEventListener('pause', () => (isPlaying.value = false));
+  audio.removeEventListener('play', handlePlay);
+  audio.removeEventListener('pause', handlePause);
 };
 
 // ===== 生命周期 =====
